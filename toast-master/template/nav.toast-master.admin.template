@@ -1,0 +1,38 @@
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="container">
+    <div class="navbar-header">
+
+      <a class="navbar-brand" href="#">
+        <img alt="Brand" src="[__ROOT_PATH__]/images/Wordmark_Website_Lockup_200x45.jpg" style="height:20px;">
+      </a>
+
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li id="video_characters"><a href="[__ROOT_PATH__]/view/membership_picker.php">Clubs</a></li>
+  <!-- nav.template __ACTIVE_MEETING_AGENDA__  'active' -->
+        <li id="video_characters" class="[__ACTIVE_MEETING_AGENDA__]">
+          <a href="[__ROOT_PATH__]/view/meeting_agenda.php?MEETING_MEMBERSHIP_ID=[__MEETING_MEMBERSHIP_ID__]">Meeting Agenda</a>
+        </li>
+	<!-- nav.template __ACTIVE_MEMBERS__ 	'active' -->
+        <li id="video_series" class="[__ACTIVE_MEMBERS__]">
+          <a href="[__ROOT_PATH__]/view/member_manage.php?MEETING_MEMBERSHIP_ID=[__MEETING_MEMBERSHIP_ID__]">Members</a>
+        </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li id="video_characters" ><a href="">[__LOG_IN_USER__]</a></li>
+        <li id="video_characters" ><a href="[__LOG_IN_URL__]">[__LOG_IN_STATUS__]</a></li>
+      </ul>
+
+    </div>
+
+  </div>
+</div>
