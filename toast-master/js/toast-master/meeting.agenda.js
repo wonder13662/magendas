@@ -110,6 +110,17 @@ wonglish.meeting_agenda_manager = {
 
 
 
+		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
+		// grid view
+		/*
+		var container_jq = $("div#meeting_agenda_container");
+		_print.draw_grid_view(
+			// target_jq
+			container_jq
+			// target_paper_format
+		);
+		*/
+
 
 
 
@@ -153,7 +164,7 @@ wonglish.meeting_agenda_manager = {
 			// parent_element_set
 			, null
 			// list_container_jq
-			, $("div#meeting_agenda_container")
+			, container_jq
 			// delegate_save_n_reload
 			, _obj.get_delegate(function(cur_outcome_obj){
 
@@ -300,7 +311,7 @@ wonglish.meeting_agenda_manager = {
 		var element_collection_set_speakers = 
 		_view_table.add_editable_table_V2(
 			// parent_jq
-			$("div#meeting_agenda_container")
+			container_jq
 			// table_title
 			, "Today's Speakers"
 			// table_column_json_format_obj
@@ -648,7 +659,7 @@ wonglish.meeting_agenda_manager = {
 		var element_collection_set_todays_role = 
 		_view_table.add_editable_table_V2(
 			// parent_jq
-			$("div#meeting_agenda_container")
+			container_jq
 			// table_title
 			, "Today's Role"
 			// table_column_json_format_obj
@@ -763,7 +774,7 @@ wonglish.meeting_agenda_manager = {
 		var element_collection_set_word_n_quote = 
 		_view_table.add_editable_table_V2(
 			// parent_jq
-			$("div#meeting_agenda_container")
+			container_jq
 			// table_title
 			, "Word & Quote"
 			// table_column_json_format_obj
@@ -862,7 +873,7 @@ wonglish.meeting_agenda_manager = {
 		var element_collection_set_news =
 		_view_table.add_editable_table_V2(
 			// parent_jq
-			$("div#meeting_agenda_container")
+			container_jq
 			// table_title
 			, "News"
 			// table_column_json_format_obj
@@ -1043,7 +1054,7 @@ wonglish.meeting_agenda_manager = {
 		var element_collection_set_executive_members =
 		_view_table.add_editable_table_V2(
 			// parent_jq
-			$("div#meeting_agenda_container")
+			container_jq
 			// table_title
 			, "Executive Members"
 			// table_column_json_format_obj

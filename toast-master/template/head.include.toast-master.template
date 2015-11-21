@@ -37,6 +37,7 @@
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.modal.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.list_search_tab.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.table.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.print.js"></script>
 
 <script src="[__ROOT_PATH__]/js/toast-master/param.manager.js"></script>
 <script src="[__ROOT_PATH__]/js/toast-master/link.manager.js"></script>
@@ -82,6 +83,7 @@
   var _search_tab = airborne.bootstrap.list_search_tab_manager;
   var _color = airborne.color;
   var _json = airborne.json;
+  var _print = airborne.bootstrap.view.print;
 
   var _param = param_manager;
   var _link = link_manager.init(service_root_path, _server, _param);
