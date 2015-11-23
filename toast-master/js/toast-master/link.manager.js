@@ -56,6 +56,7 @@ var link_manager = {
 	,MOBILE_MEETING_AGENDA_DETAIL_ROLE:"/view/mobile/meeting_agenda_detail_roles.php"
 	,MOBILE_MEETING_AGENDA_DETAIL_NEWS:"/view/mobile/meeting_agenda_detail_news.php"
 	,MOBILE_MEETING_AGENDA_DETAIL_SPEECH:"/view/mobile/meeting_agenda_detail_speech.php"
+	,MOBILE_HELP_LIST:"/view/mobile/help.php"
 
 	,MOBILE_MEMBER_MANAGE:"/view/mobile/member_manage.php"
 	,MOBILE_MEMBER_MANAGE_DETAIL:"/view/mobile/member_manage_detail.php"
@@ -155,6 +156,10 @@ var link_manager = {
 		} else if(_link.MOBILE_MEMBER_ACHIEVEMENT === link) {
 
 			return {__title:_param.PAGE_MEMBER_ACHIEVEMENT, __call_url:this.get_link(link,param_obj)};
+
+		} else if(_link.MOBILE_HELP_LIST === link) {
+
+			return {__title:_param.PAGE_HELP, __call_url:this.get_link(link,param_obj)};
 
 		}
 

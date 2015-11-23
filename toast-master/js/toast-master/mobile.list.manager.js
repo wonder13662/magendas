@@ -214,7 +214,7 @@ toast_master.mobile_list_manager = {
 		@ public
 		@ desc : 로그인 및 페이지 뎁스를 보여주는 열을 그립니다.
 	*/
-	,addHeaderRow:function(login_user_info, header_arr, table_jq, color_text, bg_color_vmouse_down){
+	,addHeaderRow:function(login_user_info, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled){
 
 		var _v = airborne.validator;
 		var _m_list = airborne.bootstrap.view.mobile.list;
@@ -264,6 +264,8 @@ toast_master.mobile_list_manager = {
 				}
 
 				if(_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) return;
+
+				if(is_disabled != undefined && is_disabled === true) return;
 
 				_link.go_there(_link.MEMBERSHIP_PICKER);
 

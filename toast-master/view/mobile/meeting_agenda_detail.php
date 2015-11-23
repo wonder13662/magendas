@@ -64,6 +64,7 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 // php to javascript sample
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
+var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
@@ -641,13 +642,20 @@ _m_list.addTableRowTextAreaInputInline(
 	.get(_param.QUOTE,meeting_agenda_obj.__quote)
 );
 
+
+
+
+
 // SHARE EXTERNAL
+var share_msg = membership_obj.__membership_desc + " needs your help.\nMeeting Agenda On " + meeting_agenda_obj.__startdate;
 var accessor_external_share =
 _m_list.addTableRowShareExternal(
 	// title
 	"Share"
 	// append_target_jq
 	,table_jq
+	// label
+	,share_msg
 	// url_desc
 	,"Magendas"
 	// url
@@ -658,6 +666,9 @@ _m_list.addTableRowShareExternal(
 		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 	)
 );
+
+
+
 
 // SHOW PDF
 _m_list.addTableRowBtn(

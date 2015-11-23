@@ -248,6 +248,9 @@ class ToastMasterParamManager{
 	public $ROLE_ID_AH_COUNTER=10;
 	public $ROLE_ID_TIMER=9;
 
+	// SHARE
+	public $IS_EXTERNAL_SHARE="IS_EXTERNAL_SHARE";
+
 }
 
 ?>

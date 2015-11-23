@@ -113,7 +113,7 @@ $wdj_mysql_interface->getMeetingAgendaList(
 
 
 
-$MEETING_ID = $params->getParamNumber($params->MEETING_ID);
+
 
 $member_list = $wdj_mysql_interface->getMemberList($MEETING_MEMBERSHIP_ID, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
 // 로그인 시에는 내 이름이 가장 먼저 올라옵니다.
@@ -126,7 +126,6 @@ if(strcmp($login_user_info->__is_login,$params->YES) == 0){
 	array_unshift($member_list, $member_obj);
 }
 
-//$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_ID, array(7,2,9,5,10,6,11,4));
 $role_id_toastmaster = 2;
 $role_id_general_evaluator = 7;
 $role_id_timer = 9;
@@ -148,7 +147,9 @@ array(
 );
 //
 $meeting_role_list_list=array();
+$MEETING_ID = $params->getParamNumber($params->MEETING_ID, -1);
 for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
+
 	// 각 미팅의 롤 정보를 가져옵니다.
 	$cur_meeting_agenda = $recent_meeting_agenda_list[$idx];
 	if(is_null($cur_meeting_agenda)) {
@@ -160,6 +161,11 @@ for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
 		continue;
 	}
 
+	// 미팅 아이디를 지정했다면, 해당 미팅 아이디의 롤 사인업만 표시합니다.
+	if(0 < $MEETING_ID && $MEETING_ID != $__meeting_id) {
+		continue;
+	}
+
 	$meeting_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $__meeting_id, $role_id_arr);
 	array_push($meeting_role_list_list, $meeting_role_list);
 
@@ -168,7 +174,7 @@ for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
 
 	// EVALUATOR - 해당 미팅의 EVALUATOR 리스트를 가져옵니다.
 
-	
+
 }
 
 
@@ -740,6 +746,31 @@ for(var idx = 0; idx < meeting_role_list_list.length; idx++) {
 	if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 		role_controller.set_badge_green();
 	}
+
+	// SPEAKER
+
+	// EVALUATOR
+
+	// SHARE EXTERNAL
+
+	var share_msg = "Role Sign Up on " + cur_meeting_agenda_obj.__startdate;
+
+	var accessor_external_share =
+	_m_list.addTableRowShareExternal(
+		// title
+		"Share"
+		// append_target_jq
+		,table_jq
+		// url_desc
+		,share_msg
+		// url
+		,_link.get_link(
+			_link.MOBILE_ROLE_SIGN_UP_LIST
+			,_param
+			.get(_param.MEETING_ID, cur_meeting_agenda_obj.__meeting_id)
+			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		)
+	);	
 
 
 

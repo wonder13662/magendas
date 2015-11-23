@@ -2,7 +2,6 @@
 // common setting
 include_once("../../common.inc");
 
-
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
@@ -22,6 +21,10 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 }
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID);
+$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgenda($MEETING_MEMBERSHIP_ID, $MEETING_ID);
+if(!empty($meeting_agenda_list)) {
+	$meeting_agenda_obj = $meeting_agenda_list[0];
+}
 
 $member_list = $wdj_mysql_interface->getMemberList($MEETING_MEMBERSHIP_ID, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
 
@@ -47,6 +50,8 @@ array(
 $today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID, $role_id_arr);
 
 $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($MEETING_MEMBERSHIP_ID);
+
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
 
 // @ required
 $wdj_mysql_interface->close();
@@ -85,13 +90,13 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 // php to javascript sample
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
+var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var member_list = <?php echo json_encode($member_list);?>;
 var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
-
-console.log(">>> member_list :: ",member_list);
-
-console.log(">>> today_role_list :: ",today_role_list);
+var membership_obj = <?php echo json_encode($membership_obj);?>;
+var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
@@ -102,40 +107,45 @@ var role_id_mini_debate_master = <?php echo json_encode($role_id_mini_debate_mas
 var role_id_grammarian = <?php echo json_encode($role_id_grammarian);?>;
 var role_id_word_n_quote_master = <?php echo json_encode($role_id_word_n_quote_master);?>;
 
+var table_jq = $("table tbody#list");
 
 // Header - Log In Treatment
-var table_jq = $("table tbody#list");
-_tm_m_list.addHeaderRow(
-	// login_user_info
-	login_user_info
-	// header_arr
-	,[
-		_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	]
-	// table_jq
-	,table_jq
-);
+if(!IS_EXTERNAL_SHARE) {
+
+	_tm_m_list.addHeaderRow(
+		// login_user_info
+		login_user_info
+		// header_arr
+		,[
+			_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
+				,_param
+				.get(_param.MEETING_ID, MEETING_ID)
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_DETAIL
+				,_param
+				.get(_param.MEETING_ID, MEETING_ID)
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_LIST
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_TOP
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+		]
+		// table_jq
+		,table_jq
+	);
+
+}
+
 
 
 
@@ -296,6 +306,42 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 
 
 
+
+// 0. 미팅 날짜 정보를 가져옵니다.
+if(IS_EXTERNAL_SHARE) {
+
+	_m_list.addTableRowTitle(
+		// title
+		membership_obj.__membership_name + " " + meeting_agenda_obj.__startdate
+		// append_target_jq
+		, table_jq
+		// delegate_obj_click_row
+		, _obj.getDelegate(function(self_obj){
+
+		}, this)
+	);	
+
+} else {
+
+	_m_list.addTableRowTitle(
+		// title
+		meeting_agenda_obj.__startdate
+		// append_target_jq
+		, table_jq
+		// delegate_obj_click_row
+		, _obj.getDelegate(function(self_obj){
+
+		}, this)
+	);	
+
+}
+
+
+
+
+
+
+
 // Today's Role
 // 화면 표시 기준에 맞게 정렬합니다.
 var role_idx=0;
@@ -303,13 +349,9 @@ var role_name = "Toast Master"
 var role_member_name = _param.NOT_ASSIGNED;
 var role_obj = today_role_list[role_idx++];
 
-console.log(">>> role_obj :: ",role_obj);
-
 if(parseInt(role_obj.__member_id) > 0){
 	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
-
-console.log(">>> role_member_name :: ",role_member_name);
 
 var role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -585,22 +627,30 @@ if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status ===
 
 
 // SHARE EXTERNAL
-var accessor_external_share =
-_m_list.addTableRowShareExternal(
-	// title
-	"Share"
-	// append_target_jq
-	,table_jq
-	// url_desc
-	,"Magendas"
-	// url
-	,_link.get_link(
-		_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
-		,_param
-		.get(_param.MEETING_ID, MEETING_ID)
-		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-	)
-);
+if(!IS_EXTERNAL_SHARE) {
+
+	var share_msg = "Did you take any role in " + membership_obj.__membership_desc + "?\nRole sign up on " + meeting_agenda_obj.__startdate;
+	var accessor_external_share =
+	_m_list.addTableRowShareExternal(
+		// title
+		"Share"
+		// append_target_jq
+		,table_jq
+		// label
+		,share_msg
+		// url_desc
+		,"Magendas"
+		// url
+		,_link.get_link(
+			_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
+			,_param
+			.get(_param.IS_EXTERNAL_SHARE, _param.YES)
+			.get(_param.MEETING_ID, MEETING_ID)
+			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		)
+	);
+
+}
 
 
 

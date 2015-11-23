@@ -101,6 +101,7 @@ class MYSQLInterface{
 		. " , MA.round AS __round"
 		. " , MA.theme AS __theme"
 		. " , MA.startdttm AS __startdttm"
+		. " , DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"		
 		. " , MA.membership_id AS __membership_id"
 		. " , MEMBERSHIP.name AS __membership_name"
 		. " , MEMBERSHIP.desc AS __membership_desc"
@@ -674,7 +675,7 @@ class MYSQLInterface{
 		. " FROM `MA_NEWS`"
 		. " LEFT JOIN `MEETING_AGENDA` AS MA ON MA.id=`MA_NEWS`.meeting_agenda_id"
 		. " WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
-		. " ORDER BY order_num"
+		. " ORDER BY `MA_NEWS`.order_num, `MA_NEWS`.id"
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
@@ -2019,15 +2020,33 @@ class MYSQLInterface{
 
 	public function getSpeechProjectList(){
 
+		// "NOT ASSIGNED"를 제외한 모든 프로젝트 명을 가져옴.
 		$query = 
 		"SELECT id AS __speech_project_id"
 		. " , ordernum AS __speech_project_ordernum"
 		. " , title AS __speech_project_title"
 		. " FROM `SPEECH_PROJECT`"
+		. " WHERE id NOT IN (86, 87, 85)"
 		. " ORDER BY ordernum"
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
+
+		// "NOT ASSIGNED"를 가져옴.
+		$query = 
+		"SELECT id AS __speech_project_id"
+		. " , ordernum AS __speech_project_ordernum"
+		. " , title AS __speech_project_title"
+		. " FROM `SPEECH_PROJECT`"
+		. " WHERE id IN (86, 87, 85)"
+		. " ORDER BY ordernum"
+		;
+
+		$json_res_obj_etc = $this->getSelectResult($query);
+		$result_etc = $json_res_obj_etc->result;
+
+		$result_merge = array_merge($result_etc, $json_res_obj->result);
+		$json_res_obj->result = $result_merge;
 
 		return $json_res_obj->result;
 	}
