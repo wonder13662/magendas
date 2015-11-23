@@ -46,7 +46,7 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 
 			<div id="message" class="alert alert-danger" role="alert" style="text-align:center;display:none;">No Message</div>
 
-			<input id="mobile_number" type="text" class="form-control" placeholder="Mobile Number" required="" autofocus="" style="border-bottom-right-radius:0;border-bottom-left-radius:0;margin-bottom:-1px;margin-top:20px;">	
+			<input id="mobile_number" type="text" class="form-control" placeholder="Email address or Mobile Number" required="" autofocus="" style="border-bottom-right-radius:0;border-bottom-left-radius:0;margin-bottom:-1px;margin-top:20px;">	
 			<input id="password" type="password" class="form-control" placeholder="Password" required style="margin-bottom:20px;">
 			<!-- 
 			<label class="checkbox">
@@ -70,7 +70,7 @@ _obj.get_delegate(
 	// delegate_func
 	function(data){
 
-		// console.log(">>> log in / success / data : ",data);
+		console.log(">>> log in / success / data : ",data);
 		// console.log(">>> log in / success / redirect_url : ",redirect_url);
 
 		if(data == null || data.member_info == null) {

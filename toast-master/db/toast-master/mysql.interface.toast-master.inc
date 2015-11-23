@@ -855,11 +855,10 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function getMemberLogIn($member_mobile="", $member_password="", $membership_id=-1){
+	public function getMemberLogIn($member_mobile="", $member_password=""){
 
 		if(empty($member_mobile)) return null;
 		if(empty($member_password)) return null;
-		if($this->isNotUnsignedNumberID($membership_id)) return null;
 
 		$query = 
 		"SELECT `MEMBER`.id AS __member_id"
@@ -867,16 +866,12 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
 		. " , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
 		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`mobile`=\"$member_mobile\"" 
-		. " AND MNM.`membership_id`=\"$membership_id\""
+		. " WHERE `MEMBER`.`mobile`=\"$member_mobile\""
 		. " AND `MEMBER`.`password`=\"$member_password\""
 		;
 
@@ -885,11 +880,10 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function getMemberLogInByEmail($member_email="", $member_password="", $membership_id=-1){
+	public function getMemberLogInByEmail($member_email="", $member_password=""){
 
 		if(empty($member_email)) return null;
 		if(empty($member_password)) return null;
-		if($this->isNotUnsignedNumberID($membership_id)) return null;
 
 		$query = 
 		"SELECT `MEMBER`.id AS __member_id"
@@ -897,16 +891,12 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
 		. " , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
 		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"		
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`email`=\"$member_email\"" 
-		. " AND MNM.`membership_id`=\"$membership_id\""
+		. " WHERE `MEMBER`.`email`=\"$member_email\""
 		. " AND `MEMBER`.`password`=\"$member_password\""
 		;
 
