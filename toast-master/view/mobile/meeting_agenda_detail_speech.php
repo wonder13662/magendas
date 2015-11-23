@@ -201,6 +201,33 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 
 
 
+// 0. 미팅 날짜 정보를 가져옵니다.
+if(IS_EXTERNAL_SHARE === true) {
+
+	_m_list.addTableRowTitle(
+		// title
+		membership_obj.__membership_name + " " + meeting_agenda_obj.__startdate
+		// append_target_jq
+		, table_jq
+		// delegate_obj_click_row
+		, _obj.getDelegate(function(self_obj){
+
+		}, this)
+	);	
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1072,8 +1099,16 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 	// 지정된 스피치가 있는 경우에는 공유버튼을 노출할 수 없습니다.
 	if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 
+		console.log(">>> today_speech_obj :: ",today_speech_obj);
+
 		// SHARE EXTERNAL
-		var share_msg = "You're going to deliver a speech in " + membership_obj.__membership_desc + "!\nIt's on " + meeting_agenda_obj.__startdate + "\nTake your ribbon!";
+		var share_msg = 
+		membership_obj.__membership_desc + "\n" + 
+		"Speech on " + meeting_agenda_obj.__startdate + "\n\n" + 
+		"Title : \n" + today_speech_obj.__title + "\n\n" + 
+		"Speaker : \n" + today_speech_obj.__speaker_member_name + "\n\n" + 
+		"Evaluator : \n" + today_speech_obj.__evaluator_member_name + "\n\n" + 
+		"Take your ribbon!";
 		var accessor_external_share =
 		_m_list.addTableRowShareExternal(
 			// title
@@ -1093,6 +1128,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				.get(_param.SPEECH_ID,parseInt(today_speech_obj.__speech_id))
 				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 			)
+			// img_url
+			,service_root_path + _link.IMG_SHARE_KAKAO_TM_RIBBONS
 		);
 
 	}

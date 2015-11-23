@@ -179,6 +179,47 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}	
 
+	/*
+		@ Desc : 
+	*/
+	public function getMeetingAgendaListUpcoming($meeting_membership_id=-1,$page=1,$size=50){
+
+		$function_name = "getMeetingAgendaList";
+		if($this->isNotUnsignedNumberID($meeting_membership_id)){
+			echo "$function_name / \$this->isNotUnsignedNumberID(\$meeting_membership_id)<br/>";
+			return;
+		}
+
+		$offset = ($page - 1)*$size;
+		$rownum = $size;
+
+		$query = 
+		"SELECT MA.id AS __meeting_id"
+		. " , MA.round AS __round"
+		. " , MA.theme AS __theme"
+		. " , MA.startdttm AS __startdttm"
+		. " , DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"
+		. " , MA.membership_id AS __membership_id"
+		. " , MEMBERSHIP.name AS __membership_name"
+		. " , MEMBERSHIP.desc AS __membership_desc"
+		. " , IFNULL(QUOTE.content,\"\") AS __quote"
+		. " , IFNULL(WORD.word,\"\") AS __word"
+		. " , IFNULL(WORD.desc,\"\") AS __word_desc"
+		. " FROM MEETING_AGENDA AS MA"
+		. " LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+		. " LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+		. " WHERE MA.membership_id=" . $meeting_membership_id
+		. " AND MA.`status`=\"A\""
+		. " AND NOW() < MA.startdttm"
+		. " ORDER BY MA.startdttm DESC LIMIT " . $offset . "," . $rownum;
+		;
+
+		$json_res_obj = $this->getSelectResult($query);
+
+		return $json_res_obj->result;
+	}		
+
 	public function getMeetingAgendaByRound($meeting_round, $startdttm, $meeting_membership_id=1){
 
 		$query = 
