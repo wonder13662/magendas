@@ -885,6 +885,37 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function getMemberLogInByEmail($member_email="", $member_password="", $membership_id=-1){
+
+		if(empty($member_email)) return null;
+		if(empty($member_password)) return null;
+		if($this->isNotUnsignedNumberID($membership_id)) return null;
+
+		$query = 
+		"SELECT `MEMBER`.id AS __member_id"
+		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+		. " , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
+		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"		
+		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+		. " FROM `MEMBER`"
+		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+		. " WHERE `MEMBER`.`email`=\"$member_email\"" 
+		. " AND MNM.`membership_id`=\"$membership_id\""
+		. " AND `MEMBER`.`password`=\"$member_password\""
+		;
+
+		$json_res_obj = $this->getSelectResult($query);
+
+		return $json_res_obj->result;
+
+	}
+
 	public function getSleepingMember($expire_date=180, $membership_id=1) {
 
 		if($this->isNotUnsignedNumberID($expire_date)) return null;
