@@ -226,6 +226,51 @@ _m_list.addTableRowMovingArrow(
 
 console.log(">>> service_root_path :: ",service_root_path);
 
+
+
+
+
+
+
+// 4. HELP
+/*
+var row_members_jq = 
+_m_list.addTableRowMovingArrow(
+	// title
+	"Help"
+	// append_target_jq
+	, table_jq
+	// delegate_obj_row_click
+	, _obj.getDelegate(function(delegate_data){
+
+		if(	delegate_data == undefined ||
+			delegate_data.delegate_data == undefined ||
+			_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+			return;
+		}
+
+		_link.go_there(
+			_link.MOBILE_MEMBER_MANAGE
+			, _param
+			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+		);
+
+	}, this)
+	// is_bold
+	, true
+	// param_obj
+	, null
+	// text_color
+	, _tm_m_list.COLOR_NAVY
+	// bg_color
+	, _tm_m_list.COLOR_TINT_GRAY	
+);
+*/
+
+
+
+
 // 3. Jessie
 // _jessie.init(service_root_path);
 // _jessie.sayHello(login_user_info, log_in_row_jq.find("td"));

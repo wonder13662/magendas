@@ -91,6 +91,8 @@ var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 
 console.log(">>> member_list :: ",member_list);
 
+console.log(">>> today_role_list :: ",today_role_list);
+
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
 var role_id_timer = <?php echo json_encode($role_id_timer);?>;
@@ -253,6 +255,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						function(data){
 
 							console.log(data);
+
 							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
 								console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
 
@@ -299,9 +302,15 @@ var role_idx=0;
 var role_name = "Toast Master"
 var role_member_name = _param.NOT_ASSIGNED;
 var role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+
+console.log(">>> role_obj :: ",role_obj);
+
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
+
+console.log(">>> role_member_name :: ",role_member_name);
+
 var role_controller = 
 _m_list.addTableRowTitleNBadge(
 	// title
@@ -337,7 +346,7 @@ _m_list.addTableRowTitleNBadge(
 	// text_color
 	// bg_color
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -348,8 +357,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "General Evaluator"
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -370,7 +379,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_general_evaluator)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -380,8 +389,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Timer";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -402,7 +411,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_timer)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -412,8 +421,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Table Topic Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -434,7 +443,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_table_topic)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -444,8 +453,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Ah & Vote Counter";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -466,7 +475,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_ah_counter)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -478,8 +487,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Mini Debate Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -500,7 +509,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_mini_debate_master)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -512,8 +521,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Grammarian";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -534,7 +543,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_grammarian)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 
@@ -546,8 +555,8 @@ if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _pa
 role_name = "Word & Quote Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
-if(parseInt(role_obj.member_id) > 0){
-	role_member_name = role_obj.member_first_name + " " + role_obj.member_last_name;
+if(parseInt(role_obj.__member_id) > 0){
+	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -568,7 +577,7 @@ _m_list.addTableRowTitleNBadge(
 	.get(_param.MEETING_ID, MEETING_ID)
 	.get(_param.ROLE_ID, role_id_word_n_quote_master)
 );
-if(parseInt(role_obj.member_id) > 0 && role_obj.member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
+if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
 	role_controller.set_badge_green();
 }
 

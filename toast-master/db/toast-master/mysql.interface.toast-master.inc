@@ -1917,6 +1917,8 @@ class MYSQLInterface{
 		. " AND ROLE.id IN (2,7,5,9,4,10,6,11)"
 		;
 
+		// echo "\$query :: $query<br/>";
+
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
