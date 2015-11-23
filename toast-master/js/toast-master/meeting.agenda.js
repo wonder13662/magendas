@@ -546,12 +546,14 @@ wonglish.meeting_agenda_manager = {
 		var today_role_list = meeting_agenda_data_set.today_role_list;
 		var today_role_list_sorted = today_role_list;
 
+		console.log(">>> today_role_list :: ",today_role_list);
+
 		// convert html safe text
 		for (var idx = 0; idx < today_role_list_sorted.length; idx++) {
 			var role_obj = today_role_list_sorted[idx];
-			role_obj.role_name = _html.getSafeText(role_obj.role_name);
-			role_obj.member_first_name = _html.getSafeText(role_obj.member_first_name);
-			role_obj.member_last_name = _html.getSafeText(role_obj.member_last_name);
+			role_obj.__role_name = _html.getSafeText(role_obj.__role_name);
+			role_obj.__member_first_name = _html.getSafeText(role_obj.__member_first_name);
+			role_obj.__member_last_name = _html.getSafeText(role_obj.__member_last_name);
 		};
 		var loop_len = (today_role_list_sorted.length/2);
 		var member_role_cnt_list = meeting_agenda_data_set.member_role_cnt_list;
@@ -586,33 +588,33 @@ wonglish.meeting_agenda_manager = {
 			for (var inner_idx = 0; inner_idx < member_role_cnt_list.length; inner_idx++) {
 				var member_role_cnt_obj = member_role_cnt_list[inner_idx];
 
-				if((left_role_obj.member_id == member_role_cnt_obj.__member_id) && (left_role_obj.role_id == member_role_cnt_obj.__role_id)){
+				if((left_role_obj.__member_id == member_role_cnt_obj.__member_id) && (left_role_obj.__role_id == member_role_cnt_obj.__role_id)){
 					left_role_cnt = member_role_cnt_obj.__role_cnt;
 				}
 
-				if((right_role_obj.member_id == member_role_cnt_obj.__member_id) && (right_role_obj.role_id == member_role_cnt_obj.__role_id)){
+				if((right_role_obj.__member_id == member_role_cnt_obj.__member_id) && (right_role_obj.__role_id == member_role_cnt_obj.__role_id)){
 					right_role_cnt = member_role_cnt_obj.__role_cnt;
 				}
 			}
 
 			var __left_role_member_name = "";
-			var __left_role_member_id = left_role_obj.member_id;
-			var __left_role_name = left_role_obj.role_name;
-			var __left_role_id = left_role_obj.role_id;
+			var __left_role_member_id = left_role_obj.__member_id;
+			var __left_role_name = left_role_obj.__role_name;
+			var __left_role_id = left_role_obj.__role_id;
 			if( parseInt(__left_role_member_id) == -1 ) {
 				__left_role_member_name = "Not Assigned";
 			} else {
-				__left_role_member_name = left_role_cnt + " " + left_role_obj.member_first_name + " " + left_role_obj.member_last_name;	
+				__left_role_member_name = left_role_cnt + " " + left_role_obj.__member_first_name + " " + left_role_obj.__member_last_name;	
 			}
 
 			var __right_role_member_name = "";
-			var __right_role_member_id = right_role_obj.member_id;
-			var __right_role_name = right_role_obj.role_name;
-			var __right_role_id = right_role_obj.role_id;
+			var __right_role_member_id = right_role_obj.__member_id;
+			var __right_role_name = right_role_obj.__role_name;
+			var __right_role_id = right_role_obj.__role_id;
 			if( parseInt(__right_role_member_id) == -1 ) {
 				__right_role_member_name = "Not Assigned";
 			} else {
-				__right_role_member_name = right_role_cnt + " " + right_role_obj.member_first_name + " " + right_role_obj.member_last_name;	
+				__right_role_member_name = right_role_cnt + " " + right_role_obj.__member_first_name + " " + right_role_obj.__member_last_name;	
 			}
 
 			// raw data obj
