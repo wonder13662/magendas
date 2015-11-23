@@ -25,12 +25,12 @@ $member_info_list;
 $member_info=null;
 if(!empty($member_mobile) && !empty($member_password)){
 
-	$member_info_list = $wdj_mysql_interface->getMemberLogIn($member_mobile, $member_password, $meeting_membership_id);
+	$member_info_list = $wdj_mysql_interface->getMemberLogIn($member_mobile, $member_password);
 	array_push($result->query_output_arr,json_encode($member_info_list));
 
 } else if(!empty($member_email) && !empty($member_password)){
 
-	$member_info_list = $wdj_mysql_interface->getMemberLogInByEmail($member_email, $member_password, $meeting_membership_id);
+	$member_info_list = $wdj_mysql_interface->getMemberLogInByEmail($member_email, $member_password);
 	array_push($result->query_output_arr,json_encode($member_info_list));
 
 }

@@ -70,7 +70,7 @@ _obj.get_delegate(
 	// delegate_func
 	function(data){
 
-		// console.log(">>> log in / success / data : ",data);
+		console.log(">>> log in / success / data : ",data);
 		// console.log(">>> log in / success / redirect_url : ",redirect_url);
 
 		if(data == null || data.member_info == null) {
