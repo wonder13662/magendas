@@ -304,7 +304,7 @@ _m_list.addTableRowTextInputInline(
 var role_cnt = 0;
 for(var idx = 0; idx < today_role_list.length; idx++) {
 	var today_role_obj = today_role_list[idx];
-	if(parseInt(today_role_obj.member_id) > 0) {
+	if(parseInt(today_role_obj.__member_id) > 0) {
 		role_cnt++;
 	}
 }
