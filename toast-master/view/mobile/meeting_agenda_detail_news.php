@@ -23,7 +23,14 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 }
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID, -1);
+$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgenda($MEETING_MEMBERSHIP_ID, $MEETING_ID);
+if(!empty($meeting_agenda_list)) {
+	$meeting_agenda_obj = $meeting_agenda_list[0];
+}
+
 $news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
 
 // @ required
 $wdj_mysql_interface->close();
@@ -60,45 +67,75 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 // php to javascript sample
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
+var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+
 var news_id = <?php echo json_encode($news_id);?>;
 var news_list = <?php echo json_encode($news_list);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
 
+var membership_obj = <?php echo json_encode($membership_obj);?>;
+var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
+
+console.log(">> IS_EXTERNAL_SHARE :: ",IS_EXTERNAL_SHARE);
+console.log(">> membership_obj :: ",membership_obj);
+console.log(">> meeting_agenda_obj :: ",meeting_agenda_obj);
+
 console.log(">> news_list :: ",news_list);
 
-// Header - Log In Treatment
+
 var table_jq = $("table tbody#list");
-_tm_m_list.addHeaderRow(
-	// login_user_info
-	login_user_info
-	// header_arr
-	,[
-		_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	]
-	// table_jq
-	,table_jq
-);
+
+// Header - Log In Treatment
+if(!IS_EXTERNAL_SHARE) {
+
+	_tm_m_list.addHeaderRow(
+		// login_user_info
+		login_user_info
+		// header_arr
+		,[
+			_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
+				,_param
+				.get(_param.MEETING_ID, MEETING_ID)
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_DETAIL
+				,_param
+				.get(_param.MEETING_ID, MEETING_ID)
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_MEETING_AGENDA_LIST
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_TOP
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+		]
+		// table_jq
+		,table_jq
+	);	
+
+} else {
+
+	// show brief meeting info
+	_m_list.addTableRowTitle(
+		// title
+		membership_obj.__membership_name + " " + meeting_agenda_obj.__startdate
+		// append_target_jq
+		, table_jq
+		// delegate_obj_click_row
+		, _obj.getDelegate(function(self_obj){
+
+		}, this)
+	);	
+
+}
+
 // Body - Content
 
 
@@ -132,7 +169,7 @@ if(_v.is_valid_array(news_list)) {
 var accessor_theme =
 _m_list.addTableRowTextInputFlexible(
 	// title
-	"News"
+	"Add News"
 	// append_target_jq
 	,table_jq
 	// place holder
@@ -142,14 +179,18 @@ _m_list.addTableRowTextInputFlexible(
 	// delegate_on_delete
 	, _obj.getDelegate(function(delegate_data){
 
-		console.log(">>> delegate_data :: ",delegate_data);
-		console.log(">>> delegate_data._key :: ",delegate_data._key);
-		console.log(">>> delegate_data._value :: ",delegate_data._value);
+		// console.log(">>> delegate_data :: ",delegate_data);
+		// console.log(">>> delegate_data._key :: ",delegate_data._key);
+		// console.log(">>> delegate_data._value :: ",delegate_data._value);
 
 		var cur_event = delegate_data[_param.EVENT_PARAM_EVENT_TYPE];
 		var key = parseInt(delegate_data[_param.EVENT_PARAM_KEY]);
 		var value = delegate_data[_param.EVENT_PARAM_VALUE];
 		var target_jq = delegate_data[_param.EVENT_PARAM_TARGET_JQ];
+
+		console.log(">>> cur_event :: ",cur_event);
+		console.log(">>> key :: ",key);
+		console.log(">>> value :: ",value);
 
 		if(_param.EVENT_INSERT === cur_event && key == -1 && _v.is_valid_str(value)) {
 
@@ -175,13 +216,13 @@ _m_list.addTableRowTextInputFlexible(
 						// TOAST POPUP 찾아볼 것
 						alert("Updated!");
 
-					},
+					}
 					// delegate_scope
-					this
+					, this
 				)
 			); // ajax done.
 
-		} else if(_param.EVENT_UPDATE === cur_event && (key > 0) && _v.is_valid_str(value)) {
+		} else if((_param.EVENT_INSERT === cur_event || _param.EVENT_UPDATE === cur_event) && (0 < key) && _v.is_valid_str(value)) {
 
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
@@ -205,9 +246,9 @@ _m_list.addTableRowTextInputFlexible(
 						// TOAST POPUP 찾아볼 것
 						alert("Updated!");
 
-					},
+					}
 					// delegate_scope
-					this
+					, this
 				)
 			); // ajax done.			
 
@@ -239,6 +280,8 @@ _m_list.addTableRowTextInputFlexible(
 
 						console.log(data);
 
+						console.log(">>> target_jq :: ",target_jq);
+
 						target_jq.remove();
 
 					},
@@ -262,22 +305,30 @@ _m_list.addTableRowTextInputFlexible(
 
 
 // SHARE EXTERNAL
-var accessor_external_share =
-_m_list.addTableRowShareExternal(
-	// title
-	"Share"
-	// append_target_jq
-	,table_jq
-	// url_desc
-	,"Magendas"
-	// url
-	,_link.get_link(
-		_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
-		,_param
-		.get(_param.MEETING_ID, MEETING_ID)
-		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-	)
-);
+if(!IS_EXTERNAL_SHARE) {
+
+	_m_list.addTableRowShareExternal(
+		// title
+		"Share"
+		// append_target_jq
+		,table_jq
+		// label
+		,"Magendas"
+		// url_desc
+		,"Magendas"
+		// url
+		,_link.get_link(
+			_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
+			,_param
+			.get(_param.IS_EXTERNAL_SHARE, _param.YES)
+			.get(_param.MEETING_ID, MEETING_ID)
+			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		)
+	);
+
+}
+
+
 
 
 

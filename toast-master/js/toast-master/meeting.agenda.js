@@ -546,7 +546,7 @@ wonglish.meeting_agenda_manager = {
 		var today_role_list = meeting_agenda_data_set.today_role_list;
 		var today_role_list_sorted = today_role_list;
 
-		console.log(">>> today_role_list :: ",today_role_list);
+		// console.log(">>> today_role_list :: ",today_role_list);
 
 		// convert html safe text
 		for (var idx = 0; idx < today_role_list_sorted.length; idx++) {

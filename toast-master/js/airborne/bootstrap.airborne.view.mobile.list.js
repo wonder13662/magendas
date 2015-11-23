@@ -1767,13 +1767,12 @@ airborne.bootstrap.view.mobile.list = {
 		row_tag += ""
 		+ "<tr class=\"active\" id=\"<_v>\" status=\"close\">".replace(/\<_v\>/gi, row_id)
 			+ "<td style=\"border-bottom: 1px solid #ddd;\">"
-				//+ "<span style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
-				+ "<button id=\"btn_add\" type=\"button\" class=\"btn btn-primary btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"float:right;\">"
-					+ "&nbsp;<span class=\"glyphicon glyphicon-plus\"></span>&nbsp;"
-				+ "</button>"
+				+ "<button id=\"btn_add\" type=\"button\" class=\"btn btn-default btn-lg btn-block\" style=\"color:#999;\"><strong><TITLE></strong></button>"
+					.replace(/\<TITLE\>/gi, title)
 			+ "</td>"
 		+ "</tr>"
 		;
+
 
 		// Set Input
 		if(key_value_array != undefined && key_value_array.length > 0) {
@@ -1784,9 +1783,15 @@ airborne.bootstrap.view.mobile.list = {
 				row_tag += ""
 				+ "<tr class=\"active\" id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
 					+ "<td style=\"border-bottom: 1px solid #ddd;\">"
+
 						+ "<button id=\"btn_remove\" type=\"button\" class=\"btn btn-danger btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"width:53px;height:49px;float:left;\">"
 							+ "&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;"
 						+ "</button>"
+
+						+ "<button id=\"btn_save\" type=\"button\" class=\"btn btn-default btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"width:53px;height:49px;float:left;display:none;margin:0px;\">"
+							+ "&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;"
+						+ "</button>"
+
 						+ "<textarea class=\"form-control\" _key=\"<key>\" _value=\"<value>\" rows=\"20\" style=\"height:49px;width:80%;float:right;\"><value></textarea>"
 						.replace(/\<value\>/gi, key_value_obj.value)
 						.replace(/\<key\>/gi, key_value_obj.key)
@@ -1811,6 +1816,9 @@ airborne.bootstrap.view.mobile.list = {
 
 			// set event - button remove
 			var btn_remove_jq = input_row_jq.find("button#btn_remove");
+			var textarea_jq = input_row_jq.find("textarea");
+			var btn_save_jq = input_row_jq.find("button#btn_save");
+
 			if(btn_remove_jq != undefined && btn_remove_jq.length > 0) {
 				btn_remove_jq.click(function(e){
 
@@ -1833,32 +1841,43 @@ airborne.bootstrap.view.mobile.list = {
 				});
 			}
 
+			if(btn_save_jq != undefined && btn_save_jq.length > 0) {
+				btn_save_jq.click(function(e){
+
+					var key = textarea_jq.attr("_key");
+					var init_value = textarea_jq.attr("_value");
+					var value = textarea_jq.val();
+
+					param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_INSERT;
+					param_obj[_param.EVENT_PARAM_KEY] = key;
+					param_obj[_param.EVENT_PARAM_VALUE] = value;
+					param_obj[_param.EVENT_PARAM_TARGET_JQ] = input_row_jq;
+
+					if((init_value != value) && delegate_on_event != undefined) {
+						if(key == -1){
+							delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);
+						} else {
+							delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);	
+						}
+					} // if end
+
+					btn_remove_jq.show();
+					btn_save_jq.hide();
+
+				});
+
+			} // if end
+
 			// set event - on change
-			var textarea_jq = input_row_jq.find("textarea");
-			textarea_jq.change(function(e){
-
-				var _self_jq = $(this);
-
-				var key = _self_jq.attr("_key");
-				var init_value = _self_jq.attr("_value");
-				var value = _self_jq.val();
-
-				param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_INSERT;
-				param_obj[_param.EVENT_PARAM_KEY] = key;
-				param_obj[_param.EVENT_PARAM_VALUE] = value;
-				param_obj[_param.EVENT_PARAM_TARGET_JQ] = input_row_jq;
-
-				if((init_value != value) && delegate_on_event != undefined) {
-					if(key == -1){
-						delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);
-					} else {
-						delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);	
-					}
-				}
-
-			})
+			textarea_jq.focus(function(e){
+				btn_remove_jq.hide();
+				btn_save_jq.show();
+			});
 
 		}
+
+		// 새로운 열을 추가할 대상의 참조.
+		var last_sibling_jq = append_target_jq.children().last();
 
 		for(var idx = 0; idx < input_row_jq_arr.length; idx++) {
 			// 각 열별로 이벤트를 부여합니다.
@@ -1873,19 +1892,35 @@ airborne.bootstrap.view.mobile.list = {
 					var new_row_tag = ""
 					+ "<tr class=\"active\" id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
 						+ "<td style=\"border-bottom: 1px solid #ddd;\">"
+
 							+ "<button id=\"btn_remove\" type=\"button\" class=\"btn btn-danger btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"width:53px;height:49px;float:left;\">"
 								+ "&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;"
 							+ "</button>"
+
+							+ "<button id=\"btn_save\" type=\"button\" class=\"btn btn-default btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"width:53px;height:49px;float:left;display:none;margin:0px;\">"
+								+ "&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;"
+							+ "</button>"
+
 							+ "<textarea class=\"form-control\" _key=\"<key>\" _value=\"<value>\" rows=\"20\" style=\"height:49px;width:80%;float:right;\"><value></textarea>"
+
 							.replace(/\<value\>/gi, "")
 							.replace(/\<key\>/gi, -1)
 						+ "</td>"
 					+ "</tr>"
 					;
 
-					append_target_jq.append(new_row_tag);
-					var last_row_jq = append_target_jq.children().last();
+					//append_target_jq.append(new_row_tag);
+
+					last_sibling_jq = append_target_jq.find("tr#" + row_id).last();
+					last_sibling_jq.after(new_row_tag);
+					var last_row_jq = append_target_jq.find("tr#" + row_id).last();
+
+					console.log(">> last_sibling_jq :: ",last_sibling_jq);
+					console.log(">> last_row_jq :: ",last_row_jq);
+
 					add_row_event(last_row_jq, param_obj);
+
+					last_sibling_jq = last_row_jq;
 
 				});
 			}
@@ -2297,7 +2332,7 @@ airborne.bootstrap.view.mobile.list = {
 		@ Public
 		@ Desc : 모바일에서 kakaotalk, facebook, line등의 SNS 앱으로 아젠다 링크를 전달해주는 share row를 만듭니다.
 	*/
-	,addTableRowShareExternal:function(title, append_target_jq, url_desc, url, text_color, bg_color){
+	,addTableRowShareExternal:function(title, append_target_jq, label, url_desc, url, text_color, bg_color){
 
 		if(_v.isNotValidStr(title)){
 			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowShareExternal / _v.isNotValidStr(title)");
@@ -2305,6 +2340,10 @@ airborne.bootstrap.view.mobile.list = {
 		}
 		if(append_target_jq==null){
 			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowShareExternal / append_target_jq==null");
+			return;
+		}
+		if(_v.isNotValidStr(label)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowShareExternal / _v.isNotValidStr(label)");
 			return;
 		}
 		if(_v.isNotValidStr(url_desc)){
@@ -2356,7 +2395,14 @@ airborne.bootstrap.view.mobile.list = {
 
 		// activate kakaotalk 
 	    // 사용할 앱의 JavaScript 키를 설정해 주세요.
-	    Kakao.init('f79f9e707a406ca442077516db048a1b');
+
+		try {
+			if(Kakao.Link == undefined) {
+				Kakao.init('f79f9e707a406ca442077516db048a1b');	
+			}
+		} catch(err) {
+		    console.log(">>> err :: ",err);
+		}
 
 	    // check url
 	    // /service/toast-master --> http://localhost/service/toast-master
@@ -2368,7 +2414,7 @@ airborne.bootstrap.view.mobile.list = {
 	    // 카카오톡 링크 버튼을 생성합니다. 처음 한번만 호출하면 됩니다.
 	    Kakao.Link.createTalkLinkButton({
 			container: '#kakao-link-btn',
-			label: 'Mobile Agenda',
+			label: label,
 			image: {
 				src: root_domain + '/service/toast-master/images/Share_kakao_TMBanner_200_200.png',
 				width: '200',

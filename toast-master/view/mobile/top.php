@@ -72,13 +72,6 @@ console.log(">>> membership_obj :: ",membership_obj);
 
 // view drawing
 var table_jq = $("table tbody");
-var row_today_meeting_jq = $("table tr#row_today_meeting");
-var row_meeting_agenda_jq = $("table tr#row_meeting_agenda");
-var row_members_jq = $("table tr#row_members");
-var row_attendance_jq = $("table tr#row_attendance_jq");
-var row_roll_sign_up_jq = $("table tr#row_roll_sing_up");
-var row_officers_jq = $("table tr#row_officers");
-
 
 // login_user_info, header_arr, table_jq, color_text, bg_color_vmouse_down
 
@@ -110,7 +103,6 @@ _tm_m_list.addHeaderRow(
 
 
 // 1. Meeting Agenda List
-var row_meeting_agenda_jq = 
 _m_list.addTableRowMovingArrow(
 	// title
 	"Meeting Agenda"
@@ -152,7 +144,6 @@ _m_list.addTableRowMovingArrow(
 
 
 // 1. Role Sign Up Sheet
-var row_meeting_agenda_jq = 
 _m_list.addTableRowMovingArrow(
 	// title
 	"Role Sign Up"
@@ -191,7 +182,6 @@ _m_list.addTableRowMovingArrow(
 
 
 // 3. Members
-var row_members_jq = 
 _m_list.addTableRowMovingArrow(
 	// title
 	"Members"
@@ -233,8 +223,6 @@ console.log(">>> service_root_path :: ",service_root_path);
 
 
 // 4. HELP
-/*
-var row_members_jq = 
 _m_list.addTableRowMovingArrow(
 	// title
 	"Help"
@@ -251,7 +239,7 @@ _m_list.addTableRowMovingArrow(
 		}
 
 		_link.go_there(
-			_link.MOBILE_MEMBER_MANAGE
+			_link.MOBILE_HELP_LIST
 			, _param
 			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
 		);
@@ -266,7 +254,7 @@ _m_list.addTableRowMovingArrow(
 	// bg_color
 	, _tm_m_list.COLOR_TINT_GRAY	
 );
-*/
+
 
 
 
