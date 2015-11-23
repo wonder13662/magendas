@@ -39,6 +39,7 @@
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.column.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.mobile.list.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.print.js"></script>
 
 <script src="[__ROOT_PATH__]/js/toast-master/mobile.list.manager.js"></script>
 <script src="[__ROOT_PATH__]/js/toast-master/jessie.js"></script>
@@ -94,6 +95,7 @@
   var _ajax = airborne.ajax;
   var _color = airborne.color;
   var _json = airborne.json;
+  var _print = airborne.bootstrap.view.print;
 
   var _m_list = airborne.bootstrap.view.mobile.list;
   var _tm_m_list = toast_master.mobile_list_manager;

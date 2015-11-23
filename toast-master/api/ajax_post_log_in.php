@@ -11,10 +11,12 @@ $debug = "";
 // GET PARAMS
 // LOG IN
 
+$member_email = $params->getParamString($params->MEMBER_EMAIL);
 $member_mobile = $params->getParamString($params->MEMBER_MOBILE);
 $member_password = $params->getParamString($params->MEMBER_PASSWORD);
 $meeting_membership_id = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);
 
+array_push($result->query_output_arr,"\$member_email :: $member_email");
 array_push($result->query_output_arr,"\$member_mobile :: $member_mobile");
 array_push($result->query_output_arr,"\$member_password :: $member_password");
 array_push($result->query_output_arr,"\$meeting_membership_id :: $meeting_membership_id");
@@ -22,13 +24,17 @@ array_push($result->query_output_arr,"\$meeting_membership_id :: $meeting_member
 $member_info_list;
 $member_info=null;
 if(!empty($member_mobile) && !empty($member_password)){
-	array_push($result->query_output_arr,"001");
+
 	$member_info_list = $wdj_mysql_interface->getMemberLogIn($member_mobile, $member_password, $meeting_membership_id);
 	array_push($result->query_output_arr,json_encode($member_info_list));
+
+} else if(!empty($member_email) && !empty($member_password)){
+
+	$member_info_list = $wdj_mysql_interface->getMemberLogInByEmail($member_email, $member_password, $meeting_membership_id);
+	array_push($result->query_output_arr,json_encode($member_info_list));
+
 }
 if(!empty($member_info_list)){
-
-	array_push($result->query_output_arr,"002");
 
 	$member_info=$member_info_list[0];
 	array_push($result->query_output_arr,json_encode($member_info));
