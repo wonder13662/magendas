@@ -1447,8 +1447,8 @@ class MYSQLInterface{
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MNM.membership_id"
 		. " WHERE MNM.membership_id=$membership_id"
-		. " AND `MEMBER`.first_name NOT IN (\"NOT\",\"WELCOME\")"
-		. " AND `MEMBER`.last_name NOT IN (\"ASSIGNED\",\"GUEST\")"
+		. " AND `MEMBER`.first_name IN (\"NOT\",\"WELCOME\")"
+		. " AND `MEMBER`.last_name IN (\"ASSIGNED\",\"GUEST\")"
 		;
 
 		if(!is_null($member_status)){
@@ -1644,6 +1644,7 @@ class MYSQLInterface{
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " WHERE MNM.`status`=\"" . $member_status .  "\""
 		. " AND MNM.membership_id=\"" . $membership_id .  "\""
+		. " AND `MEMBER`.first_name NOT IN (\"NOT\",\"WELCOME\")"
 		;
 
 		if($role_id > 0 && $member_id > 0){
@@ -1957,6 +1958,8 @@ class MYSQLInterface{
 		. " WHERE MA.membership_id=$membership_id"
 		. " AND MA.id=$meeting_agenda_id"
 		. " AND ROLE.id IN (2,7,5,9,4,10,6,11)"
+		. " AND `MEMBER`.first_name NOT IN (\"NOT\")"
+		. " AND `MEMBER`.last_name NOT IN (\"ASSIGNED\")"
 		;
 
 		// echo "\$query :: $query<br/>";
