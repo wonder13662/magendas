@@ -251,6 +251,8 @@ class ToastMasterParamManager{
 	// SHARE
 	public $IS_EXTERNAL_SHARE="IS_EXTERNAL_SHARE";
 
+	public $NOT_ASSIGNED="NOT ASSIGNED";
+
 }
 
 ?>

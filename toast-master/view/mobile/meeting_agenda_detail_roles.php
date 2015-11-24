@@ -98,6 +98,8 @@ var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
+console.log(">>> member_list :: ",member_list);
+
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
 var role_id_timer = <?php echo json_encode($role_id_timer);?>;

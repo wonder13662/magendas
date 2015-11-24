@@ -1423,7 +1423,7 @@ class MYSQLInterface{
 	}	
 
 
-	public function getMemberList($membership_id=-1, $member_status=""){
+	public function getMemberList($membership_id=-1, $member_status="A"){
 
 		$function_name = "getMemberList";
 		if($this->isNotUnsignedNumberID($membership_id)){
@@ -1447,8 +1447,8 @@ class MYSQLInterface{
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MNM.membership_id"
 		. " WHERE MNM.membership_id=$membership_id"
-		. " AND `MEMBER`.first_name IN (\"NOT\",\"WELCOME\")"
-		. " AND `MEMBER`.last_name IN (\"ASSIGNED\",\"GUEST\")"
+		. " AND `MEMBER`.first_name NOT IN (\"NOT\",\"WELCOME\")"
+		. " AND `MEMBER`.last_name NOT IN (\"ASSIGNED\",\"GUEST\")"
 		;
 
 		if(!is_null($member_status)){

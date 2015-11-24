@@ -1192,7 +1192,11 @@ class TCPDFManager{
 													, $element_set_x_pos=0
 													, $element_set_y_pos=0
 													, $element_set_width=50
-													, $data ) {
+													, $data
+													, $meeting_agenda_obj
+													, $today_news_list=null
+													, $today_role_list=null
+													, $today_speech_list=null ) {
 
 		$caller_name = "<br/>draw_card_board_timeline_V2<br/>";
 		if(empty($element_set_title)){
@@ -1216,16 +1220,246 @@ class TCPDFManager{
 			return;
 		}
 
-		//echo "\$data :: $data<br/>";
-		// print_r($data);
-
-		// try {
-		// 	$schedule_obj_arr = $this->get_timeline_card_board_data_from_toastmaster_schedule_V2("\"{" . $data);
-		// } catch (Exception $e) {
-		// 	log_exception($e);
-		// }
-
 		$schedule_obj_arr = $this->get_timeline_card_board_data_from_toastmaster_schedule_V2($data);
+
+		function update_simple_table(	$simple_table_key
+										, $simple_table_value
+										, $meeting_agenda_obj
+										, $today_news_list
+										, $today_role_list
+										, $today_speech_list 	) {
+
+			if(is_null($simple_table_key) && is_null($simple_table_key->name)) return null;
+
+
+			// role takers
+			$today_role_obj = null;
+			if(strcmp($simple_table_key->name, "Toastmaster") == 0) {
+
+				$today_role_obj = $today_role_list[1];
+
+			} else if(strcmp($simple_table_key->name, "General Evaluator") == 0) {
+
+				$today_role_obj = $today_role_list[0];
+
+			} else if(strcmp($simple_table_key->name, "Grammarian") == 0) {
+
+				$today_role_obj = $today_role_list[6];
+
+			} else if(strpos($simple_table_key->name, "Vote Counter") > 0) {
+
+				$today_role_obj = $today_role_list[4];
+
+			} else if(strcmp($simple_table_key->name, "Timer") == 0) {
+
+				$today_role_obj = $today_role_list[2];
+
+			} else if(strpos($simple_table_key->name, "Quote master") > 0) {
+
+				$today_role_obj = $today_role_list[7];
+
+			} else if(strcmp($simple_table_key->name, "Table Topic Master") == 0) {
+
+				$today_role_obj = $today_role_list[3];
+
+			} else if(strcmp($simple_table_key->name, "Mini Debate Master") == 0) {	
+
+				$today_role_obj = $today_role_list[5];
+
+			}
+
+			if(	!is_null($today_role_obj) && 
+				!empty($today_role_obj->__member_name) && 
+				!strpos($simple_table_value->name,$today_role_obj->__member_name)) {
+
+				if(!is_null($today_role_obj->__role_cnt) && 0 < intval($today_role_obj->__role_cnt)) {
+					$simple_table_value->name = $today_role_obj->__role_cnt . " " . $today_role_obj->__member_name;
+				} else {
+					$simple_table_value->name = $today_role_obj->__member_name;
+				}
+
+			} else if( !is_null($today_role_obj) && intval($today_role_obj->__member_id) == -1) {
+				$simple_table_value->name = "NOT ASSIGNED";
+			}
+
+
+			if(strcmp($simple_table_key->name, "Word") == 0) {
+
+				if( !is_null($meeting_agenda_obj) && 
+					!empty($meeting_agenda_obj->__word) && 
+					strcmp($simple_table_value->name,$meeting_agenda_obj->__word) != 0 ) {
+
+					$simple_table_value->name = $meeting_agenda_obj->__word;
+				}
+
+			}
+			if(strcmp($simple_table_key->name, "Word Desc") == 0) {
+
+				if( !is_null($meeting_agenda_obj) && 
+					!empty($meeting_agenda_obj->__word_desc) && 
+					strcmp($simple_table_value->name,$meeting_agenda_obj->__word_desc) != 0 ) {
+
+					$simple_table_value->name = $meeting_agenda_obj->__word_desc;
+				}
+			}
+			if(strcmp($simple_table_key->name, "Quote Title") == 0) {
+
+				if( !is_null($meeting_agenda_obj) && 
+					!empty($meeting_agenda_obj->__quote) && 
+					strcmp($simple_table_value->name,$meeting_agenda_obj->__quote) != 0 ) {
+
+					$simple_table_value->name = $meeting_agenda_obj->__quote;
+				}
+
+			}
+
+			return $simple_table_value;
+		}
+
+		// 데이터를 대조해서 다르다면 넘겨받은 객체의 데이터로 바꿉니다.
+		for ($idx = 0; $idx < count($schedule_obj_arr); $idx++) {
+
+			$element_first_depth = $schedule_obj_arr[$idx];
+			foreach ($element_first_depth as $key => $value) {
+
+			    if(is_array($value)) {
+
+			    	$value_array = $value;
+			    	for ($idx_second_depth = 0; $idx_second_depth < count($value); $idx_second_depth++) {
+
+			    		$element_third_depth = $value_array[$idx_second_depth];
+
+			    		foreach ($element_third_depth as $element_third_depth_key => $element_third_depth_value) {
+
+			    			if(strcmp($element_third_depth_key, "simple_table") == 0 && is_array($element_third_depth_value)) {
+
+			    				// 내부 테이블인 경우의 처리
+			    				$element_third_depth_array = $element_third_depth_value;
+			    				$is_speech_table = false;
+			    				for ($idx_fourth_depth = 0; $idx_fourth_depth < count($element_third_depth_array); $idx_fourth_depth++) {
+			    					$element_fourth_depth = $element_third_depth_array[$idx_fourth_depth];
+
+			    					if(is_array($element_fourth_depth)) {
+			    						$element_fourth_depth_array = $element_fourth_depth;
+
+			    						// NEWS
+			    						if( count($element_fourth_depth_array) > 0 && 
+			    							strcmp($element_fourth_depth_array[0]->name, "News Contents") == 0 ) {
+
+			    							$simple_table_new = array();
+			    							array_push($simple_table_new, $element_fourth_depth_array);
+
+				    						for ($idx_speech = 0; $idx_speech < count($today_news_list); $idx_speech++) {
+				    							$news_obj = $today_news_list[$idx_speech];
+
+												$simple_table_row_arr = array();
+
+												$simple_table_row_column_obj = new stdClass();
+												$simple_table_row_column_obj->name=$news_obj->__news_content;
+												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
+												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+
+												array_push($simple_table_new, $simple_table_row_arr);
+				    						}
+
+				    						// 원본 데이터를 수정본으로 바꿉니다.
+				    						$element_third_depth->$element_third_depth_key = $simple_table_new;
+
+				    						break;
+			    						}
+
+			    						// SPEECH
+			    						if( count($element_fourth_depth_array) == 4 && 
+			    							strcmp($element_fourth_depth_array[0]->name, "Project") == 0 &&
+			    							strcmp($element_fourth_depth_array[1]->name, "Title") == 0 &&
+			    							strcmp($element_fourth_depth_array[2]->name, "Speaker") == 0 &&
+			    							strcmp($element_fourth_depth_array[3]->name, "Evaluator") == 0) {
+
+			    							// 스피치 테이블 업데이트
+			    							$is_speech_table = true;
+			    							$simple_table_new = array();
+			    							array_push($simple_table_new, $element_fourth_depth_array);
+
+				    						// 지금 업데이트 해야할 스피치 정보
+				    						for ($idx_speech = 0; $idx_speech < count($today_speech_list); $idx_speech++) {
+				    							$speech_obj = $today_speech_list[$idx_speech];
+
+				    							// 스피치 객체 정보를 
+				    							$simple_table_row_arr = array();
+
+					    						// 1. project
+												$simple_table_row_column_obj = new stdClass();
+												$simple_table_row_column_obj->name=$speech_obj->__speech_project_title;
+												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
+												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+
+												// 2. speech title
+												$simple_table_row_column_obj = new stdClass();
+												$simple_table_row_column_obj->name=$speech_obj->__title;
+												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
+												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+
+												// 3. speaker name
+												$simple_table_row_column_obj = new stdClass();
+												$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name;
+												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
+												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+
+												// 4. evaluator name
+												$simple_table_row_column_obj = new stdClass();
+												$simple_table_row_column_obj->name=$speech_obj->__evaluator_member_name;
+												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
+												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+
+												array_push($simple_table_new, $simple_table_row_arr);
+				    						}
+				    						
+				    						// 원본 데이터를 수정본으로 바꿉니다.
+				    						$element_third_depth->$element_third_depth_key = $simple_table_new;
+
+				    						break;
+			    						}
+
+			    						// ROLES
+			    						for ($idx_fifth_depth = 0; $idx_fifth_depth < count($element_fourth_depth_array); $idx_fifth_depth++) {
+
+											$element_fifth_depth_key = $element_fourth_depth_array[$idx_fifth_depth];
+
+											// 타이틀과 내용이 한줄에 표시되는 형태
+											if(	$is_speech_table == false && 
+												$element_fifth_depth_key->is_title == 1 && 
+												$idx_fifth_depth < (count($element_fourth_depth_array) - 1)) {
+
+												$element_fifth_depth_value = $element_fourth_depth_array[$idx_fifth_depth + 1];
+
+												$element_fifth_depth_value = 
+												update_simple_table(
+													$element_fifth_depth_key
+													, $element_fifth_depth_value
+													, $meeting_agenda_obj
+													, $today_news_list
+													, $today_role_list
+													, $today_speech_list
+												);	
+
+												$element_fourth_depth_array[$idx_fifth_depth + 1] = $element_fifth_depth_value;
+											}
+
+			    						}  // 6 depth for end
+			    					} // if end
+			    				} // 5 depth for end
+			    			} // if end
+			    		} // 4 depth for end
+			    	} // 3 depth for end
+			    } // if end
+			} // 2 depth for end
+		} // 1 depth for end
+
 
 
 		// 전달받은 타임라인 데이터를 1 depth의 array로 변환합니다. 
