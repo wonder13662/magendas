@@ -42,6 +42,12 @@ airborne.bootstrap.view.mobile.list = {
 
 			if(is_scrolling){
 				console.log("스크롤 중입니다.");
+
+				if(time_elapsed_obj != undefined) {
+					time_elapsed_obj = _dates.getTimeElapsed(time_elapsed_obj);
+					console.log(">>> time_elapsed_obj :: ",time_elapsed_obj);
+				}
+
 				return;
 			}
 
@@ -118,19 +124,20 @@ airborne.bootstrap.view.mobile.list = {
 			// $(window).scrollTop();
 
 			var prevScrollTop = $(window).scrollTop();
-			var scrallWatcherInterval = setTimeout(function(){
+			var scrollWatcherInterval = setInterval(function(){
 
 				var curScrollTop = $(window).scrollTop();
-				if(curScrollTop != prevScrollTop) {
+
+				if(prevScrollTop != curScrollTop) {
 					// 스크롤중
-					curScrollTop = prevScrollTop;
+					prevScrollTop = curScrollTop;
 				} else {
 					// 스크롤 되지 않음. scroll stop으로 처리.
 					is_scrolling = false;
-					clearTimeout(scrallWatcherInterval);
+					clearTimeout(scrollWatcherInterval);
 				}
 
-			}, 1000);
+			}, 300);
 			
 		});		
 
