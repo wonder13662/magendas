@@ -6,6 +6,10 @@ include_once("../../common.inc");
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
+	// 인스턴스 페이지 사용을 위해 멤버쉽 정보를 받을 수 있도록 변경합니다.
+	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);	
+}
+if($MEETING_MEMBERSHIP_ID == -1) {
 	// move to membership picker page
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MEMBERSHIP_PICKER);
 } else {
@@ -99,7 +103,7 @@ if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__
 }
 // 최신순으로 등록된 미팅을 10개 가져옵니다.(업데이트 반영된 것으로 다시 가져옴)
 $recent_meeting_agenda_list =
-$wdj_mysql_interface->getMeetingAgendaList(
+$wdj_mysql_interface->getMeetingAgendaListUpcoming(
 	// meeting_membership_id
 	$MEETING_MEMBERSHIP_ID
 	// page
@@ -147,6 +151,7 @@ array(
 );
 //
 $meeting_role_list_list=array();
+$speech_list_list=array();
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID, -1);
 for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
 
@@ -169,16 +174,16 @@ for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
 	$meeting_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $__meeting_id, $role_id_arr);
 	array_push($meeting_role_list_list, $meeting_role_list);
 
-	// SPEAKER - 해당 미팅의 SPEAKER 리스트를 가져옵니다.
 
-
-	// EVALUATOR - 해당 미팅의 EVALUATOR 리스트를 가져옵니다.
-
+	$speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($__meeting_id);
+	array_push($speech_list_list, $speech_list);
 
 }
 
 
 $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($MEETING_MEMBERSHIP_ID);
+
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
 
 // @ required
 $wdj_mysql_interface->close();
@@ -217,15 +222,15 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 // php to javascript sample
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
-//var today_role_list = <?php echo json_encode($today_role_list);?>;
+var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+
 var member_list = <?php echo json_encode($member_list);?>;
 var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var recent_meeting_agenda_list = <?php echo json_encode($recent_meeting_agenda_list);?>;
 var meeting_role_list_list = <?php echo json_encode($meeting_role_list_list);?>;
+var speech_list_list = <?php echo json_encode($speech_list_list);?>;
+var membership_obj = <?php echo json_encode($membership_obj);?>;
 
-console.log(">>> meeting_role_list_list :: ",meeting_role_list_list);
-
-//meeting_role_list_list
 
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
@@ -239,25 +244,30 @@ var role_id_word_n_quote_master = <?php echo json_encode($role_id_word_n_quote_m
 
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
-_tm_m_list.addHeaderRow(
-	// login_user_info
-	login_user_info
-	// header_arr
-	,[
-		_link.get_header_link(
-			_link.MOBILE_ROLE_SIGN_UP_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	]
-	// table_jq
-	,table_jq
-);
+
+if(!IS_EXTERNAL_SHARE) {
+
+	_tm_m_list.addHeaderRow(
+		// login_user_info
+		login_user_info
+		// header_arr
+		,[
+			_link.get_header_link(
+				_link.MOBILE_ROLE_SIGN_UP_LIST
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			,_link.get_header_link(
+				_link.MOBILE_TOP
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+		]
+		// table_jq
+		,table_jq
+	);
+
+}
 
 
 
@@ -417,7 +427,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 }
 
 
-for(var idx = 0; idx < meeting_role_list_list.length; idx++) {
+for(var idx = (meeting_role_list_list.length - 1); -1 < idx; idx--) {
 	var cur_meeting_role_list = meeting_role_list_list[idx];
 
 	var cur_meeting_agenda_id = parseInt(cur_meeting_role_list[0].__meeting_agenda_id);
@@ -442,11 +452,31 @@ for(var idx = 0; idx < meeting_role_list_list.length; idx++) {
 	}
 
 	// 1-2. 미팅 날짜 정보를 가져옵니다.
+	var now_date = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD)
+	var days_left = _dates.get_YYYY_MM_DD_diff_days(now_date, cur_meeting_agenda_obj.__startdate);
 	var theme_shorten = _html.getTextHead(cur_meeting_agenda_obj.__theme, 35);
+	var date_desc = "";
+	if(days_left < 1) {
+
+		date_desc = cur_meeting_agenda_obj.__startdate + " ( Today )"
+
+	} else if(days_left == 1) {
+
+		date_desc = cur_meeting_agenda_obj.__startdate + " ( Tomorrow )"
+
+	} else if(days_left == 2) {
+
+		date_desc = cur_meeting_agenda_obj.__startdate + " ( The day after Tomorrow )"
+
+	} else {
+
+		date_desc = cur_meeting_agenda_obj.__startdate + " ( " + days_left + " days left )"
+
+	}
 	var row_meeting_info_jq = 
 	_m_list.addTableRowTitle(
 		// title
-		cur_meeting_agenda_obj.__startdate
+		date_desc
 		// append_target_jq
 		, table_jq
 		// delegate_obj_click_row
@@ -747,34 +777,106 @@ for(var idx = 0; idx < meeting_role_list_list.length; idx++) {
 		role_controller.set_badge_green();
 	}
 
-	// SPEAKER
+	console.log(">>> speech_list_list :: ",speech_list_list);
 
-	// EVALUATOR
+//meeting_role_list_list
+
+	var speech_list = speech_list_list[idx];
+
+
+	// SPEAKER & EVALUATOR
+	var param_obj = null;
+
+	if(IS_EXTERNAL_SHARE) {
+
+		param_obj = 
+		_param
+		.get(_param.IS_EXTERNAL_SHARE, _param.YES)
+		.get(_param.MEETING_ID, cur_meeting_agenda_id)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)		
+
+	} else {
+
+		param_obj = 
+		_param
+		.get(_param.MEETING_ID, cur_meeting_agenda_id)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+
+	}
+
+	// TODO 스피치 추가하도록 연동
+	/*
+	_m_list.addTableRowMovingArrowWidthBadge(
+		// title
+		"Speeches"
+		// title_on_badge
+		, "" + speech_list.length
+		// append_target_jq
+		, table_jq
+		// delegate_obj_row_click
+		, _obj.getDelegate(function(delegate_data){
+
+			_link.go_there(
+				_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
+				,delegate_data.delegate_data
+			);
+
+		}, this)
+		// is_bold
+		, true
+		// delegate_data
+		, param_obj
+	);	
+	*/
+
 
 	// SHARE EXTERNAL
+	if(!IS_EXTERNAL_SHARE) {
 
-	var share_msg = "Role Sign Up on " + cur_meeting_agenda_obj.__startdate;
+		var share_msg = "";
+		if(days_left < 1) {
 
-	var accessor_external_share =
-	_m_list.addTableRowShareExternal(
-		// title
-		"Share"
-		// append_target_jq
-		,table_jq
-		// url_desc
-		,share_msg
-		// url
-		,_link.get_link(
-			_link.MOBILE_ROLE_SIGN_UP_LIST
-			,_param
-			.get(_param.MEETING_ID, cur_meeting_agenda_obj.__meeting_id)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	);	
+			share_msg = 
+			membership_obj.__membership_desc + "\n" + 
+			"Role Sign Up \n" + 
+			"on " + cur_meeting_agenda_obj.__startdate + "\n\n" +
+			"Today is your day!"
+			;
 
+		} else {
 
+			share_msg = 
+			membership_obj.__membership_desc + "\n" + 
+			"Role Sign Up \n" + 
+			"on " + cur_meeting_agenda_obj.__startdate + "\n\n" +
+			days_left + " days left."
+			;
 
+		}
 
+		var accessor_external_share =
+		_m_list.addTableRowShareExternal(
+			// title
+			"Share"
+			// append_target_jq
+			,table_jq
+			// label
+			,share_msg
+			// url_desc
+			,"Magendas"
+			// url
+			,_link.get_link(
+				_link.MOBILE_ROLE_SIGN_UP_LIST
+				,_param
+				.get(_param.IS_EXTERNAL_SHARE, _param.YES)
+				.get(_param.MEETING_ID, cur_meeting_agenda_obj.__meeting_id)
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+			// img_url
+			,service_root_path + _link.IMG_SHARE_KAKAO_TM_LONG_BANNER
+		);	
+
+	}
 
 } // for end
 

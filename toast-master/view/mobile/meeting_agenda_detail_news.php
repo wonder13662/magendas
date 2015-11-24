@@ -324,6 +324,8 @@ if(!IS_EXTERNAL_SHARE) {
 			.get(_param.MEETING_ID, MEETING_ID)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 		)
+		// img_url
+		,service_root_path + _link.IMG_SHARE_KAKAO_TM_LONG_BANNER
 	);
 
 }

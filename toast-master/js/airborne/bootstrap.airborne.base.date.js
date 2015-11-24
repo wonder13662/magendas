@@ -538,6 +538,16 @@ airborne.dates = {
 	,get_YYYY_MM_DD_offset_days:function(time_str_YYYY_MM_DD, days){
 		return this.get_moment_offset_days(time_str_YYYY_MM_DD, days).format("YYYY-MM-DD");
 	}
+	,get_YYYY_MM_DD_diff_days:function(time_str_YYYY_MM_DD_future, time_str_YYYY_MM_DD_now){
+		var moment_future = this.get_moment_offset_days(time_str_YYYY_MM_DD_future, 0);
+		var moment_now = this.get_moment_offset_days(time_str_YYYY_MM_DD_now, 0);
+
+		var duration = moment.duration(moment_now.diff(moment_future));
+		var days = duration.asDays();
+
+		return days; // days left.
+	}
+
 	,get_moment_offset_days:function(time_str_YYYYMMDD, days){
 		return moment(time_str_YYYYMMDD,"YYYYMMDD").add(7, 'days');
 	}

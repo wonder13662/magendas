@@ -71,6 +71,8 @@ var link_manager = {
 	,API_JESSIE:"/api/ajax_post_jessie.php"
 
 	,IMG_TM_MY_BANNER:"/images/MaroonandYellowBanner.jpg"
+	,IMG_SHARE_KAKAO_TM_LONG_BANNER:"/images/Share_kakao_TMBanner_200_200.png"
+	,IMG_SHARE_KAKAO_TM_RIBBONS:"/images/ribbons.jpg"
 
 	,go_there:function(type, param_obj){
 		if(param_obj == null) {

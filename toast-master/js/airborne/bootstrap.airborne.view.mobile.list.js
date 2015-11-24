@@ -2332,7 +2332,7 @@ airborne.bootstrap.view.mobile.list = {
 		@ Public
 		@ Desc : 모바일에서 kakaotalk, facebook, line등의 SNS 앱으로 아젠다 링크를 전달해주는 share row를 만듭니다.
 	*/
-	,addTableRowShareExternal:function(title, append_target_jq, label, url_desc, url, text_color, bg_color){
+	,addTableRowShareExternal:function(title, append_target_jq, label, url_desc, url, img_url, text_color, bg_color){
 
 		if(_v.isNotValidStr(title)){
 			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowShareExternal / _v.isNotValidStr(title)");
@@ -2373,7 +2373,7 @@ airborne.bootstrap.view.mobile.list = {
 		// <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 
 		var row_id = airborne.html.getIdRandomTail("TableRowShareExternal_" + title);		
-
+		var kakao_btn_id = "kakao-link-btn" + row_id;
 		var row_tag = ""
 		+ "<tr class=\"active\" id=\"<_v>\" status=\"close\" style=\"border-bottom: 1px solid #ddd;\">".replace(/\<_v\>/gi, row_id)
 			+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;\">"
@@ -2382,7 +2382,9 @@ airborne.bootstrap.view.mobile.list = {
 				+ "<h5 style=\"margin:0px;\">"
 				+ "<span style=\"float:left;padding-left:0px;padding-top:14px;font-size:14px;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
 				+ "<span id=\"container_btn\" style=\"float:right;\">"
-	    			+ "<a id=\"kakao-link-btn\" href=\"javascript:;\" style=\"padding-left: 20px;\">"
+	    			+ "<a id=\"<ID>\" href=\"javascript:;\" style=\"padding-left: 20px;\">"
+	    				.replace(/\<ID\>/gi, kakao_btn_id)
+	    				.replace(/\<COLOR\>/gi, text_color)
 						+ "<img src=\"http://dn.api1.kage.kakao.co.kr/14/dn/btqa9B90G1b/GESkkYjKCwJdYOkLvIBKZ0/o.jpg\" style=\"width:40px;\"/>"
 	    			+ "</a>"
     			+ "</span>"
@@ -2392,10 +2394,8 @@ airborne.bootstrap.view.mobile.list = {
 		;
 
 		append_target_jq.append(row_tag);
-
 		// activate kakaotalk 
 	    // 사용할 앱의 JavaScript 키를 설정해 주세요.
-
 		try {
 			if(Kakao.Link == undefined) {
 				Kakao.init('f79f9e707a406ca442077516db048a1b');	
@@ -2413,10 +2413,10 @@ airborne.bootstrap.view.mobile.list = {
 
 	    // 카카오톡 링크 버튼을 생성합니다. 처음 한번만 호출하면 됩니다.
 	    Kakao.Link.createTalkLinkButton({
-			container: '#kakao-link-btn',
+			container: '#' + kakao_btn_id,
 			label: label,
 			image: {
-				src: root_domain + '/service/toast-master/images/Share_kakao_TMBanner_200_200.png',
+				src: root_domain + img_url,
 				width: '200',
 				height: '200'
 			},
@@ -2426,7 +2426,30 @@ airborne.bootstrap.view.mobile.list = {
 			}
 	    });
 
+		// 카카오톡으로 메시지 보내기 / 정말 메시지만 전송됨.
+		/*
+	    function sendLink() {
+
+	    	console.log(">>> 001");
+
+			Kakao.Link.sendTalkLink({
+				label: '안녕하세요, 꽃다운 ' + Math.floor(Math.random()*(70)+ 15) + '살 개발자입니다.'
+			});
+	    }	
+	    */	
+
+
 		var share_row_jq = append_target_jq.find("tr#" + row_id).find("td");
+
+		var link_jq = share_row_jq.find("a#kakao-link-btn").find("img");
+
+		link_jq.click(function(){
+			console.log(">>> 001");
+			sendLink();
+		});
+
+		console.log(">>> link_jq :: ",link_jq);
+
 		return share_row_jq;
 	}
 
