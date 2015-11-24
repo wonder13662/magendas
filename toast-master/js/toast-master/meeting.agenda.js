@@ -546,7 +546,7 @@ wonglish.meeting_agenda_manager = {
 		var today_role_list = meeting_agenda_data_set.today_role_list;
 		var today_role_list_sorted = today_role_list;
 
-		// console.log(">>> today_role_list :: ",today_role_list);
+		console.log(">>> today_role_list :: ",today_role_list);
 
 		// convert html safe text
 		for (var idx = 0; idx < today_role_list_sorted.length; idx++) {
@@ -569,7 +569,7 @@ wonglish.meeting_agenda_manager = {
 			}
 
 			// 빈값으로 지정할 수 있는 필드를 추가한다.
-			search_option_arr_members.push(_obj.get_select_option("Not Assigned","-1"));
+			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
 		}
 
 		// raw data list
@@ -602,9 +602,11 @@ wonglish.meeting_agenda_manager = {
 			var __left_role_name = left_role_obj.__role_name;
 			var __left_role_id = left_role_obj.__role_id;
 			if( parseInt(__left_role_member_id) == -1 ) {
-				__left_role_member_name = "Not Assigned";
+				__left_role_member_name = _param.NOT_ASSIGNED;
+			} else if(left_role_obj.__member_name === _param.GUEST) {
+				__left_role_member_name = left_role_obj.__member_name;
 			} else {
-				__left_role_member_name = left_role_cnt + " " + left_role_obj.__member_first_name + " " + left_role_obj.__member_last_name;	
+				__left_role_member_name = left_role_cnt + " " + left_role_obj.__member_name;	
 			}
 
 			var __right_role_member_name = "";
@@ -612,9 +614,11 @@ wonglish.meeting_agenda_manager = {
 			var __right_role_name = right_role_obj.__role_name;
 			var __right_role_id = right_role_obj.__role_id;
 			if( parseInt(__right_role_member_id) == -1 ) {
-				__right_role_member_name = "Not Assigned";
+				__right_role_member_name = _param.NOT_ASSIGNED;
+			} else if(right_role_obj.__member_name === _param.GUEST) {
+				__right_role_member_name = right_role_obj.__member_name;	
 			} else {
-				__right_role_member_name = right_role_cnt + " " + right_role_obj.__member_first_name + " " + right_role_obj.__member_last_name;	
+				__right_role_member_name = right_role_cnt + " " + right_role_obj.__member_name;	
 			}
 
 			// raw data obj
