@@ -18,6 +18,8 @@ $today_news_list = $wdj_mysql_interface->getNews($meeting_id);
 
 $schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
 
+$today_speech_speaker_v2_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($meeting_id);
+
 $speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
 $today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(7,2,9,5,10,6,11,4));
@@ -96,6 +98,7 @@ $wdj_second_column_width = 69;
 dMP   dMP dMP dMP dMPdMMMMMP         VMMMP"  VMMMP" dMP dMMMMP" dMMMMMP         dMMMMMP dMP dMP dMP dMMMMMP     
 
 */
+
 // TODO 
 // 1. 엘리먼트 정보를 만듭니다. 이 때에 element_set 과 element를 만들고 돌려받습니다.
 // 2. 엘리먼트 셋을 이용해서 화면에 그립니다.
@@ -110,6 +113,9 @@ $wdj_pdf->draw_toast_master_time_guide_line_simple_table(
 	// element_set_width
 	, $wdj_second_column_width
 );
+
+
+
 
 
 /*
@@ -174,6 +180,14 @@ $wdj_pdf->draw_card_board_timeline_V2(
 	, 133
 	// data
 	, $schedule_timeline_list_V2
+	// meeting_agenda_obj
+	, $meeting_agenda_obj
+	// today_news_list
+	, $today_news_list
+	// today_role_list
+	, $today_role_list
+	// today_speech_speaker
+	, $today_speech_speaker_v2_list
 );
 
 
