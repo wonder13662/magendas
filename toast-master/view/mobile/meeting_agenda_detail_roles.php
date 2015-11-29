@@ -2,9 +2,11 @@
 // common setting
 include_once("../../common.inc");
 
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+
 // 클럽 멤버가 아닌 경우, 해당 페이지로는 접근할 수 없습니다.
 // 로그인 유저가 해당 클럽의 멤버가 아니라면 TOP페이지로 리다이렉트.
-if($login_user_info->__is_club_member == false) {
+if($IS_EXTERNAL_SHARE == false && $login_user_info->__is_club_member == false) {
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MOBILE_TOP);
 }
 
@@ -53,8 +55,6 @@ array(
 $today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID, $role_id_arr);
 
 $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($MEETING_MEMBERSHIP_ID);
-
-$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
 
 // @ required
 $wdj_mysql_interface->close();

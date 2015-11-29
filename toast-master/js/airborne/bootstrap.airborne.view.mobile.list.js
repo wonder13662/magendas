@@ -1333,6 +1333,94 @@ airborne.bootstrap.view.mobile.list = {
 	}
 	/*
 		@ Public
+		@ Desc : 시간을 잴수 있는 타이머 열을 그립니다.
+	*/
+	,addTableRowTimerBadge:function(time_arr_on_badge, textInBadge, append_target_jq, delegate_obj_click_row, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
+
+		var _obj = airborne.bootstrap.obj;
+
+		if(_v.isNotValidArray(time_arr_on_badge)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidArray(time_arr_on_badge)");
+			return;
+		}
+		if(_v.isNotValidStr(textInBadge)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidStr(textInBadge)");
+			return;
+		}
+		if(append_target_jq==null){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / append_target_jq==null");
+			return;
+		}
+		if(text_color == undefined) {
+			text_color = _color.COLOR_MEDIUM_GRAY;
+		}
+		if(bg_color == undefined) {
+			bg_color = _color.COLOR_TINT_GRAY;
+		}
+		if(bg_color_vmouse_down == undefined) {
+			bg_color_vmouse_down = text_color;
+		}
+		if(text_color_vmouse_down == undefined) {
+			text_color_vmouse_down = bg_color;
+		}		
+
+		var row_id = airborne.html.getIdRandomTail("addTableRowTitleNBadge" + title);
+		var row_tag = "";
+		row_tag += ""
+		+ "<tr id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
+			+ "<td class=\"text-left\" style=\"color:<COLOR>;background-color:<BG_COLOR>;border-bottom:1px solid #ddd;\">"
+				.replace(/\<COLOR\>/gi, text_color)
+				.replace(/\<BG_COLOR\>/gi, bg_color)
+				+ "<h5>"
+					+ "<span class=\"no_selection\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
+					+ "<span class=\"badge no_selection\" style=\"float:right;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, textInBadge)
+				+ "</h5>"
+			+ "</td>"
+		+ "</tr>"
+		;
+
+		append_target_jq.append(row_tag);
+
+		// Set Event
+		var target_jq = append_target_jq.find("tr#" + row_id).find("td");
+
+		var badge_jq = target_jq.find("span.badge");
+
+		var target_controller = {
+			target_jq:target_jq
+			, badge_jq:badge_jq
+			, set_badge_green:function() {
+				this.badge_jq.css("background-color",_color.COLOR_EMERALD_GREEN);
+			}
+			, set_badge_gray:function() {
+				this.badge_jq.css("background-color",_color.COLOR_MEDIUM_GRAY);
+			}
+		};
+		if(delegate_data != undefined) {
+			delegate_data.target_controller = target_controller;	
+		}
+
+		// 제목 열이 클릭 되었을 때, 배경 색깔 바뀌는 등의 이벤트를 제어합니다.
+		if(_obj.isValidDelegate(delegate_obj_click_row)){
+
+			this.setTableRowEvent(
+				// row_jq
+				target_jq
+				// delegate_obj
+				, delegate_obj_click_row
+				// bg_color_vmouse_down
+				, bg_color_vmouse_down
+				// delegate_data 
+				, delegate_data
+				// text_color_vmouse_down
+				, text_color_vmouse_down
+			);
+		} // if end
+
+		return target_controller;
+	}	
+	/*
+		@ Public
 		@ Desc : 테이블 열을 여러개를 그립니다. 이 테이블 열은 숨기거나 보일(접거나 펴거나) 수 있습니다.
 	*/
 	,addTableRowsSelectFolder:function(key_value_obj_arr, append_target_jq, delegate_obj_click_row, delegate_data, text_color, bg_color){

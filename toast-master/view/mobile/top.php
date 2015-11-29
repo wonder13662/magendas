@@ -137,6 +137,49 @@ _m_list.addTableRowMovingArrow(
 
 
 
+// 1. TIMER
+if(login_user_info.__is_club_member === true) {
+	_m_list.addTableRowMovingArrow(
+		// title
+		"Timer"
+		// append_target_jq
+		, table_jq
+		// delegate_obj_row_click
+		, _obj.getDelegate(function(delegate_data){
+
+			if(	delegate_data == undefined ||
+				delegate_data.delegate_data == undefined ||
+				_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+				return;
+			}
+
+			_link.go_there(
+				_link.MOBILE_MEETING_TIMER
+				, _param
+				.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+			);
+
+		}, this)
+		// is_bold
+		, true
+		// param_obj
+		, null
+		// text_color
+		, _tm_m_list.COLOR_NAVY
+		// bg_color
+		, _tm_m_list.COLOR_TINT_GRAY
+	);
+}
+
+
+
+
+
+
+
+
+
 // 1. Role Sign Up Sheet
 if(login_user_info.__is_club_member === true) {
 	_m_list.addTableRowMovingArrow(

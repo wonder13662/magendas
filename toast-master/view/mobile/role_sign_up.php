@@ -28,6 +28,7 @@ $wdj_mysql_interface->getMeetingAgendaList(
 	// size
 	, 10
 );
+
 // 롤 사인업을 진행하기 위해서 지금으로부터 8주 뒤의 미팅 정보까지 미리 만들어 둡니다.
 $recent_meeting_agenda_obj = null;
 if(!empty($recent_meeting_agenda_list)) {
