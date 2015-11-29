@@ -11,9 +11,6 @@ if($meeting_membership_id == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($meeting_membership_id);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 
@@ -78,6 +75,8 @@ var log_in_row_jq =
 _tm_m_list.addHeaderRow(
 	// login_user_info
 	login_user_info
+	// membership_obj
+	, membership_obj
 	// header_arr 
 	,[
 		_link.get_header_link(

@@ -182,7 +182,7 @@ class MYSQLInterface{
 	/*
 		@ Desc : 
 	*/
-	public function getMeetingAgendaListUpcoming($meeting_membership_id=-1,$page=1,$size=50){
+	public function getMeetingAgendaListUpcoming($meeting_membership_id=-1,$page=1,$size=50,$is_sooner_first=false){
 
 		$function_name = "getMeetingAgendaList";
 		if($this->isNotUnsignedNumberID($meeting_membership_id)){
@@ -212,8 +212,17 @@ class MYSQLInterface{
 		. " WHERE MA.membership_id=" . $meeting_membership_id
 		. " AND MA.`status`=\"A\""
 		. " AND NOW() < MA.startdttm"
-		. " ORDER BY MA.startdttm DESC LIMIT " . $offset . "," . $rownum;
 		;
+
+		if($is_sooner_first == true) {
+			$query .= ""
+			. " ORDER BY MA.startdttm ASC LIMIT " . $offset . "," . $rownum;
+			;
+		} else {
+			$query .= ""
+			. " ORDER BY MA.startdttm DESC LIMIT " . $offset . "," . $rownum;
+			;
+		}
 
 		$json_res_obj = $this->getSelectResult($query);
 
