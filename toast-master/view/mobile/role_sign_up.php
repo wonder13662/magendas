@@ -16,9 +16,6 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 // 최신순으로 등록된 미팅을 10개 가져옵니다.
@@ -250,6 +247,8 @@ if(!IS_EXTERNAL_SHARE) {
 	_tm_m_list.addHeaderRow(
 		// login_user_info
 		login_user_info
+		// membership_obj
+		, membership_obj
 		// header_arr
 		,[
 			_link.get_header_link(

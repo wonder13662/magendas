@@ -5,7 +5,8 @@ include_once("../../common.inc");
 // TODO 멤버쉽 정보를 가지고 있는 쿠키를 따로 받아옵니다.
 
 // Membership Check
-$meeting_membership_id = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
+//$meeting_membership_id = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
+$meeting_membership_id = ToastMasterLogInManager::getMembershipCookie();
 if($meeting_membership_id == -1) {
 	// move to membership picker page
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MEMBERSHIP_PICKER);
@@ -13,9 +14,6 @@ if($meeting_membership_id == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($meeting_membership_id);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 
@@ -59,16 +57,10 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 
 
 // COMMON PROPS
-var login_user_info = <?php echo json_encode($login_user_info);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 
-//membership_obj
-
 console.log(">>> login_user_info :: ",login_user_info);
-console.log(">>> membership_obj :: ",membership_obj);
-
-
 
 // view drawing
 var table_jq = $("table tbody");
@@ -80,6 +72,8 @@ var log_in_row_jq =
 _tm_m_list.addHeaderRow(
 	// login_user_info
 	login_user_info
+	// membership_obj
+	, membership_obj
 	// header_arr
 	, [_link.get_header_link(_link.MOBILE_TOP)]
 	// table_jq
@@ -144,37 +138,39 @@ _m_list.addTableRowMovingArrow(
 
 
 // 1. Role Sign Up Sheet
-_m_list.addTableRowMovingArrow(
-	// title
-	"Role Sign Up"
-	// append_target_jq
-	, table_jq
-	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+if(login_user_info.__is_club_member === true) {
+	_m_list.addTableRowMovingArrow(
+		// title
+		"Role Sign Up"
+		// append_target_jq
+		, table_jq
+		// delegate_obj_row_click
+		, _obj.getDelegate(function(delegate_data){
 
-		if(	delegate_data == undefined ||
-			delegate_data.delegate_data == undefined ||
-			_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+			if(	delegate_data == undefined ||
+				delegate_data.delegate_data == undefined ||
+				_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
-			return;
-		}
+				return;
+			}
 
-		_link.go_there(
-			_link.MOBILE_ROLE_SIGN_UP_LIST
-			, _param
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-		);
+			_link.go_there(
+				_link.MOBILE_ROLE_SIGN_UP_LIST
+				, _param
+				.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+			);
 
-	}, this)
-	// is_bold
-	, true
-	// param_obj
-	, null
-	// text_color
-	, _tm_m_list.COLOR_NAVY
-	// bg_color
-	, _tm_m_list.COLOR_TINT_GRAY
-);
+		}, this)
+		// is_bold
+		, true
+		// param_obj
+		, null
+		// text_color
+		, _tm_m_list.COLOR_NAVY
+		// bg_color
+		, _tm_m_list.COLOR_TINT_GRAY
+	);
+}
 
 
 
@@ -182,47 +178,49 @@ _m_list.addTableRowMovingArrow(
 
 
 // 3. Members
-_m_list.addTableRowMovingArrow(
-	// title
-	"Members"
-	// append_target_jq
-	, table_jq
-	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+if(login_user_info.__is_club_member === true) {
+	_m_list.addTableRowMovingArrow(
+		// title
+		"Members"
+		// append_target_jq
+		, table_jq
+		// delegate_obj_row_click
+		, _obj.getDelegate(function(delegate_data){
 
-		if(	delegate_data == undefined ||
-			delegate_data.delegate_data == undefined ||
-			_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+			if(	delegate_data == undefined ||
+				delegate_data.delegate_data == undefined ||
+				_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
-			return;
-		}
+				return;
+			}
 
-		_link.go_there(
-			_link.MOBILE_MEMBER_MANAGE
-			, _param
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-		);
+			_link.go_there(
+				_link.MOBILE_MEMBER_MANAGE
+				, _param
+				.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+			);
 
-	}, this)
-	// is_bold
-	, true
-	// param_obj
-	, null
-	// text_color
-	, _tm_m_list.COLOR_NAVY
-	// bg_color
-	, _tm_m_list.COLOR_TINT_GRAY	
-);
-
-console.log(">>> service_root_path :: ",service_root_path);
-
-
+		}, this)
+		// is_bold
+		, true
+		// param_obj
+		, null
+		// text_color
+		, _tm_m_list.COLOR_NAVY
+		// bg_color
+		, _tm_m_list.COLOR_TINT_GRAY	
+	);
+}
 
 
 
 
 
+
+
+// TODO
 // 4. HELP
+/*
 _m_list.addTableRowMovingArrow(
 	// title
 	"Help"
@@ -254,6 +252,7 @@ _m_list.addTableRowMovingArrow(
 	// bg_color
 	, _tm_m_list.COLOR_TINT_GRAY	
 );
+*/
 
 
 

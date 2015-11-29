@@ -253,6 +253,12 @@ class ToastMasterParamManager{
 
 	public $NOT_ASSIGNED="NOT ASSIGNED";
 
+	public $REDIRECT_URL="REDIRECT_URL";
+
+
+	// COOKIE
+	public $COOKIE_TM_LOGIN_MEMBER_HASHKEY="COOKIE_TM_LOGIN_MEMBER_HASHKEY";
+
 }
 
 ?>

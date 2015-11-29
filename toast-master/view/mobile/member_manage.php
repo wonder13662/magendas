@@ -3,6 +3,12 @@
 // common setting
 include_once("../../common.inc");
 
+// 이 페이지는 로그인여부를 먼저 확인합니다. 클럽의 멤버만이 로그인 할 수 있습니다.
+// 로그인 되어 있지 않으면 로그인 페이지로!
+if($login_user_info->__is_login==$params->NO){
+	ToastMasterLinkManager::go(ToastMasterLinkManager::$LOG_IN);
+}
+
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
@@ -12,15 +18,17 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
-// 로그인 되어 있지 않으면 로그인 페이지로!
-if($login_user_info->__is_login==$params->NO){
-	ToastMasterLinkManager::go(ToastMasterLinkManager::$LOG_IN);
+// 로그인한 유저가 해당 클럽에 가입되어 있는지 확인합니다.
+// 가입되어 있지 않다면 TOP 페이지로 리다이렉트 합니다.
+if(is_null($login_user_info) || is_null($login_user_info->__is_club_member) || $login_user_info->__is_club_member == false){
+	ToastMasterLinkManager::go(
+		// link
+		ToastMasterLinkManager::$MOBILE_TOP
+	);
 }
+
 
 // 6개월간 아무런 활동이 없었던 멤버들의 상태를 N으로 바꿉니다.
 $sleeping_member_list = $wdj_mysql_interface->getSleepingMember($expire_date, $MEETING_MEMBERSHIP_ID);
@@ -31,9 +39,11 @@ for($idx = 0; $idx < sizeof($sleeping_member_list); $idx++){
 
 // SELECT INFOS
 $all_member_list = 
-$wdj_mysql_interface->getMemberListByMembershipId(
-	// $membership_id=1
+$wdj_mysql_interface->getMemberListByMembershipIdNMemberHashkey(
+	// $membership_id=-1
 	$MEETING_MEMBERSHIP_ID
+	// $member_hashkey=""
+	, $login_user_info->__member_hashkey
 );
 
 // TODO userid 생성. 번호로 정의되는 member_id는 외부 공격에 위험.
@@ -76,12 +86,26 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 var all_member_list = <?php echo json_encode($all_member_list);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 
+var membership_obj = <?php echo json_encode($membership_obj);?>;
+var login_user_info = <?php echo json_encode($login_user_info);?>;
+
+console.log(">>> membership_obj :: ",membership_obj);
+console.log(">>> login_user_info :: ",login_user_info);
+
+// print_r($membership_obj);
+// echo "<br/>";
+// print_r($login_user_info);
+// echo "<br/>";
+
+
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
 
 _tm_m_list.addHeaderRow(
 	// login_user_info
 	login_user_info
+	// membership_obj
+	, membership_obj
 	// header_arr
 	,[
 		_link.get_header_link(
@@ -131,7 +155,19 @@ for (var idx = 0; idx < all_member_list.length; idx++) {
 	var element = all_member_list[idx];
 	var tab_tag = "&nbsp;&nbsp;&nbsp;";
 	var meeting_agenda_info = element.__round + "th" + tab_tag + element.__theme;
-	var member_id = parseInt(element.__member_id);
+	var member_hash_key = element.__member_hash_key;
+
+	var text_color = null;
+	if(idx == 0) {
+		// LOG IN USER
+		text_color = _color.COLOR_NAVY;
+	} else if(element.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE) {
+		// ACTIVE USER
+		text_color = _color.COLOR_DARK_GRAY;
+	} else if(element.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_SLEEPING) {
+		// SLEEP USER
+		text_color = _color.COLOR_MEDIUM_GRAY;
+	}
 
 	var row_achievements_jq = 
 	_m_list.addTableRowMovingArrow(
@@ -154,12 +190,13 @@ for (var idx = 0; idx < all_member_list.length; idx++) {
 
 			if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
-				var MEMBER_ID = delegate_data.delegate_data.MEMBER_ID;
-				if(MEMBER_ID > 0) {
+				var MEMBER_HASH_KEY = delegate_data.delegate_data.MEMBER_HASH_KEY;
+
+				if(_v.is_valid_str(MEMBER_HASH_KEY)) {
 					_link.go_there(
 						_link.MOBILE_MEMBER_MANAGE_DETAIL
 						,_param
-						.get(_param.MEMBER_ID, MEMBER_ID)
+						.get(_param.MEMBER_HASH_KEY, MEMBER_HASH_KEY)
 						.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 					);
 				}
@@ -170,9 +207,9 @@ for (var idx = 0; idx < all_member_list.length; idx++) {
 		// is_bold
 		, false
 		// param_obj
-		, _param.get(_param.MEMBER_ID, member_id)
+		, _param.get(_param.MEMBER_HASH_KEY, member_hash_key)
 		// text_color
-		, null
+		, text_color
 		// bg_color
 		, null
 	);

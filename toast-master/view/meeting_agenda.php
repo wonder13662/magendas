@@ -135,7 +135,7 @@
 
 	if(	(!empty($login_user_info)) && 
 		($login_user_info->__is_login==$params->YES) && 
-		($login_user_info->__member_id > 0)	){
+		(!empty($login_user_info->__member_hashkey))	){
 
 		// 로그인 되었을 경우.
 		$login_user_msg = "Welcome! " . $login_user_info->__member_first_name . " " . $login_user_info->__member_last_name;
@@ -296,10 +296,12 @@ console.log(">>> executive_member_list : ",executive_member_list);
 var login_user_info = <?php echo json_encode($login_user_info);?>;
 var is_log_in_user = false;
 var cookie_key_tm_login_user = "tm_login_user";
-var cookie_login_user = _server.getCookie(cookie_key_tm_login_user);
+var cookie_login_user = _server.getCookie(_param.COOKIE_TM_LOGIN_MEMBER_HASHKEY);
 if(_v.is_valid_str(cookie_login_user)) {
 	is_log_in_user = true;
 }
+
+console.log(">>> login_user_info : ",login_user_info);
 
 var meeting_agenda_data_obj = 
 {

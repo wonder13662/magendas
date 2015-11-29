@@ -3,7 +3,11 @@
 // common setting
 include_once("../common.inc");
 
-$all_membership_list = $wdj_mysql_interface->getAllMembership();
+if(!empty($login_user_info->__member_hashkey)) {
+	$all_membership_list = $wdj_mysql_interface->getAllMembershipByMemberHashKey($login_user_info->__member_hashkey);	
+} else {
+	$all_membership_list = $wdj_mysql_interface->getAllMembership();	
+}
 
 $cookie_meeting_membership_id = ToastMasterLogInManager::getMembershipCookie();
 
@@ -59,9 +63,18 @@ var list_membership_jq = $("div#list_membership");
 
 console.log(">>> login_user_info :: ",login_user_info);
 console.log(">>> cookie_meeting_membership_id :: ",cookie_meeting_membership_id);
+console.log(">>> all_membership_list :: ",all_membership_list);
 
 // 모든 클럽을 접근, 조회할 수 있다.
 var __membership_arr = all_membership_list;
+
+// 자신이 로그인한 클럽 정보를 먼저 노출한다.
+var __user_membership_arr = login_user_info.__membership_arr;
+if(_v.is_not_valid_array(__user_membership_arr)) {
+	__user_membership_arr = [];
+}
+console.log(">>> __user_membership_arr :: ",__user_membership_arr);
+
 
 if(_v.is_valid_array(__membership_arr)) {
 	for(var idx = 0; idx < __membership_arr.length; idx++) {
@@ -72,19 +85,25 @@ if(_v.is_valid_array(__membership_arr)) {
 
 		if(_v.is_valid_str(membership_obj.__member_membership_desc)) {
 
-			tag +=
-			"<a href=\"#\" class=\"list-group-item\" club_id=\"<CLUB_ID>\"><CLUB_NAME></a>"
-			.replace(/\<CLUB_NAME\>/gi, membership_obj.__member_membership_desc)
-			.replace(/\<CLUB_ID\>/gi, membership_obj.__member_membership)
-			;
+			if(0 < parseInt(membership_obj.__is_user_membership)) {
 
-		} else if(_v.is_valid_str(membership_obj.__membership_desc)) {
+				// 내가 가입된 클럽
+				tag +=
+				"<a href=\"#\" class=\"list-group-item\" club_id=\"<CLUB_ID>\"><CLUB_NAME></a>"
+				.replace(/\<CLUB_NAME\>/gi, membership_obj.__member_membership_desc)
+				.replace(/\<CLUB_ID\>/gi, membership_obj.__member_membership)
+				;
 
-			tag +=
-			"<a href=\"#\" class=\"list-group-item\" club_id=\"<CLUB_ID>\"><CLUB_NAME></a>"
-			.replace(/\<CLUB_NAME\>/gi, membership_obj.__membership_desc)
-			.replace(/\<CLUB_ID\>/gi, membership_obj.__membership_id)
-			;
+			} else {
+
+				// 내가 가입안한 클럽
+				tag +=
+				"<a href=\"#\" class=\"list-group-item\" club_id=\"<CLUB_ID>\" style=\"color:#CCC\"><CLUB_NAME></a>"
+				.replace(/\<CLUB_NAME\>/gi, membership_obj.__member_membership_desc)
+				.replace(/\<CLUB_ID\>/gi, membership_obj.__member_membership)
+				;
+
+			}
 
 		}
 
@@ -101,12 +120,12 @@ if(_v.is_valid_array(__membership_arr)) {
 			// 선택한 멤버쉽을 쿠키에 등록합니다.
 			_server.setCookie(
 				// cname
-				_param.MEETING_MEMBERSHIP_ID
+				_param.COOKIE_TM_MEMBERSHIP_ID
 				// cvalue
 				, __member_membership
 			);
 
-			var test_val = _server.getCookieNumber(_param.MEETING_MEMBERSHIP_ID);
+			var test_val = _server.getCookieNumber(_param.COOKIE_TM_MEMBERSHIP_ID);
 
 			if(__member_membership === test_val) {
 

@@ -62,7 +62,7 @@ airborne.bootstrap.list_search_tab_manager = {
                 + "<div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\" style=\"padding-left:0px;\">";
 
                 search_tab_bar_tag +=
-                "<form class=\"navbar-form navbar-left\" role=\"search\" style=\"padding-left:0px;\">"
+                "<form class=\"navbar-form navbar-left\" role=\"search\" style=\"padding:0px;\">"
                 + "<div class=\"form-group\">"
 
                 + _o.getTagSelect(this.id, this.select_options_arr)

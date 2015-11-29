@@ -11,6 +11,8 @@ if($meeting_membership_id == -1) {
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MEMBERSHIP_PICKER);
 }
 
+$REDIRECT_URL = $params->getParamString($params->REDIRECT_URL, "");	
+
 // @ required
 $wdj_mysql_interface->close();
 
@@ -60,9 +62,10 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 
 <script>
 
-var redirect_url = <?php echo json_encode($redirect_url);?>;
+var REDIRECT_URL = <?php echo json_encode($REDIRECT_URL);?>;
 var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 
+console.log(">>> REDIRECT_URL :: ",REDIRECT_URL);
 console.log(">>> meeting_membership_id :: ",meeting_membership_id);
 
 var delegate_on_log_in = 
@@ -71,7 +74,6 @@ _obj.get_delegate(
 	function(data){
 
 		console.log(">>> log in / success / data : ",data);
-		// console.log(">>> log in / success / redirect_url : ",redirect_url);
 
 		if(data == null || data.member_info == null) {
 
@@ -87,30 +89,63 @@ _obj.get_delegate(
 
 	    	// 1. 로그인 성공.
 	    	// 1-1. 로그인에 성공한 멤버 아이디를 쿠키에 등록합니다.
-	    	_server.setCookie("tm_login_user",data.member_info.__member_id, 1);
+	    	_server.setCookie(_param.COOKIE_TM_LOGIN_MEMBER_HASHKEY,data.member_info.__member_hash_key, 1);
 	    	
-	    	var membership_arr_json_str = data.query_output_arr[4];
-	    	var membership_arr = $.parseJSON(membership_arr_json_str);
+	    	var member_info = data.member_info;
+	    	var member_membership_arr = data.member_membership_arr;
 
-	    	if(membership_arr == undefined || membership_arr.length < 1) {
+	    	if(member_membership_arr == undefined || member_membership_arr.length < 1) {
 
 	    		alert("Membership data is not correct\n\n[Error-511]");
 
-	    	} else if (1 < membership_arr.length) {
+	    		// wonder.jung
 
-	    		// 1-2. 해당 유저의 가입 클럽이 2개 이상일 경우, 클럽 선택 페이지로 이동합니다.
+	    	} else if (meeting_membership_id === -1 && 1 < member_membership_arr.length) {
+
+	    		// 1-2. 
+	    		// 클럽 정보가 없고
+	    		// 해당 유저의 가입 클럽이 2개 이상일 경우, 클럽 선택 페이지로 이동합니다.
 				_link.go_there(_link.MEMBERSHIP_PICKER);
 
-			} else if (1 == membership_arr.length) {
+			} else if (meeting_membership_id === -1 && 1 == member_membership_arr.length) {
 
-				// 1-3. 해당 유저의 가입 클럽이 1개일 경우는 해당 클럽의 메인 페이지로 리다이렉트합니다.
-				var cur_membership = membership_arr[0];
+				// 1-3. 
+				// 이전에 선택한 클럽이 없고
+				// 해당 유저의 가입 클럽이 1개일 경우는 해당 클럽의 메인 페이지로 리다이렉트합니다.(클럽이 자동으로 지정.)
+				var cur_membership = member_membership_arr[0];
 				var __member_membership = parseInt(cur_membership.__member_membership);
 
-				_link.go_there(
-					_link.MEETING_AGENDA
-					, _param.get(_param.MEETING_MEMBERSHIP_ID,__member_membership)
-				);
+				// 클럽의 쿠키값을 업데이트.
+				_server.setCookie(_param.COOKIE_TM_MEMBERSHIP_ID,__member_membership, 1);
+
+				if(_v.is_valid_str(REDIRECT_URL)) {
+					window.location.href = REDIRECT_URL;
+				} else {
+					_link.go_there(_link.MEETING_AGENDA);
+				}
+
+			} else if (0 < meeting_membership_id && 1 == member_membership_arr.length) {
+
+				// 이전에 선택한 클럽이 있고
+				// 해당 유저의 가입 클럽이 1개일 경우는 해당 클럽의 메인 페이지로 리다이렉트합니다.(쿠키값으로 지정된 클럽을 사용.)
+
+				if(_v.is_valid_str(REDIRECT_URL)) {
+					window.location.href = REDIRECT_URL;
+				} else {
+					_link.go_there(_link.MEETING_AGENDA);
+				}
+
+	    	} else if(0 < meeting_membership_id && 1 < member_membership_arr.length) {
+
+	    		// 1-4-1. 이미 사용자가 가입한 클럽을 선택 뒤, 로그인한 경우
+	    		// 1-4-2. 이미 사용자가 가입하지 않은 클럽을 선택한 상태에서 사용자가 로그인한 경우
+	    		// 두 경우 모두, 각 페이지단에서 제어 필요.
+
+				if(_v.is_valid_str(REDIRECT_URL)) {
+					window.location.href = REDIRECT_URL;
+				} else {
+					_link.go_there(_link.MEETING_AGENDA);
+				}
 
 	    	}
 
@@ -142,6 +177,8 @@ $("button#log_in_btn").on("click", function(e){
 	var regex_pattern_email_address = /[0-9a-zA-Z][_0-9a-zA-Z-]*@[_0-9a-zA-Z-]+(\.[_0-9a-zA-Z-]+){1,2}$/;
 	var regex_pattern_email_address_match = email_address.match(regex_pattern_email_address);
 
+	console.log(">>> regex_pattern_email_address_match :: ",regex_pattern_email_address_match);
+
 	// does it works?
 	if (_v.isValidArray(regex_pattern_email_address_match)) {
 
@@ -162,6 +199,8 @@ $("button#log_in_btn").on("click", function(e){
 			,_obj.get_delegate(
 				// delegate_func
 				function(data){
+
+					console.log(">>> data :: ",data);
 
 					delegate_on_log_in._func.apply(delegate_on_log_in._scope,[data]);
 
@@ -212,7 +251,6 @@ $("button#log_in_btn").on("click", function(e){
 	;
 
 	//
-
 	console.log(">>> log in / request_params : ",request_params);
 
 	// log in 처리는 ajax로!

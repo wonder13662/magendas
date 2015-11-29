@@ -180,4 +180,21 @@ airborne.validator = {
 
 		return true;
 	}
+	,is_not_valid_email:function(email) {
+		return !this.is_valid_email(email);
+	}
+	/*
+		@ Public
+		@ Desc
+		@ Refer : http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+	*/
+	,is_valid_email:function(email) {
+
+		if(this.is_not_valid_str(email)) {
+			return false;
+		}
+
+	    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+	    return re.test(email);
+	}	
 }
