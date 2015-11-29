@@ -614,11 +614,16 @@ airborne.bootstrap.view.mobile.list = {
 				return;
 			}
 
+			// wonder.jung
 			if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 				if(is_log_in==_param.YES && confirm("Log out?")){
+
 					location.href = url_log_out;
+
 				} else if(is_log_in==_param.NO) {
+
 					location.href = url_log_in;
+
 				}
 			}
 
@@ -1990,14 +1995,23 @@ airborne.bootstrap.view.mobile.list = {
 		var title_display_style = "";
 
 		// Set Input
+		var btn_color = _color.COLOR_MEDIUM_GRAY;
 		row_tag += ""
 		+ "<tr class=\"active\" id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
 			+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;border-bottom: 1px solid #ddd;\">"
 				.replace(/\<COLOR\>/gi, text_color)
 				.replace(/\<BG_COLOR\>/gi, bg_color)
-				+ "<span style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;<DISPLAY>;\" class=\"no_selection\"><strong><_v></strong></span>"
+
+				// TITLE
+				+ "<span id=\"title\" style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;<DISPLAY>;\" class=\"no_selection\"><strong><_v></strong></span>"
 					.replace(/\<_v\>/gi, title)
 					.replace(/\<DISPLAY\>/gi, title_display_style)
+
+				// CONFIRM BUTTON
+				+ "<button id=\"btn_save\" class=\"btn btn-default\" type=\"submit\" style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;display:none;\">"
+					+ "<span id=\"icon_arrow\" class=\"glyphicon glyphicon-ok\" style=\"padding-bottom:4px;padding-left:18px;padding-right:6px;color:<COLOR>;\"></span>"
+						.replace(/\<COLOR\>/gi, btn_color)
+				+ "</button>"
 
 		for(var idx = (value_arr.length-1); -1 < idx; idx--) {
 			var value = value_arr[idx];
@@ -2019,33 +2033,73 @@ airborne.bootstrap.view.mobile.list = {
 		append_target_jq.append(row_tag);
 
 		// SET EVENT
-		var input_row_jq = append_target_jq.children().last().find("input");
+		var cur_input_container_jq = append_target_jq.children().last();
 
-		input_row_jq.blur(function(e){
-			if(delegate_on_blur == undefined) return;
+		var title_jq = cur_input_container_jq.find("span#title");
+		var input_row_jq = cur_input_container_jq.find("input");
+		var btn_save_jq = cur_input_container_jq.find("button#btn_save");
 
-			var input_row_jq = $(this);
+		var accessor = {
+			input_row_jq:input_row_jq
+			, get:function(){
+				return this.input_row_jq.val();
+			}
+			, set_target_jq:function(input_row_jq) {
+				this.input_row_jq = input_row_jq;
+			}
+			, get_target_jq:function() {
+				return this.input_row_jq;
+			}
+			, get_input_jq:function(idx_input) {
+				if(-1 < idx_input) {
+					return $(this.input_row_jq.parent().find("input#input_" + input_id + "_" + idx_input));
+				}
+				return null;
+			}
+			, focus:function(){
+				this.input_row_jq.focus();
+			}
+			, param_obj:param_obj
+			, get_param_obj:function() {
+				return this.param_obj;
+			}
+			, delegate_on_blur:delegate_on_blur
+			, call_event_blur:function(select_input_jq) {
 
-			var accessor = {
-				get:function(){
-					return input_row_jq.val();
+				console.log(">>> call_event_blur / this.is_on :: ",this.is_on);
+
+				if(select_input_jq != undefined) {
+					this.set_target_jq(select_input_jq);
 				}
-				, focus:function(){
-					input_row_jq.focus();
-				}
-				, param_obj:param_obj
-				, get_param_obj:function() {
-					return this.param_obj;
-				}
-				, target_jq:input_row_jq
-				, get_target_jq:function() {
-					return this.target_jq;
+				if(this.delegate_on_blur != undefined && this.is_on === true) {
+					this.delegate_on_blur._func.apply(this.delegate_on_blur._scope,[this]);
 				}
 			}
+			, is_on:true
+			, off:function() {
+				this.is_on = false;
+			}
+			, get_is_on:function() {
+				return this.is_on;
+			}
+		}
 
-			delegate_on_blur._func.apply(delegate_on_blur._scope,[accessor]);
-
+		input_row_jq.focus(function(){
+			if(accessor.get_is_on()) {
+				btn_save_jq.show();
+				title_jq.hide();
+			}
 		});
+
+		input_row_jq.blur(function(e){
+			if(accessor.get_is_on()) {
+				accessor.call_event_blur($(this));
+				btn_save_jq.hide();
+				title_jq.show();
+			}
+		});
+
+		return accessor;
 
 	}
 
@@ -2096,7 +2150,7 @@ airborne.bootstrap.view.mobile.list = {
 				+ "<span id=\"title\" style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;<DISPLAY>;\" class=\"no_selection\"><strong><_v></strong></span>"
 					.replace(/\<_v\>/gi, title)
 					.replace(/\<DISPLAY\>/gi, title_display_style)
-				// CONFIRM BUTTON / wonder.jung
+				// CONFIRM BUTTON
 				+ "<button id=\"btn_save\" class=\"btn btn-default\" type=\"submit\" style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;display:none;\">"
 					+ "<span id=\"icon_arrow\" class=\"glyphicon glyphicon-ok\" style=\"padding-bottom:4px;padding-left:18px;padding-right:6px;color:<COLOR>;\"></span>"
 						.replace(/\<COLOR\>/gi, btn_color)
@@ -2120,12 +2174,18 @@ airborne.bootstrap.view.mobile.list = {
 		var input_row_jq = cur_input_container_jq.find("input");
 		var btn_save_jq = cur_input_container_jq.find("button#btn_save");
 
+		// wonder.jung
+
 		var accessor = {
-			get:function(){
-				return input_row_jq.val();
+			input_row_jq:input_row_jq
+			, get:function(){
+				return this.input_row_jq.val();
 			}
 			, focus:function(){
-				input_row_jq.focus();
+				this.input_row_jq.focus();
+			}
+			, get_target_jq:function() {
+				return this.input_row_jq;
 			}
 			, param_obj:param_obj
 			, get_param_obj:function() {
@@ -2133,21 +2193,33 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			, delegate_on_blur:delegate_on_blur
 			, call_event_blur:function() {
-				if(this.delegate_on_blur != undefined) {
+				if(this.delegate_on_blur != undefined && this.is_on === true) {
 					this.delegate_on_blur._func.apply(this.delegate_on_blur._scope,[this]);
 				}
+			}
+			, is_on:true
+			, off:function() {
+				this.is_on = false;
+				this.input_row_jq.attr("disabled","disabled");
+			}
+			, get_is_on:function() {
+				return this.is_on;
 			}
 		}
 
 		input_row_jq.focus(function(){
-			btn_save_jq.show();
-			title_jq.hide();
+			if(accessor.get_is_on()) {
+				btn_save_jq.show();
+				title_jq.hide();
+			}
 		});
 
 		input_row_jq.blur(function(e){
-			accessor.call_event_blur();
-			btn_save_jq.hide();
-			title_jq.show();
+			if(accessor.get_is_on()) {
+				accessor.call_event_blur();
+				btn_save_jq.hide();
+				title_jq.show();
+			}
 		});
 
 		return accessor;
@@ -2193,7 +2265,7 @@ airborne.bootstrap.view.mobile.list = {
 				// TITLE
 				+ "<span id=\"title\" style=\"float:left;padding-left:0px;padding-top:14px;font-size:14px;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
 
-				// CONFIRM BUTTON / wonder.jung
+				// CONFIRM BUTTON
 				+ "<button id=\"btn_save\" class=\"btn btn-default\" type=\"submit\" style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;display:none;\">"
 					+ "<span id=\"icon_arrow\" class=\"glyphicon glyphicon-ok\" style=\"padding-top:8px;padding-bottom:12px;padding-left:18px;padding-right:6px;color:<COLOR>;\"></span>"
 						.replace(/\<COLOR\>/gi, btn_color)
@@ -2218,11 +2290,12 @@ airborne.bootstrap.view.mobile.list = {
 		var btn_save_jq = cur_input_container_jq.find("button#btn_save");
 
 		var accessor = {
-			get:function(){
-				return input_row_jq.val();
+			input_row_jq:input_row_jq
+			, get:function(){
+				return this.input_row_jq.val();
 			}
 			, focus:function(){
-				input_row_jq.focus();
+				this.input_row_jq.focus();
 			}
 			, param_obj:param_obj
 			, get_param_obj:function(){
@@ -2233,6 +2306,9 @@ airborne.bootstrap.view.mobile.list = {
 				if(this.delegate_on_blur != undefined) {
 					this.delegate_on_blur._func.apply(this.delegate_on_blur._scope,[this]);
 				}
+			}
+			, off:function() {
+				this.input_row_jq.attr("disabled","disabled");
 			}
 		}
 
@@ -2290,6 +2366,7 @@ airborne.bootstrap.view.mobile.list = {
 		row_tag += ""
 		+ "<tr class=\"active\" id=\"date_picker\">".replace(/\<_v\>/gi, row_id)
 			+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>\">".replace(/\<COLOR\>/gi, text_color).replace(/\<BG_COLOR\>/gi, bg_color)
+				//+ "<input type=\"text\" class=\"span2 datepicker center-block\" data-date-format=\"yyyy-mm-dd\" readonly=\"\" style=\"<style>\" disabled=\"disabled\">"
 				+ "<input type=\"text\" class=\"span2 datepicker center-block\" data-date-format=\"yyyy-mm-dd\" readonly=\"\" style=\"<style>\">"
 				.replace(/\<_v\>/gi, input_id)
 				.replace(/\<style\>/gi, input_style)
@@ -2300,7 +2377,8 @@ airborne.bootstrap.view.mobile.list = {
 		append_target_jq.append(row_tag);
 
 		// Set Event
-		var datepicker_row_jq = append_target_jq.find("tr#date_picker");
+		var datepicker_row_jq = append_target_jq.children().last();
+		var input_jq = datepicker_row_jq.find("input");
 
 		// ACCESSOR
 		var accessor = {
@@ -2316,6 +2394,19 @@ airborne.bootstrap.view.mobile.list = {
 			, param_obj:param_obj
 			, get_param_obj:function() {
 				return this.param_obj;
+			}
+			, input_jq:input_jq
+			, off:function() {
+				if(this.input_jq == undefined) {
+					return;
+				}
+				this.input_jq.attr("disabled","disabled");
+			}
+			, on:function() {
+				if(this.input_jq == undefined) {
+					return;
+				}
+				this.input_jq.attr("disabled","");
 			}
 		};
 
@@ -2368,6 +2459,17 @@ airborne.bootstrap.view.mobile.list = {
 		if(bg_color == undefined) {
 			bg_color = _color.COLOR_TINT_GRAY;
 		}
+
+		try {
+			if(Kakao == null) {
+				console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowShareExternal / Kakao == undefined");
+				return;
+			}
+		} catch(e) {
+			console.log("CAUTION :: Network is not valid! Kakao share is disabled.");
+			return;
+		}
+
 
 		// 1. kakaotalk (https://developers.kakao.com/apps/66421)
 
@@ -2491,7 +2593,6 @@ airborne.bootstrap.view.mobile.list = {
 			bg_color = _color.COLOR_TINT_GRAY;
 		}
 		var text_color_vmouse_down = bg_color;
-
 
 		var row_id = airborne.html.getIdRandomTail("TableRowMovingArrow_" + title);
 

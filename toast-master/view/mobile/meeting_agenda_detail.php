@@ -16,9 +16,6 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
@@ -30,6 +27,9 @@ $today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
 
 // 다음 미팅 날짜를 가져옵니다.
 $start_date = date('Y-m-d');
+
+// 외부 공유로 링크를 전달했을 경우 여부 - 외부 공유시에는 업데이트가 허용됩니다.
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
 
 // @ required
 $wdj_mysql_interface->close();
@@ -64,17 +64,30 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 // php to javascript sample
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
+var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
 
+console.log(">>> login_user_info :: ",login_user_info);
+console.log(">>> membership_obj :: ",membership_obj);
+
+var is_editable = true;
+if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
+	// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
+	is_editable = false;
+}
+
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
 _tm_m_list.addHeaderRow(
 	// login_user_info
 	login_user_info
+	// membership_obj
+	, membership_obj
 	// header_arr
 	,[
 		_link.get_header_link(
@@ -216,6 +229,10 @@ _m_list.addTableRowDateInput(
 	.get(_param.MEETING_ID,MEETING_ID)
 	.get(_param.START_DATE,start_date)
 );
+if(!is_editable) {
+	accessor_date.off();	
+}
+
 
 
 
@@ -291,6 +308,9 @@ _m_list.addTableRowTextInputInline(
 	.get(_param.MEETING_ID,MEETING_ID)
 	.get(_param.THEME,meeting_agenda_obj.__theme)
 );
+if(!is_editable) {
+	accessor_theme.off();
+}
 
 
 
@@ -299,7 +319,20 @@ _m_list.addTableRowTextInputInline(
 
 
 
-
+var msg_guide_not_club_member = ""; 
+if(login_user_info.__is_login === _param.YES) {
+	msg_guide_not_club_member = 
+	"Sorry, <MEMBER_NAME>.\nYou are not the member of\n<CLUB_NAME>"
+	.replace(/\<MEMBER_NAME\>/gi, login_user_info.__member_first_name + " " + login_user_info.__member_last_name)
+	.replace(/\<CLUB_NAME\>/gi, membership_obj.__membership_desc)
+	;
+} else {
+	msg_guide_not_club_member = 
+	"Sorry.\nYou are not the member of\n<CLUB_NAME>"
+	.replace(/\<MEMBER_NAME\>/gi, login_user_info.__member_first_name + " " + login_user_info.__member_last_name)
+	.replace(/\<CLUB_NAME\>/gi, membership_obj.__membership_desc)
+	;
+}
 
 // 4. Today's Role
 var role_cnt = 0;
@@ -319,6 +352,11 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	, table_jq
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(delegate_data){
+
+		if(!is_editable) {
+			alert(msg_guide_not_club_member);
+			return;
+		}
 
 		if(	delegate_data == undefined ||
 			delegate_data.delegate_data == undefined ||
@@ -365,6 +403,12 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(delegate_data){
 
+		if(!is_editable) {
+			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
+			alert(msg_guide_not_club_member);
+			return;
+		}
+
 		console.log(">>> delegate_data :: ",delegate_data);
 
 		_link.go_there(
@@ -400,6 +444,12 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	, table_jq
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(delegate_data){
+
+		if(!is_editable) {
+			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
+			alert(msg_guide_not_club_member);
+			return;
+		}
 
 		_link.go_there(
 			_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
@@ -491,6 +541,9 @@ _m_list.addTableRowTextInputInline(
 	.get(_param.MEETING_ID,MEETING_ID)
 	.get(_param.WORD,meeting_agenda_obj.__word)
 );
+if(!is_editable) {
+	accessor_word.off();
+}
 
 
 
@@ -565,6 +618,9 @@ _m_list.addTableRowTextAreaInputInline(
 	.get(_param.MEETING_ID,MEETING_ID)
 	.get(_param.WORD_DESC,meeting_agenda_obj.__word_desc)
 );
+if(!is_editable) {
+	accessor_word_desc.off();
+}
 
 
 
@@ -641,6 +697,9 @@ _m_list.addTableRowTextAreaInputInline(
 	.get(_param.MEETING_ID,MEETING_ID)
 	.get(_param.QUOTE,meeting_agenda_obj.__quote)
 );
+if(!is_editable) {
+	accessor_quote.off();
+}
 
 
 
@@ -648,26 +707,29 @@ _m_list.addTableRowTextAreaInputInline(
 
 // SHARE EXTERNAL
 var share_msg = membership_obj.__membership_desc + " needs your help.\nMeeting Agenda On " + meeting_agenda_obj.__startdate;
-var accessor_external_share =
-_m_list.addTableRowShareExternal(
-	// title
-	"Share"
-	// append_target_jq
-	,table_jq
-	// label
-	,share_msg
-	// url_desc
-	,"Magendas"
-	// url
-	,_link.get_link(
-		_link.MOBILE_MEETING_AGENDA_DETAIL
-		,_param
-		.get(_param.MEETING_ID, MEETING_ID)
-		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-	)
-	// img_url
-	,service_root_path + _link.IMG_SHARE_KAKAO_TM_LONG_BANNER
-);
+if(is_editable) {
+	var accessor_external_share =
+	_m_list.addTableRowShareExternal(
+		// title
+		"Share"
+		// append_target_jq
+		,table_jq
+		// label
+		,share_msg
+		// url_desc
+		,"Magendas"
+		// url
+		,_link.get_link(
+			_link.MOBILE_MEETING_AGENDA_DETAIL
+			,_param
+			.get(_param.IS_EXTERNAL_SHARE, _param.YES)
+			.get(_param.MEETING_ID, MEETING_ID)
+			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		)
+		// img_url
+		,service_root_path + _link.IMG_SHARE_KAKAO_TM_LONG_BANNER
+	);
+}
 
 
 

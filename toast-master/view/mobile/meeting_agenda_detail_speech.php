@@ -15,9 +15,6 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID);
@@ -98,6 +95,8 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 	_tm_m_list.addHeaderRow(
 		// login_user_info
 		login_user_info
+		// membership_obj
+		, membership_obj
 		// header_arr
 		,[
 			_link.get_header_link(

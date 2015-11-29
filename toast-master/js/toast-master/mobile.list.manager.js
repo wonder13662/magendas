@@ -103,12 +103,10 @@ toast_master.mobile_list_manager = {
 
 		ex) 사용자가 소속된 클럽 정보 (클릭시 다른 클럽에 등록되어 있다면 클럽 변경 화면을 보여줍니다.) / 사용자 정보 (로그인/로그아웃)
 	*/
-	,addLogInRowDoubleSlot:function(login_user_info, table_jq, text_color, bg_color, delegate_on_click_left_slot){
+	,addLogInRowDoubleSlot:function(login_user_info, membership_obj, table_jq, text_color, bg_color, delegate_on_click_left_slot, redirect_url_after_log_in){
 		var _v = airborne.validator;
 		var _m_list = airborne.bootstrap.view.mobile.list;
 		var _obj = airborne.bootstrap.obj;
-
-		// @ wonder.jung
 
 		if(_v == null){
 			console.log("!Error! / toast_master.mobile_list_manager / addLogInRowDoubleSlot / _v == null");
@@ -127,6 +125,11 @@ toast_master.mobile_list_manager = {
 
 		if(login_user_info == null){
 			console.log("!Error! / toast_master.mobile_list_manager / addLogInRowDoubleSlot / login_user_info == null");
+			return;
+		}
+
+		if(membership_obj == null){
+			console.log("!Error! / toast_master.mobile_list_manager / addLogInRowDoubleSlot / membership_obj == null");
 			return;
 		}
 
@@ -161,8 +164,8 @@ toast_master.mobile_list_manager = {
 		}
 
 		var log_in_msg_left = "Looking for club?";
-		if(_v.isNumberStr(login_user_info.__membership_id) && _v.is_valid_str(login_user_info.__membership_name)){
-			log_in_msg_left = login_user_info.__membership_name;
+		if(_v.isNumberStr(membership_obj.__membership_id) && _v.is_valid_str(membership_obj.__membership_name)){
+			log_in_msg_left = membership_obj.__membership_name;
 		}
 
 
@@ -188,6 +191,22 @@ toast_master.mobile_list_manager = {
 		table_row_slot_obj_arr.push(slot_left_obj);
 		table_row_slot_obj_arr.push(slot_right_obj);
 
+		// wonder.jung
+		if(redirect_url_after_log_in == undefined) {
+			redirect_url_after_log_in = "";
+		}
+		var url_log_in = _link.get_link(
+			_link.LOG_IN
+			, _param
+			.get(_param.REDIRECT_URL, encodeURIComponent(redirect_url_after_log_in))
+		);
+		console.log(">>> redirect_url_after_log_in :: ",redirect_url_after_log_in);
+		console.log(">>> url_log_in :: ",url_log_in);
+
+		//_link
+		console.log(">>> _link :: ",_link);
+
+
 		var log_in_row_jq = 
 		_m_list.addTableRowLogInDoubleSlot(
 			// title
@@ -197,7 +216,7 @@ toast_master.mobile_list_manager = {
 			// is_log_in
 			, login_user_info.__is_login
 			// url_log_in
-			, cur_link_manager.get_link(cur_link_manager.LOG_IN)
+			, url_log_in
 			// url_log_out
 			, cur_link_manager.get_link(cur_link_manager.LOG_OUT)
 			// append_target_jq
@@ -214,7 +233,7 @@ toast_master.mobile_list_manager = {
 		@ public
 		@ desc : 로그인 및 페이지 뎁스를 보여주는 열을 그립니다.
 	*/
-	,addHeaderRow:function(login_user_info, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled){
+	,addHeaderRow:function(login_user_info, membership_obj, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled){
 
 		var _v = airborne.validator;
 		var _m_list = airborne.bootstrap.view.mobile.list;
@@ -222,6 +241,10 @@ toast_master.mobile_list_manager = {
 
 		if(login_user_info == null){
 			console.log("!Error! / toast_master.mobile_list_manager / addHeaderRow / login_user_info == null");
+			return;
+		}
+		if(membership_obj == null){
+			console.log("!Error! / toast_master.mobile_list_manager / addHeaderRow / membership_obj == null");
 			return;
 		}
 		if(_v.isNotValidArray(header_arr)){
@@ -240,12 +263,14 @@ toast_master.mobile_list_manager = {
 			bg_color_vmouse_down = this.COLOR_RED_WINE;
 		}
 
-		console.log(">>> login_user_info :: ",login_user_info);
+		var redirect_url_after_log_in = header_arr[0].__call_url;
 
 		var log_in_row_jq = 
 		this.addLogInRowDoubleSlot(
 			// login_user_info
 			login_user_info
+			// membership_obj
+			, membership_obj
 			// table_jq
 			,table_jq
 			// text_color
@@ -270,7 +295,10 @@ toast_master.mobile_list_manager = {
 				_link.go_there(_link.MEMBERSHIP_PICKER);
 
 			}, this)
+			// redirect_url_after_log_in
+			, redirect_url_after_log_in
 		);
+
 
 		_m_list.addTableHeaderNavRow(
 			// header_arr
@@ -649,7 +677,7 @@ toast_master.mobile_list_manager = {
 		@ public
 		@ desc : 브라우저 로딩 완료시 화면 움직임 현상이 보이지 않도록 문서가 준비되면 fade in 및 bootstrap 로딩 완료 메시지를 제거한다. (공통 로직)
 	*/	
-	, doWhenDocumentReady:function() {
+	, doWhenDocumentReady:function(delegate_obj) {
 
 		$( "body" ).css("opacity","0");
 		$( document ).ready(function() {
@@ -660,6 +688,10 @@ toast_master.mobile_list_manager = {
 			}, _param.MIILLISEC_BODY_FADE_IN_ON_READY);
 
 			$("div.ui-loader").hide();
+
+			if(_obj.isValidDelegate(delegate_obj)) {
+				delegate_obj._func.apply(delegate_obj._scope,[]);
+			}
 
 		});
 	}

@@ -218,7 +218,6 @@ var list_search_tab = {
 					,__member_first_name:""
 					,__member_last_name:""
 					,__member_membership:-1
-					,__member_mobile:""
 					,__member_email:""
 				};
 			}
@@ -281,28 +280,21 @@ var list_search_tab = {
 					// max_len 						
 					,20						
 				)
+				// validCheckerObj
 				,member_obj.__member_last_name
 			);
 			column_info_manager.addColumnInput(
 				// key
-				"member_mobile"			
-				// validCheckerObj	
-				,_column.getColumnInputStrMobilePhoneNumberCheckerObj(
-					// mobile_phone_number_type
-					airborne.phone.MOBILE_PHONE_KR
-					// warning_msg
-					, "Mobile Number only can have 11 Digits in Korea.\nex ) 011-2233-4455"
-				)
-				// default_value_on_no_result
-				,member_obj.__member_mobile
-			);
-			column_info_manager.addColumnInput(
-				"member_email"			// key
+				"member_email"			
 				,_column.getColumnInputStrCheckerObj(
-					false			// isEmptyAllowed
-					,1 				// min_len
-					,30				// max_len
-				)					// validCheckerObj
+					// isEmptyAllowed
+					false
+					// min_len
+					,1
+					// max_len
+					,50				
+				)
+				// validCheckerObj					
 				,member_obj.__member_email
 			);
 
@@ -329,16 +321,12 @@ var list_search_tab = {
 				// delegate_on_event
 				, _obj.getDelegate(function(mode, column_info){
 
-					console.log(">>> mode : ",mode);
-					console.log(">>> column_info : ",column_info);
-
 					var __member_id = column_info.member_id.getValue();
 					var __member_first_name = column_info.member_first_name.getValue();
 					var __member_last_name = column_info.member_last_name.getValue();
 					var __member_hash_key = column_info.member_hash_key.getValue();
 					var __member_membership = column_info.member_membership.getValue();
 					var __member_membership_status = column_info.member_membership_status.getValue();
-					var __member_mobile = column_info.member_mobile.getValue();
 					var __member_email = column_info.member_email.getValue();
 
 					if(__member_id > 0) {
@@ -356,7 +344,6 @@ var list_search_tab = {
 							.get(_param.MEMBER_FIRST_NAME, __member_first_name)
 							.get(_param.MEMBER_LAST_NAME, __member_last_name)
 							.get(_param.MEETING_MEMBERSHIP_ID, __member_membership)
-							.get(_param.MEMBER_MOBILE, __member_mobile)
 							.get(_param.MEMBER_EMAIL, __member_email)
 							// _delegate_after_job_done
 							,_obj.get_delegate(
@@ -426,14 +413,14 @@ var list_search_tab = {
 						.get(_param.MEMBER_FIRST_NAME, __member_first_name)
 						.get(_param.MEMBER_LAST_NAME, __member_last_name)
 						.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-						.get(_param.MEMBER_MOBILE, __member_mobile)
+						// .get(_param.MEMBER_MOBILE, __member_mobile)
 						.get(_param.MEMBER_EMAIL, __member_email)
 						;
 
 						var cur_param_obj_for_select_member = 
 						_param
 						.get(_param.IS_SELECT_MEMBER, _param.YES)
-						.get(_param.MEMBER_MOBILE, __member_mobile)
+						.get(_param.MEMBER_EMAIL, __member_email)
 						;
 
 						_ajax.send_simple_post(
@@ -448,17 +435,25 @@ var list_search_tab = {
 
 									console.log(">>> data :: ",data);
 
-									var cur_member_n_membership;
+									var cur_member_n_membership_arr;
 									if(data != undefined && _v.is_valid_array(data.query_output_arr)) {
-										cur_member_n_membership = data.query_output_arr[0][0];
+										cur_member_n_membership_arr = data.query_output_arr[0];
 									}
 
+									// TODO
+									// 1. 해당 멤버가 멤버 정보에 없는 경우 - 새로 등록.
+									// 2. 해당 멤버가 멤버 정보는 있지만, 현재 클럽에는 등록되지 않은 경우 - 이 클럽에도 등록 - 유저에게 가이드 필요.
+
+									console.log(">>> cur_member_n_membership_arr :: ",cur_member_n_membership_arr);
+
+									/*
 									if(cur_member_n_membership != undefined) {
 										alert("Member is already exist!");
 										return;
 									} else {
 										insert_new_member(cur_param_obj_for_insert_new_member);
 									}
+									*/
 
 
 								},
@@ -511,7 +506,7 @@ var list_search_tab = {
 				var select_option = 
 				_column.getSelectDetailElement(
 					// __key
-					other_member_obj.__member_mobile + "&nbsp;&nbsp;&nbsp;&nbsp;" + other_member_obj.__member_first_name + "&nbsp;" + other_member_obj.__member_last_name
+					other_member_obj.__member_email + "&nbsp;&nbsp;&nbsp;&nbsp;" + other_member_obj.__member_first_name + "&nbsp;" + other_member_obj.__member_last_name
 					// __value
 					, other_member_obj.__member_id
 				);
@@ -687,11 +682,9 @@ if(all_member_list != null && all_member_list.length > 0){
 		var key = ""
 		+ element.__member_membership_status
 		+ "&nbsp;&nbsp;&nbsp;&nbsp;"
-		+ element.__member_mobile	
-		+ "&nbsp;&nbsp;&nbsp;&nbsp;"
-		+ element.__member_membership_name
-		+ "&nbsp;&nbsp;&nbsp;&nbsp;"
 		+ element.__member_name
+		+ "&nbsp;&nbsp;&nbsp;&nbsp;"
+		+ element.__member_email
 		;
 		var value = element.__member_id;
 		var select_option_obj = airborne.bootstrap.column.getSelectDetailElement(key, value);

@@ -19,7 +19,10 @@
 	$MEMBER_LAST_NAME = $params->getParamString($params->MEMBER_LAST_NAME, "");
 	$MEMBER_MOBILE = $params->getParamString($params->MEMBER_MOBILE, "");
 	$MEMBER_EMAIL = $params->getParamString($params->MEMBER_EMAIL, "");
+	$MEMBER_HASH_KEY = $params->getParamString($params->MEMBER_HASH_KEY, "");
 	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
+
+
 	if($params->isYes($params->IS_INSERT_MEMBER)){
 
 		$query_output = 
@@ -48,9 +51,10 @@
 			// 새로 추가한 멤버 정보를 가져옵니다.
 			$new_member_obj = 
 			$wdj_mysql_interface->getMemberByNameAndEmail(
-				$params->getParamString($params->MEMBER_FIRST_NAME)
-				, $params->getParamString($params->MEMBER_LAST_NAME)
-				, $params->getParamString($params->MEMBER_EMAIL)
+				$MEMBER_FIRST_NAME
+				, $MEMBER_LAST_NAME
+				, $MEMBER_EMAIL
+				, $MEETING_MEMBERSHIP_ID
 			);
 			array_push($result->query_output_arr,json_encode($new_member_obj));
 		}
@@ -83,7 +87,6 @@
 		$wdj_mysql_interface->updateMember(	$params->getParamString($params->MEMBER_HASH_KEY)
 											, $params->getParamString($params->MEMBER_FIRST_NAME)
 											, $params->getParamString($params->MEMBER_LAST_NAME)
-											, $params->getParamString($params->MEMBER_MOBILE)
 											, $params->getParamString($params->MEMBER_EMAIL));
 		array_push($result->query_output_arr,$query_output);
 

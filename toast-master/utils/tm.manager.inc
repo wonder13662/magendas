@@ -3,8 +3,8 @@
 class ToastMasterLogInManager{
 
 	// TEST - PUBLIC
-	public static $LOG_IN_COOKIE_NAME = "tm_login_user";
-	public static $MEMBERSHIP_COOKIE_NAME = "MEETING_MEMBERSHIP_ID";
+	public static $COOKIE_TM_LOGIN_MEMBER_HASHKEY = "COOKIE_TM_LOGIN_MEMBER_HASHKEY";
+	public static $COOKIE_TM_MEMBERSHIP_ID = "COOKIE_TM_MEMBERSHIP_ID";
 
 	private static $COOKIE_EXPIRE_IN_A_WEEK = 604800;	// 3600 * 24 * 7
 	private static $COOKIE_EXPIRE_IN_A_HOUR = 3600;		// 3600
@@ -12,57 +12,67 @@ class ToastMasterLogInManager{
 	public static $USER_STATUS_AVAILABLE = "A";
 	public static $USER_STATUS_NOT_AVAILABLE = "N";
 
-	//public static function getLogInCookie($__membership_id=-1) {
 	public static function getLogInCookie($mysql_interface=null) {
 
-		$login_member_id = self::getCookie(self::$LOG_IN_COOKIE_NAME);
+		$login_member_hashkey = self::getCookie(self::$COOKIE_TM_LOGIN_MEMBER_HASHKEY);
 
 		$login_user_info = new stdClass();
-		if($login_member_id > 0){
-			$login_user_info->__member_id = $login_member_id;
+		if(!empty($login_member_hashkey)){
+			$login_user_info->__member_hashkey = $login_member_hashkey;
 			$login_user_info->__is_login = "YES";
 		} else {
-			$login_user_info->__member_id = -1;
+			$login_user_info->__member_hashkey = "";
 			$login_user_info->__is_login = "NO";
 		}	
 
 		if(!is_null($mysql_interface)) {
+
 			// enforce user info
 			$member_info = null;
 			$meeting_membership_id = self::getMembershipCookie();
 			if(	(!is_null($login_user_info)) && 
-				(0 < intval($login_user_info->__member_id)) && 
+				(!empty($login_user_info->__member_hashkey)) && 
 				(0 < $meeting_membership_id)) {
-				
-				$member_info = $mysql_interface->getMember($login_member_id, $meeting_membership_id);
+					
+				// 여기선 멤버의 클럽 정보는 제외된 멤버만의 정보(First name, Last name, email)를 나타냅니다.
+				$member_info = $mysql_interface->getMember($login_member_hashkey);
 			}
-			if(!is_null($member_info)) {
+			if(!is_null($member_info) && !empty($member_info)) {
+
+				// 로그인한 유저의 정보를 넘겨줍니다.
 				$login_user_info->__member_first_name = $member_info[0]->__member_first_name;
 				$login_user_info->__member_last_name = $member_info[0]->__member_last_name;
-				$login_user_info->__membership_name = $member_info[0]->__member_membership_name;
-				$login_user_info->__membership_id = $member_info[0]->__member_membership;
 
 				// 해당 유저가 가입한 모든 멤버쉽의 정보를 줍니다.
-				$membership_arr = $mysql_interface->getMemberMembership($login_member_id);
+				$login_user_info->__membership_arr = $mysql_interface->getMemberMembership($login_member_hashkey);
 
-				$login_user_info->__membership_arr = $mysql_interface->getMemberMembership($login_member_id);
+				// 해당 유저가 현재 뷰페이지의 클럽의 멤버인지 여부를 확인합니다.
+				$is_club_member=false;
+				for($idx = 0; $idx < sizeof($login_user_info->__membership_arr); $idx++){
+					$cur_membership_obj = $login_user_info->__membership_arr[$idx];
+					if($meeting_membership_id == intval($cur_membership_obj->__member_membership)) {
+						$is_club_member=true;
+						break;
+					}
+				}
+				$login_user_info->__is_club_member = $is_club_member;
 			}
 		}
 
 		return $login_user_info;
 	}
 	private static $LOG_IN_PARAM_DELIMETER = "|||";
-	public static function setLogInCookie($__member_id=-1) {
+	public static function setLogInCookie($__member_hashkey=null) {
 
-		if($__member_id < 0) return;
+		if(empty($__member_hashkey)) return;
 
-		$tossed_cookie_value = $__member_id;
+		$tossed_cookie_value = $__member_hashkey;
 
-		self::expireCookie(self::$LOG_IN_COOKIE_NAME);
-		self::setCookie(self::$LOG_IN_COOKIE_NAME,$tossed_cookie_value,self::$COOKIE_EXPIRE_IN_A_HOUR);
+		self::expireCookie(self::$COOKIE_TM_LOGIN_MEMBER_HASHKEY);
+		self::setCookie(self::$COOKIE_TM_LOGIN_MEMBER_HASHKEY,$tossed_cookie_value,self::$COOKIE_EXPIRE_IN_A_HOUR);
 
 		// CHECK VALUE
-		$registered_cookie_value = self::getCookie(self::$LOG_IN_COOKIE_NAME);
+		$registered_cookie_value = self::getCookie(self::$COOKIE_TM_LOGIN_MEMBER_HASHKEY);
 		$cookie_check_obj = new stdClass();
 		$cookie_check_obj->tossed_value = $tossed_cookie_value;
 		$cookie_check_obj->registered_value = $registered_cookie_value;
@@ -76,13 +86,13 @@ class ToastMasterLogInManager{
 		return $cookie_check_obj;
 	}
 	public static function expireLogInCookie() {
-		self::expireCookie(self::$LOG_IN_COOKIE_NAME);
+		self::expireCookie(self::$COOKIE_TM_LOGIN_MEMBER_HASHKEY);
 	}
 
 	// MEMBERSHIP
 	public static function getMembershipCookie() {
 
-		$meeting_memberhship_id = self::getCookie(self::$MEMBERSHIP_COOKIE_NAME);
+		$meeting_memberhship_id = self::getCookie(self::$COOKIE_TM_MEMBERSHIP_ID);
 
 		if(is_null($meeting_memberhship_id) || empty($meeting_memberhship_id)) {
 			$meeting_memberhship_id = -1;
@@ -99,15 +109,15 @@ class ToastMasterLogInManager{
 		$tossed_cookie_value = $meeting_memberhship;
 
 		// CHECK VALUE
-		$registered_cookie_value = self::getCookie(self::$MEMBERSHIP_COOKIE_NAME);
+		$registered_cookie_value = self::getCookie(self::$COOKIE_TM_MEMBERSHIP_ID);
 		$cookie_check_obj = new stdClass();
 		$cookie_check_obj->tossed_value = $tossed_cookie_value;
 		$cookie_check_obj->registered_value = $registered_cookie_value;
 		
 		if($registered_cookie_value != $tossed_cookie_value) {
 			$cookie_check_obj->hasChanged = true;
-			self::expireCookie(self::$MEMBERSHIP_COOKIE_NAME);
-			self::setCookie(self::$MEMBERSHIP_COOKIE_NAME,$tossed_cookie_value,self::$COOKIE_EXPIRE_IN_A_HOUR);
+			self::expireCookie(self::$COOKIE_TM_MEMBERSHIP_ID);
+			self::setCookie(self::$COOKIE_TM_MEMBERSHIP_ID,$tossed_cookie_value,self::$COOKIE_EXPIRE_IN_A_HOUR);
 		} else {
 			$cookie_check_obj->hasChanged = false;
 		}
@@ -115,7 +125,7 @@ class ToastMasterLogInManager{
 		return $cookie_check_obj;
 	}
 	public static function expireMembershipCookie() {
-		self::expireCookie(self::$MEMBERSHIP_COOKIE_NAME);
+		self::expireCookie(self::$COOKIE_TM_MEMBERSHIP_ID);
 	}	
 
 	// COOKIE - Default
@@ -138,6 +148,8 @@ class ToastMasterLogInManager{
 		}
 	}
 
+// REMOVE ME
+/*
 	public static function checkLogIn($mysql_interface, $redirect_url=null) {
 
 		$login_user_info = null;
@@ -167,6 +179,7 @@ class ToastMasterLogInManager{
 
 		return $login_user_info;
 	}
+*/
 
 
 }

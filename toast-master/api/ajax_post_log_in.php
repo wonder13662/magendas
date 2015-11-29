@@ -16,34 +16,26 @@ $member_mobile = $params->getParamString($params->MEMBER_MOBILE);
 $member_password = $params->getParamString($params->MEMBER_PASSWORD);
 $meeting_membership_id = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);
 
-array_push($result->query_output_arr,"\$member_email :: $member_email");
-array_push($result->query_output_arr,"\$member_mobile :: $member_mobile");
-array_push($result->query_output_arr,"\$member_password :: $member_password");
-array_push($result->query_output_arr,"\$meeting_membership_id :: $meeting_membership_id");
-
 $member_info_list;
 $member_info=null;
 if(!empty($member_mobile) && !empty($member_password)){
 
-	$member_info_list = $wdj_mysql_interface->getMemberLogIn($member_mobile, $member_password);
-	array_push($result->query_output_arr,json_encode($member_info_list));
+	$member_info_list = $wdj_mysql_interface->getMemberLogInByMobile($member_mobile, $member_password);
 
 } else if(!empty($member_email) && !empty($member_password)){
 
 	$member_info_list = $wdj_mysql_interface->getMemberLogInByEmail($member_email, $member_password);
-	array_push($result->query_output_arr,json_encode($member_info_list));
 
 }
 if(!empty($member_info_list)){
 
 	$member_info=$member_info_list[0];
-	array_push($result->query_output_arr,json_encode($member_info));
 
 	// 멤버가 가입한 모든 클럽의 정보를 가져옵니다.
 	$membership_arr;
 	if(!is_null($member_info) && (0 < $member_info->__member_id)) {
-		$membership_arr = $wdj_mysql_interface->getMemberMembership($member_info->__member_id);
-		array_push($result->query_output_arr,json_encode($membership_arr));
+		$membership_arr = $wdj_mysql_interface->getMemberMembership($member_info->__member_hash_key);
+		$result->member_membership_arr = $membership_arr;
 	}
 	
 }
@@ -66,7 +58,6 @@ if(!$is_active_member){
 		,$member_info_obj->__member_membership_status
 		,ToastMasterLogInManager::$USER_STATUS_AVAILABLE
 	);
-	array_push($result->query_output_arr,json_encode($output));
 }
 
 // @ required - CLOSE DB

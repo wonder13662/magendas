@@ -4,7 +4,12 @@
 include_once("../../common.inc");
 
 // Membership Check
+
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
+if($MEETING_MEMBERSHIP_ID == -1) {
+	// 인스턴스 페이지 사용을 위해 멤버쉽 정보를 받을 수 있도록 변경합니다.
+	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);	
+}
 if($MEETING_MEMBERSHIP_ID == -1) {
 	// move to membership picker page
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MEMBERSHIP_PICKER);
@@ -12,9 +17,6 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID);
@@ -73,6 +75,8 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 <script>
 
 // php to javascript
+var membership_obj = <?php echo json_encode($membership_obj);?>;
+
 var all_meeting_agenda_list = <?php echo json_encode($all_meeting_agenda_list);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var a_week_later_from_recent_meeting = <?php echo json_encode($a_week_later_from_recent_meeting);?>;
@@ -84,6 +88,8 @@ var table_jq = $("table tbody#list");
 _tm_m_list.addHeaderRow(
 	// login_user_info
 	login_user_info
+	// membership_obj
+	, membership_obj
 	// header_arr
 	, [ 
 		_link.get_header_link(
@@ -102,58 +108,63 @@ _tm_m_list.addHeaderRow(
 );
 
 // Body - Content / 새로운 미팅을 추가합니다.
-_m_list.addTableRowBtn(
-	// title
-	"Add New Meeting"
-	// color
-	, null
-	// delegate_obj
-	, _obj.getDelegate(function(){
+if(login_user_info.__is_club_member === true) {
 
-		if(!confirm("Add New Meeting?")){
-			return;
-			//_link.go_there(_link.MOBILE_MEETING_AGENDA_DETAIL_ADD_NEW_ONE);
-		}
+	_m_list.addTableRowBtn(
+		// title
+		"Add New Meeting"
+		// color
+		, null
+		// delegate_obj
+		, _obj.getDelegate(function(){
 
-		// 마지막 미팅으로부터 일주일 뒤의 미팅을 만듭니다.
-		var request_param_obj =
-		_param
-		.get(_param.IS_NEW_MEETING_HEADER,_param.YES)
-		.get(_param.MEETING_TEMPLATE_ID,_param.MEETING_TEMPLATE_ID_BASIC)
-		.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
-		.get(_param.THEME,_param.NO_THEME)
-		.get(_param.START_DATE,a_week_later_from_recent_meeting)
-		;
+			if(!confirm("Add New Meeting?")){
+				return;
+				//_link.go_there(_link.MOBILE_MEETING_AGENDA_DETAIL_ADD_NEW_ONE);
+			}
 
-		_ajax.send_simple_post(
-			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-			// _param_obj
-			,request_param_obj
-			// _delegate_after_job_done
-			,_obj.get_delegate(function(data){
+			// 마지막 미팅으로부터 일주일 뒤의 미팅을 만듭니다.
+			var request_param_obj =
+			_param
+			.get(_param.IS_NEW_MEETING_HEADER,_param.YES)
+			.get(_param.MEETING_TEMPLATE_ID,_param.MEETING_TEMPLATE_ID_BASIC)
+			.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
+			.get(_param.THEME,_param.NO_THEME)
+			.get(_param.START_DATE,a_week_later_from_recent_meeting)
+			;
 
-        		if( data != undefined && 
-        			data.query_output_arr != undefined && 
-        			data.query_output_arr.length == 3 && 
-        			data.query_output_arr[2].output === true ) {
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				// _param_obj
+				,request_param_obj
+				// _delegate_after_job_done
+				,_obj.get_delegate(function(data){
 
-					_link.go_there(
-						_link.MOBILE_MEETING_AGENDA_LIST
-						,_param
-						.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-					);
+	        		if( data != undefined && 
+	        			data.query_output_arr != undefined && 
+	        			data.query_output_arr.length == 3 && 
+	        			data.query_output_arr[2].output === true ) {
 
-        		}
+						_link.go_there(
+							_link.MOBILE_MEETING_AGENDA_LIST
+							,_param
+							.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+						);
 
-			},this)
-		); // ajax done.
+	        		}
+
+				},this)
+			); // ajax done.
 
 
-	}, this)
-	// append_target_jq
-	, table_jq
-);
+		}, this)
+		// append_target_jq
+		, table_jq
+	);	
+
+}
+
 
 
 

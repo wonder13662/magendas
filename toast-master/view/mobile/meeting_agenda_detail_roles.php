@@ -2,6 +2,12 @@
 // common setting
 include_once("../../common.inc");
 
+// 클럽 멤버가 아닌 경우, 해당 페이지로는 접근할 수 없습니다.
+// 로그인 유저가 해당 클럽의 멤버가 아니라면 TOP페이지로 리다이렉트.
+if($login_user_info->__is_club_member == false) {
+	ToastMasterLinkManager::go(ToastMasterLinkManager::$MOBILE_TOP);
+}
+
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
@@ -15,9 +21,6 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	// get membership info
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
-
-	$login_user_info->__membership_id = $membership_obj->__membership_id;
-	$login_user_info->__membership_name = $membership_obj->__membership_name;
 }
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID);
@@ -98,7 +101,7 @@ var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
-console.log(">>> member_list :: ",member_list);
+console.log(">>> login_user_info :: ",login_user_info);
 
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
@@ -117,6 +120,8 @@ if(!IS_EXTERNAL_SHARE) {
 	_tm_m_list.addHeaderRow(
 		// login_user_info
 		login_user_info
+		// membership_obj
+		, membership_obj
 		// header_arr
 		,[
 			_link.get_header_link(
@@ -269,7 +274,6 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 							console.log(data);
 
 							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
-								console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
 
 								// 롤의 이름을 업데이트 합니다.
 								row_role_jq.find("span.badge").find("strong").html(MEMBER_NAME);
@@ -289,6 +293,8 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 								row_member_obj.hide();
 								body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
 								   console.log("Finished animating");
+
+								   //console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
 								});
 								
 							} // if end

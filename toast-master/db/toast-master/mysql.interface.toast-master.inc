@@ -897,7 +897,10 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function getMemberLogIn($member_mobile="", $member_password=""){
+	/*
+		@ Deprecated
+	*/
+	public function getMemberLogInByMobile($member_mobile="", $member_password=""){
 
 		if(empty($member_mobile)) return null;
 		if(empty($member_password)) return null;
@@ -934,7 +937,6 @@ class MYSQLInterface{
 		. " , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"		
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
@@ -1017,15 +1019,11 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}
 
-	public function getMember($member_id, $membership_id=-1){
+	public function getMember($member_hashkey){
 
 		$function_name = "getMember";
-		if($this->isNotUnsignedNumberID($membership_id)){
-			echo "$function_name / \$this->isNotUnsignedNumberID(\$membership_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumberID($member_id)){
-			echo "$function_name / \$this->isNotUnsignedNumberID(\$member_id)<br/>";
+		if(empty($member_hashkey)){
+			echo "$function_name / empty(\$member_hashkey)<br/>";
 			return;
 		}
 
@@ -1035,17 +1033,9 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
 		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
-		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " , IFNULL(`MEMBER`.password,\"\") AS __member_password"
 		. " FROM `MEMBER`"
-		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`id`=$member_id"
-		. " AND MNM.`membership_id` IN ($membership_id)"
+		. " WHERE `MEMBER`.`hash_key`=\"$member_hashkey\""
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
@@ -1053,13 +1043,16 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function getMemberMembership($member_id){
+	public function getMemberMembership($member_hashkey){
 
-		if($this->isNotUnsignedNumberID($member_id)) return null;
+		$function_name = "getMemberMembership";
+		if(empty($member_hashkey)){
+			echo "$function_name / empty(\$member_hashkey)<br/>";
+			return;
+		}
 
 		$query = 
-		"SELECT `MEMBER`.id AS __member_id"
-		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+		"SELECT IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
 		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
 		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
@@ -1067,13 +1060,11 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " , IFNULL(`MEMBER`.password,\"\") AS __member_password"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`id`=$member_id"
+		. " WHERE `MEMBER`.`hash_key`=\"$member_hashkey\""
 		. " ORDER BY `MEMBERSHIP`.`name`"
 		;
 
@@ -1082,7 +1073,10 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function getMemberByNameAndEmail($first_name, $last_name, $email){
+	/*
+
+	*/
+	public function getMemberByEmail($email){
 
 		$query = 
 		"SELECT `MEMBER`.id AS __member_id"
@@ -1093,16 +1087,11 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " , IFNULL(`MEMBER`.password,\"\") AS __member_password"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`first_name`=\"$first_name\""
-		. " AND `MEMBER`.`last_name`=\"$last_name\""
-		. " AND `MEMBER`.`email`=\"$email\""
-		. " LIMIT 1"
+		. " WHERE `MEMBER`.`email`=\"$email\""
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
@@ -1110,6 +1099,35 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function getMemberByNameAndEmail($first_name, $last_name, $email, $membership_id){
+
+		$query = 
+		"SELECT `MEMBER`.id AS __member_id"
+		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+		. " FROM `MEMBER`"
+		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+		. " WHERE `MEMBER`.`first_name`=\"$first_name\""
+		. " AND `MEMBER`.`last_name`=\"$last_name\""
+		. " AND `MEMBER`.`email`=\"$email\""
+		. " AND `MEMBERSHIP`.id=$membership_id"
+		;
+
+		$json_res_obj = $this->getSelectResult($query);
+
+		return $json_res_obj->result;
+	}
+
+	/*
+		@ Deprecated
+	*/
 	public function getMemberByMobile($mobile){
 
 		$function_name = "getMemberByMobile";
@@ -1127,9 +1145,7 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " , IFNULL(`MEMBER`.password,\"\") AS __member_password"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
 		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
@@ -1144,6 +1160,12 @@ class MYSQLInterface{
 
 	public function getMemberByMemberHashKey($member_hash_key){
 
+		$function_name = "getMemberByMemberHashKey";
+		if(empty($member_hash_key)){
+			echo "$function_name / empty(\$member_hash_key)<br/>";
+			return;
+		}
+
 		$query = 
 		"SELECT `MEMBER`.id AS __member_id"
 		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
@@ -1151,12 +1173,9 @@ class MYSQLInterface{
 		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " , IFNULL(`MEMBER`.password,\"\") AS __member_password"
 		. " FROM `MEMBER`"
 		. " WHERE `MEMBER`.`member_hash_key`=\"$member_hash_key\""
-		. " LIMIT 1"
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
@@ -1184,16 +1203,16 @@ class MYSQLInterface{
 	public function getAllMembership() {
 
 		// 1. 미팅 아젠다를 가지고 있는 모든 클럽을 보여줍니다.
-
 		$query = 
-		"SELECT __membership_id"
-		. " , __membership_name"
-		. " , __membership_desc" 
+		"SELECT __member_membership"
+		. " , __member_membership_name"
+		. " , __member_membership_desc" 
 		. " , __meeting_cnt"
+		. " , 0 AS __is_user_membership"
 		. " FROM ("
-			. " SELECT `MEMBERSHIP`.id AS __membership_id"
-			. " , IFNULL(`MEMBERSHIP`.`name`, \"\") AS __membership_name"
-			. " , IFNULL(`MEMBERSHIP`.`desc`, \"\") AS __membership_desc"
+			. " SELECT `MEMBERSHIP`.id AS __member_membership"
+			. " , IFNULL(`MEMBERSHIP`.`name`, \"\") AS __member_membership_name"
+			. " , IFNULL(`MEMBERSHIP`.`desc`, \"\") AS __member_membership_desc"
 			. " , COUNT(MA.`id`) AS __meeting_cnt"
 			. " FROM `MEMBERSHIP`"
 			. " LEFT JOIN MEETING_AGENDA AS MA ON MA.membership_id=`MEMBERSHIP`.id"
@@ -1201,12 +1220,101 @@ class MYSQLInterface{
 			. " ORDER BY `name`"
 		. " ) AS TEMP"
 		. " WHERE __meeting_cnt > 0"
+		. " ORDER BY __member_membership_name"
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
 	}
+
+	public function getAllMembershipByMemberHashKey($member_hashkey) {
+
+		if(empty($member_hashkey)) return null;
+
+		// 1. 미팅 아젠다를 가지고 있는 모든 클럽을 보여줍니다.
+		// 1-1. 멤버 해시키값을 이용, 멤버가 등록된 클럽을 상위에, 그렇지 않은 클럽을 하위에 보여줍니다.
+
+		// 2. 멤버가 가입된 모든 클럽 정보를 가져옵니다.
+		$query = 
+		"SELECT MEMBERSHIP.id AS __member_membership"
+		. " FROM MEMBER"
+		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id = MEMBER.id"
+		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id = MNM.membership_id"
+		. " WHERE MEMBER.hash_key=\"$member_hashkey\""
+		;
+
+		$json_res_obj_membership = $this->getSelectResult($query);
+		$member_memberships = "";
+		for($idx = 0;$idx < COUNT($json_res_obj_membership->result); $idx++) {
+			$cur_membership_obj = $json_res_obj_membership->result[$idx];
+			$cur_membership_id = $cur_membership_obj->__member_membership;
+
+			if(0 < $idx) {
+				$member_memberships .= ",$cur_membership_id";
+			} else {
+				$member_memberships .= "$cur_membership_id";
+			}
+		}
+
+		// 2. 멤버가 가입된 클럽 세부 정보 조회.
+		$query = 
+		"SELECT __member_membership"
+		. " , __member_membership_name"
+		. " , __member_membership_desc" 
+		. " , __meeting_cnt"
+		. " , __is_user_membership"
+		. " FROM ("
+			. " SELECT `MEMBERSHIP`.id AS __member_membership"
+			. " , IFNULL(`MEMBERSHIP`.`name`, \"\") AS __member_membership_name"
+			. " , IFNULL(`MEMBERSHIP`.`desc`, \"\") AS __member_membership_desc"
+			. " , COUNT(MA.`id`) AS __meeting_cnt"
+			. " , 1 AS __is_user_membership"
+			. " FROM `MEMBERSHIP`"
+			. " LEFT JOIN MEETING_AGENDA AS MA ON MA.membership_id=`MEMBERSHIP`.id"
+			. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.membership_id = `MEMBERSHIP`.id"
+			. " WHERE `MEMBERSHIP`.id IN ($member_memberships)"
+			. " GROUP BY `MEMBERSHIP`.id"
+			. " ORDER BY `name`"
+		. " ) AS TEMP"
+		. " WHERE __meeting_cnt > 0"
+		. " ORDER BY __member_membership_name"
+		;
+		$json_res_obj_club_member_include = $this->getSelectResult($query);
+		$result_club_member_include = $json_res_obj_club_member_include->result;
+
+
+		// 3. 멤버가 가입되지 않은 클럽 세부 정보 조회.
+		$query = 
+		"SELECT __member_membership"
+		. " , __member_membership_name"
+		. " , __member_membership_desc" 
+		. " , __meeting_cnt"
+		. " , __is_user_membership"
+		. " FROM ("
+			. " SELECT `MEMBERSHIP`.id AS __member_membership"
+			. " , IFNULL(`MEMBERSHIP`.`name`, \"\") AS __member_membership_name"
+			. " , IFNULL(`MEMBERSHIP`.`desc`, \"\") AS __member_membership_desc"
+			. " , COUNT(MA.`id`) AS __meeting_cnt"
+			. " , 0 AS __is_user_membership"
+			. " FROM `MEMBERSHIP`"
+			. " LEFT JOIN MEETING_AGENDA AS MA ON MA.membership_id=`MEMBERSHIP`.id"
+			. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.membership_id = `MEMBERSHIP`.id"
+			. " WHERE `MEMBERSHIP`.id NOT IN ($member_memberships)"
+			. " GROUP BY `MEMBERSHIP`.id"
+			. " ORDER BY `name`"
+		. " ) AS TEMP"
+		. " WHERE __meeting_cnt > 0"
+		. " ORDER BY __member_membership_name"
+		;
+		$json_res_obj_club_member_exclude = $this->getSelectResult($query);
+		$result_club_member_exclude = $json_res_obj_club_member_exclude->result;
+
+		// 2개의 내용을 합칩니다.
+		$result_merge = array_merge($result_club_member_include, $result_club_member_exclude);
+
+		return $result_merge;
+	}	
 
 	public function insertMember(	$first_name, 
 									$last_name, 
@@ -1309,13 +1417,11 @@ class MYSQLInterface{
 	public function updateMember(	$hash_key, 
 									$member_first_name, 
 									$member_last_name, 
-									$member_mobile, 
 									$member_email 	){
 
 		if(empty($hash_key)) return null;
 		if(empty($member_first_name)) return null;
 		if(empty($member_last_name)) return null;
-		if(empty($member_mobile)) return null;
 		if(empty($member_email)) return null;
 
 		$query = 
@@ -1323,7 +1429,6 @@ class MYSQLInterface{
 		. " SET"
 		. " `first_name`=\"$member_first_name\""
 		. " ,`last_name`=\"$member_last_name\""
-		. " ,`mobile`=\"$member_mobile\""
 		. " ,`email`=\"$member_email\""
 		. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
 		. " WHERE hash_key=\"$hash_key\""
@@ -1388,6 +1493,8 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}	
 
+// REMOVE ME
+/*
 	public function updateMemberMobile(	$hash_key, $member_mobile ){
 
 		if(empty($hash_key)) return null;
@@ -1404,6 +1511,7 @@ class MYSQLInterface{
 
 		return $this->getSimpleResult($json_res_obj);
 	}	
+*/
 
 	public function updateMemberEmail( $hash_key, $member_email ){
 
@@ -1441,7 +1549,6 @@ class MYSQLInterface{
 		. " , IFNULL(MEMBERSHIP.id,-1) AS __member_membership"
 		. " , IFNULL(MEMBERSHIP.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
@@ -1474,7 +1581,6 @@ class MYSQLInterface{
 		. " , IFNULL(MEMBERSHIP.id,-1) AS __member_membership"
 		. " , IFNULL(MEMBERSHIP.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
@@ -1507,7 +1613,6 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
@@ -1520,6 +1625,72 @@ class MYSQLInterface{
 
 		return $json_res_obj->result;
 	}
+
+	public function getMemberListByMembershipIdNMemberHashkey($membership_id=-1, $member_hashkey=""){
+
+		$function_name = "getMemberListByMembershipIdNMemberHashkey";
+		if($this->isNotUnsignedNumberID($membership_id)){
+			echo "$function_name / \$this->isNotUnsignedNumberID(\$membership_id)<br/>";
+			return;
+		}
+		if(empty($member_hashkey)){
+			echo "$function_name / empty(\$member_hashkey)<br/>";
+			return;
+		}
+
+
+		// wonder.jung
+
+		$query = 
+		"SELECT `MEMBER`.id AS __member_id"
+		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+		. " , IFNULL(CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name),\"\") AS __member_name"
+		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+		. " , IFNULL(UPPER(SUBSTR(`MEMBER`.first_name,1,1)),\"\") AS __member_name_group"
+		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+		. " , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
+		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+		. " FROM `MEMBER`"
+		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
+		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MNM.membership_id"
+		. " WHERE MNM.membership_id = $membership_id"
+		. " AND `MEMBER`.hash_key IN (\"$member_hashkey\")"
+		;
+
+		$json_res_obj_log_in_user = $this->getSelectResult($query);
+		$result_log_in_user = $json_res_obj_log_in_user->result;
+
+		$query = 
+		"SELECT `MEMBER`.id AS __member_id"
+		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+		. " , IFNULL(CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name),\"\") AS __member_name"
+		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+		. " , IFNULL(UPPER(SUBSTR(`MEMBER`.first_name,1,1)),\"\") AS __member_name_group"
+		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+		. " , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
+		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+		. " FROM `MEMBER`"
+		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
+		. " LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MNM.membership_id"
+		. " WHERE MNM.membership_id = $membership_id"
+		. " AND `MEMBER`.hash_key NOT IN (\"$member_hashkey\")"
+		. " ORDER BY MNM.`status` ASC, LOWER(`MEMBER`.first_name) ASC"
+		;
+
+		$json_res_obj_others = $this->getSelectResult($query);
+		$result_others = $json_res_obj_others->result;
+
+		$result_merge = array_merge($result_log_in_user, $result_others);
+
+		return $result_merge;
+	}
+
 
 	public function getOtherMemberListByMembershipId($membership_id=-1){
 
@@ -1540,7 +1711,6 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " FROM `MEMBER`"
 		. " LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
@@ -1567,7 +1737,6 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " , COUNT(`MEMBER`.id) AS __member_speech_cnt"
 		. " FROM `MEMBER`"
@@ -1597,7 +1766,6 @@ class MYSQLInterface{
 		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
 		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
 		. " , COUNT(`MEMBER`.id) AS __member_evaluator_cnt"
 		. " FROM `MEMBER`"
@@ -1634,7 +1802,6 @@ class MYSQLInterface{
 		. " , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
 		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.mobile,\"\") AS __member_mobile"
 		. " , `ROLE`.id AS __role_id"
 		. " , `ROLE`.name AS __role_name"
 		. " , COUNT(MA_ROLE.role_id) AS __role_cnt"
@@ -1767,7 +1934,6 @@ class MYSQLInterface{
 		. " , IFNULL(OFFICER.name,\"\") AS __officer_name"
 		. " , IFNULL(OFFICER.desc,\"\") AS __officer_desc"
 		. " , IFNULL(MEMBER.id,-1) AS __member_id"
-		. " , IFNULL(MEMBER.mobile,\"\") AS __member_mobile"
 		. " , IFNULL(MEMBER.email,\"\") AS __member_email"
 		. " , IFNULL(CONCAT(MEMBER.first_name,\" \",MEMBER.last_name),\"\") AS __member_name"
 		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
