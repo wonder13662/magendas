@@ -455,16 +455,29 @@ airborne.dates = {
 
 		return "";
 	}
-	,getTimeElapsed:function(start_time_obj){
+	,getTimeElapsed:function(start_time_obj, time_stack){
+
+		// 초기화 설정
+		var time_stack_sec = 0;
+		if(time_stack == undefined) {
+			time_stack = 0;
+			time_stack_sec = 0;
+		} else {
+			time_stack_sec = parseInt(time_stack / 1000);
+		}
 		if(start_time_obj == null){
-			return {start_time:new Date(), time_diff_millsec:0};
+			return {start_time:new Date(), time_diff_millsec:0, time_stack:time_stack, time_stack_sec:time_stack_sec};
 		}
 
+		// 이전의 측정시간을 가지고 시간을 재는 경우.
 		var start_time = start_time_obj.start_time;
 		var now_time = new Date();
 		var time_diff_millsec = now_time.getTime() - start_time.getTime();
 
-		return {start_time:now_time, time_diff_millsec:time_diff_millsec};
+		var now_time_stack_millisec = start_time_obj.time_stack + time_diff_millsec;
+		var now_time_stack_sec = parseInt(now_time_stack_millisec / 1000);
+
+		return {start_time:now_time, time_diff_millsec:time_diff_millsec, time_stack:now_time_stack_millisec, time_stack_sec:now_time_stack_sec};
 	}
 	,getDoubleDigit:function(target_number){
 		if(target_number < 10){
@@ -531,6 +544,23 @@ airborne.dates = {
 
 		return this.getDoubleDigit(time_hh) + ":" + this.getDoubleDigit(time_mm);
 	}
+	,get_mm_ss_ss_from_millisec:function(millisecs){
+
+		var _v = airborne.validator;
+		if(!(millisecs > -1)) {
+			console.log("!Error! / airborne.dates.get_hh_mm_ss_ss_from_millisec / !(millisecs > -1)");
+			return;
+		}
+
+		var seconds = parseInt(millisecs / 1000);
+		
+		var time_mm = parseInt((seconds % 3600) / 60);
+		var time_ss = parseInt((seconds % 60));
+		var time_m_ss = parseInt((millisecs % 1000) / 10); // 1/100초
+
+		return this.getDoubleDigit(time_mm) + ":" + this.getDoubleDigit(time_ss) + "." + this.getDoubleDigit(time_m_ss);
+	}
+
 	/*
 		@ public
 		@ desc : YYYY-MM-DD 포맷으로 며칠뒤, 며칠전의 시간을 가져옵니다.
