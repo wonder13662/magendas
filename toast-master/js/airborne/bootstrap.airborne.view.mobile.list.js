@@ -322,7 +322,6 @@ airborne.bootstrap.view.mobile.list = {
 			return;
 		}
 
-		// wonder.jung
 		var row_id = airborne.html.getIdRandomTail(title) + "_btn";
 		var row_tag = ""
 		+ "<tr id=\"<ID>\" style=\"background-color:#f5f5f5;\">".replace(/\<ID\>/gi, row_id)
@@ -335,19 +334,29 @@ airborne.bootstrap.view.mobile.list = {
 		;
 		append_target_jq.append(row_tag);
 		var container_jq = append_target_jq.children().last();
+		var btn_row_jq = container_jq.find(" button#" + row_id);
 
-
-		// accessor - wonder.jung
+		// accessor
 
 		var accessor = {
 			target_jq:container_jq
 			, get_target_jq:function() {
 				return this.target_jq;
 			}
+			, btn_row_jq:btn_row_jq
+			, get_button_jq:function() {
+				return this.btn_row_jq;
+			}
 			, is_on:true
+			, on:function() {
+				this.is_on = true;
+				this.btn_row_jq.removeClass("disabled");
+				this.btn_row_jq.css("opacity","1");
+			}
 			, off:function() {
 				this.is_on = false;
-				this.input_row_jq.attr("disabled","disabled");
+				this.btn_row_jq.addClass("disabled");
+				this.btn_row_jq.css("opacity",_param.OPACITY_DISABLED);
 			}
 			, get_is_on:function() {
 				return this.is_on;
@@ -355,7 +364,7 @@ airborne.bootstrap.view.mobile.list = {
 		};
 
 		// Set Event
-		var btn_row_jq = container_jq.find(" button#" + row_id);
+		
 		btn_row_jq.on("click", function(){
 			if(accessor.get_is_on()) {
 				delegate_obj._func.apply(delegate_obj._scope,[delegate_data, accessor]);	
@@ -1354,9 +1363,52 @@ airborne.bootstrap.view.mobile.list = {
 	}
 	/*
 		@ Public
+		@ Desc : 화면에 표시되는 여러가지 이벤트 객체를 한꺼번에 toggle 시키는 obj를 반환합니다.
+	*/
+	,get_event_toggle_controller:function() {
+
+		var event_toggle_controller = 
+		{
+			accessor_arr:[]
+			, push:function(new_accessor) {
+				if(new_accessor == undefined) {
+					return;
+				}
+				if(new_accessor.on == undefined) {
+					return;
+				}
+				if(new_accessor.off == undefined) {
+					return;
+				}
+				this.accessor_arr.push(new_accessor);
+			}
+			, on:function(){
+				if(_v.is_not_valid_array(this.accessor_arr)) {
+					return;
+				}
+				for(var idx = 0; idx < this.accessor_arr.length; idx++) {
+					var accessor = this.accessor_arr[idx];
+					accessor.on();
+				} // for end
+			} // func end
+			, off:function(){
+				if(_v.is_not_valid_array(this.accessor_arr)) {
+					return;
+				}
+				for(var idx = 0; idx < this.accessor_arr.length; idx++) {
+					var accessor = this.accessor_arr[idx];
+					accessor.off();
+				} // for end
+			} // func end
+		}
+
+		return event_toggle_controller;
+	}
+	/*
+		@ Public
 		@ Desc : 시간을 잴수 있는 타이머 열을 그립니다.
 	*/
-	,addTableRowTimer:function(time_table_arr, text_on_left, after_target_jq, delegate_obj_click_row, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
+	,addTableRowTimer:function(time_table_arr, text_on_left, after_target_jq, delegate_obj_click_row, delegate_obj_on_time_update, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
 
 		var _obj = airborne.bootstrap.obj;
 
@@ -1385,7 +1437,6 @@ airborne.bootstrap.view.mobile.list = {
 			text_color_vmouse_down = bg_color;
 		}		
 
-		// wonder.jung
 		var row_id = airborne.html.getIdRandomTail("addTableRowTitleNBadge" + text_on_left);
 		var row_tag = "";
 		row_tag += ""
@@ -1427,6 +1478,10 @@ airborne.bootstrap.view.mobile.list = {
 				return this.container_jq;
 			}
 			, target_jq:target_jq
+			, title_btn_jq:title_btn_jq
+			, get_title_btn_jq:function() {
+				return this.title_btn_jq;
+			}
 			, title_btn_text_jq:title_btn_text_jq
 			, set_title:function(new_title) {
 				this.title_btn_text_jq.html(new_title);
@@ -1443,9 +1498,18 @@ airborne.bootstrap.view.mobile.list = {
 			, get_time_table_arr:function() {
 				return this.time_table_arr;
 			}
+			, delete_btn_jq:delete_btn_jq
+			, get_delete_btn_jq:function() {
+				return this.delete_btn_jq;
+			}
+			, EVENT_TYPE_CLICK_TITLE:"EVENT_TYPE_CLICK_TITLE"
+			, EVENT_TYPE_CLICK_REMOVE:"EVENT_TYPE_CLICK_REMOVE"
+			, EVENT_TYPE_CLICK_TIMER:"EVENT_TYPE_CLICK_TIMER"
 			, time_elapsed_obj:null
 			, time_stack_millisec:0
 			, interval_timer_obj:null
+			, EVENT_TYPE_START_TIMER:"EVENT_TYPE_START_TIMER"
+			, EVENT_TYPE_STOP_TIMER:"EVENT_TYPE_STOP_TIMER"
 			, start_timer:function() {
 
 				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.time_stack_millisec);
@@ -1485,43 +1549,175 @@ airborne.bootstrap.view.mobile.list = {
 				}, 40);
 
 				// TODO - 시간을 재는 동안은 다른 버튼들의 이벤트를 받지 않습니다.
+				if(delegate_obj_on_time_update != undefined) {
+					var delegate_data = {
+						EVENT_TYPE:this.EVENT_TYPE_START_TIMER
+						, target_controller:this
+					};
+					delegate_obj_on_time_update._func.apply(delegate_obj_on_time_update._scope,[delegate_data]);
+				}
 			}
 			, stop_timer:function() {
 				clearInterval(this.interval_timer_obj);
 				this.interval_timer_obj = null;
 				this.time_stack_millisec = this.time_elapsed_obj.time_stack;
 				this.time_elapsed_obj = null;
+
+				this.on();
+
+				if(delegate_obj_on_time_update != undefined) {
+					var delegate_data = {
+						EVENT_TYPE:this.EVENT_TYPE_STOP_TIMER
+						, target_controller:this
+					};
+					delegate_obj_on_time_update._func.apply(delegate_obj_on_time_update._scope,[delegate_data]);
+				}
+			}
+			, event_toggle_obj:{
+				EVENT_TYPE_CLICK_TITLE:true
+				, EVENT_TYPE_CLICK_REMOVE:true
+				, EVENT_TYPE_CLICK_TIMER:true
+			}
+			, is_on:true
+			, on:function() {
+				// 모든 버튼의 이벤트를 추가.
+				this.event_toggle_obj.EVENT_TYPE_CLICK_TITLE = true;
+				this.event_toggle_obj.EVENT_TYPE_CLICK_REMOVE = true;
+				this.event_toggle_obj.EVENT_TYPE_CLICK_TIMER = true;
+
+				var cur_delete_btn_jq = this.get_delete_btn_jq();
+				var cur_title_btn_jq = this.get_title_btn_jq();
+				var cur_timer_btn_jq = this.get_timer_btn_jq();
+
+				cur_delete_btn_jq.removeClass("disabled");
+				cur_title_btn_jq.removeClass("disabled");
+				cur_timer_btn_jq.removeClass("disabled");
+
+				cur_delete_btn_jq.css("opacity","1");
+				cur_title_btn_jq.css("opacity","1");
+				cur_timer_btn_jq.css("opacity","1");
+
+			}
+			, off:function(event_type_exclude) {
+				
+				// 사용자가 지정한 버튼에 대해서는 이벤트를 유지.
+
+				// 모든 버튼의 이벤트를 제거함.
+				this.event_toggle_obj.EVENT_TYPE_CLICK_TITLE = false;
+				this.event_toggle_obj.EVENT_TYPE_CLICK_REMOVE = false;
+				this.event_toggle_obj.EVENT_TYPE_CLICK_TIMER = false;
+
+				var cur_delete_btn_jq = this.get_delete_btn_jq();
+				var cur_title_btn_jq = this.get_title_btn_jq();
+				var cur_timer_btn_jq = this.get_timer_btn_jq();
+
+				this.event_toggle_obj[event_type_exclude] = true;
+				if(this.EVENT_TYPE_CLICK_REMOVE === event_type_exclude) {
+					cur_delete_btn_jq.removeClass("disabled");
+					cur_title_btn_jq.addClass("disabled");
+					cur_timer_btn_jq.addClass("disabled");
+
+					cur_delete_btn_jq.css("opacity","1");
+					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+
+				} else if(this.EVENT_TYPE_CLICK_TITLE === event_type_exclude) {
+					cur_delete_btn_jq.addClass("disabled");
+					cur_title_btn_jq.removeClass("disabled");
+					cur_timer_btn_jq.addClass("disabled");
+
+					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_title_btn_jq.css("opacity","1");
+					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+
+				} else if(this.EVENT_TYPE_CLICK_TIMER === event_type_exclude) {
+					cur_delete_btn_jq.addClass("disabled");
+					cur_title_btn_jq.addClass("disabled");
+					cur_timer_btn_jq.removeClass("disabled");
+
+					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_timer_btn_jq.css("opacity","1");
+
+				} else {
+					cur_delete_btn_jq.addClass("disabled");
+					cur_title_btn_jq.addClass("disabled");
+					cur_timer_btn_jq.addClass("disabled");
+
+					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+
+				}
+
+				this.is_on = false;
+			}
+			, get_is_off:function(event_type) {
+				return !this.get_is_on(event_type);
+			}
+			, get_is_on:function(event_type) {
+				if(	this.event_toggle_obj == undefined && 
+					this.event_toggle_obj[event_type] == undefined ) {
+					return false;
+				}
+
+				return this.event_toggle_obj[event_type];
 			}
 		};
+
+		// wonder.jung
+
+		// 
+
 		if(delegate_data != undefined) {
 			delegate_data.target_controller = target_controller;
 		}
 
 		delete_btn_jq.click(function(){
+			if(target_controller.get_is_off(target_controller.EVENT_TYPE_CLICK_REMOVE)) {
+				return;
+			}
+
 			if(confirm("Delete this?")) {
 
 				target_controller.stop_timer();
 
 				delegate_data.click_target_jq = $(this);
+				delegate_data.EVENT_TYPE = target_controller.EVENT_TYPE_CLICK_REMOVE;
 				delegate_obj_click_row._func.apply(delegate_obj_click_row._scope,[delegate_data]);
 			}
-			console.log("delete_btn_jq.click");			
 		});
 
 
 		title_btn_jq.click(function(){
+
+			if(target_controller.get_is_off(target_controller.EVENT_TYPE_CLICK_TITLE)) {
+				return;
+			}
+
 			delegate_data.click_target_jq = $(this);
+			delegate_data.EVENT_TYPE = target_controller.EVENT_TYPE_CLICK_TITLE;
 			delegate_obj_click_row._func.apply(delegate_obj_click_row._scope,[delegate_data]);
 		});
 
 		timer_btn_jq.click(function(){
-			console.log("timer_btn_jq.click");
+
+			if(target_controller.get_is_off(target_controller.EVENT_TYPE_CLICK_TIMER)) {
+				return;
+			}
+			
+			delegate_data.click_target_jq = $(this);
+			delegate_data.EVENT_TYPE = target_controller.EVENT_TYPE_CLICK_TIMER;
+			delegate_obj_click_row._func.apply(delegate_obj_click_row._scope,[delegate_data]);
 
 			// 1. 시간을 재기 시작합니다.
 			if(target_controller.interval_timer_obj == undefined) {
 				target_controller.start_timer();
+				// 타이머 버튼을 제외한 나머지 버튼은 모두 비활성화처리합니다.
+				target_controller.off(target_controller.EVENT_TYPE_CLICK_TIMER);
 			} else {
 				target_controller.stop_timer();
+				target_controller.on();
 			}
 			
 		});

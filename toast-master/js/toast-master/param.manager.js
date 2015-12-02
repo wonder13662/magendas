@@ -200,6 +200,10 @@ var param_manager = {
 	, SEC_TABLE_TOPIC:[60,90,120]
 	, SEC_MINI_DEBATE:[60,60,60]
 
+	// 
+	, ACCESSOR:"ACCESSOR"
+	, OPACITY_DISABLED:".6"
+
 
 
 

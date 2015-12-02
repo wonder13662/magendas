@@ -235,7 +235,7 @@ _m_list.addTableRowsSelectFolder(
 );
 // TODO accordian animation
 row_member_obj.hide();
-var role_delegate_func = function(container_jq, target_controller, row_member_obj) {
+var role_delegate_func = function(container_jq, target_controller, row_member_obj, delegate_on_finish) {
 
 
 	// TODO 모든 열의 속성 - is_open 속성을 NO로 변경.
@@ -299,6 +299,10 @@ var role_delegate_func = function(container_jq, target_controller, row_member_ob
 
 				// 멤버 리스트를 가립니다.
 				row_member_obj.hide();
+
+				if(delegate_on_finish != undefined) {
+					delegate_on_finish._func.apply(delegate_on_finish._scope,[]);
+				}
 
 				// 선택한 사용자를 해당 롤에 업데이트 합니다.
 				// 이상이 없다면 업데이트!
@@ -373,6 +377,11 @@ var role_delegate_func = function(container_jq, target_controller, row_member_ob
 
 
 
+// event hierarchy controller
+// 타이머 작동시 나머지 버튼들에 대해 비활성화 처리를 위해 필요합니다.
+
+var event_toggle_controller = _m_list.get_event_toggle_controller();
+
 
 
 
@@ -392,11 +401,16 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 		// delegate_obj_click_row
 		, _obj.getDelegate(function(delegate_data){
 
-			var cur_id = delegate_data.click_target_jq.attr("id");
+			console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
+
 			var target_controller = delegate_data.target_controller;
 			var container_jq = target_controller.get_container_jq();
+			// var parent_accessor = delegate_data[_param.ACCESSOR];
+			// parent_accessor.off();
 
-			if(cur_id === "title_left") {
+			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
+
+				console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
 
 				role_delegate_func(
 					// container_jq
@@ -405,15 +419,38 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 					, target_controller
 					// row_member_obj
 					, row_member_obj
+					// delegate_on_finish
+					, _obj.getDelegate(function(delegate_data){
+
+						console.log(">>> delegate_on_finish / delegate_data :: ",delegate_data);
+
+						// parent_accessor.on();
+
+					}, this)
+
 				);
 
-			} else if(cur_id === "btn_remove") {
+			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
+
+				console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
 
 				// 1. remove from screen
-				container_jq.remove();
+				//container_jq.remove();
 
 				// 2. remove data
 
+			}
+
+		}, this)
+		// delegate_obj_on_time_update
+		, _obj.getDelegate(function(delegate_data){
+
+			var target_controller = delegate_data.target_controller;
+
+			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_START_TIMER) {
+				event_toggle_controller.off();
+			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_STOP_TIMER) {
+				event_toggle_controller.on();
 			}
 
 		}, this)
@@ -422,6 +459,8 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 	);
 
 	table_topic_row_after_jq = timer_controller.get_container_jq();
+
+	event_toggle_controller.push(timer_controller);
 
 	return timer_controller;
 }
@@ -452,6 +491,7 @@ _m_list.addTableRowBtn(
 			// delegate_data_param
 			, _param
 			.get(_param.MEETING_ID, recent_meeting_id)
+			.get(_param.ACCESSOR, accessor)
 			// role_delegate_func
 			, role_delegate_func
 		);
@@ -461,6 +501,7 @@ _m_list.addTableRowBtn(
 	, table_jq
 );
 var table_topic_row_after_jq = null;
+event_toggle_controller.push(accessor_table_topic_btn);
 
 
 
@@ -478,7 +519,7 @@ var table_topic_row_after_jq = null;
 
 
 // MINI DEBATE (Dynamic)
-var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
+var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_delegate_func, parent_accessor) {
 
 	var timer_controller = 
 	_m_list.addTableRowTimer(
@@ -491,11 +532,17 @@ var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_deleg
 		// delegate_obj_click_row
 		, _obj.getDelegate(function(delegate_data){
 
-			var cur_id = delegate_data.click_target_jq.attr("id");
+			console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
+
+			// EVENT TYPE을 받는 것이 나을것 같은데?
 			var target_controller = delegate_data.target_controller;
 			var container_jq = target_controller.get_container_jq();
 
-			if(cur_id === "title_left") {
+			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
+
+				console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
+
+				// TODO 왜 2번 눌러야 이벤트 제어가 가능한가? 이슈.
 
 				role_delegate_func(
 					// container_jq
@@ -506,14 +553,30 @@ var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_deleg
 					, row_member_obj
 				);
 
-			} else if(cur_id === "btn_remove") {
+			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
+
+				console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
 
 				// 1. remove from screen
-				container_jq.remove();
+				//container_jq.remove();
 
 				// 2. remove data
-
 			}
+
+
+
+		}, this)
+		// delegate_obj_on_time_update
+		, _obj.getDelegate(function(delegate_data){
+
+			var target_controller = delegate_data.target_controller;
+
+			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_START_TIMER) {
+				event_toggle_controller.off();
+			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_STOP_TIMER) {
+				event_toggle_controller.on();
+			}
+
 
 		}, this)
 		// delegate_data
@@ -521,6 +584,8 @@ var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_deleg
 	);
 
 	mini_debate_row_after_jq = timer_controller.get_container_jq();
+
+	event_toggle_controller.push(timer_controller);
 
 	return timer_controller;
 }
@@ -551,8 +616,11 @@ _m_list.addTableRowBtn(
 			// delegate_data_param
 			, _param
 			.get(_param.MEETING_ID, recent_meeting_id)
+			.get(_param.ACCESSOR, accessor)
 			// role_delegate_func
 			, role_delegate_func
+			// parent accessor
+			, accessor
 		);
 
 	}, this)
@@ -560,6 +628,8 @@ _m_list.addTableRowBtn(
 	, table_jq
 );
 var mini_debate_row_after_jq = null;
+event_toggle_controller.push(accessor_mini_debate_btn);
+
 
 
 
