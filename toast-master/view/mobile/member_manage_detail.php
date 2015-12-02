@@ -745,7 +745,7 @@ if(__member_obj != undefined) {
 			// 롤의 세부 내역을 가리고 리스트 최상단으로 이동합니다.
 			var body = $("html, body");
 			history_row_jq_arr.hide();
-			body.stop().animate({scrollTop:0}, _param.MIILLISEC_ANIMATE_SCROLL, 'swing', function() { 
+			body.stop().animate({scrollTop:0}, _param.SEC_ANIMATE_SCROLL, 'swing', function() { 
 			   console.log("Finished animating");
 			});
 
@@ -756,7 +756,7 @@ if(__member_obj != undefined) {
 			// 선택한 롤을 화면 최상단으로 이동시킵니다.
 			var cur_offset = self_jq.offset();
 			var body = $("html, body");
-			body.stop().animate({scrollTop:cur_offset.top}, _param.MIILLISEC_ANIMATE_SCROLL, 'swing', function() { 
+			body.stop().animate({scrollTop:cur_offset.top}, _param.SEC_ANIMATE_SCROLL, 'swing', function() { 
 			   console.log("Finished animating");
 			});
 		}
@@ -882,7 +882,7 @@ if(__member_obj != undefined) {
 			// 선택한 롤을 화면 최상단으로 이동시킵니다.
 			var cur_offset = delegate_data.target_jq.offset();
 			var body = $("html, body");
-			body.stop().animate({scrollTop:cur_offset.top}, _param.MIILLISEC_ANIMATE_SCROLL, 'swing', function() { 
+			body.stop().animate({scrollTop:cur_offset.top}, _param.SEC_ANIMATE_SCROLL, 'swing', function() { 
 			   console.log("Finished animating");
 			});
 

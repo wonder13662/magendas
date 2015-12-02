@@ -684,8 +684,8 @@ toast_master.mobile_list_manager = {
 
 			setTimeout(function(){ 
 				$( "body" ).css("opacity",".5");
-				$( "body" ).animate({opacity:1}, _param.MIILLISEC_BODY_FADE_IN_ON_READY);
-			}, _param.MIILLISEC_BODY_FADE_IN_ON_READY);
+				$( "body" ).animate({opacity:1}, _param.SEC_BODY_FADE_IN_ON_READY);
+			}, _param.SEC_BODY_FADE_IN_ON_READY);
 
 			$("div.ui-loader").hide();
 

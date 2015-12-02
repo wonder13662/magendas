@@ -95,6 +95,8 @@ var membership_obj = <?php echo json_encode($membership_obj);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 
 var recent_meeting_agenda_obj = <?php echo json_encode($recent_meeting_agenda_obj);?>;
+var recent_meeting_id = <?php echo json_encode($recent_meeting_id);?>;
+
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var member_list = <?php echo json_encode($member_list);?>;
 
@@ -225,7 +227,7 @@ _m_list.addTableRowsSelectFolder(
 	}, this)
 	// delegate_data
 	, _param
-	.get(_param.MEETING_ID,MEETING_ID)
+	.get(_param.MEETING_ID,recent_meeting_id)
 	// text_color
 	, _color.COLOR_MEDIUM_GRAY
 	// bg_color
@@ -233,26 +235,25 @@ _m_list.addTableRowsSelectFolder(
 );
 // TODO accordian animation
 row_member_obj.hide();
-var role_delegate_func = function(delegate_data, row_member_obj) {
+var role_delegate_func = function(container_jq, target_controller, row_member_obj) {
 
-	if(	delegate_data == undefined || 
-		delegate_data.target_jq == undefined ||
-		delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] == undefined || 
-		delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] !== _param.EVENT_MOUSE_UP
-		) {
-		return;
-	}
 
 	// TODO 모든 열의 속성 - is_open 속성을 NO로 변경.
 	// 이미 열려있는 열이 있는 상태에서 다른 열을 열면 이벤트 상태가 초기화되지 않음.
 	// 사용자는 두번 열어야 함.
-	var MEETING_ID = delegate_data.delegate_data.MEETING_ID;
-	var ROLE_ID = delegate_data.delegate_data.ROLE_ID;
-	var row_role_jq = delegate_data.target_jq;
+	// var MEETING_ID = delegate_data.delegate_data.MEETING_ID;
+	// var ROLE_ID = delegate_data.delegate_data.ROLE_ID;
+	// var row_role_jq = delegate_data.target_jq;
 
-	delegate_data.target_jq.parent().after(row_member_obj.get_target_jq_arr());
-	if(delegate_data.target_jq.attr("is_open") === "YES") {
-		delegate_data.target_jq.attr("is_open", "NO");
+	// 리스트를 노출할 위치를 가리키는 jq container가 필요함.
+	//container_jq;
+	// 업데이트된 이름을 반영할 target controller
+
+
+
+	container_jq.after(row_member_obj.get_target_jq_arr());
+	if(container_jq.attr("is_open") === "YES") {
+		container_jq.attr("is_open", "NO");
 
 		//window.scrollTo(0, 0);
 		// REFACTOR ME
@@ -264,11 +265,11 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 
 	} else {
 
-		delegate_data.target_jq.attr("is_open", "YES");
+		container_jq.attr("is_open", "YES");
 		row_member_obj.show();
 
 		// TODO 선택된 사용자는 제외합니다.
-		var cur_offset = delegate_data.target_jq.offset();
+		var cur_offset = container_jq.offset();
 
 		//window.scrollTo(0, cur_offset.top);
 		// REFACTOR ME
@@ -280,14 +281,28 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 		// 다른 롤의 멤버 리스트가 될 때마다 role id가 변경되어야 합니다.
 		// 그러므로 delegate 함수가 그때마다 새로 설정되어야 합니다.
 		row_member_obj.set_delegate_obj_click_row(
+
 			_obj.getDelegate(function(selector_delegate_data){
+
 
 				var target_jq = selector_delegate_data.delegate_data.get_target_jq();
 				var MEMBER_ID = target_jq.attr("key");
 				var MEMBER_NAME = target_jq.find("strong").html();
 
+				console.log(">>> selector_delegate_data :: ",selector_delegate_data);
+				console.log(">>> target_controller :: ",target_controller);
+				console.log(">>> MEMBER_ID :: ",MEMBER_ID);
+				console.log(">>> MEMBER_NAME :: ",MEMBER_NAME);
+
+				// 롤의 이름을 업데이트 합니다.
+				target_controller.set_title(MEMBER_NAME);
+
+				// 멤버 리스트를 가립니다.
+				row_member_obj.hide();
+
 				// 선택한 사용자를 해당 롤에 업데이트 합니다.
 				// 이상이 없다면 업데이트!
+				/*
 				_ajax.send_simple_post(
 					// _url
 					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -304,6 +319,9 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						function(data){
 
 							console.log(data);
+
+							return;
+
 							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
 								console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
 
@@ -336,6 +354,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						this
 					)
 				); // ajax done.
+				*/
 
 			}, this)					
 		);
@@ -359,71 +378,97 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 
 
 // TABLE TOPIC (Dynamic)
-var add_table_topic = function(time_arr_on_badge, table_jq, delegate_data_param, role_delegate_func) {
 
-	var role_controller = 
-	_m_list.addTableRowTimerBadge(
-		// time_arr_on_badge
-		time_arr_on_badge
+var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
+
+	var timer_controller = 
+	_m_list.addTableRowTimer(
+		// time_arr - ( GREEN / YELLOW / RED )
+		time_arr
 		// title_on_badge
 		, _param.NOT_ASSIGNED
-		// append_target_jq
-		, table_jq
+		// after_target_jq
+		, row_jq
 		// delegate_obj_click_row
 		, _obj.getDelegate(function(delegate_data){
 
-			if(	delegate_data == undefined ||
-				delegate_data.delegate_data == undefined ||
-				delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] == undefined ) {
+			var cur_id = delegate_data.click_target_jq.attr("id");
+			var target_controller = delegate_data.target_controller;
+			var container_jq = target_controller.get_container_jq();
 
-				console.log("!Error!\taddTableRowMovingArrowWidthBadge\tdelegate_data is not valid!\tdelegate_data :: ",delegate_data);
-				return;
-			}
+			if(cur_id === "title_left") {
 
-			if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+				role_delegate_func(
+					// container_jq
+					container_jq
+					// target_controller
+					, target_controller
+					// row_member_obj
+					, row_member_obj
+				);
 
-				role_delegate_func(delegate_data, row_member_obj);
+			} else if(cur_id === "btn_remove") {
+
+				// 1. remove from screen
+				container_jq.remove();
+
+				// 2. remove data
 
 			}
 
 		}, this)
 		// delegate_data
 		, delegate_data_param
-
-		// , _param
-		// .get(_param.MEETING_ID, cur_meeting_agenda_id)
-		// .get(_param.ROLE_ID, role_id_toastmaster)
-		// .get(_param.TARGET_SCROLL_BACK_Y, row_meeting_info_jq)
-
-		// text_color_vmouse_down
-		// bg_color_vmouse_down
-		// text_color
-		// bg_color
 	);
 
-	return role_controller;
+	table_topic_row_after_jq = timer_controller.get_container_jq();
+
+	return timer_controller;
 }
+var accessor_table_topic_btn = 
 _m_list.addTableRowBtn(
 	// title
-	"Add Table Topic Speaker"
+	"+ Table Topic Speaker"
 	// color
 	, null
 	// delegate_obj
-	, _obj.getDelegate(function(){
+	, _obj.getDelegate(function(delegate_data, accessor){
 
 		if(!confirm("Add New One?")){
 			return;
 		}
 
+		if(table_topic_row_after_jq == undefined) {
+			table_topic_row_after_jq = accessor.get_target_jq();
+		}
+
 		// 이 테이블 토픽 데이터는 어디에 저장?
-
-	
-
+		var timer_controller = 
+		add_table_topic(
+			// time_arr
+			_param.SEC_TABLE_TOPIC
+			// row_jq
+			, table_topic_row_after_jq
+			// delegate_data_param
+			, _param
+			.get(_param.MEETING_ID, recent_meeting_id)
+			// role_delegate_func
+			, role_delegate_func
+		);
 
 	}, this)
 	// append_target_jq
 	, table_jq
 );
+var table_topic_row_after_jq = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -433,26 +478,88 @@ _m_list.addTableRowBtn(
 
 
 // MINI DEBATE (Dynamic)
+var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
 
+	var timer_controller = 
+	_m_list.addTableRowTimer(
+		// time_arr - ( GREEN / YELLOW / RED )
+		time_arr
+		// title_on_badge
+		, _param.NOT_ASSIGNED
+		// after_target_jq
+		, row_jq
+		// delegate_obj_click_row
+		, _obj.getDelegate(function(delegate_data){
+
+			var cur_id = delegate_data.click_target_jq.attr("id");
+			var target_controller = delegate_data.target_controller;
+			var container_jq = target_controller.get_container_jq();
+
+			if(cur_id === "title_left") {
+
+				role_delegate_func(
+					// container_jq
+					container_jq
+					// target_controller
+					, target_controller
+					// row_member_obj
+					, row_member_obj
+				);
+
+			} else if(cur_id === "btn_remove") {
+
+				// 1. remove from screen
+				container_jq.remove();
+
+				// 2. remove data
+
+			}
+
+		}, this)
+		// delegate_data
+		, delegate_data_param
+	);
+
+	mini_debate_row_after_jq = timer_controller.get_container_jq();
+
+	return timer_controller;
+}
+var accessor_mini_debate_btn = 
 _m_list.addTableRowBtn(
 	// title
-	"Add Mini Debate Speaker"
+	"+ Mini Debate Speaker"
 	// color
 	, null
 	// delegate_obj
-	, _obj.getDelegate(function(){
+	, _obj.getDelegate(function(delegate_data, accessor){
 
 		if(!confirm("Add New One?")){
 			return;
 		}
 
-		// 이 테이블 토픽 데이터는 어디에 저장?
+		if(mini_debate_row_after_jq == undefined) {
+			mini_debate_row_after_jq = accessor.get_target_jq();
+		}
 
+		// 이 테이블 토픽 데이터는 어디에 저장?
+		var timer_controller = 
+		add_mini_debate(
+			// time_arr
+			_param.SEC_MINI_DEBATE
+			// row_jq
+			, mini_debate_row_after_jq
+			// delegate_data_param
+			, _param
+			.get(_param.MEETING_ID, recent_meeting_id)
+			// role_delegate_func
+			, role_delegate_func
+		);
 
 	}, this)
 	// append_target_jq
 	, table_jq
 );
+var mini_debate_row_after_jq = null;
 
 
 

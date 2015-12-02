@@ -322,6 +322,7 @@ airborne.bootstrap.view.mobile.list = {
 			return;
 		}
 
+		// wonder.jung
 		var row_id = airborne.html.getIdRandomTail(title) + "_btn";
 		var row_tag = ""
 		+ "<tr id=\"<ID>\" style=\"background-color:#f5f5f5;\">".replace(/\<ID\>/gi, row_id)
@@ -333,14 +334,35 @@ airborne.bootstrap.view.mobile.list = {
 		+ "</tr>"
 		;
 		append_target_jq.append(row_tag);
+		var container_jq = append_target_jq.children().last();
+
+
+		// accessor - wonder.jung
+
+		var accessor = {
+			target_jq:container_jq
+			, get_target_jq:function() {
+				return this.target_jq;
+			}
+			, is_on:true
+			, off:function() {
+				this.is_on = false;
+				this.input_row_jq.attr("disabled","disabled");
+			}
+			, get_is_on:function() {
+				return this.is_on;
+			}
+		};
 
 		// Set Event
-		var btn_row_jq = append_target_jq.find("tr#" + row_id + " button#" + row_id);
+		var btn_row_jq = container_jq.find(" button#" + row_id);
 		btn_row_jq.on("click", function(){
-			delegate_obj._func.apply(delegate_obj._scope,[delegate_data]);
+			if(accessor.get_is_on()) {
+				delegate_obj._func.apply(delegate_obj._scope,[delegate_data, accessor]);	
+			}
 		});
 
-
+		return accessor;
 	}
 	,NOT_VALID:"NOT_VALID"
 	,addTableRowInput:function(title, value, check_obj, append_target_jq){
@@ -614,7 +636,6 @@ airborne.bootstrap.view.mobile.list = {
 				return;
 			}
 
-			// wonder.jung
 			if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 				if(is_log_in==_param.YES && confirm("Log out?")){
 
@@ -1335,20 +1356,20 @@ airborne.bootstrap.view.mobile.list = {
 		@ Public
 		@ Desc : 시간을 잴수 있는 타이머 열을 그립니다.
 	*/
-	,addTableRowTimerBadge:function(time_arr_on_badge, textInBadge, append_target_jq, delegate_obj_click_row, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
+	,addTableRowTimer:function(time_table_arr, text_on_left, after_target_jq, delegate_obj_click_row, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
 
 		var _obj = airborne.bootstrap.obj;
 
-		if(_v.isNotValidArray(time_arr_on_badge)){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidArray(time_arr_on_badge)");
+		if(_v.isNotValidArray(time_table_arr)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidArray(time_table_arr)");
 			return;
 		}
-		if(_v.isNotValidStr(textInBadge)){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidStr(textInBadge)");
+		if(_v.isNotValidStr(text_on_left)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidStr(text_on_left)");
 			return;
 		}
-		if(append_target_jq==null){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / append_target_jq==null");
+		if(after_target_jq==null){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / after_target_jq==null");
 			return;
 		}
 		if(text_color == undefined) {
@@ -1364,58 +1385,146 @@ airborne.bootstrap.view.mobile.list = {
 			text_color_vmouse_down = bg_color;
 		}		
 
-		var row_id = airborne.html.getIdRandomTail("addTableRowTitleNBadge" + title);
+		// wonder.jung
+		var row_id = airborne.html.getIdRandomTail("addTableRowTitleNBadge" + text_on_left);
 		var row_tag = "";
 		row_tag += ""
 		+ "<tr id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
 			+ "<td class=\"text-left\" style=\"color:<COLOR>;background-color:<BG_COLOR>;border-bottom:1px solid #ddd;\">"
 				.replace(/\<COLOR\>/gi, text_color)
 				.replace(/\<BG_COLOR\>/gi, bg_color)
-				+ "<h5>"
-					+ "<span class=\"no_selection\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
-					+ "<span class=\"badge no_selection\" style=\"float:right;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, textInBadge)
-				+ "</h5>"
+
+					+ "<button id=\"btn_remove\" type=\"button\" class=\"btn btn-danger btn-ls btn-block ui-btn ui-shadow ui-corner-all\" style=\"width:60px;height:57px;float:left;margin-right:8px;\">"
+						+ "&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;"
+					+ "</button>"
+					+ "<button id=\"title_left\" type=\"button\" class=\"btn btn-default btn-lg btn-block\" style=\"color:<COLOR>;width:50%;float:left;margin:0px;\"><h5><TITLE></h5></button>"
+						.replace(/\<TITLE\>/gi, text_on_left)
+						.replace(/\<COLOR\>/gi, text_color)
+					+ "<button id=\"timer_right\" type=\"button\" class=\"btn btn-default btn-lg btn-block\" style=\"color:<COLOR>;width:28%;float:right;margin:0px;\"><h5><TITLE></h5></button>"
+						.replace(/\<TITLE\>/gi, "00:00:00")
+						.replace(/\<COLOR\>/gi, text_color)
+
 			+ "</td>"
 		+ "</tr>"
 		;
-
-		append_target_jq.append(row_tag);
+		after_target_jq.after(row_tag);
 
 		// Set Event
-		var target_jq = append_target_jq.find("tr#" + row_id).find("td");
+		var container_jq = after_target_jq.parent().find("tr#" + row_id);
+		var target_jq = container_jq.find("td");
 
-		var badge_jq = target_jq.find("span.badge");
+		var delete_btn_jq = target_jq.find("button#btn_remove");
+
+		var title_btn_jq = target_jq.find("button#title_left");
+		var title_btn_text_jq = title_btn_jq.find("h5");
+
+		var timer_btn_jq = target_jq.find("button#timer_right");
+		var timer_btn_text_jq = timer_btn_jq.find("h5");
 
 		var target_controller = {
-			target_jq:target_jq
-			, badge_jq:badge_jq
-			, set_badge_green:function() {
-				this.badge_jq.css("background-color",_color.COLOR_EMERALD_GREEN);
+			container_jq:container_jq
+			, get_container_jq:function() {
+				return this.container_jq;
 			}
-			, set_badge_gray:function() {
-				this.badge_jq.css("background-color",_color.COLOR_MEDIUM_GRAY);
+			, target_jq:target_jq
+			, title_btn_text_jq:title_btn_text_jq
+			, set_title:function(new_title) {
+				this.title_btn_text_jq.html(new_title);
+			}
+			, timer_btn_jq:timer_btn_jq
+			, get_timer_btn_jq:function() {
+				return this.timer_btn_jq;
+			}
+			, timer_btn_text_jq:timer_btn_text_jq
+			, set_time:function(time) {
+				this.timer_btn_text_jq.html(time);
+			}
+			, time_table_arr:time_table_arr
+			, get_time_table_arr:function() {
+				return this.time_table_arr;
+			}
+			, time_elapsed_obj:null
+			, time_stack_millisec:0
+			, interval_timer_obj:null
+			, start_timer:function() {
+
+				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.time_stack_millisec);
+
+				var _self = this;
+				this.interval_timer_obj = setInterval(function(){
+
+					_self.time_elapsed_obj = _dates.getTimeElapsed(_self.time_elapsed_obj);
+
+					// show new time
+					var time_stack = _self.time_elapsed_obj.time_stack;
+					var time_stack_sec = _self.time_elapsed_obj.time_stack_sec;
+
+					// 1/100초까지 표현
+					var cur_time_elapsed = _dates.get_mm_ss_ss_from_millisec(time_stack);
+					_self.set_time(cur_time_elapsed);
+
+					var time_table_arr = _self.get_time_table_arr();
+					var timer_btn_jq = _self.get_timer_btn_jq();
+					if(time_table_arr[0] <= time_stack_sec && time_stack_sec < time_table_arr[1] && !timer_btn_jq.hasClass("btn-success")) {
+						console.log("GREEN ZONE");
+						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+						timer_btn_jq.addClass("btn-success");
+						timer_btn_jq.css("color", _color.COLOR_WHITE);
+					} else if(time_table_arr[1] <= time_stack_sec && time_stack_sec < time_table_arr[2] && !timer_btn_jq.hasClass("btn-warning")) {
+						console.log("YELLOW ZONE");
+						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+						timer_btn_jq.addClass("btn-warning");
+						timer_btn_jq.css("color", _color.COLOR_WHITE);
+					} else if(time_table_arr[2] <= time_stack_sec && !timer_btn_jq.hasClass("btn-danger")) {
+						console.log("RED ZONE");
+						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+						timer_btn_jq.addClass("btn-danger");
+						timer_btn_jq.css("color", _color.COLOR_WHITE);
+					}
+
+				}, 40);
+
+				// TODO - 시간을 재는 동안은 다른 버튼들의 이벤트를 받지 않습니다.
+			}
+			, stop_timer:function() {
+				clearInterval(this.interval_timer_obj);
+				this.interval_timer_obj = null;
+				this.time_stack_millisec = this.time_elapsed_obj.time_stack;
+				this.time_elapsed_obj = null;
 			}
 		};
 		if(delegate_data != undefined) {
-			delegate_data.target_controller = target_controller;	
+			delegate_data.target_controller = target_controller;
 		}
 
-		// 제목 열이 클릭 되었을 때, 배경 색깔 바뀌는 등의 이벤트를 제어합니다.
-		if(_obj.isValidDelegate(delegate_obj_click_row)){
+		delete_btn_jq.click(function(){
+			if(confirm("Delete this?")) {
 
-			this.setTableRowEvent(
-				// row_jq
-				target_jq
-				// delegate_obj
-				, delegate_obj_click_row
-				// bg_color_vmouse_down
-				, bg_color_vmouse_down
-				// delegate_data 
-				, delegate_data
-				// text_color_vmouse_down
-				, text_color_vmouse_down
-			);
-		} // if end
+				target_controller.stop_timer();
+
+				delegate_data.click_target_jq = $(this);
+				delegate_obj_click_row._func.apply(delegate_obj_click_row._scope,[delegate_data]);
+			}
+			console.log("delete_btn_jq.click");			
+		});
+
+
+		title_btn_jq.click(function(){
+			delegate_data.click_target_jq = $(this);
+			delegate_obj_click_row._func.apply(delegate_obj_click_row._scope,[delegate_data]);
+		});
+
+		timer_btn_jq.click(function(){
+			console.log("timer_btn_jq.click");
+
+			// 1. 시간을 재기 시작합니다.
+			if(target_controller.interval_timer_obj == undefined) {
+				target_controller.start_timer();
+			} else {
+				target_controller.stop_timer();
+			}
+			
+		});
 
 		return target_controller;
 	}	
@@ -2261,8 +2370,6 @@ airborne.bootstrap.view.mobile.list = {
 		var title_jq = cur_input_container_jq.find("span#title");
 		var input_row_jq = cur_input_container_jq.find("input");
 		var btn_save_jq = cur_input_container_jq.find("button#btn_save");
-
-		// wonder.jung
 
 		var accessor = {
 			input_row_jq:input_row_jq
