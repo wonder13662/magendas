@@ -549,7 +549,144 @@ toast_master.mobile_list_manager = {
 
 			_m_list.addTableRowFolder(membership_member_arr, table_jq);
 		}
-	}	
+	}
+	/*
+		@ Public
+		@ Desc : 추가/삭제가 가능한 타이머 테이블을 그립니다.
+	*/	
+	,add_timer_table_editable:function(title, time_arr, append_target_jq, delegate_on_click_timer_title, delegate_on_click_remove_timer, delegate_on_finish_adding_timer, delegate_on_time_update) {
+
+		var row_before_new_timer_jq = null;
+
+		// 타이머를 화면에 그립니다.
+		var add_timer = function(time_arr, row_jq, delegate_data_param) {
+
+			var timer_controller = 
+			_m_list.addTableRowTimer(
+				// time_arr - ( GREEN / YELLOW / RED )
+				time_arr
+				// title_on_badge
+				, _param.NOT_ASSIGNED
+				// after_target_jq
+				, row_jq
+				// delegate_obj_click_row
+				, _obj.getDelegate(function(delegate_data){
+
+					// console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
+
+					// EVENT TYPE을 받는 것이 나을것 같은데?
+					var target_controller = delegate_data.target_controller;
+					var container_jq = target_controller.get_container_jq();
+
+					if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
+
+						console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
+
+						// TODO 왜 2번 눌러야 이벤트 제어가 가능한가? 이슈.
+						// 타이틀 버튼을 눌렀을 때의 이벤트 제어
+
+						if(_obj.is_valid_delegate(delegate_on_click_timer_title)) {
+							delegate_on_click_timer_title._apply([target_controller]);
+						}
+
+						// REMOVE ME
+						// 2. 선택한 정보를 DB로 업데이트(외부 delegate 호출)
+
+					} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
+
+						console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
+
+						// 1. remove from screen
+						container_jq.remove();
+
+						// 2. remove data
+						if(_obj.is_valid_delegate(delegate_on_click_remove_timer)) {
+							delegate_on_click_remove_timer._apply([target_controller]);
+						}
+
+					}
+
+				}, this)
+				// delegate_obj_on_time_update
+				, _obj.getDelegate(function(delegate_data){
+
+					var target_controller = delegate_data.target_controller;
+
+					if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_START_TIMER) {
+
+						event_toggle_controller.off();
+
+					} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_STOP_TIMER) {
+
+						event_toggle_controller.on();
+
+						if(_obj.is_valid_delegate(delegate_on_time_update)) {
+							delegate_on_time_update._apply([target_controller]);
+						}
+
+					}
+
+
+				}, this)
+				// delegate_data
+				, delegate_data_param
+			);
+			
+			// 다음에 추가될 타이머의 위의 테이블 열의 참조.
+			// 다음 타이머는 이 참조 열 아래 붙입니다.
+			row_before_new_timer_jq = timer_controller.get_container_jq();
+
+			return timer_controller;
+		}		
+
+		// 타이머 추가 버튼을 화면에 그립니다.
+		var add_timer_btn_controller = 
+		_m_list.addTableRowBtn(
+			// title
+			title
+			// color
+			, null
+			// delegate_obj
+			, _obj.getDelegate(function(delegate_data, accessor){
+
+				if(!confirm("Add New One?")){
+					return;
+				}
+
+				if(row_before_new_timer_jq == undefined) {
+					row_before_new_timer_jq = accessor.get_target_jq();
+				}
+
+				// 이 테이블 토픽 데이터는 어디에 저장?
+				var timer_controller = 
+				add_timer(
+					// time_arr
+					_param.SEC_MINI_DEBATE
+					// row_jq
+					, row_before_new_timer_jq
+					// delegate_data_param
+					, _param
+					.get(_param.MEETING_ID, recent_meeting_id)
+					.get(_param.ACCESSOR, accessor)
+					// parent accessor
+					, accessor
+				);
+
+				if(_obj.is_valid_delegate(delegate_on_finish_adding_timer)) {
+					delegate_on_finish_adding_timer._apply([timer_controller]);
+				}
+
+			}, this)
+			// append_target_jq
+			, table_jq
+		);
+
+
+		if(_obj.is_valid_delegate(delegate_on_finish_adding_timer)) {
+			delegate_on_finish_adding_timer._apply([add_timer_btn_controller]);
+		}
+
+	}
 	// REMOVE ME
 	/*
 	,addMemberSelectorList:function(target_list, table_jq){

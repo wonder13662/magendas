@@ -1473,7 +1473,8 @@ airborne.bootstrap.view.mobile.list = {
 		var timer_btn_text_jq = timer_btn_jq.find("h5");
 
 		var target_controller = {
-			container_jq:container_jq
+			NAME:"TABLE_ROW_TIMER"
+			, container_jq:container_jq
 			, get_container_jq:function() {
 				return this.container_jq;
 			}
@@ -1483,8 +1484,18 @@ airborne.bootstrap.view.mobile.list = {
 				return this.title_btn_jq;
 			}
 			, title_btn_text_jq:title_btn_text_jq
+			, get_title:function() {
+				return this.title_btn_text_jq.html();
+			}
 			, set_title:function(new_title) {
 				this.title_btn_text_jq.html(new_title);
+			}
+			, meta_data:null
+			, set_meta_data:function(meta_data) {
+				this.meta_data = meta_data;
+			}
+			, get_meta_data:function() {
+				return this.meta_data;
 			}
 			, timer_btn_jq:timer_btn_jq
 			, get_timer_btn_jq:function() {
@@ -1493,6 +1504,9 @@ airborne.bootstrap.view.mobile.list = {
 			, timer_btn_text_jq:timer_btn_text_jq
 			, set_time:function(time) {
 				this.timer_btn_text_jq.html(time);
+			}
+			, get_time:function() {
+				return this.timer_btn_text_jq.html();	
 			}
 			, time_table_arr:time_table_arr
 			, get_time_table_arr:function() {
@@ -1507,6 +1521,9 @@ airborne.bootstrap.view.mobile.list = {
 			, EVENT_TYPE_CLICK_TIMER:"EVENT_TYPE_CLICK_TIMER"
 			, time_elapsed_obj:null
 			, time_stack_millisec:0
+			, get_time_stack_millisec:function() {
+				return this.time_stack_millisec;
+			}
 			, interval_timer_obj:null
 			, EVENT_TYPE_START_TIMER:"EVENT_TYPE_START_TIMER"
 			, EVENT_TYPE_STOP_TIMER:"EVENT_TYPE_STOP_TIMER"
@@ -1560,7 +1577,9 @@ airborne.bootstrap.view.mobile.list = {
 			, stop_timer:function() {
 				clearInterval(this.interval_timer_obj);
 				this.interval_timer_obj = null;
-				this.time_stack_millisec = this.time_elapsed_obj.time_stack;
+				if(this.time_elapsed_obj != undefined && this.time_elapsed_obj.time_stack != undefined) {
+					this.time_stack_millisec = this.time_elapsed_obj.time_stack;
+				}
 				this.time_elapsed_obj = null;
 
 				this.on();

@@ -223,6 +223,9 @@ airborne.bootstrap.obj = {
 	,isNotValidDelegate:function(target_delegate){
 		return !this.isValidDelegate(target_delegate);
 	}
+	,is_valid_delegate:function(target_delegate){
+		return this.isValidDelegate(target_delegate);
+	}
 	,isValidDelegate:function(target_delegate){
 		if(target_delegate == null){
 			// console.log("isValidDelegate / target_delegate == null");
@@ -252,7 +255,16 @@ airborne.bootstrap.obj = {
 			return null;
 		}
 
-		return {_func:delegate_func,_scope:delegate_scope};
+		var delegate_obj = 
+		{
+			_func:delegate_func
+			, _scope:delegate_scope
+			, _apply:function(param_arr){
+				this._func.apply(this._scope,param_arr);
+			}
+		}
+
+		return delegate_obj;
 	}
 	,is_hover:function(event_obj, target_jq){
 

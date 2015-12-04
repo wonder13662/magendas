@@ -215,7 +215,7 @@ for(var idx = 0;idx < member_list.length; idx++) {
 	key_value_obj_arr.push(key_value_obj);
 }
 // MEMBER LIST
-var row_member_obj = 
+var row_member_list_obj = 
 _m_list.addTableRowsSelectFolder(
 	// key_value_obj_arr
 	key_value_obj_arr
@@ -234,31 +234,17 @@ _m_list.addTableRowsSelectFolder(
 	, _color.COLOR_WHITE
 );
 // TODO accordian animation
-row_member_obj.hide();
-var role_delegate_func = function(container_jq, target_controller, row_member_obj, delegate_on_finish) {
+row_member_list_obj.hide();
+var show_member_list = function(container_jq, target_controller, row_member_list_obj, delegate_on_finish) {
 
-
-	// TODO 모든 열의 속성 - is_open 속성을 NO로 변경.
-	// 이미 열려있는 열이 있는 상태에서 다른 열을 열면 이벤트 상태가 초기화되지 않음.
-	// 사용자는 두번 열어야 함.
-	// var MEETING_ID = delegate_data.delegate_data.MEETING_ID;
-	// var ROLE_ID = delegate_data.delegate_data.ROLE_ID;
-	// var row_role_jq = delegate_data.target_jq;
-
-	// 리스트를 노출할 위치를 가리키는 jq container가 필요함.
-	//container_jq;
-	// 업데이트된 이름을 반영할 target controller
-
-
-
-	container_jq.after(row_member_obj.get_target_jq_arr());
+	container_jq.after(row_member_list_obj.get_target_jq_arr());
 	if(container_jq.attr("is_open") === "YES") {
 		container_jq.attr("is_open", "NO");
 
 		//window.scrollTo(0, 0);
 		// REFACTOR ME
 		var body = $("html, body");
-		row_member_obj.hide();
+		row_member_list_obj.hide();
 		body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
 		   console.log("Finished animating");
 		});
@@ -266,7 +252,7 @@ var role_delegate_func = function(container_jq, target_controller, row_member_ob
 	} else {
 
 		container_jq.attr("is_open", "YES");
-		row_member_obj.show();
+		row_member_list_obj.show();
 
 		// TODO 선택된 사용자는 제외합니다.
 		var cur_offset = container_jq.offset();
@@ -280,85 +266,29 @@ var role_delegate_func = function(container_jq, target_controller, row_member_ob
 
 		// 다른 롤의 멤버 리스트가 될 때마다 role id가 변경되어야 합니다.
 		// 그러므로 delegate 함수가 그때마다 새로 설정되어야 합니다.
-		row_member_obj.set_delegate_obj_click_row(
+		row_member_list_obj.set_delegate_obj_click_row(
 
 			_obj.getDelegate(function(selector_delegate_data){
-
 
 				var target_jq = selector_delegate_data.delegate_data.get_target_jq();
 				var MEMBER_ID = target_jq.attr("key");
 				var MEMBER_NAME = target_jq.find("strong").html();
 
-				console.log(">>> selector_delegate_data :: ",selector_delegate_data);
-				console.log(">>> target_controller :: ",target_controller);
-				console.log(">>> MEMBER_ID :: ",MEMBER_ID);
-				console.log(">>> MEMBER_NAME :: ",MEMBER_NAME);
-
 				// 롤의 이름을 업데이트 합니다.
 				target_controller.set_title(MEMBER_NAME);
 
 				// 멤버 리스트를 가립니다.
-				row_member_obj.hide();
+				row_member_list_obj.hide();
 
-				if(delegate_on_finish != undefined) {
-					delegate_on_finish._func.apply(delegate_on_finish._scope,[]);
+				// 선택한 멤버 정보를 전달합니다.
+				var delegate_data = {
+					MEMBER_ID:MEMBER_ID
+					, MEMBER_NAME:MEMBER_NAME
 				}
 
-				// 선택한 사용자를 해당 롤에 업데이트 합니다.
-				// 이상이 없다면 업데이트!
-				/*
-				_ajax.send_simple_post(
-					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-					// _param_obj / MEETING_ID
-					, _param
-					.get(_param.IS_UPDATE_TODAY_ROLE,_param.YES)
-					.get(_param.MEETING_ID,MEETING_ID)
-					.get(_param.MEMBER_ID,MEMBER_ID)
-					.get(_param.ROLE_ID,ROLE_ID)
-
-					// _delegate_after_job_done
-					,_obj.get_delegate(
-						// delegate_func
-						function(data){
-
-							console.log(data);
-
-							return;
-
-							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
-								console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
-
-								// 롤의 이름을 업데이트 합니다.
-								row_role_jq.find("span.badge").find("strong").html(MEMBER_NAME);
-								delegate_data.target_jq.attr("is_open", "NO");
-
-								// 멤버 리스트를 가립니다.
-								row_member_obj.hide();
-
-								// 선택된 배지 녹색으로 변경
-								var target_controller = delegate_data.delegate_data.target_controller;
-								if(MEMBER_NAME == _param.NOT_ASSIGNED) {
-									target_controller.set_badge_gray();
-								} else {
-									target_controller.set_badge_green();
-								}
-
-								// Role sign up 업데이트 완료시, 해당 미팅의 최상단으로 이동.
-								var body = $("html, body");
-								var TARGET_SCROLL_BACK_Y = delegate_data.delegate_data[_param.TARGET_SCROLL_BACK_Y];
-								body.stop().animate({scrollTop:TARGET_SCROLL_BACK_Y.offset().top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-								   console.log("Finished animating");
-								});
-								
-							} // if end
-
-						},
-						// delegate_scope
-						this
-					)
-				); // ajax done.
-				*/
+				if(delegate_on_finish != undefined) {
+					delegate_on_finish._func.apply(delegate_on_finish._scope,[delegate_data]);
+				}
 
 			}, this)					
 		);
@@ -384,11 +314,80 @@ var event_toggle_controller = _m_list.get_event_toggle_controller();
 
 
 
+// How to show table topic timer from DB?
+var timer_controller_table_topic = 
+_tm_m_list.add_timer_table_editable(
+	// title
+	"+ Table Topic Speaker"
+	// time_arr
+	, _param.SEC_TABLE_TOPIC
+	// append_target_jq
+	, table_jq
+	// delegate_on_click_timer_title
+	, _obj.getDelegate(function(delegate_data){
+
+		// 선택할 수 있는 회원 리스트를 보여줍니다.
+		var target_controller = delegate_data;
+		var container_jq = target_controller.get_container_jq();
+
+		show_member_list(
+			// container_jq
+			container_jq
+			// target_controller
+			, target_controller
+			// row_member_list_obj
+			, row_member_list_obj
+			// delegate_on_finish
+			, _obj.getDelegate(function(delegate_data){
+
+				// 선택한 사용자를 업데이트 합니다.
+				console.log("delegate_on_finish / delegate_data :: ",delegate_data);
+				console.log("delegate_on_finish / target_controller :: ",target_controller);
+				target_controller.set_meta_data(delegate_data);
+
+				// INSERT? UPDATE?
+
+			}, this)
+		);
+
+	}, this)
+	// delegate_on_click_remove_timer
+	, _obj.getDelegate(function(delegate_data){
+
+		console.log(">>> delegate_on_click_remove_timer / delegate_data :: ",delegate_data);
+
+		// DB에 해당 열을 삭제합니다.
+
+	}, this)
+	// delegate_on_finish_adding_timer
+	, _obj.getDelegate(function(delegate_data){
+
+		console.log(">>> delegate_on_finish_adding_timer / delegate_data :: ",delegate_data);
+
+		// DB에 새로운 열을 추가합니다.
+
+	}, this)
+	// delegate_on_time_update
+	, _obj.getDelegate(function(delegate_data){
+
+		var cur_millisec = delegate_data.get_time_stack_millisec();
+		console.log(">>> delegate_on_time_update / delegate_data :: ",delegate_data);
+
+		// DB에 해당 열의 시간을 저장합니다.
+		// 현재 유저 정보를 받아올 수 있나요?
+
+	}, this)
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+);
+
+
 
 
 // TABLE TOPIC (Dynamic)
-
-var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
+/*
+var add_table_topic = function(time_arr, row_jq, delegate_data_param, show_member_list) {
 
 	var timer_controller = 
 	_m_list.addTableRowTimer(
@@ -405,26 +404,20 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 
 			var target_controller = delegate_data.target_controller;
 			var container_jq = target_controller.get_container_jq();
-			// var parent_accessor = delegate_data[_param.ACCESSOR];
-			// parent_accessor.off();
 
 			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
 
 				console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
 
-				role_delegate_func(
+				show_member_list(
 					// container_jq
 					container_jq
 					// target_controller
 					, target_controller
-					// row_member_obj
-					, row_member_obj
+					// row_member_list_obj
+					, row_member_list_obj
 					// delegate_on_finish
 					, _obj.getDelegate(function(delegate_data){
-
-						console.log(">>> delegate_on_finish / delegate_data :: ",delegate_data);
-
-						// parent_accessor.on();
 
 					}, this)
 
@@ -432,10 +425,8 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 
 			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
 
-				console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
-
 				// 1. remove from screen
-				//container_jq.remove();
+				container_jq.remove();
 
 				// 2. remove data
 
@@ -446,7 +437,6 @@ var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_deleg
 		, _obj.getDelegate(function(delegate_data){
 
 			var target_controller = delegate_data.target_controller;
-
 			if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_START_TIMER) {
 				event_toggle_controller.off();
 			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_STOP_TIMER) {
@@ -492,8 +482,8 @@ _m_list.addTableRowBtn(
 			, _param
 			.get(_param.MEETING_ID, recent_meeting_id)
 			.get(_param.ACCESSOR, accessor)
-			// role_delegate_func
-			, role_delegate_func
+			// show_member_list
+			, show_member_list
 		);
 
 	}, this)
@@ -502,7 +492,7 @@ _m_list.addTableRowBtn(
 );
 var table_topic_row_after_jq = null;
 event_toggle_controller.push(accessor_table_topic_btn);
-
+*/
 
 
 
@@ -519,7 +509,7 @@ event_toggle_controller.push(accessor_table_topic_btn);
 
 
 // MINI DEBATE (Dynamic)
-var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_delegate_func, parent_accessor) {
+var add_mini_debate = function(time_arr, row_jq, delegate_data_param, show_member_list) {
 
 	var timer_controller = 
 	_m_list.addTableRowTimer(
@@ -544,13 +534,13 @@ var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_deleg
 
 				// TODO 왜 2번 눌러야 이벤트 제어가 가능한가? 이슈.
 
-				role_delegate_func(
+				show_member_list(
 					// container_jq
 					container_jq
 					// target_controller
 					, target_controller
-					// row_member_obj
-					, row_member_obj
+					// row_member_list_obj
+					, row_member_list_obj
 				);
 
 			} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
@@ -562,8 +552,6 @@ var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_deleg
 
 				// 2. remove data
 			}
-
-
 
 		}, this)
 		// delegate_obj_on_time_update
@@ -617,8 +605,8 @@ _m_list.addTableRowBtn(
 			, _param
 			.get(_param.MEETING_ID, recent_meeting_id)
 			.get(_param.ACCESSOR, accessor)
-			// role_delegate_func
-			, role_delegate_func
+			// show_member_list
+			, show_member_list
 			// parent accessor
 			, accessor
 		);
