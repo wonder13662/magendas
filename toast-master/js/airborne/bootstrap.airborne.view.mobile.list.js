@@ -361,13 +361,28 @@ airborne.bootstrap.view.mobile.list = {
 			, get_is_on:function() {
 				return this.is_on;
 			}
+			, delegate_data:delegate_data
+			, delegate_obj:delegate_obj
+			, call_on_click:function(external_delegate_data) {
+				if(this.delegate_obj == undefined) {
+					return;
+				}
+
+				if(external_delegate_data != undefined) {
+					this.delegate_obj._func.apply(this.delegate_obj._scope,[external_delegate_data, this]);	
+				} else {
+					this.delegate_obj._func.apply(this.delegate_obj._scope,[this.delegate_data, this]);	
+				}
+				
+			}
 		};
 
 		// Set Event
 		
 		btn_row_jq.on("click", function(){
 			if(accessor.get_is_on()) {
-				delegate_obj._func.apply(delegate_obj._scope,[delegate_data, accessor]);	
+				accessor.call_on_click();
+				//delegate_obj._func.apply(delegate_obj._scope,[delegate_data, accessor]);
 			}
 		});
 
@@ -1408,20 +1423,24 @@ airborne.bootstrap.view.mobile.list = {
 		@ Public
 		@ Desc : 시간을 잴수 있는 타이머 열을 그립니다.
 	*/
-	,addTableRowTimer:function(time_table_arr, text_on_left, after_target_jq, delegate_obj_click_row, delegate_obj_on_time_update, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
+	,addTableRowTimer:function(time_table_arr, text_on_left, time_record_millisec, after_target_jq, delegate_obj_click_row, delegate_obj_on_time_update, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
 
 		var _obj = airborne.bootstrap.obj;
 
 		if(_v.isNotValidArray(time_table_arr)){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidArray(time_table_arr)");
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / _v.isNotValidArray(time_table_arr)");
 			return;
 		}
 		if(_v.isNotValidStr(text_on_left)){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / _v.isNotValidStr(text_on_left)");
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / _v.isNotValidStr(text_on_left)");
+			return;
+		}
+		if(_v.isNotNumber(time_record_millisec)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / _v.isNotNumber(time_record_millisec)");
 			return;
 		}
 		if(after_target_jq==null){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTitleNBadge / after_target_jq==null");
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / after_target_jq==null");
 			return;
 		}
 		if(text_color == undefined) {
@@ -1435,8 +1454,9 @@ airborne.bootstrap.view.mobile.list = {
 		}
 		if(text_color_vmouse_down == undefined) {
 			text_color_vmouse_down = bg_color;
-		}		
+		}
 
+		var time_record = _dates.get_mm_ss_ss_from_millisec(time_record_millisec);
 		var row_id = airborne.html.getIdRandomTail("addTableRowTitleNBadge" + text_on_left);
 		var row_tag = "";
 		row_tag += ""
@@ -1452,7 +1472,7 @@ airborne.bootstrap.view.mobile.list = {
 						.replace(/\<TITLE\>/gi, text_on_left)
 						.replace(/\<COLOR\>/gi, text_color)
 					+ "<button id=\"timer_right\" type=\"button\" class=\"btn btn-default btn-lg btn-block\" style=\"color:<COLOR>;width:28%;float:right;margin:0px;\"><h5><TITLE></h5></button>"
-						.replace(/\<TITLE\>/gi, "00:00:00")
+						.replace(/\<TITLE\>/gi, time_record)
 						.replace(/\<COLOR\>/gi, text_color)
 
 			+ "</td>"
@@ -1491,11 +1511,47 @@ airborne.bootstrap.view.mobile.list = {
 				this.title_btn_text_jq.html(new_title);
 			}
 			, meta_data:null
-			, set_meta_data:function(meta_data) {
-				this.meta_data = meta_data;
+			, add_meta_data:function(additional_meta_data) {
+
+				var hasChanged = false;
+				if(additional_meta_data == undefined) {
+					return hasChanged;
+				}
+				
+				if(this.meta_data ==  undefined) {
+					this.meta_data = {};
+				}
+
+				// 1 depth의 객체의 키와 값을 추가합니다.
+				for(var key in additional_meta_data) {
+					var value = additional_meta_data[key];
+
+					if(_v.isFunction(value)) {
+						// 메서드는 제외합니다.
+						continue;
+					}
+
+					// 이전과 동일한 값은 건너뜁니다.
+					var prev_value = this.meta_data[key];
+					if(prev_value === value) {
+						continue;
+					}
+
+					this.meta_data[key] = value;
+					hasChanged = true;
+				}
+
+				return hasChanged;
 			}
 			, get_meta_data:function() {
 				return this.meta_data;
+			}
+			, get_meta_data_prop:function(prop_key) {
+				if(_v.is_not_valid_str(prop_key)) {
+					return null;
+				}
+
+				return this.meta_data[prop_key];
 			}
 			, timer_btn_jq:timer_btn_jq
 			, get_timer_btn_jq:function() {
@@ -1520,48 +1576,61 @@ airborne.bootstrap.view.mobile.list = {
 			, EVENT_TYPE_CLICK_REMOVE:"EVENT_TYPE_CLICK_REMOVE"
 			, EVENT_TYPE_CLICK_TIMER:"EVENT_TYPE_CLICK_TIMER"
 			, time_elapsed_obj:null
-			, time_stack_millisec:0
+			, time_stack_millisec:time_record_millisec
 			, get_time_stack_millisec:function() {
 				return this.time_stack_millisec;
 			}
 			, interval_timer_obj:null
 			, EVENT_TYPE_START_TIMER:"EVENT_TYPE_START_TIMER"
 			, EVENT_TYPE_STOP_TIMER:"EVENT_TYPE_STOP_TIMER"
+			/*
+				@ Public
+				@ Desc : 현재 타이머 시간이 어떤 상태인지 색깔로 보여줍니다.
+			*/
+			, show_time_zone:function(time_stack_millisec) {
+
+				var time_stack_sec = 0;
+				if(time_stack_millisec != undefined && (0 < time_stack_millisec)) {
+					time_stack_sec = parseInt(time_stack_millisec / 1000);
+				}
+
+				var time_table_arr = this.get_time_table_arr();
+				var timer_btn_jq = this.get_timer_btn_jq();
+				if(time_table_arr[0] <= time_stack_sec && time_stack_sec < time_table_arr[1] && !timer_btn_jq.hasClass("btn-success")) {
+					console.log("GREEN ZONE");
+					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+					timer_btn_jq.addClass("btn-success");
+					timer_btn_jq.css("color", _color.COLOR_WHITE);
+				} else if(time_table_arr[1] <= time_stack_sec && time_stack_sec < time_table_arr[2] && !timer_btn_jq.hasClass("btn-warning")) {
+					console.log("YELLOW ZONE");
+					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+					timer_btn_jq.addClass("btn-warning");
+					timer_btn_jq.css("color", _color.COLOR_WHITE);
+				} else if(time_table_arr[2] <= time_stack_sec && !timer_btn_jq.hasClass("btn-danger")) {
+					console.log("RED ZONE");
+					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
+					timer_btn_jq.addClass("btn-danger");
+					timer_btn_jq.css("color", _color.COLOR_WHITE);
+				}
+
+			}
 			, start_timer:function() {
 
-				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.time_stack_millisec);
+				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.get_time_stack_millisec());
 
 				var _self = this;
 				this.interval_timer_obj = setInterval(function(){
 
-					_self.time_elapsed_obj = _dates.getTimeElapsed(_self.time_elapsed_obj);
+					_self.time_elapsed_obj = _dates.getTimeElapsed(_self.time_elapsed_obj, _self.get_time_stack_millisec());
 
 					// show new time
 					var time_stack = _self.time_elapsed_obj.time_stack;
-					var time_stack_sec = _self.time_elapsed_obj.time_stack_sec;
 
 					// 1/100초까지 표현
 					var cur_time_elapsed = _dates.get_mm_ss_ss_from_millisec(time_stack);
 					_self.set_time(cur_time_elapsed);
 
-					var time_table_arr = _self.get_time_table_arr();
-					var timer_btn_jq = _self.get_timer_btn_jq();
-					if(time_table_arr[0] <= time_stack_sec && time_stack_sec < time_table_arr[1] && !timer_btn_jq.hasClass("btn-success")) {
-						console.log("GREEN ZONE");
-						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
-						timer_btn_jq.addClass("btn-success");
-						timer_btn_jq.css("color", _color.COLOR_WHITE);
-					} else if(time_table_arr[1] <= time_stack_sec && time_stack_sec < time_table_arr[2] && !timer_btn_jq.hasClass("btn-warning")) {
-						console.log("YELLOW ZONE");
-						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
-						timer_btn_jq.addClass("btn-warning");
-						timer_btn_jq.css("color", _color.COLOR_WHITE);
-					} else if(time_table_arr[2] <= time_stack_sec && !timer_btn_jq.hasClass("btn-danger")) {
-						console.log("RED ZONE");
-						timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
-						timer_btn_jq.addClass("btn-danger");
-						timer_btn_jq.css("color", _color.COLOR_WHITE);
-					}
+					_self.show_time_zone(time_stack);
 
 				}, 40);
 
@@ -1683,14 +1752,13 @@ airborne.bootstrap.view.mobile.list = {
 				return this.event_toggle_obj[event_type];
 			}
 		};
+		target_controller.show_time_zone(target_controller.get_time_stack_millisec());
 
-		// wonder.jung
-
-		// 
 
 		if(delegate_data != undefined) {
 			delegate_data.target_controller = target_controller;
 		}
+		
 
 		delete_btn_jq.click(function(){
 			if(target_controller.get_is_off(target_controller.EVENT_TYPE_CLICK_REMOVE)) {

@@ -48,6 +48,9 @@ class ToastMasterParamManager{
 
 	public function getParamNumber($tossed_key, $placeholder=null){
 		if( $this->hasNoKey($tossed_key) ) {
+			if(!is_null($placeholder)) {
+				return $placeholder;
+			}
 			return -1;
 		}
 
@@ -258,6 +261,17 @@ class ToastMasterParamManager{
 
 	// COOKIE
 	public $COOKIE_TM_LOGIN_MEMBER_HASHKEY="COOKIE_TM_LOGIN_MEMBER_HASHKEY";
+
+	// TIMER
+	public $TIMER_RECORD_ID="TIMER_RECORD_ID";
+	public $TIMER_TYPE_ID="TIMER_TYPE_ID";
+	public $TIMER_TYPE_ID_TABLE_TOPIC=1;
+
+	public $IS_INSERT_TIMER="IS_INSERT_TIMER";
+	public $IS_UPDATE_TIMER="IS_UPDATE_TIMER";
+	public $IS_DELETE_TIMER="IS_DELETE_TIMER";
+	public $IS_SELECT_TIMER="IS_SELECT_TIMER";
+	public $TIME_RECORD_MILLISEC="TIME_RECORD_MILLISEC";
 
 }
 
