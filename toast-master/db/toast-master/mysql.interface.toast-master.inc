@@ -4032,6 +4032,45 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+		public function selectTimerListByTimerTypeNMemberId($meeting_id, $timer_type_id, $member_id){
+
+		$function_name = "selectTimerListByTimerType";
+		if($this->isNotUnsignedNumber($meeting_id)){
+			echo "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
+			return;
+		}
+		if($this->isNotUnsignedNumber($timer_type_id)){
+			echo "$function_name / \$this->isNotUnsignedNumber(\$timer_type_id)<br/>";
+			return;
+		}
+		if($this->isNotNumber($member_id)){
+			echo "$function_name / \$this->isNotNumber(\$member_id)<br/>";
+			return;
+		}
+
+		$query = 
+		"SELECT `MA_TIMER_RECORD`.`id` AS __timer_record_id"
+		. " ,`MA_TIMER_RECORD`.`meeting_id` AS __meeting_id"
+		. " ,`MA_TIMER_RECORD`.`timer_type_id` AS __timer_type_id"
+		. " ,`MA_TIMER_RECORD`.`time_record_milli_sec` AS __time_record_milli_sec"
+		. " ,`MA_TIMER_RECORD`.`is_qualified` AS __is_qualified"
+		. " ,IFNULL(`MEMBER`.`hash_key`,\"\") AS __member_hash_key"		
+		. " , IFNULL(CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name),\"\") AS __member_name"
+		. " FROM `magendas`.`MA_TIMER_RECORD`"
+		. " LEFT JOIN `magendas`.`MEMBER` ON `magendas`.`MEMBER`.id=`MA_TIMER_RECORD`.`member_id`"
+		. " WHERE `MA_TIMER_RECORD`.`meeting_id`=$meeting_id"
+		. " AND `MA_TIMER_RECORD`.`timer_type_id`=$timer_type_id"
+		. " AND `MA_TIMER_RECORD`.`member_id`=$member_id"
+		. " ORDER BY `MA_TIMER_RECORD`.`id` DESC"
+		. " LIMIT 1"
+		;
+
+		$result_one = $this->getSelectOneResult($query);
+
+		return $result_one;
+	}
+
+
 
 	public function isQualifiedTime($timer_type_id, $time_record_millisec){
 

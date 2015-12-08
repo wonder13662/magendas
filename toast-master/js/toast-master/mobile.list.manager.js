@@ -552,6 +552,296 @@ toast_master.mobile_list_manager = {
 	}
 	/*
 		@ Public
+		@ Desc : 추가/삭제가 가능한 타이머 테이블을 그립니다. 타이머에 대응하는 멤버정보 및 멤버 리스트를 노출합니다.
+	*/	
+	,add_member_timer_table_editable:function(title, time_arr, append_target_jq, event_toggle_controller, member_list_controller, meta_data) {
+
+		if(_v.isNotValidStr(title)){
+			console.log("!Error! / mobile.list.manager.js / add_member_timer_table_editable / _v.isNotValidStr(title)");
+			return;
+		}
+
+		if(_v.isNotValidArray(time_arr)){
+			console.log("!Error! / mobile.list.manager.js / add_member_timer_table_editable / _v.isNotValidStr(time_arr)");
+			return;
+		}
+
+		if(append_target_jq ==  undefined){
+			console.log("!Error! / mobile.list.manager.js / add_member_timer_table_editable / append_target_jq ==  undefined");
+			return;
+		}
+
+		if(event_toggle_controller ==  undefined){
+			console.log("!Error! / mobile.list.manager.js / add_member_timer_table_editable / event_toggle_controller ==  undefined");
+			return;
+		}
+
+		if(member_list_controller ==  undefined){
+			console.log("!Error! / mobile.list.manager.js / add_member_timer_table_editable / member_list_controller ==  undefined");
+			return;
+		}
+
+		var show_member_list = function(container_jq, target_controller, member_list_controller, delegate_on_finish) {
+
+			container_jq.after(member_list_controller.get_target_jq_arr());
+			if(container_jq.attr("is_open") === "YES") {
+				container_jq.attr("is_open", "NO");
+
+				//window.scrollTo(0, 0);
+				// REFACTOR ME
+				var body = $("html, body");
+				member_list_controller.hide();
+				body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
+				   console.log("Finished animating");
+				});
+
+			} else {
+
+				container_jq.attr("is_open", "YES");
+				member_list_controller.show();
+
+				// TODO 선택된 사용자는 제외합니다.
+				var cur_offset = container_jq.offset();
+
+				//window.scrollTo(0, cur_offset.top);
+				// REFACTOR ME
+				var body = $("html, body");
+				body.stop().animate({scrollTop:cur_offset.top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
+				   console.log("Finished animating");
+				});
+
+				// 다른 롤의 멤버 리스트가 될 때마다 role id가 변경되어야 합니다.
+				// 그러므로 delegate 함수가 그때마다 새로 설정되어야 합니다.
+				member_list_controller.set_delegate_obj_click_row(
+
+					_obj.getDelegate(function(selector_delegate_data){
+
+						var target_jq = selector_delegate_data.delegate_data.get_target_jq();
+						var MEMBER_HASH_KEY = target_jq.attr("key");
+						var MEMBER_NAME = target_jq.find("strong").html();
+
+						// 롤의 이름을 업데이트 합니다.
+						target_controller.set_title(MEMBER_NAME);
+
+						// 멤버 리스트를 가립니다.
+						member_list_controller.hide();
+
+						// 선택한 멤버 정보를 전달합니다.
+						var delegate_data = {
+							MEMBER_HASH_KEY:MEMBER_HASH_KEY
+							, MEMBER_NAME:MEMBER_NAME
+						}
+
+						if(delegate_on_finish != undefined) {
+							delegate_on_finish._func.apply(delegate_on_finish._scope,[delegate_data]);
+						}
+
+					}, this)					
+				);
+			} // if end
+		}
+
+		var delegate_on_click_timer_title = 
+		_obj.getDelegate(function(delegate_data){
+
+			// 선택할 수 있는 회원 리스트를 보여줍니다.
+			var target_controller = delegate_data;
+			var container_jq = target_controller.get_container_jq();
+
+			show_member_list(
+				// container_jq
+				container_jq
+				// target_controller
+				, target_controller
+				// member_list_controller
+				, member_list_controller
+				// delegate_on_finish
+				, _obj.getDelegate(function(delegate_data){
+
+					console.log(">>> TTM / UPDATE MEMBER / delegate_data ::",delegate_data);
+
+					// 선택한 사용자를 업데이트 합니다.
+					var hasChanged = target_controller.add_meta_data(delegate_data);
+					if(!hasChanged) {
+						console.log("변화된 값이 없으므로 중단합니다.");
+						return;
+					}
+
+					var meta_data = target_controller.get_meta_data();
+					var param_obj = 
+					_param
+					.get(_param.IS_UPDATE_TIMER,_param.YES)
+					.get(_param.MEETING_ID,meta_data[_param.MEETING_ID])
+					.get(_param.MEMBER_HASH_KEY,meta_data[_param.MEMBER_HASH_KEY])
+					.get(_param.TIMER_RECORD_ID,meta_data[_param.TIMER_RECORD_ID])
+					;
+
+					console.log(">>> TTM / UPDATE MEMBER / param_obj ::",param_obj);
+
+					// UPDATE
+					_ajax.send_simple_post(
+						// _url
+						_link.get_link(_link.API_UPDATE_TIMER)
+						// _param_obj / MEETING_ID
+						, param_obj
+						// _delegate_after_job_done
+						, _obj.get_delegate(
+							// delegate_func
+							function(data){
+
+								console.log(">>> TTM / UPDATE / data ::",data);
+
+							},
+							// delegate_scope
+							this
+						)
+					); // ajax done.
+
+				}, this)
+			);
+
+		}, this)
+
+		var delegate_on_click_remove_timer =
+		_obj.getDelegate(function(delegate_data){
+
+			// DB에 해당 열을 삭제합니다.
+			var param_obj = 
+			_param
+			.get(_param.IS_DELETE_TIMER,_param.YES)
+			.get(_param.TIMER_RECORD_ID,delegate_data.get_meta_data_prop(_param.TIMER_RECORD_ID))
+			;
+
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_UPDATE_TIMER)
+				// _param_obj / MEETING_ID
+				, param_obj
+				// _delegate_after_job_done
+				, _obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						console.log(">>> TTM / DELETE / data ::",data);
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.		
+
+		}, this)
+		;
+
+		var delegate_on_finish_adding_timer =
+		_obj.getDelegate(function(target_controller){
+
+			var IS_DATA_FROM_DB = target_controller.get_meta_data_prop(_param.IS_DATA_FROM_DB);
+			var TIMER_RECORD_ID = target_controller.get_meta_data_prop(_param.TIMER_RECORD_ID);
+			if((IS_DATA_FROM_DB != undefined && IS_DATA_FROM_DB === true) || (TIMER_RECORD_ID != undefined && 0 < TIMER_RECORD_ID)) {
+				return;
+			}
+
+			var MEETING_ID = target_controller.get_meta_data_prop(_param.MEETING_ID);
+			var TIMER_TYPE_ID = target_controller.get_meta_data_prop(_param.TIMER_TYPE_ID);
+			var param_obj = 
+			_param
+			.get(_param.IS_INSERT_TIMER,_param.YES)
+			.get(_param.MEETING_ID,MEETING_ID)
+			.get(_param.MEMBER_HASH_KEY,"")
+			.get(_param.TIMER_TYPE_ID,TIMER_TYPE_ID)
+			.get(_param.TIME_RECORD_MILLISEC,0)
+			;
+
+			// DB에 새로운 열을 추가합니다.
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_UPDATE_TIMER)
+				// _param_obj / MEETING_ID
+				, param_obj
+				// _delegate_after_job_done
+				, _obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						console.log(">>> TTM / INSERT / data ::",data);
+
+						var timer_record_id = -1;
+						if(	data != undefined && 
+							data.NEW_TIMER != undefined && 
+							data.NEW_TIMER.__timer_record_id != undefined ) {
+
+							timer_record_id = parseInt(data.NEW_TIMER.__timer_record_id);
+						}
+
+						if(timer_record_id) {
+							target_controller.add_meta_data(
+								_param.get(_param.TIMER_RECORD_ID,timer_record_id)
+							);	
+						}
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.
+
+		}, this)
+		;
+
+		var delegate_on_time_update =
+		_obj.getDelegate(function(delegate_data){
+
+			var cur_millisec = delegate_data.get_time_stack_millisec();
+
+			// DB에 해당 열의 시간을 저장합니다.
+			var param_obj = 
+			_param
+			.get(_param.IS_UPDATE_TIMER,_param.YES)
+			.get(_param.TIMER_TYPE_ID,delegate_data.get_meta_data_prop(_param.TIMER_TYPE_ID))
+			.get(_param.TIMER_RECORD_ID,delegate_data.get_meta_data_prop(_param.TIMER_RECORD_ID))
+			.get(_param.TIME_RECORD_MILLISEC,cur_millisec)
+			;
+
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_UPDATE_TIMER)
+				// _param_obj / MEETING_ID
+				, param_obj
+				// _delegate_after_job_done
+				, _obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						console.log(">>> TTM / UPDATE TIME / data ::",data);
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.
+
+		}, this)
+		;			
+
+
+		var timer_table_controller =  
+		this.add_timer_table_editable(
+			title
+			, time_arr
+			, append_target_jq
+			, event_toggle_controller
+			, delegate_on_click_timer_title
+			, delegate_on_click_remove_timer
+			, delegate_on_finish_adding_timer
+			, delegate_on_time_update
+			, meta_data
+		);
+
+		return timer_table_controller;
+	}
+	/*
+		@ Public
 		@ Desc : 추가/삭제가 가능한 타이머 테이블을 그립니다.
 	*/	
 	,add_timer_table_editable:function(title, time_arr, append_target_jq, event_toggle_controller, delegate_on_click_timer_title, delegate_on_click_remove_timer, delegate_on_finish_adding_timer, delegate_on_time_update, meta_data) {

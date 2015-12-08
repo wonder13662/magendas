@@ -4,15 +4,6 @@
 	include_once("../common.inc");
 
 	$result = new stdClass();
-	$result->query_output_arr = array();
-	$debug = "";
-
-
-
-
-
-
-
 
 	// UPDATE - member management
 	$MEMBER_HASH_KEY = $params->getParamString($params->MEMBER_HASH_KEY, "");
@@ -66,7 +57,19 @@
 			// $is_qualified
 			, $is_qualified
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->IS_INSERT_TIMER = $query_output;
+
+		// 새로 입력한 타이머 정보를 가져옵니다.
+		$query_output = 
+		$wdj_mysql_interface->selectTimerListByTimerTypeNMemberId(
+			// $meeting_id
+			$MEETING_ID
+			// $timer_type_id
+			, $TIMER_TYPE_ID
+			// $member_id
+			, $MEMBER_ID
+		);
+		$result->NEW_TIMER = $query_output;
 
 	} else if($params->isYes($params->IS_UPDATE_TIMER) && (0 < $TIMER_RECORD_ID) && (0 < $MEMBER_ID)){
 
@@ -77,7 +80,7 @@
 			// $member_id
 			, $MEMBER_ID
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->IS_UPDATE_TIMER_MEMBER = $query_output;
 
 	} else if($params->isYes($params->IS_UPDATE_TIMER) && (0 < $TIMER_RECORD_ID) && (0 < $TIME_RECORD_MILLISEC)){
 
@@ -90,7 +93,7 @@
 			// $is_qualified
 			, $is_qualified
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->IS_UPDATE_TIMER_TIME_RECORD = $query_output;
 
 	} else if($params->isYes($params->IS_DELETE_TIMER) && (0 < $TIMER_RECORD_ID)){
 
@@ -99,7 +102,7 @@
 			// $timer_record_id
 			$TIMER_RECORD_ID
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->IS_DELETE_TIMER = $query_output;
 
 	}
 
