@@ -1425,6 +1425,8 @@ airborne.bootstrap.view.mobile.list = {
 	*/
 	,addTableRowTimer:function(time_table_arr, text_on_left, time_record_millisec, after_target_jq, delegate_obj_click_row, delegate_obj_on_time_update, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
 
+		console.log(">>> time_record_millisec :: ",time_record_millisec);
+
 		var _obj = airborne.bootstrap.obj;
 
 		if(_v.isNotValidArray(time_table_arr)){
@@ -1436,8 +1438,7 @@ airborne.bootstrap.view.mobile.list = {
 			return;
 		}
 		if(_v.isNotNumber(time_record_millisec)){
-			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / _v.isNotNumber(time_record_millisec)");
-			return;
+			time_record_millisec = 0;
 		}
 		if(after_target_jq==null){
 			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableRowTimer / after_target_jq==null");
@@ -1616,6 +1617,8 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			, start_timer:function() {
 
+				console.log(">>> start_timer");
+
 				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.get_time_stack_millisec());
 
 				var _self = this;
@@ -1644,6 +1647,11 @@ airborne.bootstrap.view.mobile.list = {
 				}
 			}
 			, stop_timer:function() {
+
+				if(this.interval_timer_obj == undefined) {
+					return;
+				}
+
 				clearInterval(this.interval_timer_obj);
 				this.interval_timer_obj = null;
 				if(this.time_elapsed_obj != undefined && this.time_elapsed_obj.time_stack != undefined) {

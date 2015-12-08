@@ -679,12 +679,17 @@ toast_master.mobile_list_manager = {
 		// 타이머를 화면에 그립니다.
 		var add_timer = function(time_arr, row_jq, event_toggle_controller, delegate_data_param, meta_data) {
 
+			var MEMBER_NAME = delegate_data_param[_param.MEMBER_NAME];
+			if(_v.isNotValidStr(MEMBER_NAME)) {
+				MEMBER_NAME = _param.NOT_ASSIGNED;
+			}
+
 			var timer_controller = 
 			_m_list.addTableRowTimer(
 				// time_arr - ( GREEN / YELLOW / RED )
 				time_arr
 				// title_on_left
-				, delegate_data_param[_param.MEMBER_NAME]
+				, MEMBER_NAME
 				// time_record
 				, meta_data[_param.TIME_RECORD_MILLISEC]
 				// after_target_jq
@@ -692,7 +697,7 @@ toast_master.mobile_list_manager = {
 				// delegate_obj_click_row
 				, _obj.getDelegate(function(delegate_data){
 
-					// console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
+					console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
 
 					// EVENT TYPE을 받는 것이 나을것 같은데?
 					var target_controller = delegate_data.target_controller;
@@ -746,11 +751,12 @@ toast_master.mobile_list_manager = {
 
 					}
 
-
 				}, this)
 				// delegate_data
 				, delegate_data_param
 			);
+
+			event_toggle_controller.push(timer_controller);
 
 			// 다음에 추가될 타이머의 위의 테이블 열의 참조.
 			// 다음 타이머는 이 참조 열 아래 붙입니다.

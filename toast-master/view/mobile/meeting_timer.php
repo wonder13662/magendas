@@ -423,6 +423,30 @@ _tm_m_list.add_timer_table_editable(
 
 		// DB에 해당 열을 삭제합니다.
 		console.log(">>> DELETE");
+		// DB에 해당 열의 시간을 저장합니다.
+		var param_obj = 
+		_param
+		.get(_param.IS_DELETE_TIMER,_param.YES)
+		.get(_param.TIMER_RECORD_ID,delegate_data.get_meta_data_prop(_param.TIMER_RECORD_ID))
+		;
+
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_UPDATE_TIMER)
+			// _param_obj / MEETING_ID
+			, param_obj
+			// _delegate_after_job_done
+			, _obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log(">>> DELETE / data ::",data);
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.		
 
 	}, this)
 	// delegate_on_finish_adding_timer
@@ -471,8 +495,6 @@ _tm_m_list.add_timer_table_editable(
 	, _obj.getDelegate(function(delegate_data){
 
 		var cur_millisec = delegate_data.get_time_stack_millisec();
-		console.log(">>> delegate_on_time_update / delegate_data :: ",delegate_data);
-		console.log(">>> delegate_on_time_update / cur_millisec :: ",cur_millisec);
 
 		// DB에 해당 열의 시간을 저장합니다.
 		var param_obj = 
@@ -532,6 +554,7 @@ for(var idx = 0;idx < time_record_list_table_topic.length;idx++) {
 
 	timer_controller_table_topic.add_timer(timer_record_obj_formatted);
 }
+console.log(">>> time_record_list_table_topic : ",time_record_list_table_topic);
 
 
 //timer_controller_table_topic.add_timer(time_record_list_table_topic[0]);

@@ -92,24 +92,14 @@
 		);
 		array_push($result->query_output_arr,$query_output);
 
-	} else if($params->isYes($params->IS_DELETE_TIMER)){
+	} else if($params->isYes($params->IS_DELETE_TIMER) && (0 < $TIMER_RECORD_ID)){
 
-		/*
 		$query_output = 
-		$wdj_mysql_interface->updateMember(	$params->getParamString($params->MEMBER_HASH_KEY)
-											, $params->getParamString($params->MEMBER_FIRST_NAME)
-											, $params->getParamString($params->MEMBER_LAST_NAME)
-											, $params->getParamString($params->MEMBER_EMAIL));
-		array_push($result->query_output_arr,$query_output);
-
-		// 클럽 내의 활동 상황을 변경합니다.
-		$query_output = 
-		$wdj_mysql_interface->updateMemberStatus(	$params->getParamNumber($params->MEMBER_ID)
-													, $params->getParamNumber($params->MEETING_MEMBERSHIP_ID)
-													, $params->getParamString($params->MEMBER_MEMBERSHIP_STATUS)
+		$wdj_mysql_interface->deleteTimer(
+			// $timer_record_id
+			$TIMER_RECORD_ID
 		);
 		array_push($result->query_output_arr,$query_output);
-		*/
 
 	}
 
