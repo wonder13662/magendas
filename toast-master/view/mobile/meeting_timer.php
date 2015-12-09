@@ -421,6 +421,7 @@ for(var idx = 0;idx < time_record_list_mini_debate.length;idx++) {
 }
 
 // TODO 지우고 새 열을 추가하면 참조를 잃어버려 추가가 안됨.
+// TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
 
 
 

@@ -191,7 +191,6 @@ toast_master.mobile_list_manager = {
 		table_row_slot_obj_arr.push(slot_left_obj);
 		table_row_slot_obj_arr.push(slot_right_obj);
 
-		// wonder.jung
 		if(redirect_url_after_log_in == undefined) {
 			redirect_url_after_log_in = "";
 		}
@@ -863,7 +862,6 @@ toast_master.mobile_list_manager = {
 			, get_timer_record_obj:function(is_qualified, meeting_id, member_hash_key, member_name, time_record_millisec, timer_record_id, timer_type_id) {
 				// 타이머가 이해할 수 있는 타이머 정보 타입 형식을 가지고 있는 객체를 돌려줍니다.
 
-				// wonder.jung
 				if(_v.isNumberStr(is_qualified)) {
 					is_qualified = parseInt(is_qualified);
 				}
@@ -1010,6 +1008,9 @@ toast_master.mobile_list_manager = {
 					} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
 
 						console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
+
+						// 0. 열을 삭제하므로 이전 열의 참조를 다음 타이머 추가시, 아래에 붙일 참조로 변경.
+						timer_table_controller.set_row_before_new_timer_jq(container_jq.prev());
 
 						// 1. remove from screen
 						container_jq.remove();
