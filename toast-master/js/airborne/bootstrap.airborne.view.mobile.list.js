@@ -347,8 +347,17 @@ airborne.bootstrap.view.mobile.list = {
 			, get_button_jq:function() {
 				return this.btn_row_jq;
 			}
+			, is_enabled:true
+			, disable:function() {
+				this.is_enabled = false;
+			}
 			, is_on:true
 			, on:function() {
+
+				if(!this.is_enabled) {
+					return;
+				}
+
 				this.is_on = true;
 				this.btn_row_jq.removeClass("disabled");
 				this.btn_row_jq.css("opacity","1");
@@ -1425,8 +1434,6 @@ airborne.bootstrap.view.mobile.list = {
 	*/
 	,addTableRowTimer:function(time_table_arr, text_on_left, time_record_millisec, after_target_jq, delegate_obj_click_row, delegate_obj_on_time_update, delegate_data, text_color_vmouse_down, bg_color_vmouse_down, text_color, bg_color){
 
-		console.log(">>> time_record_millisec :: ",time_record_millisec);
-
 		var _obj = airborne.bootstrap.obj;
 
 		if(_v.isNotValidArray(time_table_arr)){
@@ -1573,6 +1580,17 @@ airborne.bootstrap.view.mobile.list = {
 			, get_delete_btn_jq:function() {
 				return this.delete_btn_jq;
 			}
+			, hide_delete_btn:function() {
+				if(this.delete_btn_jq == undefined) {
+					return;
+				}
+				this.delete_btn_jq.hide();
+				if(this.title_btn_jq == undefined) {
+					return;
+				}
+				// wonder.jung
+				this.title_btn_jq.css("width","69%");
+			}
 			, EVENT_TYPE_CLICK_TITLE:"EVENT_TYPE_CLICK_TITLE"
 			, EVENT_TYPE_CLICK_REMOVE:"EVENT_TYPE_CLICK_REMOVE"
 			, EVENT_TYPE_CLICK_TIMER:"EVENT_TYPE_CLICK_TIMER"
@@ -1686,18 +1704,48 @@ airborne.bootstrap.view.mobile.list = {
 				var cur_timer_btn_jq = this.get_timer_btn_jq();
 
 				cur_delete_btn_jq.removeClass("disabled");
-				cur_title_btn_jq.removeClass("disabled");
+				// REMOVE ME
+				// cur_title_btn_jq.removeClass("disabled");
 				cur_timer_btn_jq.removeClass("disabled");
 
-				cur_delete_btn_jq.css("opacity","1");
-				cur_title_btn_jq.css("opacity","1");
-				cur_timer_btn_jq.css("opacity","1");
+				cur_delete_btn_jq.css("opacity",_param.OPACITY_ENABLED);
+				// REMOVE ME
+				// cur_title_btn_jq.css("opacity","1");
+				cur_timer_btn_jq.css("opacity",_param.OPACITY_ENABLED);
 
+				this.on_title_btn();
+
+			}
+			/*
+				@ Public
+				@ Desc : 타이틀 버튼을 어떤 이벤트 상황에도 반응하지 않도록 비활성화 시킵니다.
+			*/
+			, is_title_btn_enabled:true
+			, disable_title_btn:function() {
+				this.is_title_btn_enabled = false;
+			}
+			, on_title_btn:function() {
+
+				if(!this.is_title_btn_enabled) {
+					return;
+				}
+
+				var cur_title_btn_jq = this.get_title_btn_jq();
+				if(cur_title_btn_jq == undefined) return;
+
+				cur_title_btn_jq.removeClass("disabled");
+				cur_title_btn_jq.css("opacity",_param.OPACITY_ENABLED);
+			}
+			, off_title_btn:function() {
+				var cur_title_btn_jq = this.get_title_btn_jq();
+				if(cur_title_btn_jq == undefined) return;
+
+				cur_title_btn_jq.addClass("disabled");
+				cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 			}
 			, off:function(event_type_exclude) {
 				
 				// 사용자가 지정한 버튼에 대해서는 이벤트를 유지.
-
 				// 모든 버튼의 이벤트를 제거함.
 				this.event_toggle_obj.EVENT_TYPE_CLICK_TITLE = false;
 				this.event_toggle_obj.EVENT_TYPE_CLICK_REMOVE = false;
@@ -1710,39 +1758,58 @@ airborne.bootstrap.view.mobile.list = {
 				this.event_toggle_obj[event_type_exclude] = true;
 				if(this.EVENT_TYPE_CLICK_REMOVE === event_type_exclude) {
 					cur_delete_btn_jq.removeClass("disabled");
-					cur_title_btn_jq.addClass("disabled");
+					// REMOVE ME
+					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
-					cur_delete_btn_jq.css("opacity","1");
-					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_delete_btn_jq.css("opacity",_param.OPACITY_ENABLED);
+					// REMOVE ME
+					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 
+					this.off_title_btn();
+
 				} else if(this.EVENT_TYPE_CLICK_TITLE === event_type_exclude) {
+
 					cur_delete_btn_jq.addClass("disabled");
-					cur_title_btn_jq.removeClass("disabled");
+					// REMOVE ME
+					// cur_title_btn_jq.removeClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					cur_title_btn_jq.css("opacity","1");
+					// REMOVE ME
+					// cur_title_btn_jq.css("opacity",_param.OPACITY_ENABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 
+					this.on_title_btn();
+
 				} else if(this.EVENT_TYPE_CLICK_TIMER === event_type_exclude) {
+
 					cur_delete_btn_jq.addClass("disabled");
-					cur_title_btn_jq.addClass("disabled");
+					// REMOVE ME
+					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.removeClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					cur_timer_btn_jq.css("opacity","1");
+					// REMOVE ME
+					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					cur_timer_btn_jq.css("opacity",_param.OPACITY_ENABLED);
+
+					this.off_title_btn();
 
 				} else {
+
 					cur_delete_btn_jq.addClass("disabled");
-					cur_title_btn_jq.addClass("disabled");
+					// REMOVE ME
+					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+					// REMOVE ME
+					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
+
+					this.off_title_btn();
 
 				}
 

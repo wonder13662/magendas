@@ -36,8 +36,20 @@ if(!empty($recent_meeting_agenda_list)) {
 	$recent_meeting_id = $recent_meeting_agenda_obj->__meeting_id;
 }
 if(0 < $recent_meeting_id) {
-	$today_speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($recent_meeting_id);
+	// REMOVE ME
+	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($recent_meeting_id);
+	$speaker_timer_list = $wdj_mysql_interface->sel_speaker_n_timer($recent_meeting_id);
+	$evaluator_timer_list = $wdj_mysql_interface->sel_evaluator_n_timer($recent_meeting_id);
 }
+
+
+
+
+	
+
+
+
+
 
 
 
@@ -56,6 +68,10 @@ $time_guide_line_list = $wdj_mysql_interface->getTimeGuideLine();
 $time_record_list_table_topic = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_TABLE_TOPIC);
 $time_record_list_mini_debate = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_MINI_DEBATE);
 
+// TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
+
+
+// TEST
 
 
 
@@ -108,11 +124,27 @@ var recent_meeting_agenda_obj = <?php echo json_encode($recent_meeting_agenda_ob
 var recent_meeting_id = <?php echo json_encode($recent_meeting_id);?>;
 
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
+
+var speaker_timer_list = <?php echo json_encode($speaker_timer_list);?>;
+var speaker_no_timer_list = <?php echo json_encode($speaker_no_timer_list);?>;
+var no_speaker_timer_list = <?php echo json_encode($no_speaker_timer_list);?>;
+
+var evaluator_timer_list = <?php echo json_encode($evaluator_timer_list);?>;
+var evaluator_no_timer_list = <?php echo json_encode($evaluator_no_timer_list);?>;
+var no_evaluator_timer_list = <?php echo json_encode($no_evaluator_timer_list);?>;
+
+
+
 var member_list = <?php echo json_encode($member_list);?>;
 var time_guide_line_list = <?php echo json_encode($time_guide_line_list);?>;
 var time_record_list_table_topic = <?php echo json_encode($time_record_list_table_topic);?>;
 var time_record_list_mini_debate = <?php echo json_encode($time_record_list_mini_debate);?>;
 var table_jq = $("table tbody");
+
+console.log(">>> speaker_timer_list :: ",speaker_timer_list);
+
+console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
+
 
 
 
@@ -303,7 +335,7 @@ var event_toggle_controller = _m_list.get_event_toggle_controller();
 //   dMP   dMP dMP dMP dMP dMMMP   dMMMMK"        dMP   dMMMMMP dMMMMK" dMP     dMMMP           dMP   dMP dMP dMMMMP" dMP dMP      
 //  dMP   dMP dMP dMP dMP dMP     dMP"AMF        dMP   dMP dMP dMP.aMF dMP     dMP             dMP   dMP.aMP dMP     dMP dMP.aMP   
 // dMP   dMP dMP dMP dMP dMMMMMP dMP dMP        dMP   dMP dMP dMMMMP" dMMMMMP dMMMMMP         dMP    VMMMP" dMP     dMP  VMMMP"    
-
+console.log(">>> time_record_list_table_topic :: ",time_record_list_table_topic);
 var time_guide_line_table_topic = time_guide_line_list[(_param.TIMER_TYPE_ID_TABLE_TOPIC - 1)];
 var time_table_arr_table_topic = 
 [
@@ -375,9 +407,6 @@ var time_table_arr_mini_debate =
 	, parseInt(time_guide_line_mini_debate.__time_guide_line_sec_yellow)
 	, parseInt(time_guide_line_mini_debate.__time_guide_line_sec_red)
 ];
-console.log(">>> time_guide_line_list :: ",time_guide_line_list);
-console.log(">>> time_table_arr_mini_debate :: ",time_table_arr_mini_debate);
-console.log(">>> time_record_list_mini_debate :: ",time_record_list_mini_debate);
 var timer_controller_mini_debate = 
 _tm_m_list.add_member_timer_table_editable(
 	// title
@@ -420,8 +449,153 @@ for(var idx = 0;idx < time_record_list_mini_debate.length;idx++) {
 	timer_controller_mini_debate.add_timer(timer_record_obj_formatted);
 }
 
-// TODO 지우고 새 열을 추가하면 참조를 잃어버려 추가가 안됨.
-// TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
+
+
+
+
+
+
+
+
+
+
+//    .dMMMb  dMMMMb  dMMMMMP .aMMMb  dMP dMP dMMMMMP dMMMMb 
+//   dMP" VP dMP.dMP dMP     dMP"dMP dMP.dMP dMP     dMP.dMP 
+//   VMMMb  dMMMMP" dMMMP   dMMMMMP dMMMMK" dMMMP   dMMMMK"  
+// dP .dMP dMP     dMP     dMP dMP dMP"AMF dMP     dMP"AMF   
+// VMMMP" dMP     dMMMMMP dMP dMP dMP dMP dMMMMMP dMP dMP    
+
+var timer_controller_prepared_speech = 
+_tm_m_list.add_member_timer_table_fixed(
+	// title
+	"Prepared Speech"
+	// append_target_jq
+	, table_jq
+	// event_toggle_controller
+	, event_toggle_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+);
+for(var idx = 0;idx < speaker_timer_list.length;idx++) {
+	var speech_speaker_obj = speaker_timer_list[idx];	
+
+	var timer_record_obj_formatted = 
+	timer_controller_prepared_speech.get_timer_record_obj(
+		// is_qualified
+		speech_speaker_obj.__speech_timer_is_qualified
+		// meeting_id
+		, speech_speaker_obj.__meeting_id
+		// member_hash_key
+		, speech_speaker_obj.__speaker_member_hash_key
+		// member_name
+		, speech_speaker_obj.__speaker_member_name
+		// time_record_millisec
+		, speech_speaker_obj.__speech_timer_time_record_milli_sec
+		// timer_record_id
+		, speech_speaker_obj.__speech_timer_id
+		// timer_type_id
+		, speech_speaker_obj.__speaker_speech_project_time_guide_line
+		// time_arr
+		,[
+			parseInt(speech_speaker_obj.__speech_timer_sec_green)
+			, parseInt(speech_speaker_obj.__speech_timer_sec_yellow)
+			, parseInt(speech_speaker_obj.__speech_timer_sec_red)
+		]
+	);
+
+	timer_controller_prepared_speech.add_timer(timer_record_obj_formatted);
+}
+
+
+
+
+
+
+
+
+
+
+//     dMMMMMP dMP dMP .aMMMb  dMP    dMP dMP .aMMMb dMMMMMMP .aMMMb  dMMMMb 
+//    dMP     dMP dMP dMP"dMP dMP    dMP dMP dMP"dMP   dMP   dMP"dMP dMP.dMP 
+//   dMMMP   dMP dMP dMMMMMP dMP    dMP dMP dMMMMMP   dMP   dMP dMP dMMMMK"  
+//  dMP      YMvAP" dMP dMP dMP    dMP.aMP dMP dMP   dMP   dMP.aMP dMP"AMF   
+// dMMMMMP    VP"  dMP dMP dMMMMMP VMMMP" dMP dMP   dMP    VMMMP" dMP dMP    
+
+console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
+var timer_controller_evaluator = 
+_tm_m_list.add_member_timer_table_fixed(
+	// title
+	"Evaluator"
+	// append_target_jq
+	, table_jq
+	// event_toggle_controller
+	, event_toggle_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+);
+for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
+	var evaluator_obj = evaluator_timer_list[idx];
+
+	var timer_record_obj_formatted = 
+	timer_controller_prepared_speech.get_timer_record_obj(
+		// is_qualified
+		evaluator_obj.__evaluation_timer_is_qualified
+		// meeting_id
+		, evaluator_obj.__meeting_id
+		// member_hash_key
+		, evaluator_obj.__evaluator_member_hash_key
+		// member_name
+		, evaluator_obj.__evaluator_member_name
+		// time_record_millisec
+		, evaluator_obj.__evaluation_timer_time_record_milli_sec
+		// timer_record_id
+		, evaluator_obj.__evaluation_timer_id
+		// timer_type_id
+		, evaluator_obj.__evaluator_speech_project_time_guide_line
+		// time_arr
+		,[
+			parseInt(evaluator_obj.__evaluation_timer_sec_green)
+			, parseInt(evaluator_obj.__evaluation_timer_sec_yellow)
+			, parseInt(evaluator_obj.__evaluation_timer_sec_red)
+		]
+	);
+
+	timer_controller_evaluator.add_timer(timer_record_obj_formatted);
+}
+
+
+
+
+
+
+
+
+// TIME TABLE
+// http://toastmasters.wikia.com/wiki/Category:Speaking_to_Inform
+
+// ALTER ADD COLUMN
+
+
+
+
+// SPEECH
+// 스피치 프로젝트 메뉴얼과 타임 테이블이 정확히 일치하는지 확인하는 작업이 필요함.
+// 이 페이지에 진입시, 스피치 관련 타이머 정보가 없다면 서버 단에서 추가해줘야 한다.
+// 스피치 관련 타이머는 삭제 버튼이 없어야 함.
+// 스피치 관련 타이머는 추가 버튼이 없어야 함.(이미 관리되는 정보가 있으므로)
+// for(var idx = 0; idx < today_speech_list.length; idx++) {
+// 	today_speech_list[idx];
+// }
+
+
+
+
+
+// EVALUATOR
+
+
 
 
 
@@ -439,6 +613,103 @@ for(var idx = 0;idx < time_record_list_mini_debate.length;idx++) {
 // SET sec_green = 60, sec_yellow = 60, sec_red = 60
 // WHERE id=6
 // ;
+
+// DROP TABLE `SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE`
+
+// CREATE TABLE `SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE` (
+//   `speech_manual_project_id` int(11) NOT NULL,
+//   `time_guide_line_id` int(11) NOT NULL,
+//   UNIQUE KEY `speech_manual_project_n_time_guide_line` (`speech_manual_project_id`,`time_guide_line_id`)
+// ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+
+
+// INSERT SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE (speech_manual_project_id, time_guide_line_id)
+// SELECT SMP.`id`, MTGL.id
+// FROM SPEECH_MANUAL_PROJECT AS SMP
+// LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.role_name=SMP.`name`
+// ;
+
+//UPDATE `magendas`.`SPEECH_MANUAL_PROJECT` SET `sec_allocated_min`=\2,`sec_qualified_min`=\3,`sec_allocated_max`=\4,`sec_qualified_max`=\5,`sec_green`=\6,`sec_yellow`=\7,`sec_red`=\8 WHERE `id`=\1;
+
+//INSERT INTO `magendas`.`MA_TIMER_GUIDE_LINE`(`role_name`,`sec_allocated_min`,`sec_qualified_min`,`sec_allocated_max`,`sec_qualified_max`,`sec_green`,`sec_yellow`,`sec_red`) VALUES (\1,\2,\3,\4,\5,\6,\7,\8);
+
+
+// SELECT MTGL.`id`,
+//     MTGL.`role_name`,
+// FROM `magendas`.`MA_TIMER_GUIDE_LINE`;
+
+/*
+// 스피치 프로젝트 별 시간 가져오기 쿼리.
+
+SELECT SMPNTGL.speech_manual_project_id
+, SMPNTGL.time_guide_line_id
+, MTGL.role_name
+, MTGL.`sec_allocated_min`
+, MTGL.`sec_qualified_min`
+, MTGL.`sec_allocated_max`
+, MTGL.`sec_qualified_max`
+, MTGL.`sec_green`
+, MTGL.`sec_yellow`
+, MTGL.`sec_red`
+FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL
+LEFT JOIN SPEECH_MANUAL_PROJECT AS SMP ON SMP.id=SMPNTGL.speech_manual_project_id
+LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id
+;
+
+*/ 
+
+// 아젠다 타임라인과 모든 영역에서 입력시, 제한된 문자만을 입력받도록 하는 프로세스가 필요.
+
+// 도메인 구입 필요.
+// We have a meeting --> WEETING.COM
+
+/*
+SELECT * FROM SPEECH_MANUAL_PROJECT WHERE name="Make Them Laugh";
+
+SELECT * FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE WHERE speech_manual_project_id IN (13, 82);
+
+SELECT * FROM MA_TIMER_GUIDE_LINE WHERE role_name="Make Them Laugh";
+
+// 스피치 프로젝트가 실제로 있는지 확인 필요.
+// 제목이 중복되어 있음.
+
+// SPEECH_MANUAL, SPEECH_MANUAL_PROJECT의 사용하지 않는 컬럼 제거
+
+ALTER TABLE SPEECH_MANUAL_PROJECT DROP COLUMN `status`
+, DROP COLUMN `regdttm`
+, DROP COLUMN `updttm`
+;
+
+ALTER TABLE SPEECH_MANUAL DROP COLUMN `status`
+, DROP COLUMN `regdttm`
+, DROP COLUMN `updttm`
+;
+
+ALTER TABLE MA_SPEECH_SPEAKER DROP COLUMN `timer_green`, DROP COLUMN `timer_red`;
+ALTER TABLE MA_SPEECH_EVALUATOR DROP COLUMN `timer_green`, DROP COLUMN `timer_red`;
+
+
+
+// 서비스 리스트 정렬 순서를 위해서 order_num 컬럼이 필요함.
+ALTER TABLE SPEECH_MANUAL_PROJECT ADD COLUMN order_num int(11) NOT NULL DEFAULT 0;
+
+// 매뉴얼에 없는 그밖의 스피치 항목을 추가함.
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("Speech Contest",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("ETC",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("NOT ASSIGNED",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("Education Session",-1,-1);
+
+INSERT INTO `magendas`.`MA_TIMER_GUIDE_LINE`(`role_name`,`sec_allocated_min`,`sec_qualified_min`,`sec_allocated_max`,`sec_qualified_max`,`sec_green`,`sec_yellow`,`sec_red`) VALUES ("Speech Contest",300,270,420,450,300,360,420);
+
+// speaker와 evaluator정보에서 timer_id를 갖고 있도록 컬럼을 추가합니다.
+ALTER TABLE MA_SPEECH_SPEAKER ADD COLUMN timer_record_id int(11) NOT NULL DEFAULT 0;
+ALTER TABLE MA_SPEECH_EVALUATOR ADD COLUMN timer_record_id int(11) NOT NULL DEFAULT 0;
+
+// 스피커 생성시에 timer를 지정하도록 로직 추가.
+
+
+*/
+
 
 
 

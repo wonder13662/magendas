@@ -168,7 +168,6 @@
 	$IS_UPDATE_SPEECH_SPEAKER = $params->isYes($params->IS_UPDATE_SPEECH_SPEAKER);
 	$IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_SPEAKER = $params->isYes($params->IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_SPEAKER);
 
-	$IS_INSERT_SPEECH_EVALUATOR = $params->isYes($params->IS_INSERT_SPEECH_EVALUATOR);
 	$IS_UPDATE_SPEECH_EVALUATOR = $params->isYes($params->IS_UPDATE_SPEECH_EVALUATOR);
 	$IS_DELETE_SPEECH_EVALUATOR = $params->isYes($params->IS_DELETE_SPEECH_EVALUATOR);
 	$IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_EVALUATOR = $params->isYes($params->IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_EVALUATOR);
@@ -181,31 +180,44 @@
 	$SPEECH_TABLE_ROW_INFO_ARR_JSON_STR = $params->getParamString($params->SPEECH_TABLE_ROW_INFO_ARR_JSON_STR);
 
 	$SPEECH_TITLE = $params->getParamString($params->SPEECH_TITLE);
-	$SPEECH_SPEAKER_MEMBER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_MEMBER_ID, -1);
-	$SPEECH_SPEAKER_TIMER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_ID, -1);
 
+	// @ Deprecated
+	// $SPEECH_SPEAKER_MEMBER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_MEMBER_ID, -1);
+
+	$SPEECH_SPEAKER_MEMBER_HASH_KEY = $params->getParamString($params->SPEECH_SPEAKER_MEMBER_HASH_KEY, "");
+	if(!empty($SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
+		$SPEECH_SPEAKER_MEMBER_ID = $wdj_mysql_interface->getMemberId($SPEECH_SPEAKER_MEMBER_HASH_KEY);
+	}
+	$SPEECH_SPEAKER_TIMER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_ID, -1);
 	$SPEECH_SPEAKER_TIMER = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER);
-	$SPEECH_SPEAKER_TIMER_GREEN = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_GREEN, 300);
-	$SPEECH_SPEAKER_TIMER_RED = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_RED, 360);
+
+	// REMOVE ME
+	// $SPEECH_SPEAKER_TIMER_GREEN = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_GREEN, 300);
+	// $SPEECH_SPEAKER_TIMER_RED = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_RED, 360);
 
 	$SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR = $params->getParamString($params->SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR);
 
-	$SPEECH_EVALUATOR_MEMBER_ID = $params->getParamNumber($params->SPEECH_EVALUATOR_MEMBER_ID);
+	// @ Deprecated
+	// $SPEECH_EVALUATOR_MEMBER_ID = $params->getParamNumber($params->SPEECH_EVALUATOR_MEMBER_ID);
+
+	$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $params->getParamString($params->SPEECH_EVALUATOR_MEMBER_HASH_KEY, "");
+	if(!empty($SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
+		$SPEECH_EVALUATOR_MEMBER_ID = $wdj_mysql_interface->getMemberId($SPEECH_EVALUATOR_MEMBER_HASH_KEY);
+	}
+
 	$SPEECH_EVALUATOR_TIMER_ID = $params->getParamNumber($params->SPEECH_EVALUATOR_TIMER_ID);
 	$SPEECH_EVALUATOR_TIMER = $params->getParamNumber($params->SPEECH_EVALUATOR_TIMER);
 
-	$SPEECH_EVALUATOR_TIMER_GREEN = 120;
-	$SPEECH_EVALUATOR_TIMER_RED = 180;
+	// REMOVE ME
+	// $SPEECH_EVALUATOR_TIMER_GREEN = 120;
+	// $SPEECH_EVALUATOR_TIMER_RED = 180;
 
 
 
 	if($IS_INSERT_SPEECH){
 
-		$query_output = $wdj_mysql_interface->insert_today_speech_empty_speaker_n_evaluator($MEETING_ID);
-		array_push($result->query_output_arr,$query_output);
-
-		// 새로운 스피치 정보를 결과에 추가합니다.
-		
+		$query_output = $wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
+		$result->insert_speech_empty_speaker_n_evaluator = $query_output;
 
 	} else if($IS_UPDATE_SPEECH){
 
@@ -316,19 +328,17 @@
 
 	} else if($IS_DELETE_SPEECH){
 
-		$query_output = $wdj_mysql_interface->delete_today_speech_v2($SPEECH_ID);
-		array_push($result->query_output_arr,$query_output);
+		$query_output = $wdj_mysql_interface->delete_speech($SPEECH_ID);
+		$result->delete_speech = $query_output;
 
 	} else if($IS_UPDATE_SPEECH_SPEAKER){
 
 		$query_output = 
-		$wdj_mysql_interface->upsert_today_speech_speaker_v2(
+		$wdj_mysql_interface->upsert_speech_speaker(
 			$SPEECH_ID
 			, $SPEECH_SPEAKER_MEMBER_ID
-			, $SPEECH_SPEAKER_TIMER_GREEN
-			, $SPEECH_SPEAKER_TIMER_RED
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->upsert_speech_speaker=$query_output;
 
 	} else if( $IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_EVALUATOR && !empty($SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR)){
 
@@ -342,7 +352,7 @@
 
 			// 입력된 파라미터만 업데이트됩니다.
 			$query_output = 
-			$wdj_mysql_interface->update_today_speech_evaluator_v2(
+			$wdj_mysql_interface->update_speech_evaluator(
 				// $SPEECH_ID
 				$cur_evaluation_id
 				// $SPEECH_ID
@@ -359,42 +369,32 @@
 			array_push($result->query_output_arr,$query_output);
 		}
 
-	} else if(	$IS_INSERT_SPEECH_EVALUATOR==$params->YES && 
-				$SPEECH_ID > 0 && 
-				$SPEECH_EVALUATOR_MEMBER_ID > 0	){
-
-		$query_output = 
-		$wdj_mysql_interface->insert_today_speech_evaluator_v2(
-			$SPEECH_ID
-			, $SPEECH_EVALUATOR_MEMBER_ID
-			, $SPEECH_EVALUATOR_TIMER_GREEN
-			, $SPEECH_EVALUATOR_TIMER_RED
-		);
-		array_push($result->query_output_arr,$query_output);
-
-
-	} else if(	$IS_UPDATE_SPEECH_EVALUATOR==$params->YES && 
+	} else if(	$IS_UPDATE_SPEECH_EVALUATOR && 
 				$SPEECH_ID > 0 && 
 				$SPEECH_EVALUATOR_MEMBER_ID > 0	){
 
 		// 스피치에는 1명의 이벨류에이터만 가능합니다.
-		// 이전에 등록되어 있던 스피커가 있다면 삭제합니다.
-		$query_output = 		
-		$wdj_mysql_interface->delete_all_today_speech_evaluator($SPEECH_ID);
-		array_push($result->query_output_arr,$query_output);
+		// 등록된 이벨류에이터 값을 가져옵니다.
+		$recent_speech_evaluator_id = $wdj_mysql_interface->select_recent_speech_evaluator_id($SPEECH_ID);
+		if(0 < $recent_speech_evaluator_id) {
 
-		$query_output = 
-		$wdj_mysql_interface->insert_today_speech_evaluator_v2(
-			$SPEECH_ID
-			, $SPEECH_EVALUATOR_MEMBER_ID
-			, $SPEECH_EVALUATOR_TIMER_GREEN
-			, $SPEECH_EVALUATOR_TIMER_RED
-		);
-		array_push($result->query_output_arr,$query_output);
+			$query_output = 
+			$wdj_mysql_interface->update_speech_evaluator(
+				// $speech_evaluator_id
+				$recent_speech_evaluator_id
+				// $speech_id
+				, null
+				// $speech_evaluator_member_id
+				, $SPEECH_EVALUATOR_MEMBER_ID
+				// $order_num
+				, null
+			);
+			$result->update_speech_evaluator=$query_output;
+		}
 
 	} else if($IS_DELETE_SPEECH_EVALUATOR==$params->YES && $EVALUATOR_ID > 0){
 
-		$query_output = $wdj_mysql_interface->delete_today_speech_evaluator_v2($EVALUATOR_ID);
+		$query_output = $wdj_mysql_interface->delete_speech_evaluator($EVALUATOR_ID);
 		array_push($result->query_output_arr,$query_output);
 
 	}

@@ -22,7 +22,7 @@ $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
 
 $meeting_agenda_list = $wdj_mysql_interface->getMeetingAgenda($MEETING_MEMBERSHIP_ID, $MEETING_ID);
 $today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
-$today_speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($MEETING_ID);
+$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
 $today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
 
 // 다음 미팅 날짜를 가져옵니다.
@@ -74,6 +74,8 @@ var today_news_list = <?php echo json_encode($today_news_list);?>;
 
 console.log(">>> login_user_info :: ",login_user_info);
 console.log(">>> membership_obj :: ",membership_obj);
+
+console.log(">>> today_speech_list :: ",today_speech_list);
 
 var is_editable = true;
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {

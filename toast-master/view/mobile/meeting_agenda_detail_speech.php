@@ -23,7 +23,7 @@ if(!empty($meeting_agenda_list)) {
 	$meeting_agenda_obj = $meeting_agenda_list[0];
 }
 
-$today_speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($MEETING_ID);
+$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
 
 $SPEECH_ID = $params->getParamNumber($params->SPEECH_ID, -1);
 $IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
@@ -165,6 +165,8 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 			.get(_param.MEETING_ID,MEETING_ID)
 			;
 
+			// wonder.jung
+			// 새로운 스피치를 생성하면 타이머도 함께 만들어줘야 합니다.
 			_ajax.send_simple_post(
 				// _url
 				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -284,7 +286,7 @@ select_folder_speech_project.hide();
 
 
 
-
+console.log(">>> member_list :: ",member_list);
 
 // Member List for speaker n evaluator.
 var key_value_obj_member_arr = [];
@@ -293,7 +295,7 @@ for(var idx = 0;idx < member_list.length; idx++) {
 	var key_value_obj = 
 	_obj.get_select_option(
 		// key_str
-		""+member_obj.__member_id
+		""+member_obj.__member_hash_key
 		// value_str
 		,member_obj.__member_name
 		// key_access_prop_name
@@ -763,6 +765,9 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
 					var target_controller = selected_delegate_data.target_controller;
 
+					// wonder.jung
+					// 프로젝트 업데이트시 관련 타이머의 정보도 함께 업데이트 해줘야 합니다.
+
 					_ajax.send_simple_post(
 						// _url
 						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -892,8 +897,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
 					var target_controller = selected_delegate_data.target_controller;
 
-					console.log("SELECTED_VALUE :: ",SELECTED_VALUE);
-
 					_ajax.send_simple_post(
 						// _url
 						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -901,25 +904,24 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 						, _param
 						.get(_param.IS_UPDATE_SPEECH_SPEAKER,_param.YES)
 						.get(_param.SPEECH_ID,SPEECH_ID)
-						.get(_param.SPEECH_SPEAKER_MEMBER_ID,SELECTED_KEY)
+						.get(_param.SPEECH_SPEAKER_MEMBER_HASH_KEY,SELECTED_KEY)
 
 						// _delegate_after_job_done
 						,_obj.get_delegate(
 							// delegate_func
 							function(data){
 
-								// console.log(data);
-								// console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
+								console.log(data);
+								console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
 								alert("Updated!");
 
 								var is_success = false;
 								if(	data != undefined && 
-									_v.is_valid_array(data.query_output_arr) &&
-									data.query_output_arr[0] != undefined &&
-									data.query_output_arr[0].output != undefined ) {
+									data.upsert_speech_speaker != undefined && 
+									data.upsert_speech_speaker.output === true) {
 
-									is_success = data.query_output_arr[0].output;
+									is_success = true;
 								}
 
 								if(is_success) {
@@ -1010,26 +1012,14 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
 					var SELECTED_KEY = selected_delegate_data[_param.SELECTED_KEY];
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
-					var SPEECH_EVALUATOR_MEMBER_ID = selected_delegate_data[_param.SPEECH_EVALUATOR_MEMBER_ID];
-
-					console.log("SPEECH_EVALUATOR_MEMBER_ID :: ",SPEECH_EVALUATOR_MEMBER_ID);
-
-					
+					var target_controller = selected_delegate_data.target_controller;
 
 					var request_param = 
 					_param
-					.get(_param.IS_INSERT_SPEECH_EVALUATOR,_param.YES)
+					.get(_param.IS_UPDATE_SPEECH_EVALUATOR,_param.YES)
 					.get(_param.SPEECH_ID,SPEECH_ID)
-					.get(_param.SPEECH_EVALUATOR_MEMBER_ID,SELECTED_KEY)
+					.get(_param.SPEECH_EVALUATOR_MEMBER_HASH_KEY,SELECTED_KEY)
 					;
-					if(SPEECH_EVALUATOR_MEMBER_ID > 0) {
-						request_param = 
-						_param
-						.get(_param.IS_UPDATE_SPEECH_EVALUATOR,_param.YES)
-						.get(_param.SPEECH_ID,SPEECH_ID)
-						.get(_param.SPEECH_EVALUATOR_MEMBER_ID,SELECTED_KEY)
-						;
-					}
 
 					_ajax.send_simple_post(
 						// _url
@@ -1041,23 +1031,27 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 							// delegate_func
 							function(data){
 
-								// console.log(data);
-								// console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
-
-								alert("Updated!");
+								console.log(data);
+								console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
 								var is_success = false;
 								if(	data != undefined && 
-									_v.is_valid_array(data.query_output_arr) &&
-									data.query_output_arr[0] != undefined &&
-									data.query_output_arr[0].output != undefined ) {
+									data.update_speech_evaluator != undefined &&
+									data.update_speech_evaluator.output != undefined &&	
+									data.update_speech_evaluator.output === true ) {
 
-									is_success = data.query_output_arr[0].output;
+									is_success = true;
 								}
-
 								if(is_success) {
-									// 성공했다면 표시된 값을 변경해준다.
+									// console.log("성공했다면 표시된 값을 변경해준다.");
 									row_member_jq.find("span.badge").find("strong").html(SELECTED_VALUE);
+
+									if(SELECTED_VALUE  === _param.NOT_ASSIGNED) {
+										target_controller.set_badge_gray();
+									} else {
+										target_controller.set_badge_green();
+									}
+
 								} else {
 									alert("Update failed!");
 								}
@@ -1078,14 +1072,14 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 		, _param
 		.get(_param.MEETING_ID, MEETING_ID)
 		.get(_param.SPEECH_ID,parseInt(today_speech_obj.__speech_id))
-		.get(_param.SPEECH_EVALUATOR_MEMBER_ID,parseInt(today_speech_obj.__evaluator_member_id))
+		.get(_param.SPEECH_EVALUATOR_MEMBER_HASH_KEY,today_speech_obj.__evaluator_member_hash_key)
 		.get(_param.SPEECH_EVALUATOR_MEMBER_NAME,today_speech_obj.__evaluator_member_name)
 		// text_color_vmouse_down
 		// bg_color_vmouse_down
 		// text_color
 		// bg_color
 	);
-	if(0 < parseInt(today_speech_obj.__evaluator_member_id)) {
+	if(_v.isValidStr(today_speech_obj.__evaluator_member_hash_key)) {
 		row_controller.set_badge_green();
 	} else {
 		row_controller.set_badge_gray();
@@ -1165,6 +1159,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				.get(_param.SPEECH_ID,parseInt(delegate_data.SPEECH_ID))
 				;
 
+				// wonder.jung
+				// 스피치를 삭제하는 경우에는 타이머도 함께 제거해 줘야 합니다.
 				_ajax.send_simple_post(
 					// _url
 					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)

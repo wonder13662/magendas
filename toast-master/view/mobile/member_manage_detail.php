@@ -119,6 +119,8 @@ var role_history_grammarian = <?php echo json_encode($role_history_grammarian);?
 var role_history_ah_counter = <?php echo json_encode($role_history_ah_counter);?>;
 var role_history_timer = <?php echo json_encode($role_history_timer);?>;
 
+console.log(">>> selected_member_arr :: ",selected_member_arr);
+
 
 
 var __member_obj = null;
@@ -497,9 +499,6 @@ _m_list.addTableRowTextInputInline(
 	.get(_param.MEETING_MEMBERSHIP_ID,parseInt(__member_membership_id))
 	.get(_param.MEMBER_EMAIL,__member_email)
 );
-if(__member_obj == undefined) {
-	accessor_member_email.off();
-}
 
 
 
