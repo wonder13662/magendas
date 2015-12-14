@@ -46,6 +46,12 @@ class MYSQLManager{
 		mysqli_close($this->con);
 	}
 
+	public function getLastId() {
+		if($this->con == null) -1;
+		
+		return mysqli_insert_id($this->con);
+	}
+
 	public function run($query, $run_type, $json_res_obj){
 
 		if(empty($json_res_obj)) return null;

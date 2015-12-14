@@ -89,6 +89,14 @@ airborne.validator = {
 		if(target == true || target == false) return true;
 		return false;
 	}
+	/*
+		@ Public 
+		@ Referrer : http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
+	*/
+	,isFunction:function(functionToCheck) {
+		var getType = {};
+		return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+	}	
 	,is_jquery_obj:function(target_obj){
 		return this.isJQueryObj(target_obj);
 	}

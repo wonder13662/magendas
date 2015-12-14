@@ -82,7 +82,7 @@
 	}
 
 	$today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));
-	$today_speech_speaker_v2_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($meeting_id);
+	$today_speech_speaker_v2_list = $wdj_mysql_interface->sel_speech_speaker($meeting_id);
 
 	$schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
 

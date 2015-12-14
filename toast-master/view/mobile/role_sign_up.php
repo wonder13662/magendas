@@ -173,7 +173,7 @@ for($idx = 0;$idx < count($recent_meeting_agenda_list);$idx++) {
 	array_push($meeting_role_list_list, $meeting_role_list);
 
 
-	$speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($__meeting_id);
+	$speech_list = $wdj_mysql_interface->sel_speech_speaker($__meeting_id);
 	array_push($speech_list_list, $speech_list);
 
 }

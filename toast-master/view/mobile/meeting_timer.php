@@ -36,8 +36,20 @@ if(!empty($recent_meeting_agenda_list)) {
 	$recent_meeting_id = $recent_meeting_agenda_obj->__meeting_id;
 }
 if(0 < $recent_meeting_id) {
-	$today_speech_list = $wdj_mysql_interface->sel_today_speech_speaker_v2($recent_meeting_id);
+	// REMOVE ME
+	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($recent_meeting_id);
+	$speaker_timer_list = $wdj_mysql_interface->sel_speaker_n_timer($recent_meeting_id);
+	$evaluator_timer_list = $wdj_mysql_interface->sel_evaluator_n_timer($recent_meeting_id);
 }
+
+
+
+
+	
+
+
+
+
 
 
 
@@ -49,6 +61,20 @@ if(0 < $recent_meeting_id) {
 
 
 $member_list = $wdj_mysql_interface->getMemberList($MEETING_MEMBERSHIP_ID, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
+
+$time_guide_line_list = $wdj_mysql_interface->getTimeGuideLine();
+
+// time record list
+$time_record_list_table_topic = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_TABLE_TOPIC);
+$time_record_list_mini_debate = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_MINI_DEBATE);
+
+// TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
+
+
+// TEST
+
+
+
 
 
 // @ required
@@ -98,21 +124,39 @@ var recent_meeting_agenda_obj = <?php echo json_encode($recent_meeting_agenda_ob
 var recent_meeting_id = <?php echo json_encode($recent_meeting_id);?>;
 
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
+
+var speaker_timer_list = <?php echo json_encode($speaker_timer_list);?>;
+var speaker_no_timer_list = <?php echo json_encode($speaker_no_timer_list);?>;
+var no_speaker_timer_list = <?php echo json_encode($no_speaker_timer_list);?>;
+
+var evaluator_timer_list = <?php echo json_encode($evaluator_timer_list);?>;
+var evaluator_no_timer_list = <?php echo json_encode($evaluator_no_timer_list);?>;
+var no_evaluator_timer_list = <?php echo json_encode($no_evaluator_timer_list);?>;
+
+
+
 var member_list = <?php echo json_encode($member_list);?>;
-
-//membership_obj
-console.log(">>> login_user_info :: ",login_user_info);
-console.log(">>> membership_obj :: ",membership_obj);
-
-console.log(">>> recent_meeting_agenda_obj :: ",recent_meeting_agenda_obj);
-console.log(">>> today_speech_list :: ",today_speech_list);
-console.log(">>> member_list :: ",member_list);
-
-// view drawing
+var time_guide_line_list = <?php echo json_encode($time_guide_line_list);?>;
+var time_record_list_table_topic = <?php echo json_encode($time_record_list_table_topic);?>;
+var time_record_list_mini_debate = <?php echo json_encode($time_record_list_mini_debate);?>;
 var table_jq = $("table tbody");
 
+console.log(">>> speaker_timer_list :: ",speaker_timer_list);
 
-// login_user_info, header_arr, table_jq, color_text, bg_color_vmouse_down
+console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
+
+
+
+
+
+
+
+//     dMP dMP dMMMMMP .aMMMb  dMMMMb  dMMMMMP dMMMMb 
+//    dMP dMP dMP     dMP"dMP dMP VMP dMP     dMP.dMP 
+//   dMMMMMP dMMMP   dMMMMMP dMP dMP dMMMP   dMMMMK"  
+//  dMP dMP dMP     dMP dMP dMP.aMP dMP     dMP"AMF   
+// dMP dMP dMMMMMP dMP dMP dMMMMP" dMMMMMP dMP dMP                                                       
+
 var test = 
 _link.get_header_link(
 	_link.MOBILE_MEETING_TIMER
@@ -121,7 +165,6 @@ _link.get_header_link(
 );
 console.log(">>> test :: ",test);
 
-// 메뉴 뎁스 리스트를 보여줍니다.
 var log_in_row_jq = 
 _tm_m_list.addHeaderRow(
 	// login_user_info
@@ -149,8 +192,18 @@ _tm_m_list.addHeaderRow(
 
 
 
-// MEETING INFO
 
+
+
+
+
+
+//     dMMMMMMMMb  dMMMMMP dMMMMMP dMMMMMMP dMP dMMMMb  .aMMMMP         dMP dMMMMb  dMMMMMP .aMMMb 
+//    dMP"dMP"dMP dMP     dMP        dMP   amr dMP dMP dMP"            amr dMP dMP dMP     dMP"dMP 
+//   dMP dMP dMP dMMMP   dMMMP      dMP   dMP dMP dMP dMP MMP"        dMP dMP dMP dMMMP   dMP dMP  
+//  dMP dMP dMP dMP     dMP        dMP   dMP dMP dMP dMP.dMP         dMP dMP dMP dMP     dMP.aMP   
+// dMP dMP dMP dMMMMMP dMMMMMP    dMP   dMP dMP dMP  VMMMP"         dMP dMP dMP dMP      VMMMP"    
+                                                                                                
 var now_date = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD)
 var days_left = _dates.get_YYYY_MM_DD_diff_days(now_date, recent_meeting_agenda_obj.__startdate);
 var date_desc = "";
@@ -194,28 +247,27 @@ _m_list.addTableRowTitle(
 
 
 
-
-
-
-
-// MEMBER LIST
+//     dMMMMMMMMb  dMMMMMP dMMMMMMMMb  dMMMMb  dMMMMMP dMMMMb         dMP     dMP .dMMMb dMMMMMMP 
+//    dMP"dMP"dMP dMP     dMP"dMP"dMP dMP"dMP dMP     dMP.dMP        dMP     amr dMP" VP   dMP    
+//   dMP dMP dMP dMMMP   dMP dMP dMP dMMMMK" dMMMP   dMMMMK"        dMP     dMP  VMMMb    dMP     
+//  dMP dMP dMP dMP     dMP dMP dMP dMP.aMF dMP     dMP"AMF        dMP     dMP dP .dMP   dMP      
+// dMP dMP dMP dMMMMMP dMP dMP dMP dMMMMP" dMMMMMP dMP dMP        dMMMMMP dMP  VMMMP"   dMP       
+                                                                                               
 var key_value_obj_arr = [];
 for(var idx = 0;idx < member_list.length; idx++) {
 	var member_obj = member_list[idx];
 	var key_value_obj = 
 	_obj.get_select_option(
 		// key_str
-		""+member_obj.__member_id
+		member_obj.__member_hash_key
 		// value_str
 		,member_obj.__member_name
-		// key_access_prop_name
-		// value_access_prop_name
 	);
 
 	key_value_obj_arr.push(key_value_obj);
 }
 // MEMBER LIST
-var row_member_obj = 
+var member_list_controller = 
 _m_list.addTableRowsSelectFolder(
 	// key_value_obj_arr
 	key_value_obj_arr
@@ -233,133 +285,7 @@ _m_list.addTableRowsSelectFolder(
 	// bg_color
 	, _color.COLOR_WHITE
 );
-// TODO accordian animation
-row_member_obj.hide();
-var role_delegate_func = function(container_jq, target_controller, row_member_obj) {
-
-
-	// TODO 모든 열의 속성 - is_open 속성을 NO로 변경.
-	// 이미 열려있는 열이 있는 상태에서 다른 열을 열면 이벤트 상태가 초기화되지 않음.
-	// 사용자는 두번 열어야 함.
-	// var MEETING_ID = delegate_data.delegate_data.MEETING_ID;
-	// var ROLE_ID = delegate_data.delegate_data.ROLE_ID;
-	// var row_role_jq = delegate_data.target_jq;
-
-	// 리스트를 노출할 위치를 가리키는 jq container가 필요함.
-	//container_jq;
-	// 업데이트된 이름을 반영할 target controller
-
-
-
-	container_jq.after(row_member_obj.get_target_jq_arr());
-	if(container_jq.attr("is_open") === "YES") {
-		container_jq.attr("is_open", "NO");
-
-		//window.scrollTo(0, 0);
-		// REFACTOR ME
-		var body = $("html, body");
-		row_member_obj.hide();
-		body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-		   console.log("Finished animating");
-		});
-
-	} else {
-
-		container_jq.attr("is_open", "YES");
-		row_member_obj.show();
-
-		// TODO 선택된 사용자는 제외합니다.
-		var cur_offset = container_jq.offset();
-
-		//window.scrollTo(0, cur_offset.top);
-		// REFACTOR ME
-		var body = $("html, body");
-		body.stop().animate({scrollTop:cur_offset.top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-		   console.log("Finished animating");
-		});
-
-		// 다른 롤의 멤버 리스트가 될 때마다 role id가 변경되어야 합니다.
-		// 그러므로 delegate 함수가 그때마다 새로 설정되어야 합니다.
-		row_member_obj.set_delegate_obj_click_row(
-
-			_obj.getDelegate(function(selector_delegate_data){
-
-
-				var target_jq = selector_delegate_data.delegate_data.get_target_jq();
-				var MEMBER_ID = target_jq.attr("key");
-				var MEMBER_NAME = target_jq.find("strong").html();
-
-				console.log(">>> selector_delegate_data :: ",selector_delegate_data);
-				console.log(">>> target_controller :: ",target_controller);
-				console.log(">>> MEMBER_ID :: ",MEMBER_ID);
-				console.log(">>> MEMBER_NAME :: ",MEMBER_NAME);
-
-				// 롤의 이름을 업데이트 합니다.
-				target_controller.set_title(MEMBER_NAME);
-
-				// 멤버 리스트를 가립니다.
-				row_member_obj.hide();
-
-				// 선택한 사용자를 해당 롤에 업데이트 합니다.
-				// 이상이 없다면 업데이트!
-				/*
-				_ajax.send_simple_post(
-					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-					// _param_obj / MEETING_ID
-					, _param
-					.get(_param.IS_UPDATE_TODAY_ROLE,_param.YES)
-					.get(_param.MEETING_ID,MEETING_ID)
-					.get(_param.MEMBER_ID,MEMBER_ID)
-					.get(_param.ROLE_ID,ROLE_ID)
-
-					// _delegate_after_job_done
-					,_obj.get_delegate(
-						// delegate_func
-						function(data){
-
-							console.log(data);
-
-							return;
-
-							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
-								console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
-
-								// 롤의 이름을 업데이트 합니다.
-								row_role_jq.find("span.badge").find("strong").html(MEMBER_NAME);
-								delegate_data.target_jq.attr("is_open", "NO");
-
-								// 멤버 리스트를 가립니다.
-								row_member_obj.hide();
-
-								// 선택된 배지 녹색으로 변경
-								var target_controller = delegate_data.delegate_data.target_controller;
-								if(MEMBER_NAME == _param.NOT_ASSIGNED) {
-									target_controller.set_badge_gray();
-								} else {
-									target_controller.set_badge_green();
-								}
-
-								// Role sign up 업데이트 완료시, 해당 미팅의 최상단으로 이동.
-								var body = $("html, body");
-								var TARGET_SCROLL_BACK_Y = delegate_data.delegate_data[_param.TARGET_SCROLL_BACK_Y];
-								body.stop().animate({scrollTop:TARGET_SCROLL_BACK_Y.offset().top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-								   console.log("Finished animating");
-								});
-								
-							} // if end
-
-						},
-						// delegate_scope
-						this
-					)
-				); // ajax done.
-				*/
-
-			}, this)					
-		);
-	} // if end
-}
+member_list_controller.hide();
 
 
 
@@ -377,230 +303,415 @@ var role_delegate_func = function(container_jq, target_controller, row_member_ob
 
 
 
-// TABLE TOPIC (Dynamic)
+//     dMMMMMP dMP dMP dMMMMMP dMMMMb dMMMMMMP      dMMMMMMP .aMMMb  .aMMMMP .aMMMMP dMP     dMMMMMP dMMMMb 
+//    dMP     dMP dMP dMP     dMP dMP   dMP           dMP   dMP"dMP dMP"    dMP"    dMP     dMP     dMP.dMP 
+//   dMMMP   dMP dMP dMMMP   dMP dMP   dMP           dMP   dMP dMP dMP MMP"dMP MMP"dMP     dMMMP   dMMMMK"  
+//  dMP      YMvAP" dMP     dMP dMP   dMP           dMP   dMP.aMP dMP.dMP dMP.dMP dMP     dMP     dMP"AMF   
+// dMMMMMP    VP"  dMMMMMP dMP dMP   dMP           dMP    VMMMP"  VMMMP"  VMMMP" dMMMMMP dMMMMMP dMP dMP    
+                                                                                                         
+// event hierarchy controller
+// 타이머 작동시 나머지 버튼들에 대해 비활성화 처리를 위해 필요합니다.
+// 저장된 모든 객체의 on/off 메서드를 호출해줍니다.
+var event_toggle_controller = _m_list.get_event_toggle_controller();
 
-var add_table_topic = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
 
-	var timer_controller = 
-	_m_list.addTableRowTimer(
-		// time_arr - ( GREEN / YELLOW / RED )
-		time_arr
-		// title_on_badge
-		, _param.NOT_ASSIGNED
-		// after_target_jq
-		, row_jq
-		// delegate_obj_click_row
-		, _obj.getDelegate(function(delegate_data){
 
-			var cur_id = delegate_data.click_target_jq.attr("id");
-			var target_controller = delegate_data.target_controller;
-			var container_jq = target_controller.get_container_jq();
 
-			if(cur_id === "title_left") {
 
-				role_delegate_func(
-					// container_jq
-					container_jq
-					// target_controller
-					, target_controller
-					// row_member_obj
-					, row_member_obj
-				);
 
-			} else if(cur_id === "btn_remove") {
 
-				// 1. remove from screen
-				container_jq.remove();
 
-				// 2. remove data
 
-			}
 
-		}, this)
-		// delegate_data
-		, delegate_data_param
-	);
 
-	table_topic_row_after_jq = timer_controller.get_container_jq();
 
-	return timer_controller;
-}
-var accessor_table_topic_btn = 
-_m_list.addTableRowBtn(
+
+
+
+
+
+//  dMMMMMMP dMP dMMMMMMMMb  dMMMMMP dMMMMb      dMMMMMMP .aMMMb  dMMMMb  dMP     dMMMMMP      dMMMMMMP .aMMMb  dMMMMb  dMP .aMMMb 
+//    dMP   amr dMP"dMP"dMP dMP     dMP.dMP        dMP   dMP"dMP dMP"dMP dMP     dMP             dMP   dMP"dMP dMP.dMP amr dMP"VMP 
+//   dMP   dMP dMP dMP dMP dMMMP   dMMMMK"        dMP   dMMMMMP dMMMMK" dMP     dMMMP           dMP   dMP dMP dMMMMP" dMP dMP      
+//  dMP   dMP dMP dMP dMP dMP     dMP"AMF        dMP   dMP dMP dMP.aMF dMP     dMP             dMP   dMP.aMP dMP     dMP dMP.aMP   
+// dMP   dMP dMP dMP dMP dMMMMMP dMP dMP        dMP   dMP dMP dMMMMP" dMMMMMP dMMMMMP         dMP    VMMMP" dMP     dMP  VMMMP"    
+console.log(">>> time_record_list_table_topic :: ",time_record_list_table_topic);
+var time_guide_line_table_topic = time_guide_line_list[(_param.TIMER_TYPE_ID_TABLE_TOPIC - 1)];
+var time_table_arr_table_topic = 
+[
+	parseInt(time_guide_line_table_topic.__time_guide_line_sec_green)
+	, parseInt(time_guide_line_table_topic.__time_guide_line_sec_yellow)
+	, parseInt(time_guide_line_table_topic.__time_guide_line_sec_red)
+];
+var timer_controller_table_topic = 
+_tm_m_list.add_member_timer_table_editable(
 	// title
 	"+ Table Topic Speaker"
-	// color
-	, null
-	// delegate_obj
-	, _obj.getDelegate(function(delegate_data, accessor){
-
-		if(!confirm("Add New One?")){
-			return;
-		}
-
-		if(table_topic_row_after_jq == undefined) {
-			table_topic_row_after_jq = accessor.get_target_jq();
-		}
-
-		// 이 테이블 토픽 데이터는 어디에 저장?
-		var timer_controller = 
-		add_table_topic(
-			// time_arr
-			_param.SEC_TABLE_TOPIC
-			// row_jq
-			, table_topic_row_after_jq
-			// delegate_data_param
-			, _param
-			.get(_param.MEETING_ID, recent_meeting_id)
-			// role_delegate_func
-			, role_delegate_func
-		);
-
-	}, this)
+	// time_arr
+	, time_table_arr_table_topic
 	// append_target_jq
 	, table_jq
+	// event_toggle_controller
+	, event_toggle_controller
+	// member_list_controller
+	, member_list_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.TIMER_TYPE_ID, parseInt(time_guide_line_table_topic.__time_guide_line_id))
+	.get(_param.IS_DATA_FROM_DB, false)
 );
-var table_topic_row_after_jq = null;
+for(var idx = 0;idx < time_record_list_table_topic.length;idx++) {
+	var timer_record_obj = time_record_list_table_topic[idx];	
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// MINI DEBATE (Dynamic)
-var add_mini_debate = function(time_arr, row_jq, delegate_data_param, role_delegate_func) {
-
-	var timer_controller = 
-	_m_list.addTableRowTimer(
-		// time_arr - ( GREEN / YELLOW / RED )
-		time_arr
-		// title_on_badge
-		, _param.NOT_ASSIGNED
-		// after_target_jq
-		, row_jq
-		// delegate_obj_click_row
-		, _obj.getDelegate(function(delegate_data){
-
-			var cur_id = delegate_data.click_target_jq.attr("id");
-			var target_controller = delegate_data.target_controller;
-			var container_jq = target_controller.get_container_jq();
-
-			if(cur_id === "title_left") {
-
-				role_delegate_func(
-					// container_jq
-					container_jq
-					// target_controller
-					, target_controller
-					// row_member_obj
-					, row_member_obj
-				);
-
-			} else if(cur_id === "btn_remove") {
-
-				// 1. remove from screen
-				container_jq.remove();
-
-				// 2. remove data
-
-			}
-
-		}, this)
-		// delegate_data
-		, delegate_data_param
+	var timer_record_obj_formatted = 
+	timer_controller_table_topic.get_timer_record_obj(
+		// is_qualified
+		timer_record_obj.__is_qualified
+		// meeting_id
+		, timer_record_obj.__meeting_id
+		// member_hash_key
+		, timer_record_obj.__member_hash_key
+		// member_name
+		, timer_record_obj.__member_name
+		// time_record_millisec
+		, timer_record_obj.__time_record_milli_sec
+		// timer_record_id
+		, timer_record_obj.__timer_record_id
+		// timer_type_id
+		, timer_record_obj.__timer_type_id
 	);
 
-	mini_debate_row_after_jq = timer_controller.get_container_jq();
-
-	return timer_controller;
+	timer_controller_table_topic.add_timer(timer_record_obj_formatted);
 }
-var accessor_mini_debate_btn = 
-_m_list.addTableRowBtn(
+
+
+
+
+
+
+
+
+
+
+//  dMMMMMMP dMP dMMMMMMMMb dMMMMMP dMMMMb         dMMMMMMMMb dMP dMMMMb  dMP         dMMMMb  dMMMMMP dMMMMb  .aMMMb dMMMMMMP dMMMMMP 
+//    dMP   amr dMP"dMP"dMPdMP     dMP.dMP        dMP"dMP"dMPamr dMP dMP amr         dMP VMP dMP     dMP"dMP dMP"dMP   dMP   dMP      
+//   dMP   dMP dMP dMP dMPdMMMP   dMMMMK"        dMP dMP dMPdMP dMP dMP dMP         dMP dMP dMMMP   dMMMMK" dMMMMMP   dMP   dMMMP     
+//  dMP   dMP dMP dMP dMPdMP     dMP"AMF        dMP dMP dMPdMP dMP dMP dMP         dMP.aMP dMP     dMP.aMF dMP dMP   dMP   dMP        
+// dMP   dMP dMP dMP dMPdMMMMMP dMP dMP        dMP dMP dMPdMP dMP dMP dMP         dMMMMP" dMMMMMP dMMMMP" dMP dMP   dMP   dMMMMMP     
+                                                                                                                                   
+var time_guide_line_mini_debate = time_guide_line_list[(_param.TIMER_TYPE_ID_MINI_DEBATE - 1)];
+var time_table_arr_mini_debate = 
+[
+	parseInt(time_guide_line_mini_debate.__time_guide_line_sec_green)
+	, parseInt(time_guide_line_mini_debate.__time_guide_line_sec_yellow)
+	, parseInt(time_guide_line_mini_debate.__time_guide_line_sec_red)
+];
+var timer_controller_mini_debate = 
+_tm_m_list.add_member_timer_table_editable(
 	// title
 	"+ Mini Debate Speaker"
-	// color
-	, null
-	// delegate_obj
-	, _obj.getDelegate(function(delegate_data, accessor){
-
-		if(!confirm("Add New One?")){
-			return;
-		}
-
-		if(mini_debate_row_after_jq == undefined) {
-			mini_debate_row_after_jq = accessor.get_target_jq();
-		}
-
-		// 이 테이블 토픽 데이터는 어디에 저장?
-		var timer_controller = 
-		add_mini_debate(
-			// time_arr
-			_param.SEC_MINI_DEBATE
-			// row_jq
-			, mini_debate_row_after_jq
-			// delegate_data_param
-			, _param
-			.get(_param.MEETING_ID, recent_meeting_id)
-			// role_delegate_func
-			, role_delegate_func
-		);
-
-	}, this)
+	// time_arr
+	, time_table_arr_mini_debate
 	// append_target_jq
 	, table_jq
+	// event_toggle_controller
+	, event_toggle_controller
+	// member_list_controller
+	, member_list_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.TIMER_TYPE_ID, parseInt(time_guide_line_mini_debate.__time_guide_line_id))
+	.get(_param.IS_DATA_FROM_DB, false)
 );
-var mini_debate_row_after_jq = null;
+for(var idx = 0;idx < time_record_list_mini_debate.length;idx++) {
+	var timer_record_obj = time_record_list_mini_debate[idx];	
+
+	var timer_record_obj_formatted = 
+	timer_controller_mini_debate.get_timer_record_obj(
+		// is_qualified
+		timer_record_obj.__is_qualified
+		// meeting_id
+		, timer_record_obj.__meeting_id
+		// member_hash_key
+		, timer_record_obj.__member_hash_key
+		// member_name
+		, timer_record_obj.__member_name
+		// time_record_millisec
+		, timer_record_obj.__time_record_milli_sec
+		// timer_record_id
+		, timer_record_obj.__timer_record_id
+		// timer_type_id
+		, timer_record_obj.__timer_type_id
+	);
+
+	timer_controller_mini_debate.add_timer(timer_record_obj_formatted);
+}
 
 
 
 
 
 
-// 1. Meeting Agenda List
-/*
-var row_meeting_agenda_jq = 
-_m_list.addTableRowMovingArrow(
+
+
+
+
+
+//    .dMMMb  dMMMMb  dMMMMMP .aMMMb  dMP dMP dMMMMMP dMMMMb 
+//   dMP" VP dMP.dMP dMP     dMP"dMP dMP.dMP dMP     dMP.dMP 
+//   VMMMb  dMMMMP" dMMMP   dMMMMMP dMMMMK" dMMMP   dMMMMK"  
+// dP .dMP dMP     dMP     dMP dMP dMP"AMF dMP     dMP"AMF   
+// VMMMP" dMP     dMMMMMP dMP dMP dMP dMP dMMMMMP dMP dMP    
+
+var timer_controller_prepared_speech = 
+_tm_m_list.add_member_timer_table_fixed(
 	// title
-	"Meeting Agenda"
+	"Prepared Speech"
 	// append_target_jq
 	, table_jq
-	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
-
-		if(	delegate_data == undefined ||
-			delegate_data.delegate_data == undefined ||
-			_param.EVENT_MOUSE_UP !== delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
-
-			return;
-		}
-
-		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			, _param
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-		);
-
-	}, this)
-	// is_bold
-	, true
-	// param_obj
-	, null
-	// text_color
-	, _tm_m_list.COLOR_NAVY
-	// bg_color
-	, _tm_m_list.COLOR_TINT_GRAY
+	// event_toggle_controller
+	, event_toggle_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
 );
+for(var idx = 0;idx < speaker_timer_list.length;idx++) {
+	var speech_speaker_obj = speaker_timer_list[idx];	
+
+	var timer_record_obj_formatted = 
+	timer_controller_prepared_speech.get_timer_record_obj(
+		// is_qualified
+		speech_speaker_obj.__speech_timer_is_qualified
+		// meeting_id
+		, speech_speaker_obj.__meeting_id
+		// member_hash_key
+		, speech_speaker_obj.__speaker_member_hash_key
+		// member_name
+		, speech_speaker_obj.__speaker_member_name
+		// time_record_millisec
+		, speech_speaker_obj.__speech_timer_time_record_milli_sec
+		// timer_record_id
+		, speech_speaker_obj.__speech_timer_id
+		// timer_type_id
+		, speech_speaker_obj.__speaker_speech_project_time_guide_line
+		// time_arr
+		,[
+			parseInt(speech_speaker_obj.__speech_timer_sec_green)
+			, parseInt(speech_speaker_obj.__speech_timer_sec_yellow)
+			, parseInt(speech_speaker_obj.__speech_timer_sec_red)
+		]
+	);
+
+	timer_controller_prepared_speech.add_timer(timer_record_obj_formatted);
+}
+
+
+
+
+
+
+
+
+
+
+//     dMMMMMP dMP dMP .aMMMb  dMP    dMP dMP .aMMMb dMMMMMMP .aMMMb  dMMMMb 
+//    dMP     dMP dMP dMP"dMP dMP    dMP dMP dMP"dMP   dMP   dMP"dMP dMP.dMP 
+//   dMMMP   dMP dMP dMMMMMP dMP    dMP dMP dMMMMMP   dMP   dMP dMP dMMMMK"  
+//  dMP      YMvAP" dMP dMP dMP    dMP.aMP dMP dMP   dMP   dMP.aMP dMP"AMF   
+// dMMMMMP    VP"  dMP dMP dMMMMMP VMMMP" dMP dMP   dMP    VMMMP" dMP dMP    
+
+console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
+var timer_controller_evaluator = 
+_tm_m_list.add_member_timer_table_fixed(
+	// title
+	"Evaluator"
+	// append_target_jq
+	, table_jq
+	// event_toggle_controller
+	, event_toggle_controller
+	// meta data
+	, _param
+	.get(_param.MEETING_ID, recent_meeting_id)
+);
+for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
+	var evaluator_obj = evaluator_timer_list[idx];
+
+	var timer_record_obj_formatted = 
+	timer_controller_prepared_speech.get_timer_record_obj(
+		// is_qualified
+		evaluator_obj.__evaluation_timer_is_qualified
+		// meeting_id
+		, evaluator_obj.__meeting_id
+		// member_hash_key
+		, evaluator_obj.__evaluator_member_hash_key
+		// member_name
+		, evaluator_obj.__evaluator_member_name
+		// time_record_millisec
+		, evaluator_obj.__evaluation_timer_time_record_milli_sec
+		// timer_record_id
+		, evaluator_obj.__evaluation_timer_id
+		// timer_type_id
+		, evaluator_obj.__evaluator_speech_project_time_guide_line
+		// time_arr
+		,[
+			parseInt(evaluator_obj.__evaluation_timer_sec_green)
+			, parseInt(evaluator_obj.__evaluation_timer_sec_yellow)
+			, parseInt(evaluator_obj.__evaluation_timer_sec_red)
+		]
+	);
+
+	timer_controller_evaluator.add_timer(timer_record_obj_formatted);
+}
+
+
+
+
+
+
+
+
+// TIME TABLE
+// http://toastmasters.wikia.com/wiki/Category:Speaking_to_Inform
+
+// ALTER ADD COLUMN
+
+
+
+
+// SPEECH
+// 스피치 프로젝트 메뉴얼과 타임 테이블이 정확히 일치하는지 확인하는 작업이 필요함.
+// 이 페이지에 진입시, 스피치 관련 타이머 정보가 없다면 서버 단에서 추가해줘야 한다.
+// 스피치 관련 타이머는 삭제 버튼이 없어야 함.
+// 스피치 관련 타이머는 추가 버튼이 없어야 함.(이미 관리되는 정보가 있으므로)
+// for(var idx = 0; idx < today_speech_list.length; idx++) {
+// 	today_speech_list[idx];
+// }
+
+
+
+
+
+// EVALUATOR
+
+
+
+
+
+// CREATE TABLE `MA_TIMER_RECORD` (
+//   `id` int(11) NOT NULL AUTO_INCREMENT,
+//   `meeting_id` int(11) NOT NULL,
+//   `timer_type_id` int(11) NOT NULL,
+//   `member_id` int(11) NOT NULL,
+//   `time_record_milli_sec` int(11) NOT NULL,
+//   `is_qualified` tinyint(1) NOT NULL,
+//   PRIMARY KEY (`id`)
+// ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+
+// UPDATE MA_TIMER_GUIDE_LINE
+// SET sec_green = 60, sec_yellow = 60, sec_red = 60
+// WHERE id=6
+// ;
+
+// DROP TABLE `SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE`
+
+// CREATE TABLE `SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE` (
+//   `speech_manual_project_id` int(11) NOT NULL,
+//   `time_guide_line_id` int(11) NOT NULL,
+//   UNIQUE KEY `speech_manual_project_n_time_guide_line` (`speech_manual_project_id`,`time_guide_line_id`)
+// ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+
+
+// INSERT SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE (speech_manual_project_id, time_guide_line_id)
+// SELECT SMP.`id`, MTGL.id
+// FROM SPEECH_MANUAL_PROJECT AS SMP
+// LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.role_name=SMP.`name`
+// ;
+
+//UPDATE `magendas`.`SPEECH_MANUAL_PROJECT` SET `sec_allocated_min`=\2,`sec_qualified_min`=\3,`sec_allocated_max`=\4,`sec_qualified_max`=\5,`sec_green`=\6,`sec_yellow`=\7,`sec_red`=\8 WHERE `id`=\1;
+
+//INSERT INTO `magendas`.`MA_TIMER_GUIDE_LINE`(`role_name`,`sec_allocated_min`,`sec_qualified_min`,`sec_allocated_max`,`sec_qualified_max`,`sec_green`,`sec_yellow`,`sec_red`) VALUES (\1,\2,\3,\4,\5,\6,\7,\8);
+
+
+// SELECT MTGL.`id`,
+//     MTGL.`role_name`,
+// FROM `magendas`.`MA_TIMER_GUIDE_LINE`;
+
+/*
+// 스피치 프로젝트 별 시간 가져오기 쿼리.
+
+SELECT SMPNTGL.speech_manual_project_id
+, SMPNTGL.time_guide_line_id
+, MTGL.role_name
+, MTGL.`sec_allocated_min`
+, MTGL.`sec_qualified_min`
+, MTGL.`sec_allocated_max`
+, MTGL.`sec_qualified_max`
+, MTGL.`sec_green`
+, MTGL.`sec_yellow`
+, MTGL.`sec_red`
+FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL
+LEFT JOIN SPEECH_MANUAL_PROJECT AS SMP ON SMP.id=SMPNTGL.speech_manual_project_id
+LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id
+;
+
+*/ 
+
+// 아젠다 타임라인과 모든 영역에서 입력시, 제한된 문자만을 입력받도록 하는 프로세스가 필요.
+
+// 도메인 구입 필요.
+// We have a meeting --> WEETING.COM
+
+/*
+SELECT * FROM SPEECH_MANUAL_PROJECT WHERE name="Make Them Laugh";
+
+SELECT * FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE WHERE speech_manual_project_id IN (13, 82);
+
+SELECT * FROM MA_TIMER_GUIDE_LINE WHERE role_name="Make Them Laugh";
+
+// 스피치 프로젝트가 실제로 있는지 확인 필요.
+// 제목이 중복되어 있음.
+
+// SPEECH_MANUAL, SPEECH_MANUAL_PROJECT의 사용하지 않는 컬럼 제거
+
+ALTER TABLE SPEECH_MANUAL_PROJECT DROP COLUMN `status`
+, DROP COLUMN `regdttm`
+, DROP COLUMN `updttm`
+;
+
+ALTER TABLE SPEECH_MANUAL DROP COLUMN `status`
+, DROP COLUMN `regdttm`
+, DROP COLUMN `updttm`
+;
+
+ALTER TABLE MA_SPEECH_SPEAKER DROP COLUMN `timer_green`, DROP COLUMN `timer_red`;
+ALTER TABLE MA_SPEECH_EVALUATOR DROP COLUMN `timer_green`, DROP COLUMN `timer_red`;
+
+
+
+// 서비스 리스트 정렬 순서를 위해서 order_num 컬럼이 필요함.
+ALTER TABLE SPEECH_MANUAL_PROJECT ADD COLUMN order_num int(11) NOT NULL DEFAULT 0;
+
+// 매뉴얼에 없는 그밖의 스피치 항목을 추가함.
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("Speech Contest",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("ETC",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("NOT ASSIGNED",-1,-1);
+INSERT INTO `magendas`.`SPEECH_MANUAL_PROJECT`(`name`,`speech_manual_id`,`order_num`) VALUES ("Education Session",-1,-1);
+
+INSERT INTO `magendas`.`MA_TIMER_GUIDE_LINE`(`role_name`,`sec_allocated_min`,`sec_qualified_min`,`sec_allocated_max`,`sec_qualified_max`,`sec_green`,`sec_yellow`,`sec_red`) VALUES ("Speech Contest",300,270,420,450,300,360,420);
+
+// speaker와 evaluator정보에서 timer_id를 갖고 있도록 컬럼을 추가합니다.
+ALTER TABLE MA_SPEECH_SPEAKER ADD COLUMN timer_record_id int(11) NOT NULL DEFAULT 0;
+ALTER TABLE MA_SPEECH_EVALUATOR ADD COLUMN timer_record_id int(11) NOT NULL DEFAULT 0;
+
+// 스피커 생성시에 timer를 지정하도록 로직 추가.
+
+
 */
+
+
+
 
 
 
