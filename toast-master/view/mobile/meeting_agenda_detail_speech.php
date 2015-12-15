@@ -787,11 +787,11 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 								var is_success = false;
 								if(	data != undefined && 
-									_v.is_valid_array(data.query_output_arr) &&
-									data.query_output_arr[0] != undefined &&
-									data.query_output_arr[0].output != undefined ) {
+									data.update_speech != undefined &&
+									data.update_speech.output != undefined &&
+									data.update_speech.output == true ) {
 
-									is_success = data.query_output_arr[0].output;
+									is_success = true;
 								}
 
 								if(is_success) {

@@ -2996,43 +2996,54 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
-	public function update_today_speech_v2(	$speech_id
-											, $order_num=-1
-											, $speech_project_id=-1
-											, $speech_title="" ){
+	public function update_speech(	$speech_id
+									, $order_num=-1
+									, $speech_project_id=-1
+									, $speech_title="" ){
 
+		// wonder.jung
+		$function_name = "update_speech";
 		if($this->isNotUnsignedNumber($speech_id)){
-			echo "!Error! / insert_speech / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
-			return null;
+			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
 		}
 
-		$query = "";
+		$query_manager = new MYSQLQueryManager();
 		if($this->isUnsignedNumber($order_num)){
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `order_num`=$order_num"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		} else if($this->isUnsignedNumber($speech_project_id)){
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `speech_project_id`=$speech_project_id"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		} else if(!empty($speech_title)){
-			$safe_speech_title = addslashes($speech_title);
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `title`=\"$safe_speech_title\""
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		}
 
-		// echo "$query<br/>";
-		$json_res_obj = $this->getModifyResult($query);
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `order_num`=$order_num"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		} else if($this->isUnsignedNumber($speech_project_id)){
+
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `speech_project_id`=$speech_project_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		} else if(!empty($speech_title)){
+
+			$safe_speech_title = addslashes($speech_title);
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `title`=\"$safe_speech_title\""
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		}
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		return $this->getSimpleResult($json_res_obj);
 	}	
 	public function delete_speech($speech_id){
