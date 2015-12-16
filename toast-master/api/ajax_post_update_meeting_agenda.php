@@ -181,9 +181,6 @@
 
 	$SPEECH_TITLE = $params->getParamString($params->SPEECH_TITLE);
 
-	// @ Deprecated
-	// $SPEECH_SPEAKER_MEMBER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_MEMBER_ID, -1);
-
 	$SPEECH_SPEAKER_MEMBER_HASH_KEY = $params->getParamString($params->SPEECH_SPEAKER_MEMBER_HASH_KEY, "");
 	if(!empty($SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
 		$SPEECH_SPEAKER_MEMBER_ID = $wdj_mysql_interface->getMemberId($SPEECH_SPEAKER_MEMBER_HASH_KEY);
@@ -191,14 +188,8 @@
 	$SPEECH_SPEAKER_TIMER_ID = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_ID, -1);
 	$SPEECH_SPEAKER_TIMER = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER);
 
-	// REMOVE ME
-	// $SPEECH_SPEAKER_TIMER_GREEN = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_GREEN, 300);
-	// $SPEECH_SPEAKER_TIMER_RED = $params->getParamNumber($params->SPEECH_SPEAKER_TIMER_RED, 360);
 
 	$SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR = $params->getParamString($params->SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR);
-
-	// @ Deprecated
-	// $SPEECH_EVALUATOR_MEMBER_ID = $params->getParamNumber($params->SPEECH_EVALUATOR_MEMBER_ID);
 
 	$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $params->getParamString($params->SPEECH_EVALUATOR_MEMBER_HASH_KEY, "");
 	if(!empty($SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
@@ -207,12 +198,6 @@
 
 	$SPEECH_EVALUATOR_TIMER_ID = $params->getParamNumber($params->SPEECH_EVALUATOR_TIMER_ID);
 	$SPEECH_EVALUATOR_TIMER = $params->getParamNumber($params->SPEECH_EVALUATOR_TIMER);
-
-	// REMOVE ME
-	// $SPEECH_EVALUATOR_TIMER_GREEN = 120;
-	// $SPEECH_EVALUATOR_TIMER_RED = 180;
-
-
 
 	if($IS_INSERT_SPEECH){
 
@@ -224,7 +209,7 @@
 		if($SPEECH_PROJECT_ID > 0) {
 
 			$query_output = 
-			$wdj_mysql_interface->update_today_speech_v2(
+			$wdj_mysql_interface->update_speech(
 				// $SPEECH_ID
 				$SPEECH_ID
 				// $ORDER_NUM
@@ -238,7 +223,7 @@
 		} else if(!empty($SPEECH_TITLE)) {
 
 			$query_output = 
-			$wdj_mysql_interface->update_today_speech_v2(
+			$wdj_mysql_interface->update_speech(
 				// $SPEECH_ID
 				$SPEECH_ID
 				// $ORDER_NUM
@@ -258,7 +243,7 @@
 		if(0 < $SPEECH_ID && 0 < $SPEECH_PROJECT_ID) {
 
 			$query_output = 
-			$wdj_mysql_interface->update_today_speech_v2(
+			$wdj_mysql_interface->update_speech(
 				// $SPEECH_ID
 				$SPEECH_ID
 				// $ORDER_NUM
@@ -268,10 +253,10 @@
 				// SPEECH_TITLE
 				, null
 			);
-			array_push($result->query_output_arr,$query_output);
+			$result->update_speech=$query_output;
 
 		} else {
-			array_push($result->query_output_arr,"param is not valid!");
+			$result->update_speech="param is not valid!";
 		}
 
 	} else if($IS_UPDATE_SPEECH_TITLE){
@@ -279,7 +264,7 @@
 		if(0 < $SPEECH_ID && !empty($SPEECH_TITLE)) {
 
 			$query_output = 
-			$wdj_mysql_interface->update_today_speech_v2(
+			$wdj_mysql_interface->update_speech(
 				// $SPEECH_ID
 				$SPEECH_ID
 				// $ORDER_NUM
@@ -315,7 +300,7 @@
 
 			if($cur_speech_id > 0 && $cur_order_num > -1) {
 				$query_output = 
-				$wdj_mysql_interface->update_today_speech_v2(
+				$wdj_mysql_interface->update_speech(
 					// $SPEECH_ID
 					$cur_speech_id
 					// $ORDER_NUM

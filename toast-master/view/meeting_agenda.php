@@ -49,12 +49,9 @@
 	$window_scroll_y = $params->getParamNumber($params->WINDOW_SCROLL_Y);
 
 	// 가장 마지막 등록된 미팅 ID를 가져옵니다.
-	$result = $wdj_mysql_interface->getLatestMeetingAgendaId($meeting_membership_id);
-	$latest_meeting_id = -1;
-	if(!empty($result)) {
-		$latest_meeting_id = $result[0]->__meeting_id;	
-	}
-	if(!($meeting_id > 0)) {
+	$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
+	if((0 == $meeting_id) && (0 < $latest_meeting_id)) {
+		// 외부로 받은 미팅 아이디가 정상적인 값이 아닐 경우, upcoming meeting id를 사용합니다.
 		$meeting_id = $latest_meeting_id;
 	}
 
@@ -71,14 +68,33 @@
 
 	$meeting_agenda_obj = null;
 	if($meeting_id > 0) {
+
 		// 지정한 meeting_id가 있는 경우.
 		$meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
 		$meeting_agenda_obj = $meeting_agenda_arr[0];
 
 	} else if(	!empty($meeting_agenda_list) && count($meeting_agenda_list) > 0	){
-		// 지정한 meeting_id가 없는 경우, 유저가 속한 클럽의 최신 미팅의 정보를 가져옵니다.
-		$meeting_agenda_obj = $meeting_agenda_list[0];
+
+		// REMOVE ME - DEAD CODE
+		/*
+		// 지정한 meeting_id가 없는 경우, 유저가 속한 클럽의 가장 최신의 예정된 미팅을 가져옵니다.
+		// 앞으로 진행할 최신 미팅 1개의 정보를 가져옵니다.
+		// 최신순으로 등록된 미팅을 10개 가져옵니다.
+		$recent_meeting_agenda_list =
+		$wdj_mysql_interface->getMeetingAgendaListUpcoming(
+			// meeting_membership_id
+			$meeting_membership_id
+			// page
+			, 1
+			// size
+			, 1
+			// is_sooner_first
+			, true
+		);
+
+		$meeting_agenda_obj = $recent_meeting_agenda_list[0];
 		$meeting_id = $meeting_agenda_obj->__meeting_id;
+		*/
 	}
 
 	$today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));

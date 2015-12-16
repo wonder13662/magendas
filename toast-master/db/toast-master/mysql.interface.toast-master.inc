@@ -228,7 +228,41 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
-	}	
+	}
+
+	/*
+		@ Public
+		@ Desc : 가장 가까이 예정된 미팅의 id를 돌려줍니다.
+	*/
+	public function get_meeting_agenda_id_upcoming($meeting_membership_id=-1){
+
+		$function_name = "get_meeting_agenda_id_upcoming";
+		if($this->isNotUnsignedNumber($meeting_membership_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		}
+
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT MA.id AS __meeting_id"
+			,"FROM MEETING_AGENDA AS MA"
+			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+			,"WHERE MA.membership_id=$meeting_membership_id"
+			,"AND MA.`status`=\"A\""
+			,"AND NOW() < MA.startdttm"
+			,"ORDER BY MA.startdttm ASC LIMIT 1"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		$__meeting_id = -1;
+		if(!is_null($result)) {
+			$__meeting_id = intval($result->__meeting_id);	
+		}
+
+		return $__meeting_id;
+	}
 
 	/*
 		@ Desc : 
@@ -2996,43 +3030,53 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
-	public function update_today_speech_v2(	$speech_id
-											, $order_num=-1
-											, $speech_project_id=-1
-											, $speech_title="" ){
+	public function update_speech(	$speech_id
+									, $order_num=-1
+									, $speech_project_id=-1
+									, $speech_title="" ){
 
+		$function_name = "update_speech";
 		if($this->isNotUnsignedNumber($speech_id)){
-			echo "!Error! / insert_speech / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
-			return null;
+			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
 		}
 
-		$query = "";
+		$query_manager = new MYSQLQueryManager();
 		if($this->isUnsignedNumber($order_num)){
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `order_num`=$order_num"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		} else if($this->isUnsignedNumber($speech_project_id)){
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `speech_project_id`=$speech_project_id"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		} else if(!empty($speech_title)){
-			$safe_speech_title = addslashes($speech_title);
-			$query =
-			"UPDATE `MA_SPEECH`"
-			. " SET `title`=\"$safe_speech_title\""
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_id"
-			;
-		}
 
-		// echo "$query<br/>";
-		$json_res_obj = $this->getModifyResult($query);
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `order_num`=$order_num"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		} else if($this->isUnsignedNumber($speech_project_id)){
+
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `speech_project_id`=$speech_project_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		} else if(!empty($speech_title)){
+
+			$safe_speech_title = addslashes($speech_title);
+			$query_array = 
+			array(
+				"UPDATE `MA_SPEECH`"
+				,"SET `title`=\"$safe_speech_title\""
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_id"
+			);
+
+		}
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		return $this->getSimpleResult($json_res_obj);
 	}	
 	public function delete_speech($speech_id){

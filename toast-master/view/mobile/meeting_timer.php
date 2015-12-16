@@ -622,14 +622,43 @@ for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
 //   UNIQUE KEY `speech_manual_project_n_time_guide_line` (`speech_manual_project_id`,`time_guide_line_id`)
 // ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_bin
 
+// UPDATE SPEECH_MANUAL_PROJECT SET `name`="The Team Technical Presentation" WHERE id=50;
+
+// DELETE FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE WHERE time_guide_line_id=0;
 
 // INSERT SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE (speech_manual_project_id, time_guide_line_id)
 // SELECT SMP.`id`, MTGL.id
 // FROM SPEECH_MANUAL_PROJECT AS SMP
 // LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.role_name=SMP.`name`
+// WHERE MTGL.id IS NOT NULL
+// ORDER BY SMP.`id`
 // ;
 
-//UPDATE `magendas`.`SPEECH_MANUAL_PROJECT` SET `sec_allocated_min`=\2,`sec_qualified_min`=\3,`sec_allocated_max`=\4,`sec_qualified_max`=\5,`sec_green`=\6,`sec_yellow`=\7,`sec_red`=\8 WHERE `id`=\1;
+// Make them laugh 중복 지우기.
+// DELETE 
+// FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE
+// WHERE speech_manual_project_id=13
+// ANd time_guide_line_id=93
+// ;
+// DELETE 
+// FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE
+// WHERE speech_manual_project_id=82
+// ANd time_guide_line_id=23
+// ;
+
+//TEST
+// SELECT SMP.`id`
+// , SMP.`name`
+// , MTGL.id
+// , MTGL.role_name
+// FROM SPEECH_MANUAL_PROJECT AS SMP
+// LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.role_name=SMP.`name`
+// WHERE MTGL.id IS NOT NULL
+// ORDER BY SMP.`id`
+// ;
+
+
+// UPDATE `magendas`.`SPEECH_MANUAL_PROJECT` SET `sec_allocated_min`=\2,`sec_qualified_min`=\3,`sec_allocated_max`=\4,`sec_qualified_max`=\5,`sec_green`=\6,`sec_yellow`=\7,`sec_red`=\8 WHERE `id`=\1;
 
 //INSERT INTO `magendas`.`MA_TIMER_GUIDE_LINE`(`role_name`,`sec_allocated_min`,`sec_qualified_min`,`sec_allocated_max`,`sec_qualified_max`,`sec_green`,`sec_yellow`,`sec_red`) VALUES (\1,\2,\3,\4,\5,\6,\7,\8);
 
@@ -660,8 +689,6 @@ LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id
 
 // 아젠다 타임라인과 모든 영역에서 입력시, 제한된 문자만을 입력받도록 하는 프로세스가 필요.
 
-// 도메인 구입 필요.
-// We have a meeting --> WEETING.COM
 
 /*
 SELECT * FROM SPEECH_MANUAL_PROJECT WHERE name="Make Them Laugh";
