@@ -381,8 +381,6 @@ class MYSQLInterface{
 	*/
 	public function get_upcoming_meeting_agenda($meeting_membership_id){
 
-		// wonder.jung
-
 		$function_name = "get_upcoming_meeting_agenda";
 		if($this->isNotUnsignedNumber($meeting_membership_id)){
 			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
@@ -395,6 +393,7 @@ class MYSQLInterface{
 			,", MA.round AS __round"
 			,", MA.theme AS __theme"
 			,", MA.startdttm AS __startdttm"
+			,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"
 			,", MA.membership_id AS __membership_id"
 			,", MEMBERSHIP.name AS __membership_name"
 			,", MEMBERSHIP.desc AS __membership_desc"
