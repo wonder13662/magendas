@@ -2,9 +2,12 @@
 // common setting
 include_once("../../common.inc");
 
+// 외부 공유 여부
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
-if($MEETING_MEMBERSHIP_ID == -1) {
+if($MEETING_MEMBERSHIP_ID == -1 || $IS_EXTERNAL_SHARE == TRUE) {
 	// 인스턴스 페이지 사용을 위해 멤버쉽 정보를 받을 수 있도록 변경합니다.
 	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);	
 }
@@ -19,6 +22,11 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 
 // 앞으로 진행할 최신 미팅 1개의 정보를 가져옵니다.
 // 최신순으로 등록된 미팅을 10개 가져옵니다.
+$upcoming_meeting_agenda_obj = $wdj_mysql_interface->get_upcoming_meeting_agenda($MEETING_MEMBERSHIP_ID);
+if(!is_null($upcoming_meeting_agenda_obj)) {
+	$upcoming_meeting_id = $upcoming_meeting_agenda_obj->__meeting_id;
+}
+/*
 $recent_meeting_agenda_list =
 $wdj_mysql_interface->getMeetingAgendaListUpcoming(
 	// meeting_membership_id
@@ -30,16 +38,18 @@ $wdj_mysql_interface->getMeetingAgendaListUpcoming(
 	// is_sooner_first
 	, true
 );
-$recent_meeting_id = -1;
+$upcoming_meeting_id = -1;
 if(!empty($recent_meeting_agenda_list)) {
-	$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
-	$recent_meeting_id = $recent_meeting_agenda_obj->__meeting_id;
+	$upcoming_meeting_agenda_obj = $recent_meeting_agenda_list[0];
+	$upcoming_meeting_id = $upcoming_meeting_agenda_obj->__meeting_id;
 }
-if(0 < $recent_meeting_id) {
+*/
+
+if(0 < $upcoming_meeting_id) {
 	// REMOVE ME
-	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($recent_meeting_id);
-	$speaker_timer_list = $wdj_mysql_interface->sel_speaker_n_timer($recent_meeting_id);
-	$evaluator_timer_list = $wdj_mysql_interface->sel_evaluator_n_timer($recent_meeting_id);
+	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($upcoming_meeting_id);
+	$speaker_timer_list = $wdj_mysql_interface->sel_speaker_n_timer($upcoming_meeting_id);
+	$evaluator_timer_list = $wdj_mysql_interface->sel_evaluator_n_timer($upcoming_meeting_id);
 }
 
 
@@ -65,8 +75,8 @@ $member_list = $wdj_mysql_interface->getMemberList($MEETING_MEMBERSHIP_ID, $para
 $time_guide_line_list = $wdj_mysql_interface->getTimeGuideLine();
 
 // time record list
-$time_record_list_table_topic = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_TABLE_TOPIC);
-$time_record_list_mini_debate = $wdj_mysql_interface->selectTimerListByTimerType($recent_meeting_id, $params->TIMER_TYPE_ID_MINI_DEBATE);
+$time_record_list_table_topic = $wdj_mysql_interface->selectTimerListByTimerType($upcoming_meeting_id, $params->TIMER_TYPE_ID_TABLE_TOPIC);
+$time_record_list_mini_debate = $wdj_mysql_interface->selectTimerListByTimerType($upcoming_meeting_id, $params->TIMER_TYPE_ID_MINI_DEBATE);
 
 // TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
 
@@ -119,9 +129,10 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 var login_user_info = <?php echo json_encode($login_user_info);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
+var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
 
-var recent_meeting_agenda_obj = <?php echo json_encode($recent_meeting_agenda_obj);?>;
-var recent_meeting_id = <?php echo json_encode($recent_meeting_id);?>;
+var upcoming_meeting_agenda_obj = <?php echo json_encode($upcoming_meeting_agenda_obj);?>;
+var upcoming_meeting_id = <?php echo json_encode($upcoming_meeting_id);?>;
 
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 
@@ -141,9 +152,16 @@ var time_record_list_table_topic = <?php echo json_encode($time_record_list_tabl
 var time_record_list_mini_debate = <?php echo json_encode($time_record_list_mini_debate);?>;
 var table_jq = $("table tbody");
 
-console.log(">>> speaker_timer_list :: ",speaker_timer_list);
+var is_editable = true;
+if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
+	// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
+	is_editable = false;
+}
 
+
+console.log(">>> speaker_timer_list :: ",speaker_timer_list);
 console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
+console.log(">>> upcoming_meeting_agenda_obj :: ",upcoming_meeting_agenda_obj);
 
 
 
@@ -157,36 +175,33 @@ console.log(">>> evaluator_timer_list :: ",evaluator_timer_list);
 //  dMP dMP dMP     dMP dMP dMP.aMP dMP     dMP"AMF   
 // dMP dMP dMMMMMP dMP dMP dMMMMP" dMMMMMP dMP dMP                                                       
 
-var test = 
-_link.get_header_link(
-	_link.MOBILE_MEETING_TIMER
-	,_param
-	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
-);
-console.log(">>> test :: ",test);
+if(IS_EXTERNAL_SHARE===false) {
 
-var log_in_row_jq = 
-_tm_m_list.addHeaderRow(
-	// login_user_info
-	login_user_info
-	// membership_obj
-	, membership_obj
-	// header_arr 
-	,[
-		_link.get_header_link(
-			_link.MOBILE_MEETING_TIMER
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
-		)
-		,_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	]
-	// table_jq
-	, table_jq
-);
+	var log_in_row_jq = 
+	_tm_m_list.addHeaderRow(
+		// login_user_info
+		login_user_info
+		// membership_obj
+		, membership_obj
+		// header_arr 
+		,[
+			_link.get_header_link(
+				_link.MOBILE_MEETING_TIMER
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
+			)
+			,_link.get_header_link(
+				_link.MOBILE_TOP
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+		]
+		// table_jq
+		, table_jq
+	);
+
+}
+
 
 
 
@@ -205,23 +220,23 @@ _tm_m_list.addHeaderRow(
 // dMP dMP dMP dMMMMMP dMMMMMP    dMP   dMP dMP dMP  VMMMP"         dMP dMP dMP dMP      VMMMP"    
                                                                                                 
 var now_date = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD)
-var days_left = _dates.get_YYYY_MM_DD_diff_days(now_date, recent_meeting_agenda_obj.__startdate);
+var days_left = _dates.get_YYYY_MM_DD_diff_days(now_date, upcoming_meeting_agenda_obj.__startdate);
 var date_desc = "";
 if(days_left < 1) {
 
-	date_desc = recent_meeting_agenda_obj.__startdate + " ( Today )"
+	date_desc = upcoming_meeting_agenda_obj.__startdate + " ( Today )"
 
 } else if(days_left == 1) {
 
-	date_desc = recent_meeting_agenda_obj.__startdate + " ( Tomorrow )"
+	date_desc = upcoming_meeting_agenda_obj.__startdate + " ( Tomorrow )"
 
 } else if(days_left == 2) {
 
-	date_desc = recent_meeting_agenda_obj.__startdate + " ( The day after Tomorrow )"
+	date_desc = upcoming_meeting_agenda_obj.__startdate + " ( The day after Tomorrow )"
 
 } else {
 
-	date_desc = recent_meeting_agenda_obj.__startdate + " ( " + days_left + " days left )"
+	date_desc = upcoming_meeting_agenda_obj.__startdate + " ( " + days_left + " days left )"
 
 }
 var row_meeting_info_jq = 
@@ -279,7 +294,7 @@ _m_list.addTableRowsSelectFolder(
 	}, this)
 	// delegate_data
 	, _param
-	.get(_param.MEETING_ID,recent_meeting_id)
+	.get(_param.MEETING_ID,upcoming_meeting_id)
 	// text_color
 	, _color.COLOR_MEDIUM_GRAY
 	// bg_color
@@ -357,7 +372,7 @@ _tm_m_list.add_member_timer_table_editable(
 	, member_list_controller
 	// meta data
 	, _param
-	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.MEETING_ID, upcoming_meeting_id)
 	.get(_param.TIMER_TYPE_ID, parseInt(time_guide_line_table_topic.__time_guide_line_id))
 	.get(_param.IS_DATA_FROM_DB, false)
 );
@@ -421,7 +436,7 @@ _tm_m_list.add_member_timer_table_editable(
 	, member_list_controller
 	// meta data
 	, _param
-	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.MEETING_ID, upcoming_meeting_id)
 	.get(_param.TIMER_TYPE_ID, parseInt(time_guide_line_mini_debate.__time_guide_line_id))
 	.get(_param.IS_DATA_FROM_DB, false)
 );
@@ -475,7 +490,7 @@ _tm_m_list.add_member_timer_table_fixed(
 	, event_toggle_controller
 	// meta data
 	, _param
-	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.MEETING_ID, upcoming_meeting_id)
 );
 for(var idx = 0;idx < speaker_timer_list.length;idx++) {
 	var speech_speaker_obj = speaker_timer_list[idx];	
@@ -533,7 +548,7 @@ _tm_m_list.add_member_timer_table_fixed(
 	, event_toggle_controller
 	// meta data
 	, _param
-	.get(_param.MEETING_ID, recent_meeting_id)
+	.get(_param.MEETING_ID, upcoming_meeting_id)
 );
 for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
 	var evaluator_obj = evaluator_timer_list[idx];
@@ -563,6 +578,31 @@ for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
 	);
 
 	timer_controller_evaluator.add_timer(timer_record_obj_formatted);
+}
+
+
+// SHARE EXTERNAL
+var share_msg = membership_obj.__membership_desc + " needs Timer.\nAre you ready?\nMeeting Agenda On " + upcoming_meeting_agenda_obj.__startdate;
+if(is_editable) {
+	var accessor_external_share =
+	_m_list.addTableRowShareExternal(
+		// title
+		"Share"
+		// append_target_jq
+		,table_jq
+		// label
+		,share_msg
+		// url_desc
+		,"Magendas"
+		// url
+		,_link.get_link(
+			_link.MOBILE_MEETING_TIMER
+			,_param
+			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
+		)
+		// img_url
+		,service_root_path + _link.IMG_SHARE_KAKAO_TM_LONG_BANNER
+	);
 }
 
 
