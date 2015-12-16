@@ -249,7 +249,7 @@ class MYSQLInterface{
 			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
 			,"WHERE MA.membership_id=$meeting_membership_id"
 			,"AND MA.`status`=\"A\""
-			,"AND NOW() < MA.startdttm"
+			,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= MA.startdttm"
 			,"ORDER BY MA.startdttm ASC LIMIT 1"
 		);
 		$query_manager->addQueryLineArr($query_array);
