@@ -271,7 +271,7 @@ wonglish.meeting_agenda_manager = {
 			for (var idx = 0; idx < meeting_agenda_data_obj.member_list.length; idx++) {
 				var cur_member_obj = meeting_agenda_data_obj.member_list[idx];
 
-				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_id);
+				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_hash_key);
 				search_option_arr_speakers.push(cur_select_option);
 			}
 		}
@@ -296,14 +296,14 @@ wonglish.meeting_agenda_manager = {
 
 			column_title:"Speaker"
 			, key_access_prop_name:"__speaker_member_name"
-			, value_access_prop_name:"__speaker_member_id"
+			, value_access_prop_name:"__speaker_member_hash_key"
 			, search_option_arr:search_option_arr_speakers
 
 		}).add_search_list_type({
 
 			column_title:"Evaluator"
 			, key_access_prop_name:"__evaluator_member_name"
-			, value_access_prop_name:"__evaluator_member_id"
+			, value_access_prop_name:"__evaluator_member_hash_key"
 			, search_option_arr:search_option_arr_speakers
 
 		});
@@ -402,22 +402,19 @@ wonglish.meeting_agenda_manager = {
 
 					} else if("Speaker" == cur_outcome_obj._id){
 
-						// TODO 프로젝트에 맞는 시간을 설정해야 합니다.
-
 						// @ params
 						request_param_obj = 
 						_param
 						.get(_param.IS_UPDATE_SPEECH_SPEAKER,_param.YES)
 						.get(_param.MEETING_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__meeting_id"))
 						.get(_param.SPEECH_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__speech_id"))
-						.get(_param.SPEECH_SPEAKER_MEMBER_ID,cur_outcome_obj._value)
+						.get(_param.SPEECH_SPEAKER_MEMBER_HASH_KEY,cur_outcome_obj._value)
 						.get(_param.SPEECH_SPEAKER_TIMER_GREEN,300)
 						.get(_param.SPEECH_SPEAKER_TIMER_RED,300)
 						;
 
 					} else if("Evaluator" == cur_outcome_obj._id){
 
-						// today_speech_speaker_v2_list
 						var __evaluator_id = -1;
 						for (var idx = 0; idx < today_speech_speaker_v2_list.length; idx++) {
 							var today_speech_speaker = today_speech_speaker_v2_list[idx];
@@ -439,7 +436,7 @@ wonglish.meeting_agenda_manager = {
 							.get(_param.MEETING_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__meeting_id"))
 							.get(_param.SPEECH_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__speech_id"))
 							.get(_param.EVALUATOR_ID,__evaluator_id)
-							.get(_param.SPEECH_EVALUATOR_MEMBER_ID,cur_outcome_obj._value)
+							.get(_param.SPEECH_EVALUATOR_MEMBER_HASH_KEY,cur_outcome_obj._value)
 							;
 
 						} else {
@@ -450,7 +447,7 @@ wonglish.meeting_agenda_manager = {
 							.get(_param.IS_INSERT_SPEECH_EVALUATOR,_param.YES)
 							.get(_param.MEETING_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__meeting_id"))
 							.get(_param.SPEECH_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__speech_id"))
-							.get(_param.SPEECH_EVALUATOR_MEMBER_ID,cur_outcome_obj._value)
+							.get(_param.SPEECH_EVALUATOR_MEMBER_HASH_KEY,cur_outcome_obj._value)
 							;
 
 						}
