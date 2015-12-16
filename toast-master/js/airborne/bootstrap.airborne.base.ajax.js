@@ -58,7 +58,7 @@ airborne.ajax = {
 	/*
 	@ Desc : ajax post 전송을 합니다. 결과를 콘솔창에 보여줍니다. / 222
 	*/
-	,send_simple_post:function(_url, _param_obj, _delegate_after_job_done){
+	,send_simple_post:function(_url, _param_obj, _delegate_after_job_done, _delegate_param){
 
 		var method_name = "airborne.ajax.send_simple_post";
 		var _obj = airborne.bootstrap.obj;
@@ -88,7 +88,7 @@ airborne.ajax = {
 
 		}).done(function( data ) {
 
-			_delegate_after_job_done._func.apply(_delegate_after_job_done._scope,[data]);
+			_delegate_after_job_done._func.apply(_delegate_after_job_done._scope,[data, _delegate_param]);
 
 		}).fail(function( jqXHR, text_status ) {
 

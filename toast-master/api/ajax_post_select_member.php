@@ -24,7 +24,7 @@
 
 		if(!empty($MEMBER_EMAIL)) {
 			$query_output = $wdj_mysql_interface->getMemberByEmail($MEMBER_EMAIL);
-			array_push($result->query_output_arr,$query_output);
+			$result->getMemberByEmail=$query_output;
 		}
 
 	}

@@ -17,7 +17,8 @@
 	// UPDATE - member management
 	$MEMBER_FIRST_NAME = $params->getParamString($params->MEMBER_FIRST_NAME, "");
 	$MEMBER_LAST_NAME = $params->getParamString($params->MEMBER_LAST_NAME, "");
-	$MEMBER_MOBILE = $params->getParamString($params->MEMBER_MOBILE, "");
+	// @ Deprecated
+	//$MEMBER_MOBILE = $params->getParamString($params->MEMBER_MOBILE, "");
 	$MEMBER_EMAIL = $params->getParamString($params->MEMBER_EMAIL, "");
 	$MEMBER_HASH_KEY = $params->getParamString($params->MEMBER_HASH_KEY, "");
 	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
@@ -29,24 +30,21 @@
 		$wdj_mysql_interface->insertMember(	
 			$MEMBER_FIRST_NAME
 			, $MEMBER_LAST_NAME
-			, $MEMBER_MOBILE
 			, $MEMBER_EMAIL
 		);
-		array_push($result->query_output_arr,$query_output);
+		$result->insertMember = $query_output;
+		//array_push($result->query_output_arr,$query_output);
 
 		// 새로 추가한 멤버 정보를 가져옵니다.
-		$member_list = $wdj_mysql_interface->getMemberByMobile($MEMBER_MOBILE);
-		$member_obj;
-		if(!empty($member_list) && COUNT($member_list) > 0) {
-			$member_obj = $member_list[0];
-		}
+		$member_obj = $wdj_mysql_interface->getMemberByEmail($MEMBER_EMAIL);
 		if(!is_null($member_obj)){
 			$member_id = $member_obj->__member_id;	
 		}
 		if(0 < $member_id && 0 < $MEETING_MEMBERSHIP_ID) {
 			$query_output = 
 			$wdj_mysql_interface->insertMemberNMembership($member_id, $MEETING_MEMBERSHIP_ID);
-			array_push($result->query_output_arr,$query_output);
+			// array_push($result->query_output_arr,$query_output);
+			$result->insertMemberNMembership = $query_output;
 
 			// 새로 추가한 멤버 정보를 가져옵니다.
 			$new_member_obj = 
@@ -56,7 +54,8 @@
 				, $MEMBER_EMAIL
 				, $MEETING_MEMBERSHIP_ID
 			);
-			array_push($result->query_output_arr,json_encode($new_member_obj));
+			// array_push($result->query_output_arr,json_encode($new_member_obj));
+			$result->getMemberByNameAndEmail = $new_member_obj;
 		}
 
 	} else if($params->isYes($params->IS_INSERT_MEMBER_N_MEMBERSHIP)){
@@ -74,8 +73,8 @@
 		// 추가한 멤버 정보를 조회해서 돌려줍니다.
 		$query_output = 
 		$wdj_mysql_interface->getMember(
-			// MEMBER_ID
-			$params->getParamNumber($params->MEMBER_ID, -1)
+			// MEMBER_HASH_KEY
+			$MEMBER_HASH_KEY
 			// MEETING_MEMBERSHIP_ID
 			,$params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1)
 		);

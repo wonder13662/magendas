@@ -26,24 +26,6 @@ $upcoming_meeting_agenda_obj = $wdj_mysql_interface->get_upcoming_meeting_agenda
 if(!is_null($upcoming_meeting_agenda_obj)) {
 	$upcoming_meeting_id = $upcoming_meeting_agenda_obj->__meeting_id;
 }
-/*
-$recent_meeting_agenda_list =
-$wdj_mysql_interface->getMeetingAgendaListUpcoming(
-	// meeting_membership_id
-	$MEETING_MEMBERSHIP_ID
-	// page
-	, 1
-	// size
-	, 1
-	// is_sooner_first
-	, true
-);
-$upcoming_meeting_id = -1;
-if(!empty($recent_meeting_agenda_list)) {
-	$upcoming_meeting_agenda_obj = $recent_meeting_agenda_list[0];
-	$upcoming_meeting_id = $upcoming_meeting_agenda_obj->__meeting_id;
-}
-*/
 
 if(0 < $upcoming_meeting_id) {
 	// REMOVE ME
@@ -79,12 +61,6 @@ $time_record_list_table_topic = $wdj_mysql_interface->selectTimerListByTimerType
 $time_record_list_mini_debate = $wdj_mysql_interface->selectTimerListByTimerType($upcoming_meeting_id, $params->TIMER_TYPE_ID_MINI_DEBATE);
 
 // TODO 기본 인원을 만들어 주는 로직 필요. TTM은 2명. MD도 2명. - 추가하는 프로세스가 귀찮음.
-
-
-// TEST
-
-
-
 
 
 // @ required
