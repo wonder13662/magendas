@@ -374,6 +374,101 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+
+	/*
+		@ Public
+		@ Desc : 해당 클럽에 예정된 가장 가까운 시간의 미팅을 가져옵니다.
+	*/
+	public function get_upcoming_meeting_agenda($meeting_membership_id){
+
+		// wonder.jung
+
+		$function_name = "get_upcoming_meeting_agenda";
+		if($this->isNotUnsignedNumber($meeting_membership_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		}
+
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT MA.id AS __meeting_id"
+			,", MA.round AS __round"
+			,", MA.theme AS __theme"
+			,", MA.startdttm AS __startdttm"
+			,", MA.membership_id AS __membership_id"
+			,", MEMBERSHIP.name AS __membership_name"
+			,", MEMBERSHIP.desc AS __membership_desc"
+			,", IFNULL(QUOTE.content,\"\") AS __quote"
+			,", IFNULL(WORD.word,\"\") AS __word"
+			,", IFNULL(WORD.desc,\"\") AS __word_desc"
+			,"FROM MEETING_AGENDA AS MA"
+			,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+			,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+			,"WHERE MA.membership_id=$meeting_membership_id"
+			,"AND MA.`status`=\"A\""
+			,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= MA.startdttm"
+			,"ORDER BY MA.startdttm ASC LIMIT 1"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$json_res_obj = $this->getSelectResult($query_manager->getExecuteQuery());
+		if(!is_null($json_res_obj->result) && !empty($json_res_obj->result) &&is_array($json_res_obj->result) ) {
+			return $json_res_obj->result[0];
+		}
+
+		return null;
+	}
+
+	/*
+		@ Public
+		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
+	*/
+	public function get_meeting_agenda_by_id($meeting_membership_id, $meeting_id){
+
+		// wonder.jung
+
+		$function_name = "get_meeting_agenda_by_id";
+		if($this->isNotUnsignedNumber($meeting_membership_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		}
+		if($this->isNotUnsignedNumber($meeting_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
+		}
+
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT MA.id AS __meeting_id"
+			,", MA.round AS __round"
+			,", MA.theme AS __theme"
+			,", MA.startdttm AS __startdttm"
+			,", MA.membership_id AS __membership_id"
+			,", MEMBERSHIP.name AS __membership_name"
+			,", MEMBERSHIP.desc AS __membership_desc"
+			,", IFNULL(QUOTE.content,\"\") AS __quote"
+			,", IFNULL(WORD.word,\"\") AS __word"
+			,", IFNULL(WORD.desc,\"\") AS __word_desc"
+			,"FROM MEETING_AGENDA AS MA"
+			,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+			,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+			,"WHERE MA.id=$meeting_id"
+			,"AND MA.membership_id=$meeting_membership_id"
+			,"AND MA.`status`=\"A\""
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$json_res_obj = $this->getSelectResult($query_manager->getExecuteQuery());
+		if(!is_null($json_res_obj->result) && !empty($json_res_obj->result) &&is_array($json_res_obj->result) ) {
+			return $json_res_obj->result[0];
+		}
+
+		return null;
+	}	
+
 	public function getLatestMeetingAgendaId($meetingship_id=-1){
 
 		if($this->isNotUnsignedNumber($meetingship_id)) return null;
