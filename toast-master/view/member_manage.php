@@ -33,11 +33,19 @@ for($idx = 0; $idx < sizeof($sleeping_member_list); $idx++){
 
 // SELECT INFOS
 $all_member_list = $wdj_mysql_interface->getMemberListByMembershipId($MEETING_MEMBERSHIP_ID);
-$MEMBER_ID = $params->getParamNumber($params->MEMBER_ID, -1);
+
+
+$MEMBER_HASH_KEY = $params->getParamString($params->MEMBER_HASH_KEY, "");
+if(!empty($MEMBER_HASH_KEY)) {
+	$MEMBER_ID = $wdj_mysql_interface->getMemberId($MEMBER_HASH_KEY);
+}
 if($MEMBER_ID > 0) {
-	$selected_member_arr = $wdj_mysql_interface->getMember($MEMBER_ID, $MEETING_MEMBERSHIP_ID);	
+
+	$selected_member_arr = $wdj_mysql_interface->getMember($MEMBER_HASH_KEY, $MEETING_MEMBERSHIP_ID);	
 	$selected_member_obj = $selected_member_arr[0];
+
 } else if(!empty($all_member_list)){
+
 	// 선택된 멤버가 없다면 등록된 첫번째 멤버를 가져옵니다.
 	$selected_member_obj = $all_member_list[0];
 }
@@ -196,14 +204,12 @@ var list_search_tab = {
 		this._self.hide_search_btn();
 		this._self.hide_input_search_keyword();
 
-		console.log("here");
-
 		this._self.addDelegateOnChange(_obj.getDelegate(function(selected_option_name, selected_option_value){
 
 			_link.go_there(
 				_link.MEMBER_MANAGE
 				,_param
-				.get(_param.MEMBER_ID, selected_option_value)
+				.get(_param.MEMBER_HASH_KEY, selected_option_value)
 				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
 			);
 
@@ -379,20 +385,18 @@ var list_search_tab = {
 									// delegate_func
 									function(data){
 
-										var new_member_id = -1;
-										if(	data.query_output_arr != undefined && 
-											data.query_output_arr.length == 3) {
-
-											var new_memeber_arr = $.parseJSON(data.query_output_arr[2]);
-											new_member_id = parseInt(new_memeber_arr[0].__member_id);
+										var new_member_hash_key = "";
+										if(	data != undefined && 
+											data.getMemberByNameAndEmail != undefined) {
+											new_member_hash_key = data.getMemberByNameAndEmail.__member_hash_key;
 										} // if end
 
-										if( 0 < new_member_id ) {
+										if(_v.isValidStr(new_member_hash_key)) {
 
 											_link.go_there(
 												_link.MEMBER_MANAGE
 												,_param
-												.get(_param.MEMBER_ID, new_member_id)
+												.get(_param.MEMBER_HASH_KEY, new_member_hash_key)
 												.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
 											);
 
@@ -431,35 +435,35 @@ var list_search_tab = {
 							// _delegate_after_job_done
 							,_obj.get_delegate(
 								// delegate_func
-								function(data){
+								function(data, delegate_data){
 
 									console.log(">>> data :: ",data);
+									console.log(">>> delegate_data :: ",delegate_data);
 
-									var cur_member_n_membership_arr;
-									if(data != undefined && _v.is_valid_array(data.query_output_arr)) {
-										cur_member_n_membership_arr = data.query_output_arr[0];
+									var cur_member = null;
+									if(	data != undefined && 
+										data.getMemberByEmail != undefined && 
+										_v.is_valid_array(data.getMemberByEmail.result) ) {
+
+										cur_member = data.getMemberByEmail.result[0];
 									}
 
 									// TODO
 									// 1. 해당 멤버가 멤버 정보에 없는 경우 - 새로 등록.
 									// 2. 해당 멤버가 멤버 정보는 있지만, 현재 클럽에는 등록되지 않은 경우 - 이 클럽에도 등록 - 유저에게 가이드 필요.
-
-									console.log(">>> cur_member_n_membership_arr :: ",cur_member_n_membership_arr);
-
-									/*
-									if(cur_member_n_membership != undefined) {
+									if(cur_member != undefined) {
 										alert("Member is already exist!");
 										return;
 									} else {
-										insert_new_member(cur_param_obj_for_insert_new_member);
+										insert_new_member(delegate_data);
 									}
-									*/
-
 
 								},
 								// delegate_scope
 								this
 							)
+							// delegate_data
+							, cur_param_obj_for_insert_new_member
 						);	// ajax end	
 
 					} // outer if end
@@ -654,23 +658,23 @@ var role_history_ah_counter = <?php echo json_encode($role_history_ah_counter);?
 var role_history_timer = <?php echo json_encode($role_history_timer);?>;
 
 
-var selected_member_id = -1;
+var selected_member_hash_key = -1;
 if(selected_member_obj != undefined && selected_member_obj.__member_id != undefined) {
-	selected_member_id = selected_member_obj.__member_id;
+	selected_member_hash_key = selected_member_obj.__member_hash_key;
 }
 
-console.log(">>> all_member_list :: ",all_member_list);
-console.log(">>> speech_history :: ",speech_history);
-console.log(">>> evaluation_history :: ",evaluation_history);
-console.log(">>> role_history_toastmaster :: ",role_history_toastmaster);
-console.log(">>> role_history_word_n_quote_master :: ",role_history_word_n_quote_master);
-console.log(">>> role_history_table_topic_master :: ",role_history_table_topic_master);
-console.log(">>> role_history_mini_debate_master :: ",role_history_mini_debate_master);
-console.log(">>> role_history_general_evaluator :: ",role_history_general_evaluator);
-console.log(">>> role_history_grammarian :: ",role_history_grammarian);
-console.log(">>> role_history_ah_counter :: ",role_history_ah_counter);
-console.log(">>> role_history_timer :: ",role_history_timer);
-console.log(">>> selected_member_obj :: ",selected_member_obj);
+// console.log(">>> all_member_list :: ",all_member_list);
+// console.log(">>> speech_history :: ",speech_history);
+// console.log(">>> evaluation_history :: ",evaluation_history);
+// console.log(">>> role_history_toastmaster :: ",role_history_toastmaster);
+// console.log(">>> role_history_word_n_quote_master :: ",role_history_word_n_quote_master);
+// console.log(">>> role_history_table_topic_master :: ",role_history_table_topic_master);
+// console.log(">>> role_history_mini_debate_master :: ",role_history_mini_debate_master);
+// console.log(">>> role_history_general_evaluator :: ",role_history_general_evaluator);
+// console.log(">>> role_history_grammarian :: ",role_history_grammarian);
+// console.log(">>> role_history_ah_counter :: ",role_history_ah_counter);
+// console.log(">>> role_history_timer :: ",role_history_timer);
+// console.log(">>> selected_member_obj :: ",selected_member_obj);
 
 // member list를 combo box list로 보여줍니다.
 var delegate_create_select_option_obj = null;
@@ -686,7 +690,8 @@ if(all_member_list != null && all_member_list.length > 0){
 		+ "&nbsp;&nbsp;&nbsp;&nbsp;"
 		+ element.__member_email
 		;
-		var value = element.__member_id;
+
+		var value = element.__member_hash_key;
 		var select_option_obj = airborne.bootstrap.column.getSelectDetailElement(key, value);
 
 		return select_option_obj;
@@ -694,7 +699,7 @@ if(all_member_list != null && all_member_list.length > 0){
 	
 	var member_selectable_list = airborne.bootstrap.obj.getTagSelectOptionArr(all_member_list, delegate_create_select_option_obj);
 
-	this.list_search_tab.init(member_selectable_list, null, selected_member_id);
+	this.list_search_tab.init(member_selectable_list, null, selected_member_hash_key);
 }
 
 

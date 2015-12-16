@@ -426,8 +426,6 @@ class MYSQLInterface{
 	*/
 	public function get_meeting_agenda_by_id($meeting_membership_id, $meeting_id){
 
-		// wonder.jung
-
 		$function_name = "get_meeting_agenda_by_id";
 		if($this->isNotUnsignedNumber($meeting_membership_id)){
 			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
@@ -1262,55 +1260,84 @@ class MYSQLInterface{
 	}
 
 	/*
-
+		@ Public
+		@ Desc : Email 주소를 키로 멤버 데이터를 가져옵니다.
 	*/
 	public function getMemberByEmail($email){
 
-		$query = 
-		"SELECT `MEMBER`.id AS __member_id"
-		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
-		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
-		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
-		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
-		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " FROM `MEMBER`"
-		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`email`=\"$email\""
-		;
+		$function_name = "getMemberByEmail";
+		if(empty($email)){
+			echo "$function_name / \$this->isNotUnsignedNumber(\$email)<br/>";
+			return;
+		}
 
-		$json_res_obj = $this->getSelectResult($query);
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT `MEMBER`.id AS __member_id"
+			,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+			,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+			,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+			,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+			,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+			,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+			,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+			,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+			,"FROM `MEMBER`"
+			,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+			,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+			,"WHERE `MEMBER`.`email`=\"$email\""
+			,"LIMIT 1"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
 
-		return $json_res_obj->result;
+		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		return $result;
 	}
 
 	public function getMemberByNameAndEmail($first_name, $last_name, $email, $membership_id){
 
-		$query = 
-		"SELECT `MEMBER`.id AS __member_id"
-		. " , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
-		. " , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
-		. " , CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
-		. " , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-		. " , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-		. " , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
-		. " , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-		. " , IFNULL(`MEMBER`.email,\"\") AS __member_email"
-		. " FROM `MEMBER`"
-		. " LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-		. " LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-		. " WHERE `MEMBER`.`first_name`=\"$first_name\""
-		. " AND `MEMBER`.`last_name`=\"$last_name\""
-		. " AND `MEMBER`.`email`=\"$email\""
-		. " AND `MEMBERSHIP`.id=$membership_id"
-		;
+		$function_name = "getMemberByNameAndEmail";
+		if(empty($first_name)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$first_name)<br/>";
+		}
+		if(empty($last_name)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$last_name)<br/>";
+		}
+		if(empty($email)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$email)<br/>";
+		}
+		if($this->isNotUnsignedNumber($membership_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$membership_id)<br/>";
+		}
 
-		$json_res_obj = $this->getSelectResult($query);
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT `MEMBER`.id AS __member_id"
+			,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+			,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+			,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+			,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+			,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+			,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+			,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+			,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+			,"FROM `MEMBER`"
+			,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+			,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+			,"WHERE `MEMBER`.`first_name`=\"$first_name\""
+			,"AND `MEMBER`.`last_name`=\"$last_name\""
+			,"AND `MEMBER`.`email`=\"$email\""
+			,"AND `MEMBERSHIP`.id=$membership_id"
+			,"LIMIT 1"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
 
-		return $json_res_obj->result;
+		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		return $result;
 	}
 
 	/*
@@ -1531,10 +1558,7 @@ class MYSQLInterface{
 		return $result_merge;
 	}	
 
-	public function insertMember(	$first_name, 
-									$last_name, 
-									$mobile, 
-									$email){
+	public function insertMember($first_name, $last_name, $email){
 
 		$function_name = "insertMember";
 		if(empty($first_name)){
@@ -1545,52 +1569,25 @@ class MYSQLInterface{
 			echo "$function_name / \$this->isNotUnsignedNumber(\$last_name)<br/>";
 			return;
 		}
-		if(empty($mobile)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$mobile)<br/>";
-			return;
-		}
 		if(empty($email)){
 			echo "$function_name / \$this->isNotUnsignedNumber(\$email)<br/>";
 			return;
 		}
 
-		// 이메일과 휴대폰 번호를 조합한 해시키를 만듭니다.
-		$member_hash_key = MD5("$mobile $email");
+		// 이메일과 이름을 조합한 해시키를 만듭니다.
+		$member_hash_key = MD5("$first_name $last_name $email");
 
-		$query =
-		"INSERT INTO `MEMBER`("
-		. " `first_name`"
-		. ","
-		. " `last_name`"
-		. ","
-		. " `hash_key`"
-		. ","
-		. " `mobile`"
-		. ","
-		. " `email`"
-		. ","
-		. " `regdttm`"
-		. ","
-		. " `updttm`"
-		. ")"
-		. " VALUES ("
-		. "\"$first_name\""
-		. ","
-		. "\"$last_name\""
-		. ","
-		. "\"$member_hash_key\""
-		. ","
-		. "\"$mobile\""
-		. ","
-		. "\"$email\""
-		. ","
-		. "DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-		. ","
-		. "DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-		. ")"
-		;	
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"INSERT INTO `MEMBER`(`first_name`,`last_name`,`hash_key`,`email`,`regdttm`,`updttm`)"
+			,"VALUES (\"$first_name\",\"$last_name\",\"$member_hash_key\",\"$email\""
+			,",DATE_FORMAT(NOW(),'%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
 
-		$json_res_obj = $this->getModifyResult($query);
+		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 
 		return $this->getSimpleResult($json_res_obj);
 	}

@@ -587,9 +587,10 @@ if(__member_obj == undefined) {
 				// _delegate_after_job_done
 				,_obj.get_delegate(
 					// delegate_func
-					function(data){
+					function(data, delegate_param){
 
-						console.log(">>> data :: ",data);
+						// console.log(">>> data :: ",data);
+						
 
 						var cur_member_n_membership_arr;
 						if(data != undefined && _v.is_valid_array(data.query_output_arr)) {
@@ -597,11 +598,59 @@ if(__member_obj == undefined) {
 						}
 
 						if(_v.is_not_valid_array(cur_member_n_membership_arr)) {
+
 							console.log("Not registered user.");
+							console.log(">>> delegate_param :: ",delegate_param);
+
 							// 1. 해당 멤버가 멤버 정보에 없는 경우 - 새로 등록.
+							var cur_param_obj_for_insert_new_member = delegate_param;
+
+							_ajax.send_simple_post(
+								// _url
+								_link.get_link(_link.API_UPDATE_MEMBER)
+								// _param_obj
+								, cur_param_obj_for_insert_new_member
+								// _delegate_after_job_done
+								,_obj.get_delegate(
+									// delegate_func
+									function(data){
+
+										console.log(">>> data :: ",data);
+
+										var cur_member_n_membership_arr;
+										if(data != undefined && _v.is_valid_array(data.query_output_arr)) {
+											cur_member_n_membership_arr = data.query_output_arr[0];
+										}
+
+										// TODO
+										// 1. 해당 멤버가 멤버 정보에 없는 경우 - 새로 등록.
+										// 2. 해당 멤버가 멤버 정보는 있지만, 현재 클럽에는 등록되지 않은 경우 - 이 클럽에도 등록 - 유저에게 가이드 필요.
+
+										console.log(">>> cur_member_n_membership_arr :: ",cur_member_n_membership_arr);
+
+										/*
+										if(cur_member_n_membership != undefined) {
+											alert("Member is already exist!");
+											return;
+										} else {
+											insert_new_member(cur_param_obj_for_insert_new_member);
+										}
+										*/
+
+
+									},
+									// delegate_scope
+									this
+								)
+							);	// ajax end	
 
 							return;
 						}
+
+
+
+
+
 
 						// TODO
 						
@@ -655,6 +704,8 @@ if(__member_obj == undefined) {
 					// delegate_scope
 					this
 				)
+				// _delegate_param
+				, cur_param_obj_for_insert_new_member
 			);	// ajax end	
 
 
