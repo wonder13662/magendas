@@ -21,7 +21,10 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 
 $MEETING_ID = $params->getParamNumber($params->MEETING_ID);
 
+// 예정된 최신의 미팅을 1건 가져옵니다.
+$upcoming_meeting_agenda = $wdj_mysql_interface->get_upcoming_meeting_agenda($MEETING_MEMBERSHIP_ID);
 
+// 등록된 모든 미팅을 최신순으로 10건 가져옵니다.
 $all_meeting_agenda_list =
 $wdj_mysql_interface->getMeetingAgendaList(
 	// meeting_membership_id
@@ -78,10 +81,12 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 
 var all_meeting_agenda_list = <?php echo json_encode($all_meeting_agenda_list);?>;
+var upcoming_meeting_agenda = <?php echo json_encode($upcoming_meeting_agenda);?>;
+
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var a_week_later_from_recent_meeting = <?php echo json_encode($a_week_later_from_recent_meeting);?>;
 
-console.log(">>> a_week_later_from_recent_meeting :: ",a_week_later_from_recent_meeting);
+console.log(">>> upcoming_meeting_agenda :: ",upcoming_meeting_agenda);
 
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
@@ -171,6 +176,66 @@ if(login_user_info.__is_club_member === true) {
 // TODO AJAX를 통한 더보기 기능.
 // draw table
 var row_tag = "";
+// 1. 곧 다가올 일정 리스트 - 1개만 노출
+var tab_tag = "&nbsp;&nbsp;&nbsp;";
+var meeting_agenda_info = upcoming_meeting_agenda.__round + "th" + tab_tag + upcoming_meeting_agenda.__theme;
+var meeting_id = parseInt(upcoming_meeting_agenda.__meeting_id);
+
+//var round = "<span class=\"badge\" style=\"color:#989898;background-color:#CCC;\"><_v></span>".replace(/\<_v\>/gi, element.__round + "th");
+var round = 
+"<span class=\"badge\" style=\"color:<COLOR>;background-color:<BG_COLOR>;\"><_v></span>"
+.replace(/\<_v\>/gi, upcoming_meeting_agenda.__round + "th")
+.replace(/\<COLOR\>/gi, _color.COLOR_WHITE)
+.replace(/\<BG_COLOR\>/gi, _color.COLOR_EMERALD_GREEN)
+;
+var meeting_date = "<span><_v></span>".replace(/\<_v\>/gi, airborne.dates.getFormattedTime(upcoming_meeting_agenda.__startdttm,airborne.dates.DATE_TYPE_YYYY_MM_DD));
+var theme_shorten = _html.getTextHead(upcoming_meeting_agenda.__theme, 20);
+var row_upcoming_meeting = 
+_m_list.addTableRowMovingArrow(
+	// title
+	round + tab_tag + meeting_date + tab_tag + theme_shorten
+	// append_target_jq
+	, table_jq
+	// delegate_obj_row_click
+	, _obj.getDelegate(function(delegate_data){
+
+		if(	delegate_data == undefined ||
+			delegate_data.delegate_data == undefined ||
+			delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] == undefined ) {
+
+			console.log("!Error!\taddTableRowMovingArrow\tdelegate_data is not valid!\tdelegate_data :: ",delegate_data);
+			return;
+		}
+
+		if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+			var delegate_data = delegate_data.delegate_data;
+			var MEETING_ID = parseInt(delegate_data.MEETING_ID);
+
+			if(MEETING_ID > 0) {
+				_link.go_there(
+					_link.MOBILE_MEETING_AGENDA_DETAIL
+					,_param
+					.get(_param.MEETING_ID, MEETING_ID)
+					.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+				);
+			}
+
+		}
+		
+
+	}, this)
+	// is_bold
+	, false
+	// param_obj
+	, _param.get(_param.MEETING_ID, meeting_id)
+	// text_color
+	, _color.COLOR_DARK_GRAY
+	// bg_color
+	, null
+);
+
+// 2. 시간순 리스트
 for (var idx = 0; idx < all_meeting_agenda_list.length; idx++) {
 	var element = all_meeting_agenda_list[idx];
 	var tab_tag = "&nbsp;&nbsp;&nbsp;";
@@ -182,7 +247,7 @@ for (var idx = 0; idx < all_meeting_agenda_list.length; idx++) {
 	var meeting_date = "<span><_v></span>".replace(/\<_v\>/gi, airborne.dates.getFormattedTime(element.__startdttm,airborne.dates.DATE_TYPE_YYYY_MM_DD));
 	var theme_shorten = _html.getTextHead(element.__theme, 20);
 
-	var row_achievements_jq = 
+	var row_meeting = 
 	_m_list.addTableRowMovingArrow(
 
 		// title
@@ -213,9 +278,7 @@ for (var idx = 0; idx < all_meeting_agenda_list.length; idx++) {
 						.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 					);
 				}
-
 			}
-			
 
 		}, this)
 		// is_bold
