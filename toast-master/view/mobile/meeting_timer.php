@@ -622,7 +622,7 @@ for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
 //   UNIQUE KEY `speech_manual_project_n_time_guide_line` (`speech_manual_project_id`,`time_guide_line_id`)
 // ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_bin
 
-//UPDATE SPEECH_MANUAL_PROJECT SET `name`="The Team Technical Presentation" WHERE id=50;
+// UPDATE SPEECH_MANUAL_PROJECT SET `name`="The Team Technical Presentation" WHERE id=50;
 
 // DELETE FROM SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE WHERE time_guide_line_id=0;
 
@@ -645,8 +645,6 @@ for(var idx = 0;idx < evaluator_timer_list.length;idx++) {
 // WHERE speech_manual_project_id=82
 // ANd time_guide_line_id=23
 // ;
-
-
 
 //TEST
 // SELECT SMP.`id`

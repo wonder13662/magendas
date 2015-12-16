@@ -228,7 +228,41 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
-	}	
+	}
+
+	/*
+		@ Public
+		@ Desc : 가장 가까이 예정된 미팅의 id를 돌려줍니다.
+	*/
+	public function get_meeting_agenda_id_upcoming($meeting_membership_id=-1){
+
+		$function_name = "get_meeting_agenda_id_upcoming";
+		if($this->isNotUnsignedNumber($meeting_membership_id)){
+			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		}
+
+		$query_manager = new MYSQLQueryManager();
+		$query_array = 
+		array(
+			"SELECT MA.id AS __meeting_id"
+			,"FROM MEETING_AGENDA AS MA"
+			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+			,"WHERE MA.membership_id=$meeting_membership_id"
+			,"AND MA.`status`=\"A\""
+			,"AND NOW() < MA.startdttm"
+			,"ORDER BY MA.startdttm ASC LIMIT 1"
+		);
+		$query_manager->addQueryLineArr($query_array);
+		// $query_manager->printFormattedQuery();
+
+		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		$__meeting_id = -1;
+		if(!is_null($result)) {
+			$__meeting_id = intval($result->__meeting_id);	
+		}
+
+		return $__meeting_id;
+	}
 
 	/*
 		@ Desc : 
@@ -3001,7 +3035,6 @@ class MYSQLInterface{
 									, $speech_project_id=-1
 									, $speech_title="" ){
 
-		// wonder.jung
 		$function_name = "update_speech";
 		if($this->isNotUnsignedNumber($speech_id)){
 			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
