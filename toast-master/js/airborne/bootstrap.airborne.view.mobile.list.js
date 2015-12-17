@@ -1588,7 +1588,6 @@ airborne.bootstrap.view.mobile.list = {
 				if(this.title_btn_jq == undefined) {
 					return;
 				}
-				// wonder.jung
 				this.title_btn_jq.css("width","69%");
 			}
 			, EVENT_TYPE_CLICK_TITLE:"EVENT_TYPE_CLICK_TITLE"

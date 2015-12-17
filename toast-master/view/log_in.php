@@ -98,8 +98,6 @@ _obj.get_delegate(
 
 	    		alert("Membership data is not correct\n\n[Error-511]");
 
-	    		// wonder.jung
-
 	    	} else if (meeting_membership_id === -1 && 1 < member_membership_arr.length) {
 
 	    		// 1-2. 

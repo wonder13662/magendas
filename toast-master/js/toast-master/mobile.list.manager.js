@@ -605,7 +605,7 @@ toast_master.mobile_list_manager = {
 		}, this)
 		;
 
-		// wonder.jung
+
 		// 여기서 time_arr is null
 		var timer_table_controller =  
 		this.add_timer_table_fixed(
@@ -918,7 +918,7 @@ toast_master.mobile_list_manager = {
 		@ Desc : 입력한 데이터를 대상으로만 타이머 테이블을 그립니다. 유저 이벤트로 타이머를 추가할 수 없습니다.
 	*/	
 	,add_timer_table_fixed:function(title, append_target_jq, event_toggle_controller, delegate_on_time_update, meta_data) {
-		// wonder.jung
+
 		var row_before_new_timer_jq = null;
 		// 외부에서 해당 타이머를 추가해야 할 경우(ex: DB에서 해당 timer 정보를 가져오는 경우.)를 위한 오브젝트.
 		var timer_table_controller = {
@@ -936,9 +936,6 @@ toast_master.mobile_list_manager = {
 			, get_timer_record_obj:function(is_qualified, meeting_id, member_hash_key, member_name, time_record_millisec, timer_record_id, timer_type_id, time_arr) {
 
 				// 타이머가 이해할 수 있는 타이머 정보 타입 형식을 가지고 있는 객체를 돌려줍니다.
-
-				// wonder.jung 
-
 				if(_v.isNumberStr(is_qualified)) {
 					is_qualified = parseInt(is_qualified);
 				}
@@ -1179,7 +1176,6 @@ toast_master.mobile_list_manager = {
 
 				if(param_obj != undefined) {
 
-					// wonder.jung
 					var meta_data = delegate_data;
 					var timer_controller = 
 					add_timer(

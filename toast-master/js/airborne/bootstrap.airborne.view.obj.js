@@ -1103,28 +1103,28 @@ airborne.bootstrap.obj = {
 
 				this.set_title_jq_text(cur_prev_value, true);
 			}
-			,title_container_jq:null
-			,set_title_container_jq:function(title_container_jq){
-				if(_v.isNotJQueryObj(title_container_jq)){
-					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_title_container_jq / _v.isNotJQueryObj(title_container_jq)");
+			,parent_container_jq:null
+			,set_parent_container_jq:function(parent_container_jq){
+				if(_v.isNotJQueryObj(parent_container_jq)){
+					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_parent_container_jq / _v.isNotJQueryObj(parent_container_jq)");
 					return;
 				}
-				this.title_container_jq = title_container_jq;
+				this.parent_container_jq = parent_container_jq;
 			}
-			,get_title_container_jq:function(){
-				return this.title_container_jq;
+			,get_parent_container_jq:function(){
+				return this.parent_container_jq;
 			}
-			,show_title_container_jq:function(){
-				if(this.title_container_jq == null) return;
-				if(this.title_container_jq.length < 1 || 1 < this.title_container_jq.length){
-					console.log("!Error! / show_title_container_jq / title_container_jq is not valid!");
+			,show_parent_container_jq:function(){
+				if(this.parent_container_jq == null) return;
+				if(this.parent_container_jq.length < 1 || 1 < this.parent_container_jq.length){
+					console.log("!Error! / show_parent_container_jq / parent_container_jq is not valid!");
 					return;
 				}
-				this.title_container_jq.show();
+				this.parent_container_jq.show();
 			}
-			,hide_title_container_jq:function(){
-				if(this.title_container_jq == null) return;
-				this.title_container_jq.hide();
+			,hide_parent_container_jq:function(){
+				if(this.parent_container_jq == null) return;
+				this.parent_container_jq.hide();
 			}
 			,title_input_group_jq:null //input group has input_jq, input_btn_ok_jq n input_btn_cancel_jq
 			,set_title_input_group_jq:function(title_input_group_jq){
@@ -2485,7 +2485,7 @@ airborne.bootstrap.obj = {
 
 			// @ functions
 			,hide_all:function(){
-				this.hide_title_container_jq();
+
 				this.hide_title_jq();
 				this.hide_time_jq();
 
@@ -2505,6 +2505,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_btn_eject_element_jq();
 				this.hide_time_input_group_jq();
+
 			}
 			,is_view_mode:false
 			,show_view_mode:function(){
@@ -2512,7 +2513,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_all();
 				this.show_element_jq();
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.set_colors_back();
 
@@ -2541,7 +2542,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_all();
 				this.show_element_jq();
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_btn_add_element_jq();
 				this.show_btn_edit_element_jq();
@@ -2571,7 +2572,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_all();
 				this.show_element_jq();
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.hide_title_jq_text_head();
 				this.show_title_jq();
 
@@ -2608,6 +2609,7 @@ airborne.bootstrap.obj = {
 
 				// input mode를 인자로 넘겨준 경우를 우선 처리합니다.
 				if( _obj.ELEMENT_TYPE_TABLE_TITLE_ADDABLE == input_mode_type ) {
+
 					consoler.say("em_sim / 1 /",cur_title);
 					consoler.say("em_sim / 1 / ELEMENT_TYPE_TABLE_TITLE_ADDABLE");
 
@@ -2650,7 +2652,7 @@ airborne.bootstrap.obj = {
 				this.hide_all();
 
 				// 1. 이벤트가 발생한 element set은 view mode
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_time_jq();
 
@@ -2674,7 +2676,7 @@ airborne.bootstrap.obj = {
 				this.hide_all();
 
 				// 1. 이벤트가 발생한 element set은 view mode
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_time_jq();
 
@@ -2695,7 +2697,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_all();
 
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 
 				this.move_title_input_group_jq();
@@ -2715,12 +2717,13 @@ airborne.bootstrap.obj = {
 
 				// 4. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
 				this.hide_shy_sibling_element_set();
+
 			}
 			,show_input_mode_time:function(){
 
 				this.hide_all();
 
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 
 				this.move_title_input_group_jq();
@@ -2748,7 +2751,7 @@ airborne.bootstrap.obj = {
 
 				this.hide_all();
 
-				this.show_title_container_jq();
+				this.show_parent_container_jq();
 				this.show_title_jq();
 
 				this.move_title_input_group_jq();
@@ -3078,18 +3081,24 @@ airborne.bootstrap.obj = {
 					this.set_btn_event_color(cur_time_jq);
 
 					cur_time_jq.click(function(e){
+
 						e.stopPropagation();
+
 						// 시간 입력 그룹을 보여줍니다.
 						_self.on_edit_btn_click();
 						_self.show_input_mode_time();
 						_self.lock();
+
 					});
 
 					cur_time_jq.mouseleave(function(e){
+
 						// 리스트 전체에 mouseleave 이벤트가 전파되는 것을 막습니다.
 						// 리스트 전체에 mosueleave 이벤트가 전파되면 리스트는 view mode로 변경됩니다.
 						e.stopPropagation();
 					});
+
+
 				}
 			}
 			,on_mouse_leave:function(){
@@ -3698,7 +3707,6 @@ airborne.bootstrap.obj = {
 						do_on_event_btn_time_cancel(e);
 					});
 					
-					// @wonder.jung
 					// 아래 코드로 인해 body의 이벤트가 제거됨.
 					// event hierarchy 객체에 등록하여 사용하는 구조로 변경.
 					this.event_hierarchy_manager.clear_delegate_keyup_on_document();
@@ -4181,8 +4189,8 @@ airborne.bootstrap.obj = {
 			console.log("!Error! / airborne.bootstrap.obj / get_element_event_manager / title_jq is @required / Using set_title_jq()");
 			return null;
 		}
-		if(_v.isNotJQueryObj(element_event_manager.title_container_jq)){
-			console.log("!Error! / airborne.bootstrap.obj / get_element_event_manager / title_container_jq is @required / Using set_title_container_jq()");
+		if(_v.isNotJQueryObj(element_event_manager.parent_container_jq)){
+			console.log("!Error! / airborne.bootstrap.obj / get_element_event_manager / parent_container_jq is @required / Using set_parent_container_jq()");
 			return null;
 		}
 		if(_v.isNotJQueryObj(element_event_manager.title_input_group_jq)){

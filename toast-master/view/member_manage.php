@@ -501,7 +501,6 @@ var list_search_tab = {
 
 		var show_modal_another_member_info = function(){
 
-			// TODO wonder.jung
 			var select_options_arr_other_member = [];
 			for(var idx = 0; idx < other_member_list.length; idx++) {
 

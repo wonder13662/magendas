@@ -314,8 +314,7 @@ airborne.dates = {
 		return this.addTime(date_str, days*24, 0);
 	}
 	,addDaysOnDateFormat:function(date_str, days, date_format_type){
-		// @ wonder.jung
-
+		
 		var date_format_type = this.getDateFormatType(date_str);
 		if(date_format_type == null){
 			console.log("!Error / date / addDaysOnDateFormat / date_str is not valid!");

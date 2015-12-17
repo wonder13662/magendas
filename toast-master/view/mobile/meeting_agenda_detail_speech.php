@@ -165,7 +165,6 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 			.get(_param.MEETING_ID,MEETING_ID)
 			;
 
-			// wonder.jung
 			// 새로운 스피치를 생성하면 타이머도 함께 만들어줘야 합니다.
 			_ajax.send_simple_post(
 				// _url
@@ -765,9 +764,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
 					var target_controller = selected_delegate_data.target_controller;
 
-					// wonder.jung
 					// 프로젝트 업데이트시 관련 타이머의 정보도 함께 업데이트 해줘야 합니다.
-
 					_ajax.send_simple_post(
 						// _url
 						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -1159,7 +1156,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				.get(_param.SPEECH_ID,parseInt(delegate_data.SPEECH_ID))
 				;
 
-				// wonder.jung
 				// 스피치를 삭제하는 경우에는 타이머도 함께 제거해 줘야 합니다.
 				_ajax.send_simple_post(
 					// _url

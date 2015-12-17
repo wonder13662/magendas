@@ -642,6 +642,29 @@ airborne.html = {
 
 		return form_obj;
 	}
+	/*
+		@ Public
+		@ Desc : 현재 문서의 스크롤 y 위치를 알려줍니다.
+		@ Refer : http://stackoverflow.com/questions/3464876/javascript-get-window-x-y-position-for-scroll
+	*/
+	, get_top:function() {
+		var doc = document.documentElement;
+		var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+
+		return top;
+	}
+	/*
+		@ Public
+		@ Desc : 현재 문서의 스크롤 y 위치를 알려줍니다.
+		@ Refer : http://stackoverflow.com/questions/3464876/javascript-get-window-x-y-position-for-scroll
+	*/
+	, get_left:function() {
+		var doc = document.documentElement;
+		var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+
+		return left;
+	}
+
 
 }
 

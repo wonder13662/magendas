@@ -1157,7 +1157,6 @@ class TCPDFElement{
 			array_push($text_arr, $raw_text);
 		}
 
-		// @ wonder.jung
 		// DEBUG
 		// if(strpos($raw_text,"Vote Counter") !== FALSE) {
 		// 	echo "\$raw_text : $raw_text<br/>";

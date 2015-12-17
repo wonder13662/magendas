@@ -1719,7 +1719,6 @@ class TCPDFManager{
 								$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 							}
 
-							// @ wonder.jung
 							// print_r($simple_table_column);
 							// echo "<br/><br/>";
 
@@ -1768,7 +1767,6 @@ class TCPDFManager{
 								, $caller_name
 							);
 
-							// @ wonder.jung
 							// $raw_text = $element_prop_simple_table_field->get_raw_text();
 							// print_r($raw_text);
 							// echo "<br/><br/>";
