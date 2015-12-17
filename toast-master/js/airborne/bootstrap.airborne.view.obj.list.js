@@ -836,7 +836,6 @@ airborne.bootstrap.view.obj.list = {
 			is_shy = editable_list_row_obj.get_is_shy();
 		}
 
-		// @ wonder.jung
 		// TODO element collection set이 새로운 열을 추가할 수 있도록 함.
 		// element collection set
 		var cur_element_collection_set = _obj.get_element_collection_set(editable_list_meta_info_obj.get_list_title());
@@ -868,7 +867,7 @@ airborne.bootstrap.view.obj.list = {
 				+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Keyword\">"
 			+ "</div>"
 
-			// time_hh_mm of time_mm_ss / 리스트 형태를 위한 태그(다른 엘리먼트 형태에서의 지원여부는 확인되지 않음.)
+			// time_hh_mm of time_mm_ss / 리스트 형태를 위한 태그
 			+ "<div id=\"input_group_time\" class=\"row airborne_add_on_input\" style=\"display:none;\">"
 				+ "<div class=\"col-lg-6\">"
 					+ "<div class=\"input-group\">"
@@ -1091,6 +1090,7 @@ airborne.bootstrap.view.obj.list = {
 				element_event_manager.set_btn_add_element_jq(btn_add_jq);
 
 			}
+			var time_jq = null;
 			if( _obj.ELEMENT_TYPE_SEARCH_LIST == cur_element_type || 
 				_obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
 				_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
@@ -1107,7 +1107,7 @@ airborne.bootstrap.view.obj.list = {
 					_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type ){
 
 					// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
-					var time_jq = cur_list_row_jq.find("span#time").first();
+					time_jq = cur_list_row_jq.find("span#time").first();
 					element_event_manager.set_time_jq(time_jq);
 					element_event_manager.show_time_jq();
 
@@ -1157,10 +1157,11 @@ airborne.bootstrap.view.obj.list = {
 			element_event_manager.set_title_jq(cur_list_row_text_jq);
 			// ROW TITLE CONTAINER
 			var cur_table_column_text_container_jq = cur_list_row_jq.parent();
-			element_event_manager.set_title_container_jq(cur_table_column_text_container_jq);
+			element_event_manager.set_parent_container_jq(cur_table_column_text_container_jq);
 			// ROW TITLE INPUT CONTAINER
-			var cur_input_title_container_jq = cur_input_group_jq.find("div#row_input_text").first();
-			element_event_manager.set_title_input_container_jq(cur_input_title_container_jq);
+			var cur_input_text_container_jq = cur_input_group_jq.find("div#row_input_text").first();
+			element_event_manager.set_title_input_container_jq(cur_input_text_container_jq);
+
 			// ROW TITLE INPUT (수정,편집이 가능한 input 엘리먼트)
 			var cur_input_title_jq = cur_input_group_jq.find("input#common_input").first();
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
@@ -1860,8 +1861,6 @@ airborne.bootstrap.view.obj.list = {
 			// @ public
 			// @ desc : 리스트의 json 객체를 이중 배열로 돌려줍니다. element collection set에서 호출하게 됩니다.
 			, get_json_format_obj_arr_from_element_collection_set:function() {
-
-				// TODO @ wonder.jung1
 
 				// json_format_obj 내부에 상, 하 관계 참조가 가능해야 함.
 

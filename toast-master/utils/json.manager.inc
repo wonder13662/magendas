@@ -583,7 +583,6 @@ class JSONManager{
 
 								self::print_me("$cur_step / 3-3-1 / LOOP / \$target_str :: $target_str",$parser_depth);
 
-								// @ wonder.jung
 								// 문자열을 다시 보내 객체로 변환합니다.
 								$outcome = 
 								self::parse_json_str_safe(
@@ -1051,8 +1050,6 @@ class JSONManager{
 		@ Return : 1. 1 depth 배열 객체
 	*/
 	private static function get_flat_array_from_str($target_str, $parser_depth=0){
-
-		// @ wonder.jung
 
 		$target_str = str_replace("[", "", $target_str);
 		$target_str = str_replace("]", "", $target_str);

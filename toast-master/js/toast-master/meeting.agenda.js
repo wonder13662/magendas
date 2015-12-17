@@ -1247,7 +1247,6 @@ wonglish.meeting_agenda_manager = {
 
 
 
-		// @ wonder.jung
 		// TODO new datepicker
 		// TODO 리스트 패키지로 옮기기 - review mode
 		// modal date picker
@@ -1505,7 +1504,6 @@ wonglish.meeting_agenda_manager = {
 		var schedule_timeline_template_list = meeting_agenda_data_set.schedule_timeline_template_list;
 
 		// 지난주의 미팅 아젠다도 가져옵니다.
-		// @ wonder.jung
 		var recent_club_schedule_timeline_list = meeting_agenda_data_set.recent_club_schedule_timeline_list;
 		// 템플릿 포맷으로 변환.
 		for(var idx = 0;idx < recent_club_schedule_timeline_list.length;idx++) {

@@ -171,7 +171,6 @@ airborne.bootstrap.view.obj.table = {
 
 		} else if(	_obj.ELEMENT_TYPE_TABLE_TEXT == element_json.get_column_type()	) {
 
-			// @ wonder.jung
 			editable_table_column_project_obj = 
 			_view_table.get_editable_table_text_column_meta_info_obj(
 				// column_title
@@ -407,7 +406,7 @@ airborne.bootstrap.view.obj.table = {
 
 		return cur_editable_table_column_meta_info_obj;
 	}
-	// @ Public // wonder.jung1
+	// @ Public
 	// @ Desc : 일반 텍스트이지만 타이틀처럼 볼드체가 필요한 경우 사용합니다. 값을 바꿀 수 없습니다.
 	,get_fixed_table_title_column:function(column_text, element_json, is_shy){
 		var _v = airborne.validator;
@@ -2380,8 +2379,8 @@ airborne.bootstrap.view.obj.table = {
 				var cur_table_title_jq = cur_table_title_set_jq.find("span#table_title");
 				element_event_manager.set_title_jq(cur_table_title_jq);
 
-				var cur_title_container_jq = cur_table_title_jq.parent();
-				element_event_manager.set_title_container_jq(cur_title_container_jq);
+				var cur_parent_container_jq = cur_table_title_jq.parent();
+				element_event_manager.set_parent_container_jq(cur_parent_container_jq);
 
 				var cur_input_group_jq = cur_table_title_set_jq.find("div#input_group_table_title");
 				element_event_manager.set_title_input_group_jq(cur_input_group_jq);
@@ -2517,10 +2516,10 @@ airborne.bootstrap.view.obj.table = {
 			element_event_manager.set_title_jq(cur_table_column_text_jq);
 
 			var cur_table_column_text_container_jq = cur_table_column_set_jq.parent();
-			element_event_manager.set_title_container_jq(cur_table_column_text_container_jq);
+			element_event_manager.set_parent_container_jq(cur_table_column_text_container_jq);
 
-			var cur_input_title_container_jq = cur_input_group_jq.find("div#input_group_column_text");
-			element_event_manager.set_title_input_container_jq(cur_input_title_container_jq);
+			var cur_input_parent_container_jq = cur_input_group_jq.find("div#input_group_column_text");
+			element_event_manager.set_title_input_container_jq(cur_input_parent_container_jq);
 
 			var cur_input_title_jq = cur_input_group_jq.find("input#common_input");
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
