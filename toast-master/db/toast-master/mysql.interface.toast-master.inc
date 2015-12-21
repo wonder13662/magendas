@@ -7,6 +7,9 @@ class MYSQLInterface{
 
 	private $mysql_manager=null;
 
+	private $COLLECTION_TYPE_LIST=1;
+	private $COLLECTION_TYPE_TABLE=2;
+
 	public function MYSQLInterface($new_mysql_manager){
 		$this->mysql_manager = $new_mysql_manager;
 	}
@@ -61,10 +64,19 @@ class MYSQLInterface{
 		return $json_res_obj;
 	}
 
+	private function get_simple_modify_result($query) {
+		$json_res_obj = $this->getModifyResult($query);
+		return $this->getSimpleResult($json_res_obj);
+	}
+
 	private function getSimpleResult($json_res_obj) {
 
 		$result = new stdClass();
 		$result->output = $json_res_obj->result;
+		$result->success = false;
+		if(!is_null($result->output) && $result->output == 1) {
+			$result->success = true;
+		}
 		$result->query = $json_res_obj->query;
 		$result->message = $json_res_obj->message;
 
@@ -94,8 +106,62 @@ class MYSQLInterface{
 		return true;
 	}
 
-	private function isNotUnsignedNumber($target){
-		return !$this->isUnsignedNumber($target);
+	private function is_null_object($function_name="", $target=null, $param_name="") {
+
+		$is_null_object = is_null($target);
+		if($is_null_object == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / is_null(\$$param_name)<br/>";
+		}
+
+		return $is_empty;
+	}
+
+	private function is_empty($function_name="", $target, $param_name="") {
+
+		$is_empty = empty($target);
+		if($is_empty == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / empty(\$$param_name)<br/>";
+		}
+
+		return $is_empty;
+	}
+
+	private function is_not_unsigned_number($function_name="", $target, $param_name=""){	
+
+		$is_not_unsigned_number = !$this->isUnsignedNumber($target);
+		if($is_not_unsigned_number == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / \$this->isNotUnsignedNumber(\$$param_name)<br/>";
+		}
+
+		return $is_not_unsigned_number;
+
+	}
+
+	private function is_not_valid_array($function_name="", $target, $param_name=""){
+		return !$this->is_valid_array($function_name="", $target, $param_name="");
+	}
+	private function is_valid_array($function_name="", $target, $param_name=""){
+		$err_msg = "$function_name / \$this->is_not_valid_array(\$$param_name)<br/>";
+		if(!is_array($target)) {
+			echo "$err_msg";
+			return false;
+		}
+		if(count($target) == 0) {
+			echo "$err_msg";
+			return false;
+		}
+		return true;
+	}
+
+	// @ Deprecated
+	private function isNotUnsignedNumber($target, $function_name="", $param_name=""){
+
+		$is_not_unsigned_number = !$this->isUnsignedNumber($target);
+		if($is_not_unsigned_number == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / \$this->isNotUnsignedNumber(\$$param_name)<br/>";
+		}
+
+		return $is_not_unsigned_number;
 	}
 	private function isUnsignedNumber($target){
 		if(	is_null($target) || 
@@ -112,6 +178,16 @@ class MYSQLInterface{
 	private function isValidArray($target){
 		if( is_null($target) || count($target) < 1 ) return false;
 		return true;
+	}
+	/*
+		@ Public
+		@ Desc : 사용자가 입력한 값을 바탕으로 hashkey를 반환합니다. 입력값이 없다면 millisec 서버 시간을 기준으로 만들어줍니다.
+	*/
+	public function get_hash_key($user_str=""){
+		$cur_micro_time = microtime(true);
+		$hash_key = MD5("$user_str $cur_micro_time");
+
+		return $hash_key;
 	}
 	public function closeNReload($param_string=""){
 
@@ -130,6 +206,30 @@ class MYSQLInterface{
 		    exit(header("Location: ".$self_url));
 		}
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//    .aMMMb  dMP dMP dMMMMMP dMMMMb  dMP dMP 
+	//   dMP"dMP dMP dMP dMP     dMP.dMP dMP.dMP  
+	//  dMP.dMP dMP dMP dMMMP   dMMMMK"  VMMMMP   
+	// dMP.MMP dMP.aMP dMP     dMP"AMF dA .dMP    
+	// VMMP"MP VMMMP" dMMMMMP dMP dMP  VMMMP"     
 
 	public function getMeetingAgenda($membership_id, $meeting_agenda_id=null,$need_latest_one=null,$page=1,$size=50){
 
@@ -4718,6 +4818,1437 @@ class MYSQLInterface{
 
 		return $__time_guide_line_id;
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//     .aMMMb  .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb        .aMMMb  .aMMMb  dMP     dMP     dMMMMMP .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb 
+	//    dMP"dMP dMP"VMP   dMP   amr dMP"dMP dMP dMP       dMP"VMP dMP"dMP dMP     dMP     dMP     dMP"VMP   dMP   amr dMP"dMP dMP dMP 
+	//   dMMMMMP dMP       dMP   dMP dMP dMP dMP dMP       dMP     dMP dMP dMP     dMP     dMMMP   dMP       dMP   dMP dMP dMP dMP dMP  
+	//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP       dMP.aMP dMP.aMP dMP     dMP     dMP     dMP.aMP   dMP   dMP dMP.aMP dMP dMP   
+	// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP        VMMMP"  VMMMP" dMMMMMP dMMMMMP dMMMMMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP    
+
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION을 추가합니다. 새로 추가한 객체의 id를 돌려줍니다.
+	*/
+	private function insert_action_collection($type, $name) {
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $type, "type")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $name, "name")){
+			return;
+		}
+
+		$hash_key = $this->get_hash_key("$type $name");
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO ACTION_COLLECTION(`hash_key`,`type`,`name`)"
+				,"VALUES (\"$hash_key\",$type,\"$name\")"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		// 추가된 collection의 id를 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __action_collection_id"
+				,"FROM ACTION_COLLECTION"
+				,"WHERE `hash_key`=\"$hash_key\""
+				,"ORDER BY id DESC"
+				,"LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$__action_collection_id = -1;
+		$result = $query_manager->get_result();
+		if(!is_null($result)) {
+			$__action_collection_id = $result->__action_collection_id;	
+		}
+
+		return $__action_collection_id;
+	}
+
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION을 추가합니다. 새로 추가한 객체의 id를 돌려줍니다.
+	*/
+	private function insert_action_collection_n_meeting_agenda($action_collection_id, $meeting_agenda_id) {
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO ACTION_COLLECTION_N_MEETING_AGENDA(`action_collection_id`,`meeting_agenda_id`,`regdttm`)"
+				,"VALUES($action_collection_id,$meeting_agenda_id,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
+
+	/*
+		@ Public
+		@ Desc : 해당 collection id가 테이블 타입인지 확인합니다. true, false를 돌려줍니다.
+	*/
+	private function is_action_collection_type($collection_id, $collection_type) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $collection_id, "collection_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $collection_type, "collection_type")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`type` AS __list_type"
+				,"FROM ACTION_COLLECTION AS AC"
+				,"WHERE AC.`id`=$collection_id"
+				,"AND AC.`type`=$collection_type"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		// $query_manager->show_result();
+		$collection_obj = $query_manager->get_result();
+
+		if(is_null($collection_obj)) {
+			return false;
+		}
+		return true;
+	}
+	/*
+		@ Public
+		@ Desc : 해당 collection id가 테이블 타입인지 확인합니다. true, false를 돌려줍니다.
+	*/
+	private function is_action_collection_table_type($table_id) {
+		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
+			return;
+		}
+
+		return $this->is_action_collection_type($table_id, $this->COLLECTION_TYPE_TABLE);
+	}	
+	/*
+		@ Public
+		@ Desc : 해당 collection id가 리스트 타입인지 확인합니다. true, false를 돌려줍니다.
+	*/
+	private function is_action_collection_list_type($list_id) {
+		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
+			return;
+		}
+
+		return $this->is_action_collection_type($list_id, $this->COLLECTION_TYPE_LIST);
+	}
+
+	/*
+		@ Public
+		@ Desc : PARENT TABLE과 CHILD LIST의 관계 정보를 추가합니다. 돌려주는 값은 없습니다.
+	*/
+	private function insert_parent_action_table_n_child_action_list($parent_action_table_id, $child_column_action_list_id) {
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_table_id, "parent_action_table_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_column_action_list_id, "child_column_action_list_id")){
+			return;
+		}
+
+		// wonder.jung 
+		// 해당 리스트에 이전에 등록된 아이템 목록을 가져옵니다.
+		// 추가되는 아이템은 리스트의 가장 마지막에 추가됩니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(PATNCCAL.child_column_action_list_id) AS __child_column_list_cnt"
+				,"FROM PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PATNCCAL"
+				,"WHERE PATNCCAL.parent_action_table_id=$parent_action_table_id"
+				,"ORDER BY PATNCCAL.order"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
+		$__child_column_list_cnt = -1;
+		if(!is_null($result) || !empty($result)) {
+			$__child_column_list_cnt = $result->__child_column_list_cnt;	
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $__child_column_list_cnt, "__child_column_list_cnt")){
+			return;
+		}
+
+		// 아이템 사이에 넣을 수 있도록 100 단위로 ordering 값을 지정해줍니다.
+		$new_order = intval($__child_column_list_cnt) * 100;
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST"
+				,"(parent_action_table_id,child_column_action_list_id,order)"
+				,"VALUES($parent_action_table_id,$child_column_action_list_id,$new_order)"
+			)
+		);
+
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$this->reorder_child_list_in_parent_table($parent_action_table_id);
+	}
+	/*
+		@ Private
+		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
+	*/
+	private function reorder_child_list_in_parent_table($parent_action_table_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT PATNCCAL.child_column_action_list_id AS __child_column_action_list_id"
+				,",PATNCCAL.order AS __child_column_action_list_order"
+				,"FROM PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PATNCCAL"
+				,"WHERE PATNCCAL.parent_action_table_id=$parent_action_table_id"
+				,"ORDER BY PATNCCAL.order"
+			)
+		);
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+		if(empty($result) || (count($result) == 1)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			// 아이템이 1개인 경우도 진행하지 않습니다.
+			return;
+		}
+
+		$child_column_action_list = $result;
+		for($idx = 0; $idx < count($child_column_action_list); $idx++) {
+			$cur_child_column_action_list = $child_column_action_list[$idx];
+			if(is_null($cur_child_column_action_list)) {
+				continue;
+			}
+
+			$__child_column_action_list_id = intval($cur_child_column_action_list->__child_collection_id);
+			$__child_column_action_list_order = intval($cur_child_column_action_list->__child_collection_order);
+			$new_column_action_list_order = $idx * 100;
+
+			if($new_column_action_list_order == $__child_column_action_list_order) {
+				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				continue;
+			}
+
+			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+			$query_manager->addQueryLineArr(
+				array(
+					"UPDATE PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST"
+					,"SET `order` = $new_column_action_list_order"
+					,"WHERE `child_column_action_list_id` = $__child_column_action_list_id"
+					,"AND `parent_action_table_id` = $parent_action_table_id"
+				)
+			);
+			$query_manager->modify();
+			if($query_manager->is_failed()) {
+				return;
+			}
+		} // for end
+	}	
+
+
+	
+
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION LIST를 추가합니다. 새로 추가한 객체 LIST의 id를 돌려줍니다. 여기서 만드는 컬렉션은 부모 컨테이너가 없습니다. 최상위 컬렉션입니다.
+	*/
+	public function insert_root_action_collection_list($meeting_agenda_id, $list_name, $row_item_type) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $list_name, "list_name")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $row_item_type, "row_item_type")){
+			return;
+		}
+
+		// 리스트를 추가합니다.
+		$new_action_list_id = $this->insert_action_collection_list($list_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_action_list_id, "new_action_list_id")){
+			return;
+		}
+
+		// 아이템을 추가합니다.
+		$row_name = "New Item";
+		$__action_item_id = $this->insert_action_item($row_item_type, $row_name, $row_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_id, "__action_item_id")){
+			return;
+		}
+
+		// 리스트에서 아이템의 순서를 구해서 지정합니다.
+		// 기본 설정은 추가된 아이템은 리스트의 가장 마지막에 들어갑니다.
+		$this->push_item_into_list($new_action_list_id, $__action_item_id);
+		$this->insert_action_collection_n_meeting_agenda(
+			// $action_collection_id
+			$new_action_list_id
+			// $meeting_agenda_id
+			, $meeting_agenda_id 
+		);
+
+		return $new_action_list_id;
+	}
+
+	/*
+		@ private
+		@ Desc : ACTION COLLECTION LIST를 추가합니다. 새로 추가한 객체 LIST의 id를 돌려줍니다. 아이템이 포함되지 읺은 빈 리스트입니다.
+	*/
+	private function insert_action_collection_list($list_name, $parent_item_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $list_name, "list_name")){
+			return;
+		}
+
+		// 리스트를 추가합니다.
+		$__action_collection_id = $this->insert_action_collection($this->COLLECTION_TYPE_LIST, $list_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_collection_id, "__action_collection_id")){
+			return $__action_collection_id;
+		}
+
+		// 부모 아이템이 있다면 연결해줍니다.
+		if(0 < $parent_item_id) {
+			$this->insert_parent_action_item_n_child_collection_id(
+				// $action_item_id
+				$parent_item_id
+				// $child_action_collection_id
+				, $__action_collection_id
+			);
+		}
+
+		return $__action_collection_id;
+	}
+
+	/*
+		@ private
+		@ Desc : ACTION COLLECTION LIST를 추가합니다. 새로 추가한 객체 LIST의 id를 돌려줍니다. 아이템이 포함되지 읺은 빈 리스트입니다.
+	*/
+	private function insert_action_collection_table($table_name, $parent_item_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $table_name, "table_name")){
+			return;
+		}
+
+		// 리스트를 추가합니다.
+		$__action_collection_id = $this->insert_action_collection($this->COLLECTION_TYPE_TABLE, $list_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_collection_id, "__action_collection_id")){
+			return $__action_collection_id;
+		}
+
+		// 부모 아이템이 있다면 연결해줍니다.
+		if(0 < $parent_item_id) {
+			$this->insert_parent_action_item_n_child_collection_id(
+				// $action_item_id
+				$parent_item_id
+				// $child_action_collection_id
+				, $__action_collection_id
+			);
+		}
+
+		return $__action_collection_id;
+	}
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION ITEM를 추가합니다. 새로 추가한 객체 ITEM의 id를 돌려줍니다. LIST 형만 가능합니다.
+	*/
+	public function insert_action_list_item($parent_collection_id=-1, $item_type, $name, $context="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id, "parent_collection_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $item_type, "item_type")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $name, "name")){
+			return;
+		}
+
+		// 1. 이 아이템을 가지게 될 모든 상위 객체에 대해 복제본을 만듭니다. 
+		// 1-1. 아이템을 포함하는 것은 리스트 형밖에 없으므로 리스트 데이터를 가져옵니다.
+		// 1-2. 가져온 리스트의 복제본을 만듭니다.
+		// 1-3. 복제본의 참조를 가져옵니다.
+		$parent_collection_id_copy = $this->copy_action_list($parent_collection_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id_copy, "parent_collection_id_copy")){
+			return;
+		}
+
+		// 2. 아이템을 새로 만듭니다.
+		$new_action_item_id = 
+		$this->insert_action_item(
+			// $type
+			$item_type
+			// $name
+			, $name
+			// $context
+			, $context
+		);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_action_item_id, "new_action_item_id")){
+			return;
+		}
+
+		// 3. 새로 복제한 리스트에 만든 아이템을 추가합니다.
+		$this->push_item_into_list(
+			// $list_id=-1
+			$parent_collection_id_copy
+			// $new_item_id=-1
+			, $new_action_item_id
+		);
+
+
+		return $parent_collection_id_copy;
+	}
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION ITEM의 내용을 변경합니다. 복사한 LIST의 id를 돌려줍니다. LIST 형만 가능합니다.
+	*/
+	public function update_action_list_item($parent_collection_id=-1, $item_id_update, $name, $context="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id, "parent_collection_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $item_id_update, "item_id_update")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $name, "name")){
+			return;
+		}
+
+		// 1. 이 아이템을 가지게 될 모든 상위 객체에 대해 복제본을 만듭니다. 
+		// 1-1. 아이템을 포함하는 것은 리스트 형밖에 없으므로 리스트 데이터를 가져옵니다.
+		// 1-2. 가져온 리스트의 복제본을 만듭니다.
+		// 1-3. 복제본의 참조를 가져옵니다.
+		$parent_list_id_copy = $this->copy_action_list($parent_collection_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_list_id_copy, "parent_list_id_copy")){
+			return;
+		}
+
+		// 2. 업데이트할 아이템 정보를 가져옵니다. 해당 아이템 정보의 순서를 옮겨줍니다.
+		$action_item_src = $this->sel_action_item($parent_list_id_copy, $item_id_update);
+		if($this->is_null_object(__FUNCTION__, $action_item_src, "action_item_src")) {
+			return;
+		}
+
+		// wonder.jung
+		$__item_type = $action_item_src->__item_type;
+		$__item_order = $action_item_src->__item_order;
+
+		echo "\$__item_order :: $__item_order<br/>";
+
+		// 3. 아이템을 새로 만듭니다.
+		$new_action_item_id = 
+		$this->insert_action_item(
+			// $type
+			$__item_type
+			// $name
+			, $name
+			// $context
+			, $context
+		);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_action_item_id, "new_action_item_id")){
+			return;
+		}
+
+		// 4. 업데이트 대상인 아이템을 새로 복사한 리스트에서 삭제합니다.
+		$this->remove_item_from_list(
+			// $parent_action_list_id=-1
+			$parent_list_id_copy
+			// $child_action_item_id_delete=-1
+			, $item_id_update
+		);
+
+		// 5. 새로 복제한 리스트에 만든 아이템을 추가합니다.
+		$this->push_item_into_list(
+			// $list_id=-1
+			$parent_list_id_copy
+			// $new_item_id=-1
+			, $new_action_item_id
+			// $order=-1
+			, $__item_order
+		);
+
+		return $parent_list_id_copy;
+	}	
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION ITEM을 제거합니다. 복제한 부모 list의 id를 돌려줍니다. LIST 형만 가능합니다.
+	*/
+	public function delete_action_list_item($parent_collection_id=-1, $item_id_delete) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id, "parent_collection_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $item_id_delete, "item_id_delete")){
+			return;
+		}
+
+		// 1. 이 아이템을 가지게 될 모든 상위 객체에 대해 복제본을 만듭니다. 
+		// 1-1. 아이템을 포함하는 것은 리스트 형밖에 없으므로 리스트 데이터를 가져옵니다.
+		// 1-2. 가져온 리스트의 복제본을 만듭니다.
+		// 1-3. 복제본의 참조를 가져옵니다.
+		$parent_collection_id_copy = $this->copy_action_list($parent_collection_id, $item_id_delete);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id_copy, "parent_collection_id_copy")){
+			return;
+		}
+
+		return $parent_collection_id_copy;
+	}	
+	/*
+		@ Private
+		@ Desc : ITEM 을 복제합니다. 상위 부모 컬렉션이 있다면 자신이 포함된 상위 부모 컬렉션(LIST)을 복제합니다.
+	*/	
+	private function copy_action_item($parent_list_id_src=-1, $child_item_id_src=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_list_id_src, "parent_list_id_src")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_item_id_src, "child_item_id_src")){
+			return;
+		}
+
+		// 1. 해당 아이템의 정보를 가져옵니다.
+		$action_item_src = $this->sel_action_item($parent_list_id_src, $child_item_id_src);
+		if($this->is_null_object(__FUNCTION__, $action_item_src, "action_item_src")) {
+			return;
+		}
+
+		// 2. 가져온 아이템의 정보를 복사해서 새로운 아이템을 만듭니다.
+		$__item_type = $action_item_src->__item_type;
+		$__item_name = $action_item_src->__item_name;
+		$__item_context = $action_item_src->__item_context;
+		$__action_item_id_copy = $this->insert_action_item($__item_type, $__item_name, $__item_context);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_id_copy, "__action_item_id_copy")){
+			return;
+		}
+		
+		$parent_list_id_src = $action_item_src->__parent_list_id;
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_list_id_src, "parent_list_id_src")){
+			return;
+		}
+
+		$parent_list_id_copy = $this->copy_action_list($parent_list_id_src);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_list_id_copy, "parent_list_id_copy")){
+			return;
+		}
+
+		// 3-2. 새로운 부모 리스트와 추가한 아이템과 연결합니다.
+		$this->push_item_into_list(
+			// $list_id=-1
+			$parent_list_id_copy
+			// $new_item_id=-1
+			, $__action_item_id_copy
+		);
+
+		return $__action_item_id_copy;
+	}
+	/*
+		@ Private
+		@ Desc : LIST 자신이 포함된 상위 부모 컬렉션(LIST)을 복제합니다.
+	*/	
+	private function copy_action_list($target_list_id, $item_id_delete=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $target_list_id, "target_list_id")){
+			return;
+		}
+			
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+
+		// 0. CHECK COLLECTION TYPE is LIST
+		$is_action_collection_list_type = $this->is_action_collection_list_type($target_list_id);
+		if($is_action_collection_list_type == false) {
+			echo "!Error! / \$is_action_collection_list_type == false / \$target_list_id :: $target_list_id";
+			return;
+		}
+
+		// 1. get receiving parent_collection.
+		// 1-1. LIST
+		$action_list_info = $this->sel_action_list_info($target_list_id);
+		if($this->is_null_object(__FUNCTION__, $action_list_info, "action_list_info")) {
+			return;
+		}
+
+		// 1-2. copy it's parent n connect my list
+		// 리스트 자신을 복제합니다.
+		$__list_name = $action_list_info->__list_name;
+		$__list_type = $action_list_info->__list_type;
+		if($this->is_empty(__FUNCTION__, $__list_name, "__list_name")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $__list_type, "__list_type")){
+			return;
+		}
+		$__action_list_id_copy = 
+		$this->insert_action_collection_list($__list_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_list_id_copy, "__action_list_id_copy")){
+			return;
+		}
+
+		// 1-3. root collection이라면 meeting agenda의 관계정보를 복사합니다.
+		$__list_meeting_agenda_id = $action_list_info->__list_meeting_agenda_id;
+		if(0 < $__list_meeting_agenda_id) {
+			$this->insert_action_collection_n_meeting_agenda(
+				// $action_collection_id
+				$__action_list_id_copy
+				// $meeting_agenda_id
+				, $__list_meeting_agenda_id
+			);
+		}
+		
+		// 이전 리스트가 가지고 있었던 모든 아이템 리스트를 가져옵니다.
+		$action_list_src = $this->sel_action_list($target_list_id);
+		for($idx = 0; $idx < count($action_list_src); $idx++) {
+			$action_item = $action_list_src[$idx];
+
+			// $query_manager->show_object_tree($action_item, "action_item");
+
+			$__list_child_item_id = $action_item->__list_child_item_id;
+			if($this->is_not_unsigned_number(__FUNCTION__, $__list_child_item_id, "__list_child_item_id")) {
+				return;
+			}
+
+			if(0 < $item_id_delete && $item_id_delete == $__list_child_item_id) {
+				// 삭제할 아이템이 있다면 제외합니다.
+				continue;
+			}
+
+			// 2. connect new copied list & its children item
+			$this->push_item_into_list(
+				// $list_id=-1
+				$__action_list_id_copy
+				// $new_item_id=-1	
+				, $__list_child_item_id
+			);
+		}	
+
+		// 3. 리스트의 부모 객체가 있다면 이것도 복제합니다. 그리고 새로 만든 리스트와 연결합니다.		
+		$__list_parent_table_id = $action_list_info->__list_parent_table_id;
+		$__list_parent_item_id = $action_list_info->__list_parent_item_id;
+		if(0 < ($__list_parent_table_id)) {
+
+			// 3-1-1. 리스트의 부모가 테이블인 경우, 부모 테이블을 복제합니다.
+			// 부모 테이블이 가지고 있던 자식 객체의 정보는 동일하게 유지합니다.
+			// wonder.jung
+			$__parent_table_id_copy = $this->copy_action_table($__list_parent_table_id);
+
+			// 3-1-2. 복제한 부모 테이블과 새로 만든 자신의 리스트와 연결합니다.
+			$this->insert_parent_action_table_n_child_action_list(
+				// $parent_table_id
+				$__parent_table_id_copy
+				// $child_list_id
+				, $__action_list_id_copy
+			);
+
+		} else if(0 < ($__list_parent_item_id)) {
+
+			// 3-2-1. 리스트의 부모가 아이템인 경우, 부모 아이템을 복제합니다.
+			// 부모 아이템이 가지고 있던 자식 객체의 정보는 동일하게 유지합니다.
+			$__parent_item_id_copy = $this->copy_action_item($__action_list_id_copy, $__list_parent_item_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__parent_item_id_copy, "__parent_item_id_copy")) {
+				return;
+			}
+
+			// 3-2-2. 복제한 부모 아이템과 새로 만든 자신의 리스트와 연결합니다.
+			$this->insert_parent_action_item_n_child_collection_id(
+				// $action_item_id
+				$__parent_item_id_copy
+				// $child_action_collection_id
+				, $__action_list_id_copy
+			);
+
+		}
+
+		return $__action_list_id_copy;                                                                               
+	}
+	/*
+		@ Private
+		@ Desc : 자신이 포함된 상위 부모 컬렉션(TABLE)을 복제합니다.
+	*/	
+	private function copy_action_table($table_id_src) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $table_id_src, "table_id_src")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+
+		// wonder.jung
+		// 1. get receiving parent_collection.
+		// 1-2. TABLE
+		$action_table_src = $this->sel_action_table_info($table_id_src);
+		if($this->is_null_object(__FUNCTION__, $action_table_src, "action_table_src")) {
+			return;
+		}
+
+
+
+		// 2. copy its data.
+
+		// 3. check its parent. if it has, do copy its parent as well.
+		// 3-1. copy its parent item.
+
+		// 3-2. copy its parent collection.
+
+		// 4. connect it and its parent.
+
+		// 5. return its copy key id
+                                                                                                                     
+	}	
+
+
+
+
+
+
+
+
+	/*
+		@ Public
+		@ Desc : ACTION COLLECTION TABLE를 추가합니다. 새로 추가한 객체 TABLE의 id를 돌려줍니다. 여기서 만드는 컬렉션은 부모 컨테이너가 없습니다. 최상위 컬렉션입니다.
+	*/
+	public function insert_root_action_collection_table($meeting_agenda_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+
+		$result = $this->insert_action_collection($this->COLLECTION_TYPE_TABLE, $meeting_agenda_id);
+
+		return $result;
+	}
+
+
+
+
+
+	//     .aMMMb  .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb         dMP dMMMMMMP dMMMMMP dMMMMMMMMb 
+	//    dMP"dMP dMP"VMP   dMP   amr dMP"dMP dMP dMP        amr    dMP   dMP     dMP"dMP"dMP 
+	//   dMMMMMP dMP       dMP   dMP dMP dMP dMP dMP        dMP    dMP   dMMMP   dMP dMP dMP  
+	//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP        dMP    dMP   dMP     dMP dMP dMP   
+	// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP        dMP    dMP   dMMMMMP dMP dMP dMP    
+	/*
+		@ Private
+		@ Desc : 리스트 아이템을 추가합니다. 추가한 아이템의 id를 돌려줍니다.
+	*/
+	private function insert_action_item($type, $name, $context="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $type, "type")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $name, "name")){
+			return;
+		}
+
+		$hash_key = $this->get_hash_key("$type $name $context");
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `magendas`.`ACTION_ITEM`(`hash_key`,`type`,`name`,`context`)"
+				,"VALUES(\"$hash_key\",$type,\"$name\",\"$context\")"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		// 추가된 item의 id를 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __action_item_id"
+				,"FROM ACTION_ITEM"
+				,"WHERE `hash_key`=\"$hash_key\""
+				,"ORDER BY id DESC"
+				,"LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
+		$__action_item_id = -1;
+		if(!is_null($result) || !empty($result)) {
+			$__action_item_id = $result->__action_item_id;	
+		}
+		return $__action_item_id;
+	}
+	/*
+		@ Private
+		@ Desc : 리스트 아이템과 아이템의 자식 컬렉션을 연결합니다.
+	*/
+	private function insert_parent_action_item_n_child_collection_id($parent_action_item_id, $child_action_collection_id, $order=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_collection_id, "child_action_collection_id")){
+			return;
+		}
+
+		// 해당 리스트에 이전에 등록된 아이템 목록을 가져옵니다.
+		// 추가되는 아이템은 리스트의 가장 마지막에 추가됩니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(AINCAC.parent_action_item_id) AS __item_child_collection_cnt"
+				,"FROM PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS AINCAC"
+				,"WHERE AINCAC.parent_action_item_id=$parent_action_item_id"
+				,"ORDER BY AINCAC.order"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
+		$__item_child_collection_cnt = -1;
+		if(!is_null($result) || !empty($result)) {
+			$__item_child_collection_cnt = $result->__item_child_collection_cnt;	
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $__item_child_collection_cnt, "__item_child_collection_cnt")){
+			return;
+		}
+
+		// 아이템 사이에 넣을 수 있도록 100 단위로 ordering 값을 지정해줍니다.
+		$new_order = intval($__item_child_collection_cnt) * 100;
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION"
+				,"(`parent_action_item_id`,`child_action_collection_id`,`order`)"
+				,"VALUES ($parent_action_item_id,$child_action_collection_id,$order)"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		// 추가한 데이터를 재정렬 해줍니다.
+		$this->reorder_item_collection($parent_action_item_id);
+
+	}
+	/*
+		@ Private
+		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
+	*/
+	private function reorder_item_collection($parent_action_item_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AINCAC.child_action_collection_id AS __child_collection_id"
+				,",AINCAC.order AS __child_collection_order"
+				,"FROM PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS AINCAC"
+				,"WHERE parent_action_item_id=$parent_action_item_id"
+				,"ORDER BY AINCAC.order"
+			)
+		);
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+		if(empty($result) || (count($result) == 1)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			// 아이템이 1개인 경우도 진행하지 않습니다.
+			return;
+		}
+
+		$child_table_list = $result;
+		for($idx = 0; $idx < count($child_table_list); $idx++) {
+			$cur_child_table = $child_table_list[$idx];
+			if(is_null($cur_child_table)) {
+				continue;
+			}
+
+			$__child_collection_id = intval($cur_child_table->__child_collection_id);
+			$__child_collection_order = intval($cur_child_table->__child_collection_order);
+			$new_child_collection_order = $idx * 100;
+
+			if($new_child_collection_order == $__child_collection_order) {
+				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				continue;
+			}
+
+			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+			$query_manager->addQueryLineArr(
+				array(
+					"UPDATE PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION"
+					,"SET `order` = $new_child_collection_order"
+					,"WHERE `child_action_collection_id` = $__child_collection_id"
+					,"AND `parent_action_item_id` = $parent_action_item_id"
+				)
+			);
+			$query_manager->modify();
+			if($query_manager->is_failed()) {
+				return;
+			}
+		}
+
+	}	
+	/*
+		@ Private
+		@ Desc : 아이템을 리스트와 아이템의 관계 리스트에서 지웁니다.
+	*/	
+	private function remove_item_from_list($parent_action_list_id=-1, $child_action_item_id_delete=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id_delete, "child_action_item_id_delete")){
+			return;
+		}
+
+		// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"DELETE FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+				,"WHERE `parent_action_list_id` = $parent_action_list_id"
+				,"AND `child_action_item_id` = $child_action_item_id_delete"
+			)
+		);
+
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
+	/*
+		@ Private
+		@ Desc : 아이템을 리스트에 넣습니다. 아이템은 오직 리스트에만 넣을수 있습니다.
+	*/	
+	private function push_item_into_list($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+
+
+		// 해당 리스트에 이전에 등록된 아이템 목록을 가져옵니다.
+		// 추가되는 아이템은 리스트의 가장 마지막에 추가됩니다.
+		$__child_action_item_cnt = $this->sel_child_item_cnt_on_list($parent_action_list_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__child_action_item_cnt, "__child_action_item_cnt")){
+			return;
+		}
+
+		if($order < 0) {
+			// order 값이 지정되지 않았다면, 아이템 맨 마지막에 넣을 order 값을 만들어 줍니다.
+			$order = intval($__child_action_item_cnt) * 100;
+		}
+
+		echo "\$parent_action_list_id :: $parent_action_list_id / \$child_action_item_id :: $child_action_item_id / \$order :: $order<br/>";
+
+		// 부모 리스트와 아이템의 관계를 지정합니다.
+		$this->insert_parent_list_n_child_item($parent_action_list_id, $child_action_item_id, $order);
+
+		// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
+		$this->reorder_list_item($parent_action_list_id);
+
+	}
+	private function sel_child_item_cnt_on_list($parent_action_list_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(PACLNCAI.child_action_item_id) AS __child_action_item_cnt"
+				,"FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
+				,"WHERE parent_action_list_id=$parent_action_list_id"
+				,"ORDER BY PACLNCAI.order"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
+		$__child_action_item_cnt = -1;
+		if(!is_null($result) || !empty($result)) {
+			$__child_action_item_cnt = $result->__child_action_item_cnt;	
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $__child_action_item_cnt, "__child_action_item_cnt")){
+			return -1;
+		}
+		return $__child_action_item_cnt;
+	}
+	private function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`(`parent_action_list_id`,`child_action_item_id`,`order`)"
+				,"VALUES($parent_action_list_id,$child_action_item_id,$order)"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+	/*
+		@ Private
+		@ Desc : 리스트의 모든 아이템의 order 값의 간격을 모두 100단위로 재조정해줍니다.
+	*/
+	private function reorder_list_item($parent_action_list_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT PACLNCAI.child_action_item_id AS __child_action_item_id"
+				,",PACLNCAI.order AS __child_action_item_order"
+				,"FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
+				,"WHERE parent_action_list_id=$parent_action_list_id"
+				,"ORDER BY PACLNCAI.order"
+			)
+		);
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+		if(empty($result) || (count($result) == 1)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			// 아이템이 1개인 경우도 진행하지 않습니다.
+			return;
+		}
+
+		$item_list = $result;
+		for($idx = 0; $idx < count($item_list); $idx++) {	
+			$cur_item = $item_list[$idx];
+			if(is_null($cur_item)) {
+				continue;
+			}
+
+			$__child_action_item_id = intval($cur_item->__child_action_item_id);
+			$__child_action_item_order = intval($cur_item->__child_action_item_order);
+			$new_item_order = $idx * 100;
+
+			if($new_item_order == $__child_action_item_order) {
+				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				continue;
+			}
+
+			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+			$query_manager->addQueryLineArr(
+				array(
+					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+					,"SET `order` = $new_item_order"
+					,"WHERE `parent_action_list_id` = $parent_action_list_id"
+					,"AND `child_action_item_id` = $__child_action_item_id"
+				)
+			);
+			$query_manager->modify();
+			if($query_manager->is_failed()) {
+				return;
+			}
+		}
+
+	}
+
+
+
+
+
+	// action list
+	/*
+		@ Public
+		@ Desc : 액션 리스트를 조회합니다. 리스트가 가지는 아이템 정보까지 함께 가져옵니다.
+	*/
+	public function sel_action_list($list_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __list_id"
+				,",AC.`hash_key` AS __list_hash_key"
+				,",AC.`type` AS __list_type"
+				,",AC.`name` AS __list_name"
+				,",ACT.`name` AS __list_type_name"
+
+				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
+				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
+				,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
+
+				,",IFNULL(PARENT_TABLE.`id`,-1) AS __list_parent_table_id"
+				,",IFNULL(PARENT_TABLE.`name`,\"\") AS __list_parent_table_name"
+				,",IFNULL(PARENT_TABLE.`hash_key`,\"\") AS __list_parent_table_hash_key"
+
+				,",IFNULL(PARENT_ITEM.`id`,-1) AS __list_parent_item_id"
+				,",IFNULL(PARENT_ITEM.`name`,\"\") AS __list_parent_item_name"
+				,",IFNULL(PARENT_ITEM.`hash_key`,\"\") AS __list_parent_item_hash_key"
+				,",IFNULL(PARENT_ITEM_TYPE.`id`,-1) AS __list_child_item_type_id"
+				,",IFNULL(PARENT_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
+				,",IFNULL(PARENT_ITEM.`context`,\"\") AS __list_parent_item_context"
+
+				,",IFNULL(CHILD_ITEM.`id`,-1) AS __list_child_item_id"
+				,",IFNULL(CHILD_ITEM.`name`,\"\") AS __list_child_item_name"
+				,",IFNULL(CHILD_ITEM.`hash_key`,\"\") AS __list_child_item_hash_key"
+				,",IFNULL(CHILD_ITEM_TYPE.`id`,-1) AS __list_child_item_type_id"
+				,",IFNULL(CHILD_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
+				,",IFNULL(CHILD_ITEM.`context`,\"\") AS __list_child_item_context"
+				,",IFNULL(PARENT_LIST_N_CHILD_ITEM.order,-1) AS __list_child_item_order"
+
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+
+				,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id=AC.`id`"
+				,"LEFT JOIN ACTION_COLLECTION AS PARENT_TABLE ON PARENT_TABLE.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id"
+
+				,"LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_LIST ON PARENT_ITEM_N_CHILD_LIST.child_action_collection_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS PARENT_ITEM ON PARENT_ITEM.id=PARENT_ITEM_N_CHILD_LIST.parent_action_item_id"
+				,"LEFT JOIN ACTION_ITEM_TYPE AS PARENT_ITEM_TYPE ON PARENT_ITEM_TYPE.id=PARENT_ITEM.`type`"
+
+				,"LEFT JOIN PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PARENT_LIST_N_CHILD_ITEM ON PARENT_LIST_N_CHILD_ITEM.parent_action_list_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS CHILD_ITEM ON CHILD_ITEM.id=PARENT_LIST_N_CHILD_ITEM.child_action_item_id"
+				,"LEFT JOIN ACTION_ITEM_TYPE AS CHILD_ITEM_TYPE ON CHILD_ITEM_TYPE.id=CHILD_ITEM.`type`"
+
+				,"WHERE AC.`id`=$list_id"
+				,"ORDER BY PARENT_LIST_N_CHILD_ITEM.order"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		//$query_manager->show_result();
+
+		return $query_manager->get_result();
+	}
+	/*
+		@ private
+		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 아이템 정보는 포함하지 않습니다. 1개의 객체만 반환합니다.
+	*/
+	private function sel_action_list_info($list_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __list_id"
+				,",AC.`hash_key` AS __list_hash_key"
+				,",AC.`type` AS __list_type"
+				,",AC.`name` AS __list_name"
+				,",ACT.`name` AS __list_type_name"
+
+				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
+				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
+				,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
+
+				,",IFNULL(PARENT_TABLE.`id`,-1) AS __list_parent_table_id"
+				,",IFNULL(PARENT_TABLE.`name`,\"\") AS __list_parent_table_name"
+				,",IFNULL(PARENT_TABLE.`hash_key`,\"\") AS __list_parent_table_hash_key"
+
+				,",IFNULL(PARENT_ITEM.`id`,-1) AS __list_parent_item_id"
+				,",IFNULL(PARENT_ITEM.`name`,\"\") AS __list_parent_item_name"
+				,",IFNULL(PARENT_ITEM.`hash_key`,\"\") AS __list_parent_item_hash_key"
+				,",IFNULL(PARENT_ITEM.`type`,\"\") AS __list_parent_item_type"
+				,",IFNULL(PARENT_ITEM.`context`,\"\") AS __list_parent_item_context"
+
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+
+				,"LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_LIST ON PARENT_ITEM_N_CHILD_LIST.child_action_collection_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS PARENT_ITEM ON PARENT_ITEM.id=PARENT_ITEM_N_CHILD_LIST.parent_action_item_id"
+
+				,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id=AC.`id`"
+				,"LEFT JOIN ACTION_COLLECTION AS PARENT_TABLE ON PARENT_TABLE.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id"
+				,"WHERE AC.`id`=$list_id"
+				,"AND AC.`type`=1"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		//$query_manager->show_result();
+
+		return $query_manager->get_result();
+	}
+
+	/*
+		@ private
+		@ Desc : 액션 테이블 관련 정보를 가져옵니다. 컬럼 리스트 정보를 포함합니다.
+	*/
+	private function sel_action_table($table_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __list_id"
+				,",AC.`hash_key` AS __list_hash_key"
+				,",AC.`type` AS __list_type"
+				,",AC.`name` AS __list_name"
+				,",ACT.`name` AS __list_type_name"
+
+				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
+				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
+				,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
+
+				,",IFNULL(CHILD_LIST.`id`,-1) AS __list_child_list_id"
+				,",IFNULL(CHILD_LIST.`name`,\"\") AS __list_child_list_name"
+				,",IFNULL(CHILD_LIST.`hash_key`,\"\") AS __list_child_list_hash_key"
+				,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`order`,-1) AS __list_child_list_order"
+
+				,",IFNULL(PARENT_ITEM.`id`,-1) AS __list_parent_item_id"
+				,",IFNULL(PARENT_ITEM.`name`,\"\") AS __list_parent_item_name"
+				,",IFNULL(PARENT_ITEM.`hash_key`,\"\") AS __list_parent_item_hash_key"
+				,",IFNULL(PARENT_ITEM.`type`,\"\") AS __list_parent_item_type"
+				,",IFNULL(PARENT_ITEM.`context`,\"\") AS __list_parent_item_context"
+
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+
+				,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id=AC.`id`"
+				,"LEFT JOIN ACTION_COLLECTION AS CHILD_LIST ON CHILD_LIST.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id"
+
+				,"LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_COLLECTION ON PARENT_ITEM_N_CHILD_COLLECTION.child_action_collection_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS PARENT_ITEM ON PARENT_ITEM.id=PARENT_ITEM_N_CHILD_COLLECTION.parent_action_item_id"
+
+				,"WHERE AC.`id`=$table_id"
+				,"AND AC.`type`=2"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		//$query_manager->show_result();
+
+		return $query_manager->get_result();
+	}
+
+	/*
+		@ private
+		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 아이템 정보는 포함하지 않습니다. 1개의 객체만 반환합니다.
+	*/
+	private function sel_action_table_info($table_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __list_id"
+				,",AC.`hash_key` AS __list_hash_key"
+				,",AC.`type` AS __list_type"
+				,",AC.`name` AS __list_name"
+				,",ACT.`name` AS __list_type_name"
+
+				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
+				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
+				,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
+
+				,",IFNULL(PARENT_ITEM.`id`,-1) AS __list_parent_item_id"
+				,",IFNULL(PARENT_ITEM.`name`,\"\") AS __list_parent_item_name"
+				,",IFNULL(PARENT_ITEM.`hash_key`,\"\") AS __list_parent_item_hash_key"
+				,",IFNULL(PARENT_ITEM.`type`,\"\") AS __list_parent_item_type"
+				,",IFNULL(PARENT_ITEM.`context`,\"\") AS __list_parent_item_context"
+
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+
+				,"LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_COLLECTION ON PARENT_ITEM_N_CHILD_COLLECTION.child_action_collection_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS PARENT_ITEM ON PARENT_ITEM.id=PARENT_ITEM_N_CHILD_COLLECTION.parent_action_item_id"
+
+				,"WHERE AC.`id`=$table_id"
+				,"AND AC.`type`=2"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		//$query_manager->show_result();
+
+		return $query_manager->get_result();
+	}		
+
+	/*
+		@ private
+		@ Desc : 액션 아이템 관련 정보를 가져옵니다. 1개의 객체만 반환합니다. 아이템의 부모 리스트 정보가 포함됩니다.
+	*/
+	private function sel_action_item($parent_list_id=-1, $child_item_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_list_id, "parent_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_item_id, "child_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AI.id AS __item_id"
+				,",AI.hash_key AS __item_hash_key"
+				,",AI.`type` AS __item_type"
+				,",AIT.`name` AS __item_type_name"
+				,",AI.`name` AS __item_name"
+				,",AI.`context` AS __item_context"
+				,",PARENT_LIST_N_CHILD_ITEM.order AS __item_order"
+
+				,",IFNULL(PARENT_LIST.id, -1) AS __item_parent_list_id"
+				,",IFNULL(PARENT_LIST.hash_key, \"\") AS __item_parent_list_hash_key"
+				,",IFNULL(PARENT_LIST.`type`, -1) AS __item_parent_list_type"
+				,",IFNULL(PARENT_LIST.`name`, -1) AS __item_parent_list_name"
+
+				,"FROM ACTION_ITEM AS AI"
+				,"LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.`type`"
+				,"LEFT JOIN PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PARENT_LIST_N_CHILD_ITEM ON PARENT_LIST_N_CHILD_ITEM.child_action_item_id=AI.id"
+				,"LEFT JOIN ACTION_COLLECTION AS PARENT_LIST ON PARENT_LIST.id=PARENT_LIST_N_CHILD_ITEM.parent_action_list_id"
+
+				,"WHERE AI.id=$child_item_id"
+				,"AND PARENT_LIST_N_CHILD_ITEM.parent_action_list_id=$parent_list_id"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		//$query_manager->show_result();
+
+		return $query_manager->get_result();		
+	}
+
+
+
+
+
+
+
+
+
 
 }
 

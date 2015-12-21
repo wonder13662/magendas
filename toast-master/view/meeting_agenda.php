@@ -73,28 +73,6 @@
 		$meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
 		$meeting_agenda_obj = $meeting_agenda_arr[0];
 
-	} else if(	!empty($meeting_agenda_list) && count($meeting_agenda_list) > 0	){
-
-		// REMOVE ME - DEAD CODE
-		/*
-		// 지정한 meeting_id가 없는 경우, 유저가 속한 클럽의 가장 최신의 예정된 미팅을 가져옵니다.
-		// 앞으로 진행할 최신 미팅 1개의 정보를 가져옵니다.
-		// 최신순으로 등록된 미팅을 10개 가져옵니다.
-		$recent_meeting_agenda_list =
-		$wdj_mysql_interface->getMeetingAgendaListUpcoming(
-			// meeting_membership_id
-			$meeting_membership_id
-			// page
-			, 1
-			// size
-			, 1
-			// is_sooner_first
-			, true
-		);
-
-		$meeting_agenda_obj = $recent_meeting_agenda_list[0];
-		$meeting_id = $meeting_agenda_obj->__meeting_id;
-		*/
 	}
 
 	$today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));
@@ -119,6 +97,73 @@
 	// 96, 2
 	// $output = $wdj_mysql_interface->copyTimelineFromTemplate(96, 2);
 	// print_r($output);
+
+	// 아래 테스트 구문을 주기적으로 실행시켜도 문제가 없어야 한다.
+	// 매크로로 돌려 볼 것!
+	
+	// TEST
+	// 리스트를 만듭니다.
+	// $meeting_agenda_id = 134;
+	// $list_name = "test list";
+	// $row_item_type = 1;
+	// $new_action_list_id = $wdj_mysql_interface->insert_root_action_collection_list($meeting_agenda_id, $list_name, $row_item_type);
+
+	// 만든 리스트에 아이템을 하나 추가합니다.
+	// $__action_collection_id_copy = 
+	// $wdj_mysql_interface->insert_action_list_item(
+	// 	// $parent_collection_id=-1
+	// 	$new_action_list_id
+	// 	// $item_type
+	// 	, 1
+	// 	// $name
+	// 	,"test_second_item"
+	// 	// $context=""
+	// 	,"test_second_item_context"
+	// );
+
+	// 이전 리스트와 지금의 리스트를 비교합니다.
+	// $action_list_src = $wdj_mysql_interface->sel_action_list($new_action_list_id);
+	// $action_list_copy = $wdj_mysql_interface->sel_action_list($__action_collection_id_copy);
+
+	// 아이템을 삭제합니다.
+	// $__action_collection_id_delete = 
+	// $wdj_mysql_interface->delete_action_list_item(
+	// 	// $parent_collection_id=-1
+	// 	10
+	// 	// $item_id_delete
+	// 	, 4
+	// );
+	// $action_list_copy = $wdj_mysql_interface->sel_action_list(10);
+	// $action_list_delete = $wdj_mysql_interface->sel_action_list(11);
+
+	// 아이템을 업데이트 합니다.
+	// $__action_collection_id_update = 
+	// $wdj_mysql_interface->update_action_list_item(
+	// 	// $parent_collection_id=-1
+	// 	14
+	// 	// $item_id_update
+	// 	, 6
+	// 	// $name
+	// 	, "updateX"
+	// 	// $context=""
+	// 	, "updateXX"
+	// );
+	// $action_list_src = $wdj_mysql_interface->sel_action_list(14);
+	// $action_list_update = $wdj_mysql_interface->sel_action_list($__action_collection_id_update);
+
+	// 아이템을 삭제합니다.
+	// $__action_collection_id_delete = 
+	// $wdj_mysql_interface->delete_action_list_item(
+	// 	// $parent_collection_id=-1
+	// 	21
+	// 	// $item_id_delete
+	// 	, 5
+	// );
+	// $action_list_copy = $wdj_mysql_interface->sel_action_list(21);
+	// $action_list_delete = $wdj_mysql_interface->sel_action_list($__action_collection_id_delete);
+
+
+
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -306,6 +351,18 @@ console.log(">>> meeting_agenda_obj : ",meeting_agenda_obj);
 console.log(">>> member_role_cnt_list : ",member_role_cnt_list);
 console.log(">>> meeting_membership_id : ",meeting_membership_id);
 console.log(">>> executive_member_list : ",executive_member_list);
+
+
+// TEST
+var action_list_src = <?php echo json_encode($action_list_src);?>;
+var action_list_copy = <?php echo json_encode($action_list_copy);?>;
+var action_list_delete = <?php echo json_encode($action_list_delete);?>;
+var action_list_update = <?php echo json_encode($action_list_update);?>;
+//$action_list
+console.log(">>> action_list_src : ",action_list_src);
+console.log(">>> action_list_copy : ",action_list_copy);
+console.log(">>> action_list_delete : ",action_list_delete);
+console.log(">>> action_list_update : ",action_list_update);
 
 
 // 로그인 여부를 확인하기 위해 
