@@ -98,69 +98,22 @@
 	// $output = $wdj_mysql_interface->copyTimelineFromTemplate(96, 2);
 	// print_r($output);
 
-	// 아래 테스트 구문을 주기적으로 실행시켜도 문제가 없어야 한다.
-	// 매크로로 돌려 볼 것!
-	
-	// TEST
-	// 리스트를 만듭니다.
-	// $meeting_agenda_id = 134;
-	// $list_name = "test list";
-	// $row_item_type = 1;
-	// $new_action_list_id = $wdj_mysql_interface->insert_root_action_collection_list($meeting_agenda_id, $list_name, $row_item_type);
+	// test action list
+	//$wdj_mysql_interface->test_action_list();
 
-	// 만든 리스트에 아이템을 하나 추가합니다.
-	// $__action_collection_id_copy = 
-	// $wdj_mysql_interface->insert_action_list_item(
-	// 	// $parent_collection_id=-1
-	// 	$new_action_list_id
-	// 	// $item_type
-	// 	, 1
-	// 	// $name
-	// 	,"test_second_item"
-	// 	// $context=""
-	// 	,"test_second_item_context"
-	// );
+	// test action table
+	//$new_action_table = $wdj_mysql_interface->test_action_table_insert();
 
-	// 이전 리스트와 지금의 리스트를 비교합니다.
-	// $action_list_src = $wdj_mysql_interface->sel_action_list($new_action_list_id);
-	// $action_list_copy = $wdj_mysql_interface->sel_action_list($__action_collection_id_copy);
+	$new_action_table = $wdj_mysql_interface->sel_action_table_object(101);
+	$new_action_table_std = $new_action_table->get_std_obj();
 
-	// 아이템을 삭제합니다.
-	// $__action_collection_id_delete = 
-	// $wdj_mysql_interface->delete_action_list_item(
-	// 	// $parent_collection_id=-1
-	// 	10
-	// 	// $item_id_delete
-	// 	, 4
-	// );
-	// $action_list_copy = $wdj_mysql_interface->sel_action_list(10);
-	// $action_list_delete = $wdj_mysql_interface->sel_action_list(11);
+	$wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
 
-	// 아이템을 업데이트 합니다.
-	// $__action_collection_id_update = 
-	// $wdj_mysql_interface->update_action_list_item(
-	// 	// $parent_collection_id=-1
-	// 	14
-	// 	// $item_id_update
-	// 	, 6
-	// 	// $name
-	// 	, "updateX"
-	// 	// $context=""
-	// 	, "updateXX"
-	// );
-	// $action_list_src = $wdj_mysql_interface->sel_action_list(14);
-	// $action_list_update = $wdj_mysql_interface->sel_action_list($__action_collection_id_update);
 
-	// 아이템을 삭제합니다.
-	// $__action_collection_id_delete = 
-	// $wdj_mysql_interface->delete_action_list_item(
-	// 	// $parent_collection_id=-1
-	// 	21
-	// 	// $item_id_delete
-	// 	, 5
-	// );
-	// $action_list_copy = $wdj_mysql_interface->sel_action_list(21);
-	// $action_list_delete = $wdj_mysql_interface->sel_action_list($__action_collection_id_delete);
+	// 리스트 정보와 리스트 엘리먼트 정보는 분리되어야 하지 않을까?
+	// 기존 timeline 형태처럼 object로 리턴받기 위해서는 어떤 과정들이 필요할까?
+	// nested list or nested table.
+
 
 
 
@@ -364,6 +317,13 @@ console.log(">>> action_list_copy : ",action_list_copy);
 console.log(">>> action_list_delete : ",action_list_delete);
 console.log(">>> action_list_update : ",action_list_update);
 
+var new_action_table_std = <?php echo json_encode($new_action_table_std);?>;
+console.log(">>> new_action_table_std : ",new_action_table_std);
+
+var root_action_obj_std = <?php echo json_encode($root_action_obj_std);?>;
+console.log(">>> root_action_obj_std : ",root_action_obj_std);
+
+//root_action_obj
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

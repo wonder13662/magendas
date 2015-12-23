@@ -279,6 +279,10 @@ class ToastMasterParamManager{
 	public $IS_SELECT_TIMER="IS_SELECT_TIMER";
 	public $TIME_RECORD_MILLISEC="TIME_RECORD_MILLISEC";
 
+	// 
+	public $ACTION_ITEM_TYPE_TITLE_ONLY=1;
+	public $ACTION_ITEM_TYPE_TITLE_N_TIME_HH_MM=2;
+
 }
 
 ?>
