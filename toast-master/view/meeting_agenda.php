@@ -102,21 +102,35 @@
 	//$wdj_mysql_interface->test_action_list();
 
 	// test action table
-	//$new_action_table = $wdj_mysql_interface->test_action_table_insert();
+	// $new_action_table = $wdj_mysql_interface->test_action_table_insert();
+	// $new_action_table_std = $new_action_table->get_std_obj();
 
-	$new_action_table = $wdj_mysql_interface->sel_action_table_object(101);
+	$new_action_table = $wdj_mysql_interface->get_action_collection(231);
 	$new_action_table_std = $new_action_table->get_std_obj();
-
 	$wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
 
+	// 뷰 로직에서 일부 엘리먼트가 업데이트 되는 경우, action collection 객체를 전달할 수 없다는 문제점이 있다.
+	// action collection 객체를 직접 받을 수 없다면, 임의의 파라미터를 받아서, action collection을 재구성해야 한다.
 
-	// 리스트 정보와 리스트 엘리먼트 정보는 분리되어야 하지 않을까?
-	// 기존 timeline 형태처럼 object로 리턴받기 위해서는 어떤 과정들이 필요할까?
-	// nested list or nested table.
+	// TODO
+
+	// phase 1
+
+	// javascript에 action collection과 동일하게 동작하는 구조체를 만든다.
+	// 이 구조체는 업데이트가 발생하면, 단계적 업데이트를 진행
+	// 이 구조체는 업데이트가 발생하면, 자신으로부터 최상위 객체까지의 링크드리스트를 파라미터로 넘긴다.
+	// json 객체 변환의 위험도를 낮추기 위해 모든 파라미터는 '해시키'로 구성되어야 한다.
+	// 이 구조체는 업데이트가 완료되면, 서버로부터 새로 생성된 링크드 리스트(업데이트가 시작된 개체부터 최상위까지)를 결과 값으로 받는다.
+	// 업데이트된 본문의 내용이 있다면 안정성 검사를 거쳐 서버로 업데이트한다.
+	// 결과는 새로운 최상위 객체 아이디로 ajax 통신으로 내용을 다시 뷰에 그려야 한다.
+	// 결과를 구조체 안에서 비교해서 달라진 부분만 업데이트한다.
+
+	// phase 2
+
+	// ajax api php 필요.
 
 
-
-
+	// 231
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -135,6 +149,7 @@
 ?>
 <!-- view controller -->
 <script src="../js/toast-master/meeting.agenda.js"></script>
+<script src="../js/toast-master/action.manager.js"></script>
 </head>
 
 
@@ -320,8 +335,9 @@ console.log(">>> action_list_update : ",action_list_update);
 var new_action_table_std = <?php echo json_encode($new_action_table_std);?>;
 console.log(">>> new_action_table_std : ",new_action_table_std);
 
-var root_action_obj_std = <?php echo json_encode($root_action_obj_std);?>;
-console.log(">>> root_action_obj_std : ",root_action_obj_std);
+var action_table_test = action_manager.get_action_obj(new_action_table_std);
+console.log(">>> action_table_test : ",action_table_test);
+
 
 //root_action_obj
 

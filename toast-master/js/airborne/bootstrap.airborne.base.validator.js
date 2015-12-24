@@ -205,4 +205,73 @@ airborne.validator = {
 	    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
 	    return re.test(email);
 	}	
+
+}
+
+airborne.validator.factory = {
+	get:function(scope_name) {
+
+		if(scope_name == undefined) {
+			console.log("!Error! / airborne.validator.factory.get / scope_name == undefined");
+			return;
+		}
+
+		var validator = {
+			scope_name:scope_name
+			,validator_engine:airborne.validator
+			,is_null_object:function(target_obj, show_log){
+
+				var is_null_object = (target_obj == undefined)?true:false;
+				if(is_null_object) {
+					this.show_err_msg("is_null_object", "target_obj", target_obj, show_log);
+				}
+
+				return is_null_object;
+			}
+			,is_not_valid_str:function(target_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				var is_not_valid_str = this.validator_engine.isNotValidStr(target_str);
+				if(is_not_valid_str) {
+					this.show_err_msg("is_not_valid_str", "target_str", target_str, show_log);
+				}
+
+				return is_not_valid_str;
+			}
+			,is_not_unsigned_number:function(target_number, show_log){
+
+
+				var is_not_unsigned_number = this.validator_engine.isNotUnsignedNumber(target_number);
+				if(is_not_unsigned_number) {
+					this.show_err_msg("is_not_unsigned_number", "target_number", target_number, show_log);
+				}
+
+				return is_not_unsigned_number;
+			}			
+			,get_err_msg:function(func_checker_name, target_name) {
+
+				var err_msg = 
+				"!Error! / <FUNC_REQUEST_NAME> / <FUNC_CHECKER_NAME>(<TARGET_NAME>)"
+				.replace(/\<FUNC_REQUEST_NAME\>/gi, this.scope_name)
+				.replace(/\<FUNC_CHECKER_NAME\>/gi, func_checker_name)
+				.replace(/\<TARGET_NAME\>/gi, target_name)
+				;
+
+				return err_msg;
+			}
+			,show_err_msg:function(func_checker_name, target_name, target_obj, show_log) {
+				var err_msg = this.get_err_msg(func_checker_name, target_name);
+				if(show_log == undefined || show_log == true) {
+					console.log(err_msg,target_obj);	
+				}
+				
+			}
+		}
+
+		return validator;
+
+	}	
 }

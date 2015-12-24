@@ -87,6 +87,7 @@
 <script>
 
   var _v = airborne.validator;
+  var _v_factory = airborne.validator.factory;
   var _dates = airborne.dates;
   var _html = airborne.html;
   var _obj = airborne.bootstrap.obj;
