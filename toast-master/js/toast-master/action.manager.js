@@ -254,20 +254,48 @@ var action_manager = {
 				return (this.ACTION_ITEM_TYPE_TITLE_N_TIME_HH_MM === action_item_type)?true:false;
 			}
 			,delegate_insert_sibling_action:null
+			,set_delegate_insert_sibling_action:function(delegate_insert_sibling_action) {
+				this.delegate_insert_sibling_action = delegate_insert_sibling_action;
+			}
 			,insert_sibling_action:function() {
-				
+				console.log(">>> insert_sibling_action");
+
+				if(this.delegate_insert_sibling_action != undefined) {
+					this.delegate_insert_sibling_action._func.apply(this.delegate_insert_sibling_action._scope,[]);
+				}
 			}
 			,delegate_insert_child_action:null
+			,set_delegate_insert_child_action:function(delegate_insert_child_action) {
+				this.delegate_insert_child_action = delegate_insert_child_action;
+			}
 			,insert_child_action:function() {
-				// TODO 컬렉션은 자신의 자식이 어떤 타입인지 알고 있어야 한다.
+				console.log(">>> insert_child_action");
+
+				if(this.delegate_insert_child_action != undefined) {
+					this.delegate_insert_child_action._func.apply(this.delegate_insert_child_action._scope,[]);
+				}
 			}
 			,delegate_update_action:null
+			,set_delegate_update_action:function(delegate_update_action) {
+				this.delegate_update_action = delegate_update_action;
+			}
 			,update_action:function() {
+				console.log(">>> update_action");
 
+				if(this.delegate_update_action != undefined) {
+					this.delegate_update_action._func.apply(this.delegate_update_action._scope,[]);
+				}
 			}
 			,delegate_delete_action:null
+			,set_delegate_delete_action:function(delegate_delete_action) {
+				this.delegate_delete_action = delegate_delete_action;
+			}
 			,delete_action:function() {
+				console.log(">>> delete_action");
 
+				if(this.delegate_delete_action != undefined) {
+					this.delegate_delete_action._func.apply(this.delegate_delete_action._scope,[]);
+				}
 			}
 		}
 		action_obj.set_action_data(action_data_obj, coordinate, search_map);

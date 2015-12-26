@@ -102,12 +102,12 @@
 	//$wdj_mysql_interface->test_action_list();
 
 	// test action table
-	// $new_action_table = $wdj_mysql_interface->test_action_table_insert();
-	// $new_action_table_std = $new_action_table->get_std_obj();
-
-	$new_action_table = $wdj_mysql_interface->get_action_collection(231);
+	$new_action_table = $wdj_mysql_interface->test_action_table_insert();
 	$new_action_table_std = $new_action_table->get_std_obj();
-	$wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
+
+	// $new_action_table = $wdj_mysql_interface->get_action_collection(231);
+	// $new_action_table_std = $new_action_table->get_std_obj();
+	// $wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
 
 	// 뷰 로직에서 일부 엘리먼트가 업데이트 되는 경우, action collection 객체를 전달할 수 없다는 문제점이 있다.
 	// action collection 객체를 직접 받을 수 없다면, 임의의 파라미터를 받아서, action collection을 재구성해야 한다.

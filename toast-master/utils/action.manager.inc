@@ -21,6 +21,8 @@ class ActionObject implements Action{
 	private $action_item_type;
 	private $action_item_type_name;
 	private $action_hash_key;
+	private $action_order;
+	private $action_is_shy;
 
 	public function ActionObject(){}
 
@@ -119,6 +121,20 @@ class ActionObject implements Action{
 		return $this->action_hash_key;
 	}
 
+	public function set_order($action_order) {
+		$this->action_order = $action_order;
+	}
+	public function get_order() {
+		return $this->action_order;
+	}
+
+	public function set_is_shy($action_is_shy) {
+		$this->action_is_shy = $action_is_shy;
+	}
+	public function get_is_shy() {
+		return $this->action_is_shy;
+	}
+
 	public function get_root_action_obj() {
 		if(is_null($this->parent_action_object)) {
 			return $this;	
@@ -135,6 +151,7 @@ class ActionObject implements Action{
 
 		$std_obj->action_id = intval($this->action_id);
 		$std_obj->action_hash_key = $this->action_hash_key;
+		$std_obj->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 		$std_obj->action_name = $this->action_name;
 		$std_obj->action_collection_type = intval($this->action_collection_type);
 		$std_obj->action_collection_type_name = $this->action_collection_type_name;
@@ -156,6 +173,7 @@ class ActionObject implements Action{
 				$std_obj_child_parent = new stdClass();
 				$std_obj_child_parent->action_id = intval($this->action_id);
 				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
+				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 				$std_obj_child_parent->action_name = $this->action_name;
 				
 				$std_obj_child_parent->action_collection_type = intval($this->action_collection_type);

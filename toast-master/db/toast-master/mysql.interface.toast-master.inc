@@ -5149,20 +5149,21 @@ class MYSQLInterface{
 
 		$__child_column_list_cnt = -1;
 		if(!is_null($result) || !empty($result)) {
-			$__child_column_list_cnt = $result->__child_column_list_cnt;	
+			$__child_column_list_cnt = intval($result->__child_column_list_cnt);	
 		}
 		if($this->is_not_unsigned_number(__FUNCTION__, $__child_column_list_cnt, "__child_column_list_cnt")){
 			return;
 		}
 
 		// 아이템 사이에 넣을 수 있도록 100 단위로 ordering 값을 지정해줍니다.
-		$new_order = intval($__child_column_list_cnt) * 100;
+		$is_shy_child = ($__child_column_list_cnt == 0)?1:0;
+		$new_order = $__child_column_list_cnt * 100;
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
 				"INSERT INTO PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST"
-				,"(parent_action_table_id,child_column_action_list_id,`order`)"
-				,"VALUES($parent_action_table_id,$child_column_action_list_id,$new_order)"
+				,"(parent_action_table_id,child_column_action_list_id,`order`,`is_shy_child`)"
+				,"VALUES($parent_action_table_id,$child_column_action_list_id,$new_order,$is_shy_child)"
 			)
 		);
 
@@ -5187,12 +5188,14 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"SELECT PATNCCAL.child_column_action_list_id AS __child_column_action_list_id"
-				,",PATNCCAL.order AS __child_column_action_list_order"
+				,",PATNCCAL.`order` AS __child_column_action_list_order"
+				,",PATNCCAL.`is_shy_child` AS __child_column_action_list_is_shy"
 				,"FROM PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PATNCCAL"
 				,"WHERE PATNCCAL.parent_action_table_id=$parent_action_table_id"
 				,"ORDER BY PATNCCAL.order"
 			)
 		);
+		// $query_manager->printFormattedQuery();
 		$query_manager->select();
 		if($query_manager->is_failed()) {
 			return;
@@ -5212,25 +5215,29 @@ class MYSQLInterface{
 				continue;
 			}
 
-			$__child_column_action_list_id = intval($cur_child_column_action_list->__child_collection_id);
-			$__child_column_action_list_order = intval($cur_child_column_action_list->__child_collection_order);
+			$__child_column_action_list_id = intval($cur_child_column_action_list->__child_column_action_list_id);
+			$__child_column_action_list_order = intval($cur_child_column_action_list->__child_column_action_list_order);
+			$__child_column_action_list_is_shy = intval($cur_child_column_action_list->__child_column_action_list_is_shy);
 			$new_column_action_list_order = $idx * 100;
 
-			if($new_column_action_list_order == $__child_column_action_list_order) {
+			if(($new_column_action_list_order == $__child_column_action_list_order) &&  $__child_column_action_list_is_shy == 0) {
 				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				// 숨김 열이라면 노출로 변경해줍니다.
 				continue;
 			}
 
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
 			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 			$query_manager->addQueryLineArr(
 				array(
 					"UPDATE PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST"
-					,"SET `order` = $new_column_action_list_order"
+					,"SET `order` = $new_column_action_list_order, `is_shy_child`=0"
 					,"WHERE `child_column_action_list_id` = $__child_column_action_list_id"
 					,"AND `parent_action_table_id` = $parent_action_table_id"
 				)
 			);
+			// $query_manager->printFormattedQuery();
 			$query_manager->modify();
 			if($query_manager->is_failed()) {
 				return;
@@ -5272,7 +5279,16 @@ class MYSQLInterface{
 
 		// 리스트에서 아이템의 순서를 구해서 지정합니다.
 		// 기본 설정은 추가된 아이템은 리스트의 가장 마지막에 들어갑니다.
-		$this->push_item_into_list($new_action_list_id, $__action_item_id);
+		$this->push_item_into_list(
+			// $parent_action_list_id=-1
+			$new_action_list_id
+			// $child_action_item_id=-1
+			, $__action_item_id
+			// $order=-1
+			, 0
+			// $is_shy_child=-1
+			, 1
+		);
 		$this->insert_action_collection_n_meeting_agenda(
 			// $action_collection_id
 			$new_action_list_id
@@ -5301,14 +5317,20 @@ class MYSQLInterface{
 
 		
 		if(0 < $parent_item_id) {
+
 			// 부모 아이템이 있다면 연결해줍니다.
-			$this->insert_parent_action_item_n_child_collection_id(
+			$this->insert_parent_action_item_n_child_collection(
 				// $action_item_id
 				$parent_item_id
 				// $child_action_collection_id
 				, $__action_collection_id
 			);
+
+			// 재정렬
+			$this->reorder_child_collection_in_parent_item($parent_item_id);
+
 		} else if(0 < $parent_table_id) {
+
 			// 부모 테이블이 있다면 연결해줍니다.
 			$this->insert_parent_action_table_n_child_action_list(
 				// $parent_action_table_id=-1
@@ -5316,6 +5338,10 @@ class MYSQLInterface{
 				// $child_column_action_list_id=-1
 				, $__action_collection_id
 			);
+
+			// 재정렬
+			$this->reorder_child_list_in_parent_table($parent_table_id);
+
 		}
 
 		return $__action_collection_id;
@@ -5339,21 +5365,24 @@ class MYSQLInterface{
 
 		// 부모 아이템이 있다면 연결해줍니다.
 		if(0 < $parent_item_id) {
-			$this->insert_parent_action_item_n_child_collection_id(
+			$this->insert_parent_action_item_n_child_collection(
 				// $action_item_id
 				$parent_item_id
 				// $child_action_collection_id
 				, $__action_collection_id
 			);
+
+			// 재정렬
+			$this->reorder_child_collection_in_parent_item($parent_item_id);
 		}
 
 		return $__action_collection_id;
 	}
 	/*
 		@ Public
-		@ Desc : ACTION COLLECTION ITEM를 추가합니다. 새로 추가한 객체 ITEM의 id를 돌려줍니다. LIST 형만 가능합니다.
+		@ Desc : 첫번째 ACTION COLLECTION ITEM를 추가합니다. 새로 추가한 객체 ITEM의 id를 돌려줍니다. LIST 형만 가능합니다.
 	*/
-	public function insert_action_list_item($parent_collection_id=-1, $item_type, $name, $context="") {
+	public function insert_action_list_first_item($parent_collection_id=-1, $item_type, $name, $context="") {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_collection_id, "parent_collection_id")){
 			return;
@@ -5389,11 +5418,17 @@ class MYSQLInterface{
 		}
 
 		// 3. 새로 복제한 리스트에 만든 아이템을 추가합니다.
+		$order = 0;
+		$is_shy_child = 1;
 		$this->push_item_into_list(
-			// $list_id=-1
+			// $parent_action_list_id=-1
 			$parent_collection_id_copy
-			// $new_item_id=-1
+			// $child_action_item_id=-1
 			, $new_action_item_id
+			// $order=-1
+			, $order
+			// $is_shy_child=-1
+			, $is_shy_child
 		);
 
 
@@ -5449,6 +5484,7 @@ class MYSQLInterface{
 
 		$__item_type = $action_item_src->__item_type;
 		$__item_order = $action_item_src->__item_order;
+		$__item_is_shy = $action_item_src->__item_is_shy;
 
 		// 3. 아이템을 새로 만듭니다.
 		$new_action_item_id = 
@@ -5474,12 +5510,14 @@ class MYSQLInterface{
 
 		// 5. 새로 복제한 리스트에 만든 아이템을 추가합니다.
 		$this->push_item_into_list(
-			// $list_id=-1
+			// $parent_action_list_id=-1
 			$parent_list_id_copy
-			// $new_item_id=-1
+			// $child_action_item_id=-1
 			, $new_action_item_id
 			// $order=-1
 			, $__item_order
+			// $is_shy_child=-1
+			, $__item_is_shy
 		);
 
 		return $parent_list_id_copy;
@@ -5694,16 +5732,28 @@ class MYSQLInterface{
 
 			$child_action_item = $child_action_item_list[$idx];
 			$child_action_item_id = $child_action_item->get_id();
+			$child_action_item_order = $child_action_item->get_order();
+			$child_action_item_is_shy = $child_action_item->get_is_shy();
 			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+				return;
+			}
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_order, "child_action_item_order")){
+				return;
+			}
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_is_shy, "child_action_item_is_shy")){
 				return;
 			}
 
 			// 1. CHILD ITEM (PARENT LIST -> CHILD ITEM)
 			$this->push_item_into_list(
-				// $list_id=-1
+				// $parent_action_list_id=-1
 				$action_list_id_copy
-				// $new_item_id=-1	
+				// $child_action_item_id=-1
 				, $child_action_item_id
+				// $order=-1
+				, $child_action_item_order
+				// $is_shy_child=-1
+				, $child_action_item_is_shy
 			);
 		}
 
@@ -5766,7 +5816,7 @@ class MYSQLInterface{
 			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_obj_id, "child_action_obj_id")){
 				return;
 			}
-			$this->insert_parent_action_item_n_child_collection_id(
+			$this->insert_parent_action_item_n_child_collection(
 				// $parent_action_item_id
 				$__action_item_id_copy
 				// $child_action_collection_id
@@ -5856,9 +5906,17 @@ class MYSQLInterface{
 				return;
 			}
 
-			// 리스트에서 아이템의 순서를 구해서 지정합니다.
-			// 기본 설정은 추가된 아이템은 리스트의 가장 마지막에 들어갑니다.
-			$this->push_item_into_list($new_action_list_id, $__action_item_id);
+			// 리스트의 첫번째 아이템을 지정해 줍니다.
+			$this->push_item_into_list(
+				// $parent_action_list_id=-1
+				$new_action_list_id
+				// $child_action_item_id=-1
+				, $__action_item_id
+				// $order=-1
+				, 0
+				// $is_shy_child=-1
+				, 1
+			);
 
 		}
 
@@ -5935,7 +5993,7 @@ class MYSQLInterface{
 		@ Private
 		@ Desc : 리스트 아이템과 아이템의 자식 컬렉션을 연결합니다.
 	*/
-	private function insert_parent_action_item_n_child_collection_id($parent_action_item_id, $child_action_collection_id, $order=-1) {
+	private function insert_parent_action_item_n_child_collection($parent_action_item_id, $child_action_collection_id, $order=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
 			return;
@@ -5970,13 +6028,14 @@ class MYSQLInterface{
 		}
 
 		// 아이템 사이에 넣을 수 있도록 100 단위로 ordering 값을 지정해줍니다.
+		$is_shy_child = ($__item_child_collection_cnt == 0)?1:0;
 		$new_order = intval($__item_child_collection_cnt) * 100;
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
 				"INSERT INTO PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION"
-				,"(`parent_action_item_id`,`child_action_collection_id`,`order`)"
-				,"VALUES ($parent_action_item_id,$child_action_collection_id,$order)"
+				,"(`parent_action_item_id`,`child_action_collection_id`,`order`,`is_shy_child`)"
+				,"VALUES ($parent_action_item_id,$child_action_collection_id,$order,$is_shy_child)"
 			)
 		);
 		$query_manager->modify();
@@ -5985,14 +6044,14 @@ class MYSQLInterface{
 		}
 
 		// 추가한 데이터를 재정렬 해줍니다.
-		$this->reorder_item_collection($parent_action_item_id);
+		$this->reorder_child_collection_in_parent_item($parent_action_item_id);
 
 	}
 	/*
 		@ Private
 		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
 	*/
-	private function reorder_item_collection($parent_action_item_id) {
+	private function reorder_child_collection_in_parent_item($parent_action_item_id) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
 			return;
@@ -6002,7 +6061,8 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"SELECT AINCAC.child_action_collection_id AS __child_collection_id"
-				,",AINCAC.order AS __child_collection_order"
+				,",AINCAC.`order` AS __child_collection_order"
+				,",AINCAC.`is_shy_child` AS __child_collection_is_shy"
 				,"FROM PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS AINCAC"
 				,"WHERE parent_action_item_id=$parent_action_item_id"
 				,"ORDER BY AINCAC.order"
@@ -6029,19 +6089,22 @@ class MYSQLInterface{
 
 			$__child_collection_id = intval($cur_child_table->__child_collection_id);
 			$__child_collection_order = intval($cur_child_table->__child_collection_order);
+			$__child_collection_is_shy = intval($cur_child_table->__child_collection_is_shy);
 			$new_child_collection_order = $idx * 100;
 
-			if($new_child_collection_order == $__child_collection_order) {
+			if(($new_child_collection_order == $__child_collection_order) && $__child_collection_is_shy == 0) {
 				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				// 숨김 열이라면 노출로 변경해줍니다.
 				continue;
 			}
 
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
 			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 			$query_manager->addQueryLineArr(
 				array(
 					"UPDATE PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION"
-					,"SET `order` = $new_child_collection_order"
+					,"SET `order` = $new_child_collection_order, `is_shy_child`=0"
 					,"WHERE `child_action_collection_id` = $__child_collection_id"
 					,"AND `parent_action_item_id` = $parent_action_item_id"
 				)
@@ -6085,12 +6148,18 @@ class MYSQLInterface{
 		@ Private
 		@ Desc : 아이템을 리스트에 넣습니다. 아이템은 오직 리스트에만 넣을수 있습니다.
 	*/	
-	private function push_item_into_list($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1) {
+	private function push_item_into_list($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
 			return;
 		}
 		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy_child, "is_shy_child")){
 			return;
 		}
 
@@ -6101,16 +6170,12 @@ class MYSQLInterface{
 			return;
 		}
 
-		if($order < 0) {
-			// order 값이 지정되지 않았다면, 아이템 맨 마지막에 넣을 order 값을 만들어 줍니다.
-			$order = intval($__child_action_item_cnt) * 100;
-		}
-
 		// 부모 리스트와 아이템의 관계를 지정합니다.
-		$this->insert_parent_list_n_child_item($parent_action_list_id, $child_action_item_id, $order);
+		$order = intval($__child_action_item_cnt) * 100;
+		$this->insert_parent_list_n_child_item($parent_action_list_id, $child_action_item_id, $order, $is_shy_child);
 
 		// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
-		$this->reorder_list_item($parent_action_list_id);
+		$this->reorder_child_item_in_parent_list($parent_action_list_id);
 
 	}
 	private function sel_child_item_cnt_on_list($parent_action_list_id=-1) {
@@ -6143,7 +6208,7 @@ class MYSQLInterface{
 		}
 		return $__child_action_item_cnt;
 	}
-	private function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1) {
+	private function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
 			return;
@@ -6154,12 +6219,16 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
 			return;
 		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy_child, "is_shy_child")){
+			return;
+		}
+
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-				"INSERT INTO `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`(`parent_action_list_id`,`child_action_item_id`,`order`)"
-				,"VALUES($parent_action_list_id,$child_action_item_id,$order)"
+				"INSERT INTO `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`(`parent_action_list_id`,`child_action_item_id`,`order`,`is_shy_child`)"
+				,"VALUES($parent_action_list_id,$child_action_item_id,$order,$is_shy_child)"
 			)
 		);
 		$query_manager->modify();
@@ -6172,7 +6241,7 @@ class MYSQLInterface{
 		@ Private
 		@ Desc : 리스트의 모든 아이템의 order 값의 간격을 모두 100단위로 재조정해줍니다.
 	*/
-	private function reorder_list_item($parent_action_list_id) {
+	private function reorder_child_item_in_parent_list($parent_action_list_id) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
 			return;
@@ -6182,7 +6251,8 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"SELECT PACLNCAI.child_action_item_id AS __child_action_item_id"
-				,",PACLNCAI.order AS __child_action_item_order"
+				,",PACLNCAI.`order` AS __child_action_item_order"
+				,",PACLNCAI.`is_shy_child` AS __child_action_item_is_shy"
 				,"FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
 				,"WHERE parent_action_list_id=$parent_action_list_id"
 				,"ORDER BY PACLNCAI.order"
@@ -6209,23 +6279,27 @@ class MYSQLInterface{
 
 			$__child_action_item_id = intval($cur_item->__child_action_item_id);
 			$__child_action_item_order = intval($cur_item->__child_action_item_order);
+			$__child_action_item_is_shy = intval($cur_item->__child_action_item_is_shy);
 			$new_item_order = $idx * 100;
 
-			if($new_item_order == $__child_action_item_order) {
+			if(($new_item_order == $__child_action_item_order) && ($__child_action_item_is_shy == 0)) {
 				// 이전과 순서가 같다면 업데이트 하지 않습니다.
+				// 숨김 열이라면 노출로 변경해줍니다.
 				continue;
 			}
 
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
+			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
 			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 			$query_manager->addQueryLineArr(
 				array(
 					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
-					,"SET `order` = $new_item_order"
+					,"SET `order` = $new_item_order, `is_shy_child`=0"
 					,"WHERE `parent_action_list_id` = $parent_action_list_id"
 					,"AND `child_action_item_id` = $__child_action_item_id"
 				)
 			);
+			$query_manager->printFormattedQuery();
 			$query_manager->modify();
 			if($query_manager->is_failed()) {
 				return;
@@ -6243,7 +6317,7 @@ class MYSQLInterface{
 		@ public
 		@ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
 	*/
-	public function get_action_collection($action_collection_id) {
+	public function get_action_collection($action_collection_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -6251,10 +6325,10 @@ class MYSQLInterface{
 
 		if($this->is_action_collection_table_type($action_collection_id)) {
 			// 테이블 타입일 경우
-			return $this->get_action_table_object($action_collection_id);
+			return $this->get_action_table_object($action_collection_id, $order, $is_shy);
 		} else if($this->is_action_collection_list_type($action_collection_id)) {
 			// 리스트 타입일 경우
-			return $this->get_action_list_object($action_collection_id);
+			return $this->get_action_list_object($action_collection_id, $order, $is_shy);
 		}
 
 	}
@@ -6262,7 +6336,7 @@ class MYSQLInterface{
 		@ private
 		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 부모, 자식 관계를 오브젝트, 프로퍼티 형태로 변환하여 전달합니다.
 	*/
-	public function get_action_list_object($list_id) {
+	public function get_action_list_object($list_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
 			return;
@@ -6285,6 +6359,8 @@ class MYSQLInterface{
 		$action_list_obj->set_collection_type(intval($list_info->__list_type));
 		$action_list_obj->set_collection_type_name($list_info->__list_type_name);
 		$action_list_obj->set_name($list_info->__list_name);
+		$action_list_obj->set_order($order);
+		$action_list_obj->set_is_shy($is_shy);
 
 		for($idx=0; $idx < count($list_n_child_item_list); $idx++) {
 			$child_item_obj = $list_n_child_item_list[$idx];
@@ -6293,12 +6369,31 @@ class MYSQLInterface{
 				return;
 			}
 
-			$__list_child_item_id = $child_item_obj->__list_child_item_id;
-			if($__list_child_item_id < 0) {
+			$__list_child_item_id = intval($child_item_obj->__list_child_item_id);
+			if($__list_child_item_id < 0){
+				// 자식 컬렉션이 없는 경우.
 				continue;
 			}
 
-			$child_item_obj = $this->get_action_item_object($__list_child_item_id);
+			$__list_child_item_order = intval($child_item_obj->__list_child_item_order);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__list_child_item_order, "__list_child_item_order")){
+				return;
+			}
+
+			$__list_child_item_is_shy = $child_item_obj->__list_child_item_is_shy;
+			if($this->is_not_unsigned_number(__FUNCTION__, $__list_child_item_is_shy, "__list_child_item_is_shy")){
+				return;
+			}
+
+			$child_item_obj = 
+			$this->get_action_item_object(
+				// $item_id
+				$__list_child_item_id
+				// $order=0
+				, $__list_child_item_order
+				// $is_shy=0
+				, $__list_child_item_is_shy
+			);
 			if($this->is_null_object(__FUNCTION__, $child_item_obj, "child_item_obj")) {
 				return;
 			}
@@ -6339,6 +6434,7 @@ class MYSQLInterface{
 				,",IFNULL(CHILD_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
 				,",IFNULL(CHILD_ITEM.`context`,\"\") AS __list_child_item_context"
 				,",IFNULL(PARENT_LIST_N_CHILD_ITEM.order,-1) AS __list_child_item_order"
+				,",IFNULL(PARENT_LIST_N_CHILD_ITEM.is_shy_child,-1) AS __list_child_item_is_shy"
 
 				,"FROM ACTION_COLLECTION AS AC"
 				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
@@ -6366,7 +6462,7 @@ class MYSQLInterface{
 		@ public
 		@ Desc : 액션 테이블 관련 정보를 가져옵니다. action collection 객체로 반환합니다.
 	*/
-	public function get_action_table_object($table_id) {
+	public function get_action_table_object($table_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
 			return;
@@ -6385,18 +6481,40 @@ class MYSQLInterface{
 		$action_table_obj->set_collection_type($parent_table_info->__table_type);
 		$action_table_obj->set_collection_type_name($parent_table_info->__table_type_name);
 		$action_table_obj->set_name($parent_table_info->__table_name);
+		$action_table_obj->set_order($order);
+		$action_table_obj->set_is_shy($is_shy);
 
 		// 테이블이 자식 리스트를 가지고 있다면, 테이블에 포함된 자식 리스트 정보를 다시 조회합니다.
+		// 자식 리스트의 숨김 여부를 알려줍니다.
 		for($idx=0;$idx < count($parent_table_n_child_list_list);$idx++) {
+
 			$child_list_obj = $parent_table_n_child_list_list[$idx];
+			if($this->is_null_object(__FUNCTION__, $child_list_obj, "child_list_obj")){
+				return;
+			}
 
-			$__table_child_list_id = $child_list_obj->__table_child_list_id;
-
+			$__table_child_list_id = intval($child_list_obj->__table_child_list_id);
 			if($__table_child_list_id < 0) {
+				// 자식 컬렉션이 없는 경우.
 				continue;
 			}
 
-			$child_list_obj = $this->get_action_list_object($__table_child_list_id);
+			$__table_child_list_order = intval($child_list_obj->__table_child_list_order);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__table_child_list_order, "__table_child_list_order")){
+				return;
+			}
+
+			$__table_child_list_is_shy = $child_list_obj->__table_child_list_is_shy;
+			if($this->is_not_unsigned_number(__FUNCTION__, $__table_child_list_is_shy, "__table_child_list_is_shy")){
+				return;
+			}
+
+			$child_list_obj = 
+			$this->get_action_list_object(
+				$__table_child_list_id
+				, $__table_child_list_order
+				, $__table_child_list_is_shy
+			);
 			if($this->is_null_object(__FUNCTION__, $child_list_obj, "child_list_obj")) {
 				return;
 			}
@@ -6433,6 +6551,7 @@ class MYSQLInterface{
 				,",IFNULL(CHILD_LIST.`name`,\"\") AS __table_child_list_name"
 				,",IFNULL(CHILD_LIST.`hash_key`,\"\") AS __table_child_list_hash_key"
 				,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`order`,-1) AS __table_child_list_order"
+				,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`is_shy_child`,-1) AS __table_child_list_is_shy"
 
 				,"FROM ACTION_COLLECTION AS AC"
 				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
@@ -6473,6 +6592,7 @@ class MYSQLInterface{
 				,",AC.`type` AS __list_type"
 				,",AC.`name` AS __list_name"
 				,",ACT.`name` AS __list_type_name"
+				,",PARENT_ITEM_N_CHILD_COLLECTION.`is_shy_child` AS __list_is_shy"
 
 				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
 				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
@@ -6510,7 +6630,8 @@ class MYSQLInterface{
 		@ private
 		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 부모, 자식 관계를 오브젝트, 프로퍼티 형태로 변환하여 전달합니다.
 	*/
-	public function get_action_item_object($item_id) {
+	public function get_action_item_object($item_id, $order=0, $is_shy=0) {
+
 		if($this->is_not_unsigned_number(__FUNCTION__, $item_id, "item_id")){
 			return;
 		}
@@ -6534,6 +6655,8 @@ class MYSQLInterface{
 		$action_item->set_item_type_name($cur_action_item->__item_type_name);
 		$action_item->set_name($cur_action_item->__item_name);
 		$action_item->set_context($cur_action_item->__item_context);
+		$action_item->set_order($order);
+		$action_item->set_is_shy($is_shy);
 
 		for($idx=0;$idx < count($parent_item_n_child_collection_list);$idx++) {
 			$child_collection_obj = $parent_item_n_child_collection_list[$idx];
@@ -6541,20 +6664,40 @@ class MYSQLInterface{
 				return;
 			}
 
-			$__item_child_collection_id = $child_collection_obj->__item_child_collection_id;
+			$__item_child_collection_id = intval($child_collection_obj->__item_child_collection_id);
 			$__item_child_collection_type =  $child_collection_obj->__item_child_collection_type;
-
-			if($__item_child_collection_id < 0) {
+			if($__item_child_collection_id < 0){
+				// 자식 컬렉션이 없는 경우.
 				continue;
+			}
+
+			$__item_child_collection_order =  $child_collection_obj->__item_child_collection_order;
+			if($this->is_not_unsigned_number(__FUNCTION__, $__item_child_collection_order, "__item_child_collection_order")){
+				return;
+			}
+
+			$__item_child_collection_is_shy =  $child_collection_obj->__item_child_collection_is_shy;
+			if($this->is_not_unsigned_number(__FUNCTION__, $__item_child_collection_is_shy, "__item_child_collection_is_shy")){
+				return;
 			}
 
 			$child_colllection_obj = null;
 			if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
 				// 1. 리스트 형일 경우.  
-				$child_colllection_obj = $this->get_action_list_object($__item_child_collection_id);
+				$child_colllection_obj = 
+				$this->get_action_list_object(
+					$__item_child_collection_id
+					, $__item_child_collection_order
+					, $__item_child_collection_is_shy
+				);
 			} else if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
 				// 2. 테이블 형일 경우.
-				$child_colllection_obj = $this->get_action_table_object($__item_child_collection_id);
+				$child_colllection_obj = 
+				$this->get_action_table_object(
+					$__item_child_collection_id
+					, $__item_child_collection_order
+					, $__item_child_collection_is_shy
+				);
 			}
 
 			if($this->is_null_object(__FUNCTION__, $child_collection_obj, "child_collection_obj")){
@@ -6591,6 +6734,7 @@ class MYSQLInterface{
 				,",IFNULL(CHILD_COLLECTION.`type`, -1) AS __item_child_collection_type"
 				,",IFNULL(CHILD_COLLECTION.`name`, -1) AS __item_child_collection_name"
 				,",IFNULL(PARENT_ITEM_N_CHILD_COLLECTION.`order`, -1) AS __item_child_collection_order"
+				,",IFNULL(PARENT_ITEM_N_CHILD_COLLECTION.`is_shy_child`, -1) AS __item_child_collection_is_shy"
 
 				,"FROM ACTION_ITEM AS AI"
 				,"LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.type"
@@ -6634,6 +6778,7 @@ class MYSQLInterface{
 				,",AI.`name` AS __item_name"
 				,",AI.`context` AS __item_context"
 				,",PARENT_LIST_N_CHILD_ITEM.order AS __item_order"
+				,",PARENT_LIST_N_CHILD_ITEM.is_shy_child AS __item_is_shy"
 
 				,",IFNULL(PARENT_LIST.id, -1) AS __item_parent_list_id"
 				,",IFNULL(PARENT_LIST.hash_key, \"\") AS __item_parent_list_hash_key"
@@ -6712,7 +6857,7 @@ class MYSQLInterface{
 
 		// 만든 리스트에 아이템을 하나 추가합니다.
 		$__action_collection_id_copy = 
-		$this->insert_action_list_item(
+		$this->insert_action_list_first_item(
 			// $parent_collection_id=-1
 			$new_action_list_id
 			// $item_type
@@ -6749,10 +6894,6 @@ class MYSQLInterface{
 		/*
 		$__action_collection_id_update = 
 		$this->update_action_list_item(
-			// $root_collection_obj / FIX ME
-			null
-			// $parent_collection_id=-1
-			, $__action_collection_id_delete
 			// $item_id_update
 			, $__list_child_item_id_update
 			// $name
