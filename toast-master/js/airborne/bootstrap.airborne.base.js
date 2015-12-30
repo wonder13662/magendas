@@ -57,6 +57,9 @@ airborne.console = {
 					}
 				}
 			}
+			,say_err:function(msg, obj) {
+				this.say("!Error! / " + msg, obj);
+			}
 			,isShow:true
 			,on:function(){
 				this.isShow=true;

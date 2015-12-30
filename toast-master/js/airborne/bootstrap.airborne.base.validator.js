@@ -42,7 +42,7 @@ airborne.validator = {
 		return !this.isNumber(targetStr); 
 	}
 	,isUnsignedNumber:function(targetStr){
-		return $.isNumeric(targetStr) && targetStr > 0;
+		return $.isNumeric(targetStr) && (0 <= targetStr);
 	}
 	,isNotUnsignedNumber:function(targetStr){
 		return !this.isUnsignedNumber(targetStr);
@@ -241,6 +241,19 @@ airborne.validator.factory = {
 
 				return is_not_valid_str;
 			}
+			,is_not_valid_array:function(target_array, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				var is_not_valid_array = this.validator_engine.is_not_valid_array(target_array);
+				if(is_not_valid_array) {
+					this.show_err_msg("is_not_valid_array", "target_array", target_array, show_log);
+				}
+
+				return is_not_valid_array;
+			}
 			,is_not_unsigned_number:function(target_number, show_log){
 
 
@@ -251,10 +264,22 @@ airborne.validator.factory = {
 
 				return is_not_unsigned_number;
 			}			
+			,is_not_number_str:function(target_number_str, show_log){
+				return !this.is_number_str(target_number_str, show_log);
+			}
+			,is_number_str:function(target_number_str, show_log){
+
+				var is_number_str = this.validator_engine.isNumberStr(target_number_str);
+				if(!is_number_str) {
+					this.show_err_msg("is_not_number_str", "target_number_str", target_number_str, show_log);
+				}
+
+				return is_number_str;
+			}
 			,get_err_msg:function(func_checker_name, target_name) {
 
 				var err_msg = 
-				"!Error! / <FUNC_REQUEST_NAME> / <FUNC_CHECKER_NAME>(<TARGET_NAME>)"
+				"!Error! / <FUNC_REQUEST_NAME> / <FUNC_CHECKER_NAME>(<TARGET_NAME>) / "
 				.replace(/\<FUNC_REQUEST_NAME\>/gi, this.scope_name)
 				.replace(/\<FUNC_CHECKER_NAME\>/gi, func_checker_name)
 				.replace(/\<TARGET_NAME\>/gi, target_name)

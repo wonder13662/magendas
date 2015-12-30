@@ -445,9 +445,10 @@ airborne.bootstrap.obj = {
 	,ELEMENT_TYPE_NONE:"ELEMENT_TYPE_INPUT_NONE"
 
 	,ELEMENT_TYPE_LIST_ROW_INPUT_TEXT:"ELEMENT_TYPE_LIST_ROW_INPUT_TEXT"
-	,ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT:"ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT"
+	,ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY:"ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY"
 	,ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT:"ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT"
 	,ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT:"ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT"
+	,ELEMENT_TYPE_LIST_ROW_SELECT_BOX:"ELEMENT_TYPE_LIST_ROW_SELECT_BOX"
 
 	,ELEMENT_TYPE_TABLE_TITLE:"ELEMENT_TYPE_TABLE_TITLE"
 	,ELEMENT_TYPE_TABLE_TITLE_ADDABLE:"ELEMENT_TYPE_TABLE_TITLE_ADDABLE"
@@ -473,7 +474,7 @@ airborne.bootstrap.obj = {
 			element_type == this.ELEMENT_TYPE_NONE 			|| 
 
 			element_type == this.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT 				|| 
-			element_type == this.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT 			|| 
+			element_type == this.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY 			|| 
 			element_type == this.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT 	|| 
 			element_type == this.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT 	|| 
 
@@ -501,7 +502,7 @@ airborne.bootstrap.obj = {
 			element_type == this.ELEMENT_TYPE_SEARCH_LIST 	||
 			
 			element_type == this.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT 				|| 
-			element_type == this.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT 			|| 
+			element_type == this.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY 			|| 
 			element_type == this.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT 	|| 
 			element_type == this.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT 	||
 
@@ -1501,7 +1502,7 @@ airborne.bootstrap.obj = {
 				} else if( (_obj.ELEMENT_TYPE_INPUT_TEXT == cur_element_type || 
 							_obj.ELEMENT_TYPE_TABLE_INPUT_TEXT == cur_element_type || 
 							_obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT == cur_element_type || 
-							_obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT == cur_element_type) && 
+							_obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY == cur_element_type) && 
 							_obj.EVENT_TYPE_UPDATE_ITEM == cur_event_type ){
 
 					cur_element_id = cur_element_meta_info.get_element_id();
@@ -2549,7 +2550,7 @@ airborne.bootstrap.obj = {
 				this.show_btn_remove_element_jq();
 
 				if( this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT || 
-					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT || 
+					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY || 
 					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT || 
 					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT ||
 
@@ -2577,7 +2578,7 @@ airborne.bootstrap.obj = {
 				this.show_title_jq();
 
 				if( this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT || 
-					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT || 
+					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY || 
 					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT || 
 					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT ||
 
@@ -2614,9 +2615,9 @@ airborne.bootstrap.obj = {
 					consoler.say("em_sim / 1 / ELEMENT_TYPE_TABLE_TITLE_ADDABLE");
 
 					this.show_input_mode_shy_table();
-				} else if( _obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT == input_mode_type ) {
+				} else if( _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY == input_mode_type ) {
 					consoler.say("em_sim / 2 /",cur_title);
-					consoler.say("em_sim / 2 / ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT");
+					consoler.say("em_sim / 2 / ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY");
 
 					this.show_input_mode_shy_list();
 				} else if( _obj.ELEMENT_TYPE_SEARCH_LIST == cur_element_type || _obj.ELEMENT_TYPE_TABLE_SEARCH_LIST == cur_element_type ) {
@@ -3748,7 +3749,7 @@ airborne.bootstrap.obj = {
 				} else {
 					// 현재는 리스트 형만 받고 있습니다.
 					console.log("on_add_btn_click / 02 / 현재는 리스트 형만 받고 있습니다.");
-					this.show_input_mode(_obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT);
+					this.show_input_mode(_obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY);
 				}
 
 				// set input group events
@@ -6319,7 +6320,7 @@ airborne.bootstrap.obj = {
 					// console.log("제거한 엘리먼트 셋은 배열에서도 제거됩니다.");
 
 					if(	cur_element_set.get_meta_info().get_element_type() === _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT ||
-						cur_element_set.get_meta_info().get_element_type() === _obj.ELEMENT_TYPE_LIST_SHY_ROW_INPUT_TEXT || 
+						cur_element_set.get_meta_info().get_element_type() === _obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT_SHY || 
 						cur_element_set.get_meta_info().get_element_type() === _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT || 
 						cur_element_set.get_meta_info().get_element_type() === _obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT 
 						) {

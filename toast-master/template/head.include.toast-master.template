@@ -33,6 +33,7 @@
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.list.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.table.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.column.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.modal.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.list_search_tab.js"></script>
@@ -71,7 +72,7 @@
 
 </script>
 
-<!-- Mobile Javascript Library -->
+<!-- PC Javascript Library -->
 <script>
   var _v = airborne.validator;
   var _v_factory = airborne.validator.factory;
@@ -85,6 +86,9 @@
   var _color = airborne.color;
   var _json = airborne.json;
   var _print = airborne.bootstrap.view.print;
+  var _console = airborne.console;
+  var _view_list = airborne.bootstrap.view.obj.list;
+  var _action = airborne.bootstrap.obj.__action;
 
   var _param = param_manager;
   var _link = link_manager.init(service_root_path, _server, _param);

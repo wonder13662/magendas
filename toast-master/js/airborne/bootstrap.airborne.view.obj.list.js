@@ -694,8 +694,8 @@ airborne.bootstrap.view.obj.list = {
 
 		var is_editable_list_action = false;
 		var is_fixed_row_action = false;
-		var delegate_add_list_row_info = this.get_delegate_add_list_row_info(cur_element_type);
 
+		var delegate_add_list_row_info = this.get_delegate_add_list_row_info(cur_element_type);
 		var delegate_add_element = this.get_delegate_add_element(parent_element_set, list_container_jq, delegate_save_n_reload, cur_color_type, delegate_add_list_row_info);
 
 		var cur_element_collection_set;

@@ -193,6 +193,10 @@ class MYSQLManager{
 		return $query_result_obj;
 	}
 
+	public function escape_json_str($json_str) {
+		return mysqli_real_escape_string($this->con, $json_str);
+	}
+
 	private function getQueryResultObj(){
 
 		$query_result_obj = new stdClass();

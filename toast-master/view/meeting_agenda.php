@@ -102,12 +102,22 @@
 	//$wdj_mysql_interface->test_action_list();
 
 	// test action table
-	$new_action_table = $wdj_mysql_interface->test_action_table_insert();
-	$new_action_table_std = $new_action_table->get_std_obj();
+	// $new_action_table = $wdj_mysql_interface->test_action_table_insert();
+	// $new_action_table_std = $new_action_table->get_std_obj();
 
 	// $new_action_table = $wdj_mysql_interface->get_action_collection(231);
 	// $new_action_table_std = $new_action_table->get_std_obj();
 	// $wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
+
+	// $new_action_list_id = $wdj_mysql_interface->test_action_list_insert_timeline();
+	// $new_action_list = $wdj_mysql_interface->get_action_collection($new_action_list_id);
+	// $new_action_list = $wdj_mysql_interface->get_action_collection(394);
+	// $new_action_list_std = $new_action_list->get_std_obj();
+
+	// $new_action_list_id = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM();
+	// $new_action_list = $wdj_mysql_interface->get_action_collection($new_action_list_id);
+	$new_action_list = $wdj_mysql_interface->get_action_collection(510);
+	$new_action_list_std = $new_action_list->get_std_obj();
 
 	// 뷰 로직에서 일부 엘리먼트가 업데이트 되는 경우, action collection 객체를 전달할 수 없다는 문제점이 있다.
 	// action collection 객체를 직접 받을 수 없다면, 임의의 파라미터를 받아서, action collection을 재구성해야 한다.
@@ -130,7 +140,8 @@
 	// ajax api php 필요.
 
 
-	// 231
+
+
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -332,14 +343,13 @@ console.log(">>> action_list_copy : ",action_list_copy);
 console.log(">>> action_list_delete : ",action_list_delete);
 console.log(">>> action_list_update : ",action_list_update);
 
-var new_action_table_std = <?php echo json_encode($new_action_table_std);?>;
-console.log(">>> new_action_table_std : ",new_action_table_std);
+var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
 
-var action_table_test = action_manager.get_action_obj(new_action_table_std);
-console.log(">>> action_table_test : ",action_table_test);
+console.log("new_action_list_std :: ",new_action_list_std);
 
+var new_action_list = action_manager.get_action_obj(new_action_list_std);
 
-//root_action_obj
+console.log("new_action_list :: ",new_action_list);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -378,6 +388,9 @@ var meeting_agenda_data_obj =
 	, window_scroll_y:window_scroll_y
 	, is_log_in_user:is_log_in_user 
 	, login_user_info:login_user_info
+
+	// TEST
+	, new_action_list:new_action_list
 };
 
 console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);

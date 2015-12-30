@@ -97,6 +97,7 @@
   var _color = airborne.color;
   var _json = airborne.json;
   var _print = airborne.bootstrap.view.print;
+  var _console = airborne.console;
 
   var _m_list = airborne.bootstrap.view.mobile.list;
   var _tm_m_list = toast_master.mobile_list_manager;
