@@ -12,6 +12,8 @@ interface Action {
 
 class ActionObject implements Action{
 
+	// 객체 내에서의 변화로 DB 업데이트를 진행합니다.
+
 	private $parent_action_obj;
 	private $children_action_obj_list;
 	private $action_id;
@@ -23,14 +25,21 @@ class ActionObject implements Action{
 	private $action_hash_key;
 	private $action_order;
 	private $action_is_shy;
-
-	public function ActionObject(){}
+	private $coordinate;
+	private $search_map;
 
 	public function test() { return 'ActionObject'; }
-
+	/*
+		@ Public
+		@ Usage : ActionObject::is_not_action_obj($target)
+	*/
 	public static function is_not_action_obj($target) {
 		return !ActionObject::is_action_obj($target);
 	}
+	/*
+		@ Public
+		@ Usage : ActionObject::is_action_obj($target)
+	*/
 	public static function is_action_obj($target) {
 		if(!is_null($target) && is_a($target,'Action')) {
 			return true;
@@ -38,10 +47,17 @@ class ActionObject implements Action{
 		return false;
 	}
 
+	public function has_no_parent() {
+		return !$this->has_parent();
+	}
+	public function has_parent() {
+		return (!is_null($this->parent_action_obj))?true:false;
+	}
 	public function set_parent($parent_action_obj) {
-		if(ActionObject::is_not_action_obj($parent_action_obj)) {
-			return;
-		}
+
+		if(is_null($parent_action_obj)) return;
+		if(ActionObject::is_not_action_obj($parent_action_obj)) return;
+
 		$this->parent_action_obj = $parent_action_obj;
 	}
 	public function get_parent() {
@@ -59,10 +75,25 @@ class ActionObject implements Action{
 			$this->children_action_object_list = array();
 		}
 
-		if(!is_null($child_action_obj)) {
-			array_push($this->children_action_object_list, $child_action_obj);
+		$duplicated_child_action_obj = null;
+		if(!empty($child_action_obj->get_coordinate())) {
+			$duplicated_child_action_obj = $this->search($child_action_obj->get_coordinate());
+		}
+		if(!is_null($duplicated_child_action_obj)) {
+			return;
 		}
 
+		if(!is_null($child_action_obj)) {
+
+			$child_action_name = $child_action_obj->get_name();
+			
+			array_push($this->children_action_object_list, $child_action_obj);
+			$child_action_obj->set_parent($this);
+		}
+
+	}
+	public function set_children($children_action_object_list) {
+		$this->children_action_object_list = $children_action_object_list;
 	}
 	public function get_children() {
 		if(is_null($this->children_action_object_list)) {
@@ -70,6 +101,12 @@ class ActionObject implements Action{
 		}
 
 		return $this->children_action_object_list;
+	}
+	public function has_children() {
+		if(0 < $this->get_children_cnt()) {
+			return true;
+		}
+		return false;
 	}
 	public function get_children_cnt() {
 		if(is_null($this->children_action_object_list)) {
@@ -177,7 +214,7 @@ class ActionObject implements Action{
 		return $this->action_item_type;
 	}
 
-	public function set_item_type_name($action_item_type_name) {
+	public function set_item_type_name($action_item_type_name) { 
 		$this->action_item_type_name = $action_item_type_name;
 	}
 	public function get_item_type_name() {
@@ -213,12 +250,52 @@ class ActionObject implements Action{
 	}
 
 	public function get_root_action_obj() {
-		if(is_null($this->parent_action_object)) {
+		if(is_null($this->parent_action_obj)) {
+			$cur_root_name = $this->get_name();
 			return $this;	
 		}
 
-		return $this->parent_action_object->get_root_action_obj();
+		return $this->parent_action_obj->get_root_action_obj();
 	}
+
+	// TODO 서버에서 좌표정보를 만들어주므로 js 단에서는 사라져야 합니다.
+	public function set_coordinate($coordinate=null) {
+		if(is_null($coordinate)) {
+			$this->coordinate = "root";
+		} else {
+			$this->coordinate = $coordinate;	
+		}
+	}
+	public function get_coordinate() {
+		return $this->coordinate;
+	}
+	// TODO 서버에서 검색 매핑 정보를 만들어 주므로 js 단에서는 사라져야 합니다.
+	// $foo->{$start . $end}
+	public function set_search_map($search_map=null) {
+
+		$cur_name = $this->get_name();
+
+		if(is_null($search_map)) {
+			$search_map = new stdClass();
+		}
+
+		if(!is_null($this->coordinate) && !empty($this->coordinate)) {
+			$search_map->{$this->coordinate} = $this;
+		}
+
+		$this->search_map = $search_map;
+	}
+	public function get_search_map() {
+		return $this->search_map;
+	}
+	public function search($coordinate) {
+		if(is_null($this->search_map)) {
+			$this->search_map = new stdClass();
+		}
+
+		return $this->search_map->{$coordinate};
+	}
+
 
 	public function get_std_obj($std_obj=null) {
 
@@ -235,7 +312,10 @@ class ActionObject implements Action{
 		$std_obj->action_collection_type_name = $this->action_collection_type_name;
 		$std_obj->action_item_type = intval($this->action_item_type);
 		$std_obj->action_item_type_name = $this->action_item_type_name;
-		$std_obj->parent_action_object = null;
+
+		$std_obj->coordinate = $this->coordinate;
+
+		$std_obj->parent_action_obj = null;
 
 		$children_action_obj_list = array();
 
@@ -245,7 +325,6 @@ class ActionObject implements Action{
 
 				if(is_null($child_action_obj)) continue;
 
-				$child_action_obj_name = $child_action_obj->get_name();
 				$std_obj_child = $child_action_obj->get_std_obj();
 
 				$std_obj_child_parent = new stdClass();
@@ -260,9 +339,11 @@ class ActionObject implements Action{
 				$std_obj_child_parent->action_item_type = intval($this->action_item_type);
 				$std_obj_child_parent->action_item_type_name = $this->action_item_type_name;
 
-				$std_obj_child->parent_action_object = $std_obj_child_parent;
+				$std_obj_child_parent->coordinate = $this->coordinate;
 
-				if((0 < $action_idx) && ActionItem::is_action_item($child_action_obj)) {
+				$std_obj_child->parent_action_obj = $std_obj_child_parent;
+
+				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
 					$std_obj_child->action_item_sibling_before = $before_std_obj_child;
 				}
@@ -275,47 +356,141 @@ class ActionObject implements Action{
 		return $std_obj;
 	}
 
+	/*
+		@ Public
+		@ Desc : 파라미터로 받은 action obj의 내용을 해당 객체로 주입합니다.
+	*/
+	public function inject($action_obj) {
+
+		if(ActionObject::is_not_action_obj($action_obj)) {
+			return;
+		}
+
+		$this->set_parent($action_obj->get_parent());
+		$this->set_children($action_obj->get_children());
+		$this->set_id($action_obj->get_id());
+		$this->set_name($action_obj->get_name());
+
+		$this->set_collection_type($action_obj->get_collection_type());
+		$this->set_collection_type_name($action_obj->get_collection_type_name());
+		$this->set_item_type($action_obj->get_item_type());
+		$this->set_item_type_name($action_obj->get_item_type_name());
+
+		$this->set_hash_key($action_obj->get_hash_key());
+		$this->set_order($action_obj->get_order());
+		$this->set_is_shy($action_obj->get_is_shy());
+
+		$this->set_coordinate($action_obj->get_coordinate());
+		$this->set_search_map($action_obj->get_search_map());
+
+	}
+
 }
 
 class ActionCollection extends ActionObject{
 
-	public static function is_not_action_collection($target) {
-		return !ActionCollection::is_action_collection($target);
+	/*
+		@ Public
+		@ Usage : ActionCollection::is_not_instance($target)
+	*/
+	public static function is_not_instance($target) {
+		return !ActionCollection::is_instance($target);
 	}
-	public static function is_action_collection($target) {
+	/*
+		@ Public
+		@ Usage : ActionCollection::is_instance($target)
+	*/
+	public static function is_instance($target) {
 		if(!is_null($target) && is_a($target,'ActionCollection')) {
 			return true;
 		}
 		return false;
 	}
 
-	private $meeting_agenda_id;
+	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0) {
+		parent::set_name($action_name);
+		parent::set_collection_type($action_collection_type);
+		$this->set_meeting_agenda_id($meeting_agenda_id);
+		parent::set_is_shy($is_shy);
+	}
 
+	private $meeting_agenda_id;
 	public function set_meeting_agenda_id($meeting_agenda_id) {
 		$this->meeting_agenda_id = $meeting_agenda_id;
 	}
 	public function get_meeting_agenda_id() {
+		if(is_null($this->meeting_agenda_id)) {
+			$this->meeting_agenda_id = 0;
+		}
 		return $this->meeting_agenda_id;
 	}
 
-	private static $ACTION_COLLECTION_TYPE_LIST=1;
-	private static $ACTION_COLLECTION_TYPE_TABLE=2;
+	private $meeting_agenda_theme;
+	public function set_meeting_agenda_theme($meeting_agenda_theme) {
+		$this->meeting_agenda_theme = $meeting_agenda_theme;
+	}
+	public function get_meeting_agenda_theme() {
+		if(is_null($this->meeting_agenda_theme)) {
+			$this->meeting_agenda_theme = "No theme";
+		}
+		return $this->meeting_agenda_theme;
+	}
+
+	private $meeting_agenda_round;
+	public function set_meeting_agenda_round($meeting_agenda_round) {
+		$this->meeting_agenda_round = $meeting_agenda_round;
+	}
+	public function get_meeting_agenda_round() {
+		if(is_null($this->meeting_agenda_round)) {
+			$this->meeting_agenda_round = 0;
+		}
+		return $this->meeting_agenda_round;
+	}
+
+	public static $ACTION_COLLECTION_TYPE_LIST=1; 		// ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+	public static $ACTION_COLLECTION_TYPE_TABLE=2;		// ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
 
 	public function is_list() {
-		if(is_null($this->action_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_LIST != $this->action_type)) {
+
+		$action_collection_type = parent::get_collection_type();
+		if(is_null($action_collection_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_LIST != $action_collection_type)) {
 			return false;
-		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_LIST == $this->action_type) {
+		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_LIST == $action_collection_type) {
 			return true;
 		}
 		return false;
 	}
 
 	public function is_table() {
-		if(is_null($this->action_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_TABLE != $this->action_type)) {
+
+		$action_collection_type = parent::get_action_collection_type();
+
+		if(is_null($action_collection_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_TABLE != $this->action_collection_type)) {
 			return false;
-		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $this->action_type) {
+		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $this->action_collection_type) {
 			return true;
 		}
+		return false;
+	}
+	/*	
+		@ Public
+		@ Usage : ActionCollection::is_not_valid_collection_type($collection_type);
+	*/
+	public static function is_not_valid_collection_type($collection_type) {
+		return !ActionCollection::is_valid_collection_type($collection_type);
+	}
+	/*	
+		@ Public
+		@ Usage : ActionCollection::is_valid_collection_type($collection_type);
+	*/
+	public static function is_valid_collection_type($collection_type) {
+
+		if( ActionCollection::$ACTION_COLLECTION_TYPE_LIST == $collection_type || 
+			ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $collection_type ) {
+
+			return true;
+		}
+
 		return false;
 	}
 
@@ -325,7 +500,7 @@ class ActionCollection extends ActionObject{
 
 	public function is_root_collection() {
 		$has_no_parent = false;
-		if(is_null($this->parent_action_object)) {
+		if(is_null($this->parent_action_obj)) {
 			$has_no_parent = true;
 		}
 
@@ -339,23 +514,75 @@ class ActionCollection extends ActionObject{
 			$std_obj = new stdClass();	
 		}
 		$std_obj->meeting_agenda_id = intval($this->meeting_agenda_id);
+		$std_obj->meeting_agenda_theme = $this->meeting_agenda_theme;
+		$std_obj->meeting_agenda_round = intval($this->meeting_agenda_round);
 
 		return parent::get_std_obj($std_obj);
 	}
 
+	/*
+		@ Public
+		@ Desc : 파라미터로 받은 action obj의 내용을 해당 객체로 주입합니다.
+	*/
+	public function inject($action_collection_obj) {
+
+		if(ActionCollection::is_not_instance($action_collection_obj)) {
+			return;
+		}
+
+		$this->set_meeting_agenda_id($action_collection_obj->get_meeting_agenda_id());
+		$this->set_meeting_agenda_theme($action_collection_obj->get_meeting_agenda_theme());
+		$this->set_meeting_agenda_round($action_collection_obj->get_meeting_agenda_round());
+		parent::inject($action_collection_obj);
+	}
+
 }
+
+
+
 
 class ActionItem extends ActionObject{
 
-	public static function is_not_action_item($target) {
-		return !$this->is_action_item($target);
+	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
+		parent::set_name($action_name);
+		parent::set_item_type($action_item_type);
+		parent::set_is_shy($is_shy);
 	}
-	public static function is_action_item($target) {
+
+	/*
+		@ Public
+		@ Usage : ActionItem::is_not_instance($target)
+	*/
+	public static function is_not_instance($target) {
+		return !ActionItem::is_instance($target);
+	}
+	/*
+		@ Public
+		@ Usage : ActionItem::is_instance($target)
+	*/
+	public static function is_instance($target) {
 		if(!is_null($target) && is_a($target,'ActionItem')) {
 			return true;
 		}
 		return false;
 	}
+
+	/*
+		@ Public
+		@ Desc : 파라미터로 받은 action obj의 내용을 해당 객체로 주입합니다.
+	*/
+	public function inject($action_item_obj) {
+
+		if(ActionItem::is_not_instance($action_item_obj)) {
+			return;
+		}
+
+		$this->set_context($action_item_obj->get_context());
+		$this->set_add_on_list($action_item_obj->get_add_on_list());
+
+		parent::inject($action_item_obj);
+	}
+
 
 	public function test() { return parent::test() . 'ActionItem'; }
 
@@ -397,7 +624,6 @@ class ActionItem extends ActionObject{
 		}
 
 	}
-
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
 			$this->add_on_action_object_list = array();
@@ -405,12 +631,37 @@ class ActionItem extends ActionObject{
 
 		return $this->add_on_action_object_list;
 	}	
+	public function set_add_on_list($add_on_action_object_list) {
+		$this->add_on_action_object_list = $add_on_action_object_list;
+	}
 
 	// 아이템 타입별로 context 내용을 구성하는 방식이 다르다.
 	public static $TITLE_ONLY=1;			// ActionItem::$TITLE_ONLY
 	public static $TITLE_N_TIME_HH_MM=2;	// ActionItem::$TITLE_N_TIME_HH_MM
 	public static $TITLE_N_TIME_MM_SS=3;	// ActionItem::$TITLE_N_TIME_MM_SS
 	public static $SELECT_BOX=4;			// ActionItem::$SELECT_BOX
+
+	/*
+		@ Public
+		@ Usage : ActionItem::is_valid_action_item_type($action_item_type);
+	*/
+
+	public static function is_valid_action_item_type($action_item_type) {
+
+		if(is_null($action_item_type) || !is_numeric($action_item_type)) {
+			return false;
+		}
+
+		if(	ActionItem::$TITLE_ONLY == $action_item_type ||
+			ActionItem::$TITLE_N_TIME_HH_MM == $action_item_type ||
+			ActionItem::$TITLE_N_TIME_MM_SS == $action_item_type ||
+			ActionItem::$SELECT_BOX == $action_item_type ) {
+
+			return true;
+		}
+
+		return false;
+	}
 
 }
 
@@ -419,7 +670,6 @@ class ActionItem extends ActionObject{
 */
 class ActionItemTitleNTimeHHMM extends ActionItem{
 
-	// ActionItemTitleNTimeHHMM::is_not_instance
 	public static function is_not_instance($target) {
 		return !ActionItemTitleNTimeHHMM::is_instance($target);
 	}
@@ -430,11 +680,53 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return false;
 	}
 
+	/*
+		@ Public
+		@ Desc : 파라미터로 받은 action obj의 내용을 해당 객체로 주입합니다.
+	*/
+	public function inject($action_hhmm_item_obj) {
+
+		if(ActionItemTitleNTimeHHMM::is_not_instance($action_hhmm_item_obj)) {
+			return;
+		}
+
+		$this->set_time_sec_initial($action_hhmm_item_obj->get_time_sec_initial());
+		$this->set_time_sec_offset_from_init($action_hhmm_item_obj->get_time_sec_offset_from_init());
+		$this->set_time_hh_mm_initial($action_hhmm_item_obj->get_time_hh_mm_initial());
+		$this->set_time_hh_mm($action_hhmm_item_obj->get_time_hh_mm());
+
+		parent::inject($action_hhmm_item_obj);
+	}	
+
 	private $context_time_hh_mm;
 	private $time_sec_initial;
 	private $time_sec_offset_from_init;
 	private $time_hh_mm_initial;
 	private $time_hh_mm;
+	public function set_time_sec_initial($time_sec_initial) {
+		$this->time_sec_initial = $time_sec_initial;
+	}
+	public function get_time_sec_initial() {
+		return $this->time_sec_initial;
+	}
+	public function set_time_sec_offset_from_init($time_sec_offset_from_init) {
+		$this->time_sec_offset_from_init = $time_sec_offset_from_init;
+	}
+	public function get_time_sec_offset_from_init() {
+		return $this->time_sec_offset_from_init;
+	}
+	public function set_time_hh_mm_initial($time_hh_mm_initial) {
+		$this->time_hh_mm_initial = $time_hh_mm_initial;
+	}
+	public function get_time_hh_mm_initial() {
+		return $this->time_hh_mm_initial;
+	}
+	public function set_time_hh_mm($time_hh_mm) {
+		$this->time_hh_mm = $time_hh_mm;
+	}
+	public function get_time_hh_mm() {
+		return $this->time_hh_mm;
+	}
 
 	public function test() { return parent::test() . 'ActionItemTitleNTimeHHMM'; }
 
@@ -467,6 +759,51 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		$this->time_hh_mm = $context_time_hh_mm->time_hh_mm;
 
 		return parent::set_context($context);
+	}
+
+	private function convert_time_str_hhmm_to_sec($time_str_hhmm) {
+
+		if(empty($time_str_hhmm)) {
+			return -1;
+		}
+
+		sscanf($time_str_hhmm, "%d:%d", $hours, $minutes);
+
+		if(!is_numeric($hours) || !is_numeric($minutes)) {
+			return -1;
+		}
+
+		$time_seconds = $hours * 3600 + $minutes * 60;
+
+		return $time_seconds;
+	}
+
+	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0) {
+
+		parent::set_name($action_name);
+		parent::set_item_type(ActionItem::$TITLE_N_TIME_HH_MM);
+		parent::set_is_shy($is_shy);
+
+		$time_sec_initial = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_init);
+		$time_sec_specific = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_specific);
+
+		if($time_sec_initial < 0 || $time_sec_specific < 0) {
+			return;
+		}
+
+		if($time_sec_initial < $time_sec_specific) {
+			$time_sec_offset_from_init = $time_sec_specific - $time_sec_initial;
+		} else {
+			$time_sec_offset_from_init = 0;
+		}
+
+		$this->set_context_time_hh_mm(
+			// $time_sec_initial
+			$time_sec_initial
+			// $time_sec_offset_from_init
+			, $time_sec_offset_from_init
+		);
+		
 	}
 
 	/*
@@ -514,6 +851,8 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		$context_time_hh_mm->time_hh_mm = $this->time_hh_mm;
 
 		$json_str_context_time_hh_mm = json_encode($context_time_hh_mm);
+
+		$this->set_context($json_str_context_time_hh_mm);
 	}
 	public function set_context_time_hh_mm_offset($time_sec_offset){
 
@@ -534,6 +873,8 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		$context_time_hh_mm->time_hh_mm = $this->time_hh_mm;
 
 		$json_str_context_time_hh_mm = json_encode($context_time_hh_mm);
+
+		$this->set_context($json_str_context_time_hh_mm);
 	}	
 	/*
 		@ Public

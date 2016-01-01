@@ -674,6 +674,7 @@ airborne.html = {
 airborne.json = {
 	parseJSON:function(json_str){
 		var _v = airborne.validator;
+		if(_v.isNotValidStr(json_str)) return null;
 
 		// json parsing safe filter
 		// \& --> &
@@ -683,8 +684,6 @@ airborne.json = {
 		// \n --> <br/>
 		json_str = json_str.replace(/\n/gi, "<br/>");
 
-		if(_v.isNotValidStr(json_str)) return null;
-
 		var json_obj = $.parseJSON(json_str);
 
 		// 모든 json obj에서 유효하지 않는 문자가 없는지 확인한다.
@@ -692,6 +691,8 @@ airborne.json = {
 
 		return json_obj;
 	}
+	// REMOVE ME
+	/*
 	, findNode:function(json_obj, delegate_action) {
 
 		if(json_obj === undefined) return;
@@ -739,6 +740,7 @@ airborne.json = {
 
 		return json_obj;
 	}
+	*/
 }
 
 

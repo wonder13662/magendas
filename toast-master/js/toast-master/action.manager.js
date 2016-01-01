@@ -133,11 +133,6 @@ var action_manager = {
 					this.set_action_item_sibling_before(action_data_obj.action_item_sibling_before);
 				}
 
-				// REMOVE ME
-				// if(action_data_obj.sibling_action_obj_after != undefined) {
-				// 	this.set_sibling_action_obj_after(action_data_obj.sibling_action_obj_after);
-				// }
-
 				this.set_coordinate(coordinate);
 
 				var my_coordinate = this.get_coordinate();
@@ -184,46 +179,69 @@ var action_manager = {
 			*/
 			,get_action_view_obj:function(){
 
+				// DEBUG
+				var consoler = airborne.console.get();
+				// consoler.off();
+
+				var cur_action_name = this.get_action_name();
+				var cur_scope = "get_action_view_obj / <cur_action_name> ".replace(/\<cur_action_name\>/gi, cur_action_name);
+				consoler.say(cur_scope);
+
+				var action_view_obj = null;
 				if(this.is_list()) {
 
-					// 뷰 리스트 데이터를 만듭니다.
+					consoler.say("get_action_view_obj / <cur_action_name> / 뷰 리스트 데이터를 만듭니다.".replace(/\<cur_action_name\>/gi, cur_action_name));
+
 					var view_list_array = [];
 					if(this.has_no_children()) {
 						return view_list_array;	
 					}
 
+					// wonder.jung - 여기서 자식 객체 연결이 안되고 있음.
 					// 자신의 자식 객체가 있다면 이 객체의 뷰 데이터를 만들어 추가해줍니다.
 					var children_action_object_list = this.get_children();
 					for(var idx=0; idx < children_action_object_list.length; idx++) {
-						var childraction_object = children_action_object_list[idx];
-						var child_action_view_obj = childraction_object.get_action_view_obj();
+						var child_action_object = children_action_object_list[idx];
+						var child_action_view_obj = child_action_object.get_action_view_obj();
 						view_list_array.push(child_action_view_obj);
 					}
+
+					consoler.say("get_action_view_obj / <cur_action_name> / view_list_array :: ".replace(/\<cur_action_name\>/gi, cur_action_name),view_list_array);
 
 					return view_list_array;
 
 				} else if(this.is_table()) {
 
-					// 뷰 테이블 데이터를 만듭니다.
-					// TODO 기존의 테이블 그리는 로직 파악 필요.
-					console.log("Need to implement!");
+					consoler.say("get_action_view_obj / <cur_action_name> / 뷰 테이블 데이터를 만듭니다.".replace(/\<cur_action_name\>/gi, cur_action_name));
+					consoler.say("get_action_view_obj / <cur_action_name> / Need to implement!".replace(/\<cur_action_name\>/gi, cur_action_name));
 
 				} else if(this.is_item_title_only()) {
 
-					// console.log("아이템 - 타이틀만 노출 뷰 데이터 객체를 만듭니다.");
-					return this.get_action_view_item_title_only();
+					consoler.say("get_action_view_obj / <cur_action_name> / 아이템 - 타이틀만 노출 뷰 데이터 객체를 만듭니다.".replace(/\<cur_action_name\>/gi, cur_action_name));
+
+					action_view_obj = this.get_action_view_item_title_only();
+					consoler.say("get_action_view_obj / <cur_action_name> / action_view_obj".replace(/\<cur_action_name\>/gi, cur_action_name),action_view_obj);
+
+					return action_view_obj;
 
 				} else if(this.is_item_title_n_time_hh_mm()) {
 
-					// console.log("아이템 - 타이틀과 시간,분 노출 뷰 데이터 객체를 만듭니다.");
-					return this.get_action_view_item_title_n_time_hh_mm();
+					consoler.say("get_action_view_obj / <cur_action_name> / 아이템 - 타이틀과 시간,분 노출 뷰 데이터 객체를 만듭니다.".replace(/\<cur_action_name\>/gi, cur_action_name));
+
+					action_view_obj = this.get_action_view_item_title_n_time_hh_mm();
+					consoler.say("get_action_view_obj / <cur_action_name> / action_view_obj".replace(/\<cur_action_name\>/gi, cur_action_name),action_view_obj);
+
+
+
+					return action_view_obj;
 
 				} else if(this.is_item_title_n_time_mm_ss()) {
 
-					// 아이템 - 타이틀과 분,초 노출 뷰 데이터 객체를 만듭니다.
-					console.log("Need to implement!");
+					consoler.say("get_action_view_obj / <cur_action_name> / 아이템 - 타이틀과 분,초 노출 뷰 데이터 객체를 만듭니다.".replace(/\<cur_action_name\>/gi, cur_action_name));
+					consoler.say("get_action_view_obj / <cur_action_name> / Need to implement!".replace(/\<cur_action_name\>/gi, cur_action_name));
 
 				}
+
 			}
 			/*
 				@ Private
@@ -246,6 +264,8 @@ var action_manager = {
 						// 내부에 추가될 외부 element collection set id 리스트
 						,__add_on_obj_list:add_on_obj_list
 						,__action_obj:this
+						,__action_list:null
+						,__action_table:null
 					}
 				}
 
@@ -255,12 +275,18 @@ var action_manager = {
 				@ Private
 				@ Desc : 제목과 시간(HH:MM)을 가지고 있는 아이템 객체를 만들어 줍니다.
 			*/
-			,get_action_view_item_title_n_time_hh_mm:function(init_time_sec, search_list) {
+			,get_action_view_item_title_n_time_hh_mm:function(search_list) {
+
+				var consoler = airborne.console.get();
+				consoler.off();
+
+				var cur_action_name = this.get_action_name();
+				consoler.say("get_action_view_item_title_n_time_hh_mm / <cur_action_name> ".replace(/\<cur_action_name\>/gi, cur_action_name));
 
 				var cur_action_context = this.get_action_context();
 
 				var action_time_obj = _json.parseJSON(cur_action_context);
-				console.log(">>> action_time_obj :: ",action_time_obj);
+				consoler.say("get_action_view_item_title_n_time_hh_mm / <cur_action_name> / action_time_obj".replace(/\<cur_action_name\>/gi, cur_action_name),action_time_obj);
 
 				// Sample : Object {time_sec_initial: 70800, time_sec_offset_from_init: 600, time_hh_mm_initial: "19:40", time_hh_mm: "19:50"}
 
@@ -292,24 +318,50 @@ var action_manager = {
 				var action_context_str = this.get_action_context();
 				var action_context_obj = _json.parseJSON(action_context_str);
 
-				var view_item_title_only = {
+				var view_item = {
 					__action_list:null
 					, __action_table:null
 					, __action_name:action_name
 					, __time_hh_mm:time_hh_mm
 					, __prop_map:{
 						// 숨김열 여부 - 숨김 열은 컬렉션 객체에 엘리먼트를 추가할 때 사용합니다.
+						// REMOVE ME
 						__is_shy:is_shy
 						// 엘리먼트의 값을 편집할 때, 사용하게 될 선택 리스트
-						,__search_list:search_list
+						, __search_list:search_list
 						// 내부에 추가될 외부 element collection set id 리스트
-						,__add_on_obj_list:add_on_obj_list
-						,__time_sec:time_sec_initial+time_sec_offset_from_init
-						,__action_obj:this
+						, __add_on_obj_list:add_on_obj_list
+						// REMOVE ME
+						, __time_sec:time_sec_initial+time_sec_offset_from_init
+						, __action_obj:this
+						, __action_list:null
+						, __action_table:null
 					}
 				}
 
-				return view_item_title_only;
+				// children - item은 1개의 테이블 혹은 1개의 리스트를 자식으로 가질 수 있습니다.
+				if(this.has_children()) {
+
+					var children_action_object_list = this.get_children();
+					var children_view_obj_list = [];
+
+					for(var idx=0; idx < children_action_object_list.length; idx++) {
+						var child_action_object = children_action_object_list[idx];
+						var child_action_view_obj = child_action_object.get_action_view_obj();
+
+						children_view_obj_list.push(child_action_view_obj);
+
+					} // end for
+
+					view_item.__action_list = children_view_obj_list;
+					view_item.__prop_map.__action_list = children_view_obj_list;
+					return view_item;
+
+				} // end outer if
+
+				consoler.say("get_action_view_item_title_n_time_hh_mm / <cur_action_name> / view_item".replace(/\<cur_action_name\>/gi, cur_action_name),view_item);
+
+				return view_item;
 			}			
 			/*
 				@ Public
@@ -518,20 +570,36 @@ var action_manager = {
 				return element_type;
 
 			}
+			// 아래 방법으로는 타입 정보를 전달하기는 불가능하다.
 			/*
 				@ Public
 				@ Desc : 실제로 화면에 그릴때 사용되는 타입으로 변환해줍니다. 
 				호출 객체부터 시작해서 최하단의 아이템의 타입까지 배열로 반환합니다. 
 				단, 각 단계의 형제 아이템의 속성을 동일해야 합니다.
 			*/
-			,get_element_type_list:function(element_type_list) {
+			,get_element_type_list:function(element_type_list, depth) {
+
+				// DEBUG
+				var cur_action_name = this.get_action_name();
+				console.log("** get_element_type_list / cur_action_name :: ",cur_action_name);
 
 				if(element_type_list == undefined) {
 					element_type_list = [];
 				}
+				if(depth == undefined) {
+					depth = 0;
+				}
 
-				if(this.is_item()) {
+				if(this.is_item() && element_type_list.length == depth) {
+					
+					var cur_element_type = this.get_element_type();
+
+					console.log("*** depth :: ",depth);
+					console.log("*** cur_element_type :: ",cur_element_type);
+
 					element_type_list.push(this.get_element_type());	
+
+					depth += 1;
 				}
 
 				if(this.has_no_children()) {
@@ -539,8 +607,12 @@ var action_manager = {
 				}
 
 				var children_action_object_list = this.get_children();
-				var first_chlild_action_obj = children_action_object_list[0];
-				element_type_list = first_chlild_action_obj.get_element_type_list(element_type_list);
+				for(var idx = 0;idx < children_action_object_list.length; idx++) {
+					var child_action_obj = children_action_object_list[idx];
+					element_type_list = child_action_obj.get_element_type_list(element_type_list, depth);
+				}
+				
+				
 
 				return element_type_list;
 			}

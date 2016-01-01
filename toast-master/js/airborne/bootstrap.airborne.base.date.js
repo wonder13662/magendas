@@ -101,7 +101,7 @@ airborne.dates = {
 	,getDateFormatType:function(date_str){
 
 		if(airborne.validator.isNotValidStr(date_str)) {
-			console.log("!Error! / airborne.dates / getFormattedDate / airborne.validator.isNotValidStr(date_str)");
+			console.log("!Error! / airborne.dates / getDateFormatType / airborne.validator.isNotValidStr(date_str)");
 			return null;
 		}
 
@@ -129,13 +129,14 @@ airborne.dates = {
 		return null;
 	}
 	,is_valid_time_format_str:function(date_str, input_date_format_type){
+		// wonder.jung
 		var cur_date = this.getFormattedDate(date_str, input_date_format_type);
 		return (cur_date!=null)?true:false;
 	}
 	,is_not_valid_time_format_str:function(date_str, input_date_format_type){
 		return !this.is_valid_time_format_str(date_str, input_date_format_type);
 	}
-	,getFormattedDate:function(date_str, input_date_format_type){ // airborne.dates.getFormattedDate("",airborne.dates.DATE_TYPE_YYYY_MM_DD);
+	,getFormattedDate:function(date_str, input_date_format_type){
 		
 		if(airborne.validator.isNotValidStr(date_str)) {
 			console.log("!Error! / airborne.dates / getFormattedDate / airborne.validator.isNotValidStr(date_str)");
@@ -399,6 +400,7 @@ airborne.dates = {
 			console.log("getFormattedTime / airborne.validator.isNotValidStr(date_str)");
 			return null;
 		}
+
 		var input_date_format_type = this.getDateFormatType(date_str);
 		if(input_date_format_type == null){
 			console.log("getFormattedTime / input_date_format_type == null");

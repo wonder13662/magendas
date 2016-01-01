@@ -127,22 +127,28 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
-
 		// TEST
-
 		var new_action_list = meeting_agenda_data_obj.new_action_list;
-
-		// TODO - wonder.jung
-		// 1. 시간 아이템에 대해 일괄 시간 업데이트를 할 수 있는 방법을 찾아야 함.
-		// 2. add on 에 대한 처리.
-
 		_action.add_editable_action_list(
 			// parent_jq
 			container_jq
 			// action_list
 			, new_action_list
+			// delegate_save_n_reload
+			, _obj.get_delegate(function(cur_outcome_obj){
+
+				console.log("cur_outcome_obj :: ",cur_outcome_obj);
+				
+			},this)			
+		);
+
+
+		var new_action_list_v2 = meeting_agenda_data_obj.new_action_list_v2;
+		_action.add_editable_action_list(
+			// parent_jq
+			container_jq
+			// action_list
+			, new_action_list_v2
 			// delegate_save_n_reload
 			, _obj.get_delegate(function(cur_outcome_obj){
 

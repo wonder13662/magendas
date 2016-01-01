@@ -39,11 +39,33 @@ airborne.bootstrap.obj.__action = {
 			return;
 		}
 
-		var list_element_type_arr = action_list.get_element_type_list();
+		//var list_element_type_arr = action_list.get_element_type_list();
+		var list_element_type_arr = ["ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT","ELEMENT_TYPE_LIST_ROW_INPUT_TEXT"];
 		var action_list_view = action_list.get_action_view_obj();
 
-		console.log(">>* list_element_type_arr :: ",list_element_type_arr);
-		console.log(">>* action_list_view :: ",action_list_view);
+		console.log("add_editable_action_list >>> action_list_view :: ",action_list_view);
+
+		var consoler = airborne.console.get();
+		consoler.off();
+
+		// DEBUG
+		var msg = 
+		"airborne.bootstrap.obj.__action / add_editable_action_list / <list_title>"
+		.replace(/\<list_title\>/gi, action_list.get_action_name())
+		;
+		consoler.say(msg, action_list);
+
+		var msg = 
+		"airborne.bootstrap.obj.__action / add_editable_action_list / <list_title> / list_element_type_arr"
+		.replace(/\<list_title\>/gi, action_list.get_action_name())
+		;
+		consoler.say(msg, action_list,list_element_type_arr);
+
+		var msg = 
+		"airborne.bootstrap.obj.__action / add_editable_action_list / <list_title> / action_list_view"
+		.replace(/\<list_title\>/gi, action_list.get_action_name())
+		;
+		consoler.say(msg, action_list,action_list_view);
 
 		var editable_action_list = 
 		_view_list.add_editable_action_list(

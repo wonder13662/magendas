@@ -3503,14 +3503,14 @@ airborne.bootstrap.obj = {
 							_obj.ELEMENT_TYPE_TABLE_TIME_HH_MM == cur_element_type || 
 							_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type
 							){
-
+							
 							is_valid_time_format_str = _date.is_valid_time_format_str(cur_time_double_digit_str, _date.DATE_TYPE_HH_MM);
 
 						} else if( 	_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
 									_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
 									_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
 									){
-
+							
 							is_valid_time_format_str = _date.is_valid_time_format_str(cur_time_double_digit_str, _date.DATE_TYPE_MM_SS);
 						}
 

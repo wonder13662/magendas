@@ -4235,7 +4235,7 @@ airborne.bootstrap.view.mobile.list = {
 		var check_time_format_valid = function(){
 			var cur_time_double_digit_str = cur_time_input_group_jq_input_jq.val();
 			var prev_time_double_digit_str = cur_time_input_group_jq_input_jq.attr("prev_value");
-
+			
 			is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_MM_SS);
 
 			if(is_valid_time_format_str){

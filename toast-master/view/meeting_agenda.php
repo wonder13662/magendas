@@ -94,51 +94,22 @@
 
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
-	// 96, 2
-	// $output = $wdj_mysql_interface->copyTimelineFromTemplate(96, 2);
-	// print_r($output);
+
+
 
 	// test action list
-	//$wdj_mysql_interface->test_action_list();
 
-	// test action table
-	// $new_action_table = $wdj_mysql_interface->test_action_table_insert();
-	// $new_action_table_std = $new_action_table->get_std_obj();
-
-	// $new_action_table = $wdj_mysql_interface->get_action_collection(231);
-	// $new_action_table_std = $new_action_table->get_std_obj();
-	// $wdj_mysql_interface->test_action_table_list_item_update($new_action_table);
-
-	// $new_action_list_id = $wdj_mysql_interface->test_action_list_insert_timeline();
-	// $new_action_list = $wdj_mysql_interface->get_action_collection($new_action_list_id);
-	// $new_action_list = $wdj_mysql_interface->get_action_collection(394);
+	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM();
 	// $new_action_list_std = $new_action_list->get_std_obj();
+	
+	// $new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
+	// $new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
 
-	// $new_action_list_id = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM();
-	// $new_action_list = $wdj_mysql_interface->get_action_collection($new_action_list_id);
-	$new_action_list = $wdj_mysql_interface->get_action_collection(510);
+	$new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
 	$new_action_list_std = $new_action_list->get_std_obj();
 
-	// 뷰 로직에서 일부 엘리먼트가 업데이트 되는 경우, action collection 객체를 전달할 수 없다는 문제점이 있다.
-	// action collection 객체를 직접 받을 수 없다면, 임의의 파라미터를 받아서, action collection을 재구성해야 한다.
-
-	// TODO
-
-	// phase 1
-
-	// javascript에 action collection과 동일하게 동작하는 구조체를 만든다.
-	// 이 구조체는 업데이트가 발생하면, 단계적 업데이트를 진행
-	// 이 구조체는 업데이트가 발생하면, 자신으로부터 최상위 객체까지의 링크드리스트를 파라미터로 넘긴다.
-	// json 객체 변환의 위험도를 낮추기 위해 모든 파라미터는 '해시키'로 구성되어야 한다.
-	// 이 구조체는 업데이트가 완료되면, 서버로부터 새로 생성된 링크드 리스트(업데이트가 시작된 개체부터 최상위까지)를 결과 값으로 받는다.
-	// 업데이트된 본문의 내용이 있다면 안정성 검사를 거쳐 서버로 업데이트한다.
-	// 결과는 새로운 최상위 객체 아이디로 ajax 통신으로 내용을 다시 뷰에 그려야 한다.
-	// 결과를 구조체 안에서 비교해서 달라진 부분만 업데이트한다.
-
-	// phase 2
-
-	// ajax api php 필요.
-
+	$new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
+	$new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
 
 
 
@@ -344,12 +315,16 @@ console.log(">>> action_list_delete : ",action_list_delete);
 console.log(">>> action_list_update : ",action_list_update);
 
 var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
+var new_action_list_std_v2 = <?php echo json_encode($new_action_list_std_v2);?>;
 
 console.log("new_action_list_std :: ",new_action_list_std);
+console.log("new_action_list_std_v2 :: ",new_action_list_std_v2);
 
 var new_action_list = action_manager.get_action_obj(new_action_list_std);
+var new_action_list_v2 = action_manager.get_action_obj(new_action_list_std_v2);
 
 console.log("new_action_list :: ",new_action_list);
+console.log("new_action_list_v2 :: ",new_action_list_v2);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -391,6 +366,7 @@ var meeting_agenda_data_obj =
 
 	// TEST
 	, new_action_list:new_action_list
+	, new_action_list_v2:new_action_list_v2
 };
 
 console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);

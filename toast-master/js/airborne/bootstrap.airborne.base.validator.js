@@ -265,9 +265,18 @@ airborne.validator.factory = {
 				return is_not_unsigned_number;
 			}			
 			,is_not_number_str:function(target_number_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
 				return !this.is_number_str(target_number_str, show_log);
 			}
 			,is_number_str:function(target_number_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
 
 				var is_number_str = this.validator_engine.isNumberStr(target_number_str);
 				if(!is_number_str) {
@@ -275,6 +284,30 @@ airborne.validator.factory = {
 				}
 
 				return is_number_str;
+			}
+			,is_not_valid_time_format_hhmm:function(time_format_str_hhmm, show_log) {
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				return !this.is_valid_time_format_hhmm(time_format_str_hhmm, show_log);
+			}
+			/*
+				@ Public
+				@ Desc : 시간 포맷 문자열이 hh:mm ex) 10:24 인지 확인합니다.
+			*/
+			,is_valid_time_format_hhmm:function(time_format_str_hhmm, show_log) {
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+				var is_valid_time_format_hhmm = _dates.is_valid_time_format_str(time_format_str_hhmm, _dates.DATE_TYPE_HH_MM);
+				if(!is_valid_time_format_hhmm) {
+					this.show_err_msg("is_not_valid_time_format_hhmm", "time_format_str_hhmm", time_format_str_hhmm, show_log);
+				}
+
+				return is_valid_time_format_hhmm;
 			}
 			,get_err_msg:function(func_checker_name, target_name) {
 
