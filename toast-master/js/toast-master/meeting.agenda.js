@@ -137,25 +137,85 @@ wonglish.meeting_agenda_manager = {
 			// delegate_save_n_reload
 			, _obj.get_delegate(function(cur_outcome_obj){
 
-				console.log("cur_outcome_obj :: ",cur_outcome_obj);
-				
-			},this)			
-		);
+				var __v = _v_factory.get("add_editable_action_list / delegate_save_n_reload / 141");
+				var action_obj = null;
+				if(	cur_outcome_obj != undefined && 
+					cur_outcome_obj._prop_map != undefined && 
+					cur_outcome_obj._prop_map.__prop_map != undefined && 
+					cur_outcome_obj._prop_map.__prop_map.__action_obj != undefined	) {
 
+					action_obj = cur_outcome_obj._prop_map.__prop_map.__action_obj;
+				}
 
-		var new_action_list_v2 = meeting_agenda_data_obj.new_action_list_v2;
-		_action.add_editable_action_list(
-			// parent_jq
-			container_jq
-			// action_list
-			, new_action_list_v2
-			// delegate_save_n_reload
-			, _obj.get_delegate(function(cur_outcome_obj){
+				if( action_obj == undefined ) {
+					console.log("!Error! / action_obj == undefined");
+					return;	
+				}
+
+				var meeting_id = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
+				if(__v.is_not_unsigned_number(meeting_id)) {
+					return;
+				}
+				var cur_element_event_manager = cur_outcome_obj._prop_map.__element_event_manager;
+				if(__v.is_null_object(meeting_id)) {
+					return;
+				}
+				var _key = cur_outcome_obj._key;
+				if(__v.is_not_valid_str(_key)) {
+					return;
+				}
+				var _value = cur_outcome_obj._value;
+				action_obj.set_element_event_manager(cur_element_event_manager);
 
 				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
+				console.log(">>> _key :: ",_key);
+				console.log(">>> _value :: ",_value);
+				console.log(">>> action_obj :: ",action_obj);
+				console.log(">>> meeting_id :: ",meeting_id);
+				console.log(">>> cur_element_event_manager :: ",cur_element_event_manager);
+
+				// 업데이트 상태마다 다르게 처리
+				if( _obj.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
+
+					console.log("Do something / INSERT");
+
+				} else if( _obj.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
+					
+					if(action_obj.is_item_title_only()) {
+
+						console.log("Do something / UPDATE / is_item_title_only");
+
+					} else if(action_obj.is_item_title_n_time_hh_mm()) {
+						
+						if(_obj.TIME_PROP_HH_MM === _key) {
+
+							console.log("Do something / UPDATE / item_title_n_time_hh_mm / time");
+
+							var time_sec_cur_item = parseInt(_value);
+							if(__v.is_not_unsigned_number(time_sec_cur_item)) {
+								return;
+							}
+							
+							action_obj.update_time_hh_mm(time_sec_cur_item);
+
+						} else {
+
+							console.log("Do something / UPDATE / item_title_n_time_hh_mm / title");
+
+						}
+
+					}
+
+				} else if( _obj.EVENT_TYPE_DELETE_ITEM == cur_outcome_obj._event ) {
+
+					console.log("Do something / DELETE");
+
+				}
 				
 			},this)			
 		);
+
+
 
 
 

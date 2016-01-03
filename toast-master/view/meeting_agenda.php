@@ -105,18 +105,17 @@
 	// $new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
 	// $new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
 
-	$new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
+	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
+	// 2396
+	$new_action_list = $wdj_mysql_interface->get_action_collection(2396);
 	$new_action_list_std = $new_action_list->get_std_obj();
 
-	$new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
-	$new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
-
-
-
+	// $new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
+	// $new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
 
 	// @ required
 	$wdj_mysql_interface->close();
-
+	
 ?>
 
 
@@ -315,16 +314,16 @@ console.log(">>> action_list_delete : ",action_list_delete);
 console.log(">>> action_list_update : ",action_list_update);
 
 var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
-var new_action_list_std_v2 = <?php echo json_encode($new_action_list_std_v2);?>;
+// var new_action_list_std_v2 = <?php echo json_encode($new_action_list_std_v2);?>;
 
 console.log("new_action_list_std :: ",new_action_list_std);
-console.log("new_action_list_std_v2 :: ",new_action_list_std_v2);
+// console.log("new_action_list_std_v2 :: ",new_action_list_std_v2);
 
 var new_action_list = action_manager.get_action_obj(new_action_list_std);
-var new_action_list_v2 = action_manager.get_action_obj(new_action_list_std_v2);
+// var new_action_list_v2 = action_manager.get_action_obj(new_action_list_std_v2);
 
 console.log("new_action_list :: ",new_action_list);
-console.log("new_action_list_v2 :: ",new_action_list_v2);
+// console.log("new_action_list_v2 :: ",new_action_list_v2);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -366,7 +365,7 @@ var meeting_agenda_data_obj =
 
 	// TEST
 	, new_action_list:new_action_list
-	, new_action_list_v2:new_action_list_v2
+	// , new_action_list_v2:new_action_list_v2
 };
 
 console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);

@@ -9271,17 +9271,27 @@ class MYSQLInterface{
 			, $meeting_agenda_id
 		);
 
+
+
+
+
+
 		// 1.Greeting
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
-			"Greeting"
+			"Greetings"
 			// $time_str_hhmm_init=""
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "19:40"
 		);
 		$root_action_obj->add_child($child_action_item);
+
+
+
+
+
 
 		// 2.Call meeting to order [Chairperson]
 		$child_action_item =  
@@ -9315,8 +9325,557 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-		return $this->add_action($root_action_obj);
+		// 2-1-2. Cite the mission of Toastmasters
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Cite the mission of Toastmasters"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
+		// 2-1-3. Cite the mission of Toastmasters
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Fill Vacant functions & Share CL process"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 2-1-4. Cite the mission of Toastmasters
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Introduce Toastmaster"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+
+
+
+
+
+		// 20:00
+		// 3.Theme & Role Introduction [Toastmaster]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Theme & Role Introduction [Toastmaster]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "20:00"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 3-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 3-1-1. Opening remarks ( Introduce the theme )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Opening remarks ( Introduce the theme )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 3-1-2. Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 20:00
+
+
+
+
+
+
+
+		// 20:15
+		// 4.Table Topics Session [ Table Topic Master ]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Table Topics Session [ Table Topic Master ]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "20:15"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 4-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 4-1-1. Explain the rules and theme
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Explain the rules and theme"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 4-1-2. 1 to 2 minutes impromptu speaking
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"1 to 2 minutes impromptu speaking"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 4-1-3. Timer‘s Report
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Timer‘s Report"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 4-1-4. Vote for the Best Table Topic Speaker
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vote for the Best Table Topic Speaker"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 20:15
+
+
+
+
+
+
+
+
+
+		// 20:25
+		// 5. Prepared Speech Session [ Toastmaster ]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Prepared Speech Session [ Toastmaster ]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "20:25"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 5-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 5-1-1. Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 5-1-2. Timer‘s Report
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Timer‘s Report"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 5-1-3. Vote for the Best Prepared Speech Speaker
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vote for the Best Prepared Speech Speaker"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 5-1-4. Empty space
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			" "
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 20:25
+
+
+
+
+
+
+
+
+
+
+		// 21:00
+		// 6. Break
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Break"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:00"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 6-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 6-1-1. Complete Feedback to prepared speakers
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Complete Feedback to prepared speakers"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 6-1-2. Empty Space
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			" "
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 21:00
+
+
+
+
+
+
+
+
+
+
+		// 21:10
+		// 7. Break
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Mini debate session"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:10"
+		);
+		$root_action_obj->add_child($child_action_item);
+		// 21:10		
+
+
+
+
+
+
+
+
+
+
+		// 21:20
+		// 8. Evaluation Session [ General Evaluator ]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Evaluation Session [ General Evaluator ]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:20"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 8-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 8-1-1. Introduces Evaluators
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Introduces Evaluators"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 8-1-2. Timer‘s Report & Vote
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Timer‘s Report & Vote"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 8-1-3. Ah Counter‘s Ah tally report
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Ah Counter‘s Ah tally report"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 8-1-4. Grammarian‘s Report
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Grammarian‘s Report"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 8-1-5. General comments on meeting ( < 3 min )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"General comments on meeting ( < 3 min )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 21:20
+
+
+
+
+
+
+
+		// 21:35
+		// 9. Evaluation Session [ General Evaluator ]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Award Session [ Toastmaster ]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:35"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 9-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 9-1-1. Present award ( < 1 min )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Present award ( < 1 min )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 9-1-2. Closing remarks ( < 2 min )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Closing remarks ( < 2 min )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
+		// 21:35
+
+
+
+
+
+
+
+		// 21:40
+		// 10. Club Business [ Chairperson ]
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Club Business [ Chairperson ]"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:40"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 10-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 10-1-1. Club News ( What's new? )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Club News ( What's new? )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 10-1-2. Announcement & Role Sign-up for future meeting
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Announcement & Role Sign-up for future meeting"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 10-1-3. Guest Comments
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Guest Comments"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 10-1-4. Acknowledgement
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Acknowledgement"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 21:40	
+
+
+
+
+
+
+
+		// 21:50
+		// 11. Call Meeting to adjourn & Group photos
+		$child_action_item =  
+		new ActionItemTitleNTimeHHMM(
+			// $action_name=""
+			"Call Meeting to adjourn & Group photos"
+			// $time_str_hhmm_init=""
+			, "19:40"
+			// $time_str_hhmm_specific=""
+			, "21:40"
+		);
+		$root_action_obj->add_child($child_action_item);
+
+		// 11-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 11-1-1. Club News ( What's new? )
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Closing remarks ( < 2min )"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+		// 11-1-2. Announcement & Role Sign-up for future meeting
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Group Photo"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+		// 21:40
+
+		return $this->add_action($root_action_obj);
 	}
 
 

@@ -96,7 +96,7 @@ var action_manager = {
 		var action_obj = {
 			parent_action_object:null
 			,children_action_object_list:null
-			,action_item_sibling_before:null
+			,sibling_action_obj_before:null
 			,sibling_action_obj_after:null
 			,add_on_action_object_list:null
 			,action_id:null
@@ -129,8 +129,8 @@ var action_manager = {
 				if(action_data_obj.context != undefined) {
 					this.set_action_context(action_data_obj.context);
 				}
-				if(action_data_obj.action_item_sibling_before != undefined) {
-					this.set_action_item_sibling_before(action_data_obj.action_item_sibling_before);
+				if(action_data_obj.sibling_action_obj_before != undefined) {
+					this.set_sibling_action_obj_before(action_data_obj.sibling_action_obj_before);
 				}
 
 				this.set_coordinate(coordinate);
@@ -145,11 +145,18 @@ var action_manager = {
 				// CHILDREN ACTION OBJ LIST
 				if(action_data_obj.children_action_object_list != undefined) {
 					for(var idx = 0;idx < action_data_obj.children_action_object_list.length;idx++) {
+
 						var child_action_data_obj = action_data_obj.children_action_object_list[idx];
 						var child_coordinate = this.get_coordinate() + "-" + idx;
-						this.add_child(child_action_data_obj, child_coordinate, action_hierarchy_search_map);
-					}
-				}	
+						var child_action_obj = this.add_child(child_action_data_obj, child_coordinate, action_hierarchy_search_map);
+
+						if(0 < idx) {
+							var child_sibling_action_obj_before = this.get_child(idx - 1);
+							child_action_obj.set_sibling_action_obj_before(child_sibling_action_obj_before);
+							child_sibling_action_obj_before.set_sibling_action_obj_after(child_action_obj);
+						} // end inner if
+					} // end for
+				} // end outer if
 
 				// ACTION ACTION OBJ LIST
 				if(action_data_obj.add_on_action_object_list != undefined) {
@@ -181,7 +188,7 @@ var action_manager = {
 
 				// DEBUG
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var cur_action_name = this.get_action_name();
 				var cur_scope = "get_action_view_obj / <cur_action_name> ".replace(/\<cur_action_name\>/gi, cur_action_name);
@@ -431,14 +438,40 @@ var action_manager = {
 				// 자신이 자식 객체의 부모 객체가 됩니다.
 				child_action_obj.set_parent(this);
 
-				var chlaction_idren_list = this.get_children();
-				chlaction_idren_list.push(child_action_obj);
+				var children_action_obj_list = this.get_children();
+				children_action_obj_list.push(child_action_obj);
+
+				return child_action_obj;
 			}
 			,get_children:function() {
 				if(this.children_action_object_list == undefined) {
 					this.children_action_object_list = [];
 				}
 				return this.children_action_object_list;
+			}
+			,get_child:function(idx) {
+				if(this.children_action_object_list == undefined) {
+					this.children_action_object_list = [];
+				}
+
+				var length = this.children_action_object_list.length;
+				if(idx < length) {
+					return this.children_action_object_list[idx];	
+				}
+
+				return null;
+			}
+			,get_last_child:function() {
+				if(this.children_action_object_list == undefined) {
+					this.children_action_object_list = [];
+				}
+
+				var length = this.children_action_object_list.length;
+				if(0 < length) {
+					return this.children_action_object_list[(length - 1)];	
+				}
+
+				return null;
 			}
 			,has_no_children:function() {
 				return !this.has_children();
@@ -447,11 +480,17 @@ var action_manager = {
 				var children_action_object_list = this.get_children();
 				return (_v.is_valid_array(children_action_object_list))?true:false;
 			}
-			,set_action_item_sibling_before:function(action_item_sibling_before) {
-				this.action_item_sibling_before = action_item_sibling_before;
+			,set_sibling_action_obj_before:function(sibling_action_obj_before) {
+				this.sibling_action_obj_before = sibling_action_obj_before;
 			}
-			,get_action_item_sibling_before:function() {
-				return this.action_item_sibling_before;
+			,get_sibling_action_obj_before:function() {
+				return this.sibling_action_obj_before;
+			}
+			,set_sibling_action_obj_after:function(sibling_action_obj_after) {
+				this.sibling_action_obj_after = sibling_action_obj_after;
+			}
+			,get_sibling_action_obj_after:function() {
+				return this.sibling_action_obj_after;
 			}
 			,push_add_on:function(add_on_action_data_obj, coordinate, action_hierarchy_search_map) {
 
@@ -684,6 +723,116 @@ var action_manager = {
 				var action_item_type = this.get_action_item_type();
 				return (action_manager.ACTION_ITEM_TYPE_SELECT_BOX === action_item_type)?true:false;
 			}
+			// update flag
+			/*
+				@ Private
+				@ Desc : 사용자에 의해 값이 변경되면 이 플래그를 true로 변경합니다.
+			*/
+			,changed:false
+			,is_changed:function() {
+				return this.changed;
+			}
+			,set_changed:function() {
+				this.changed = true;	
+			}
+			// functions for item_title_n_time_hh_mm
+			,update_time_hh_mm:function(new_time_sec) {
+
+				// title_n_time_hh_mm 타입인 경우만 진행합니다.
+				if(!this.is_item_title_n_time_hh_mm()) {
+					return;
+				}
+				var __v = _v_factory.get("action_manager / update_time_hh_mm");
+				if(__v.is_not_unsigned_number(new_time_sec)) {
+					return;
+				}
+
+				this.set_changed();
+				var time_hh_mm_obj = this.get_time_hh_mm_obj();
+
+				console.log(">>> Before / time_hh_mm_obj.time_sec_offset_from_init :: ",time_hh_mm_obj.time_sec_offset_from_init);
+				console.log(">>> Before / time_hh_mm_obj.time_hh_mm :: ",time_hh_mm_obj.time_hh_mm);
+
+				time_hh_mm_obj.time_sec_offset_from_init = new_time_sec - time_hh_mm_obj.time_sec_initial;
+				time_hh_mm_obj.time_hh_mm = _dates.get_hh_mm_from_seconds(new_time_sec);
+
+				console.log(">>> After / time_hh_mm_obj.time_sec_offset_from_init :: ",time_hh_mm_obj.time_sec_offset_from_init);
+				console.log(">>> After / time_hh_mm_obj.time_hh_mm :: ",time_hh_mm_obj.time_hh_mm);
+
+				console.log(">>> time_hh_mm_obj :: ",time_hh_mm_obj);
+
+				var element_event_manager = this.get_element_event_manager();
+
+				var new_json_str_time_hh_mm = JSON.stringify();
+				this.set_action_context(new_json_str_time_hh_mm);
+
+				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+				if(cur_sibling_action_obj_before != undefined) {
+					// 앞에 있는 형제 객체의 시작 정보를 가져와 비교합니다.
+					var time_hh_mm_obj_before = cur_sibling_action_obj_before.get_time_hh_mm_obj();
+					var time_sec_before = time_hh_mm_obj_before.time_sec_initial + time_hh_mm_obj_before.time_sec_offset_from_init;
+
+					if((0 < time_sec_before) && (new_time_sec < time_sec_before)) {
+						// 이전 시작이 지금 시간보다 뒤라면 지금시간보다 10분전으로 세팅해서 업데이트.
+						time_sec_before = new_time_sec - 600;
+						time_hh_mm_obj_before.update_time_hh_mm(time_sec_before);
+					} // end inner if
+
+					// wonder.jung / 화면에 변경된 데이터 표시!
+					var before_sibling_event_manager = element_event_manager.get_before_sibling_event_manager();
+					console.log(">>> 화면에 변경된 데이터 표시! / before_sibling_event_manager :: ",before_sibling_event_manager);
+
+				}  // end outer if
+
+				var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+				if(cur_sibling_action_obj_after != undefined) {
+					// 뒤에 있는 형제 객체의 시작 정보를 가져와 비교합니다.
+					var time_hh_mm_obj_after = cur_sibling_action_obj_after.get_time_hh_mm_obj();
+					var time_sec_after = time_hh_mm_obj_after.time_sec_initial + time_hh_mm_obj_after.time_sec_offset_from_init;
+
+					if((0 < time_sec_after) && (time_sec_after < new_time_sec)) {
+						// 이후 시작이 지금 시간보다 앞이라면 지금시간보다 10분뒤로 세팅해서 업데이트.
+						time_sec_after = new_time_sec + 600;
+						time_hh_mm_obj_after.update_time_hh_mm(time_sec_after);
+					} // end inner if
+
+					// wonder.jung
+					var after_sibling_event_manager = element_event_manager.get_after_sibling_event_manager();
+					console.log(">>> 화면에 변경된 데이터 표시! / after_sibling_event_manager :: ",after_sibling_event_manager);
+
+				} // end outer if
+
+				// TODO 여기서 변경된 값이 화면에 표시되려면?
+			}
+			,get_time_hh_mm_obj:function() {
+
+				var __v = _v_factory.get("action_manager / get_time_hh_mm_obj");
+
+				// title_n_time_hh_mm 타입인 경우만 진행합니다.
+				if(!this.is_item_title_n_time_hh_mm()) {
+					return;
+				}
+				var json_str_time_hh_mm = this.get_action_context();
+				if(__v.is_not_valid_str(json_str_time_hh_mm)) {
+					return;
+				}
+				var time_hh_mm_obj = _json.parseJSON(json_str_time_hh_mm);
+				if(__v.is_null_object(time_hh_mm_obj)) {
+					return;
+				}
+
+				return time_hh_mm_obj;
+			}
+			// 해당 데이터와 관련있는 엘리먼트 컨트롤러 참조
+			,element_event_manager:null
+			,set_element_event_manager:function(element_event_manager) {
+				this.element_event_manager = element_event_manager;
+			}
+			,get_element_event_manager:function() {
+				return this.element_event_manager;
+			}
+			// REMOVE ME
+			/*
 			,delegate_insert_sibling_action:null
 			,set_delegate_insert_sibling_action:function(delegate_insert_sibling_action) {
 				this.delegate_insert_sibling_action = delegate_insert_sibling_action;
@@ -728,6 +877,7 @@ var action_manager = {
 					this.delegate_delete_action._func.apply(this.delegate_delete_action._scope,[]);
 				}
 			}
+			*/
 		}
 		action_obj.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map);
 
