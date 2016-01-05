@@ -111,21 +111,6 @@ wonglish.meeting_agenda_manager = {
 
 
 		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
-		// grid view
-		/*
-		var container_jq = $("div#meeting_agenda_container");
-		_print.draw_grid_view(
-			// target_jq
-			container_jq
-			// target_paper_format
-		);
-		*/
-
-
-
-
-
-
 
 		// TEST
 		var new_action_list = meeting_agenda_data_obj.new_action_list;
@@ -175,6 +160,8 @@ wonglish.meeting_agenda_manager = {
 				console.log(">>> cur_element_event_manager :: ",cur_element_event_manager);
 
 				// 업데이트 상태마다 다르게 처리
+				var request_param_obj = null;
+				var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 				if( _obj.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
 
 					console.log("Do something / INSERT");
@@ -197,6 +184,26 @@ wonglish.meeting_agenda_manager = {
 							}
 							
 							action_obj.update_time_hh_mm(time_sec_cur_item);
+							var cur_action_data_for_db_update = action_obj.get_action_data_for_db_update();
+
+							console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
+
+							var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
+
+							var cur_root_action_obj = action_obj.get_root_action_obj();
+							var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+							var meeting_id = cur_root_context_obj.meeting_id;
+							if(__v.is_not_unsigned_number(meeting_id)) {
+								return;
+							}
+
+							request_param_obj =
+							_param
+							.get(_param.IS_UPDATE_ACTION_TIMELINE,_param.YES)
+							.get(_param.ACTION_TIMELINE_JSON_STR_ENCODED,cur_action_data_for_db_update_json_str)
+							.get(_param.MEETING_ID,meeting_id)
+							;
+
 
 						} else {
 
@@ -211,6 +218,41 @@ wonglish.meeting_agenda_manager = {
 					console.log("Do something / DELETE");
 
 				}
+
+				if(request_param_obj == undefined) {
+					return;
+				}
+
+				console.log(">>> request_param_obj :: ",request_param_obj);
+				
+
+				_ajax.send_simple_post(
+					// _url
+					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+					// _param_obj
+					,request_param_obj
+					// _delegate_after_job_done
+					,_obj.get_delegate(
+						// delegate_func
+						function(data){
+							console.log(">>> data : ",data);
+							cur_element_event_manager.release();
+
+
+							var cur_root_action_obj = action_obj.get_root_action_obj();
+							var new_root_action_std_obj = data.updated_action_std;
+							var new_root_action_obj = action_manager.get_action_obj(new_root_action_std_obj);
+
+							console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
+							console.log(">>> new_root_action_obj :: ",new_root_action_obj);
+
+							action_manager.compare_root_action(cur_root_action_obj, new_root_action_obj);
+
+						},
+						// delegate_scope
+						this
+					)
+				); // ajax done.				
 				
 			},this)			
 		);

@@ -430,6 +430,17 @@ var action_manager = {
 			,get_parent:function() {
 				return this.parent_action_object;
 			}
+			,has_parent:function() {
+
+				var parent_action_obj = this.get_parent();
+				if(parent_action_obj == undefined) {
+					return false;
+				}
+				return true;
+			}
+			,has_no_parent:function() {
+				return !this.has_parent();
+			}
 			,add_child:function(child_action_data_obj, coordinate, action_hierarchy_search_map) {
 
 				// 자식을 추가할 경우에도 action_obj를 생성해서 만들어 줘야 함.
@@ -656,7 +667,7 @@ var action_manager = {
 				return element_type_list;
 			}
 			,get_root_action_obj:function() {
-				if(is_null(this.parent_action_object)) {
+				if(this.parent_action_object == undefined) {
 					return this;	
 				}
 
@@ -733,7 +744,7 @@ var action_manager = {
 				return this.changed;
 			}
 			,set_changed:function() {
-				this.changed = true;	
+				this.changed = true;
 			}
 			// functions for item_title_n_time_hh_mm
 			,update_time_hh_mm:function(new_time_sec) {
@@ -742,32 +753,34 @@ var action_manager = {
 				if(!this.is_item_title_n_time_hh_mm()) {
 					return;
 				}
-				var __v = _v_factory.get("action_manager / update_time_hh_mm");
+				var cur_action_name = this.get_action_name();
+				var __v = _v_factory.get("action_manager / " + cur_action_name + " / update_time_hh_mm");
 				if(__v.is_not_unsigned_number(new_time_sec)) {
 					return;
 				}
 
+				// 업데이트 된 상태로 변경합니다.
 				this.set_changed();
 				var time_hh_mm_obj = this.get_time_hh_mm_obj();
-
-				console.log(">>> Before / time_hh_mm_obj.time_sec_offset_from_init :: ",time_hh_mm_obj.time_sec_offset_from_init);
-				console.log(">>> Before / time_hh_mm_obj.time_hh_mm :: ",time_hh_mm_obj.time_hh_mm);
 
 				time_hh_mm_obj.time_sec_offset_from_init = new_time_sec - time_hh_mm_obj.time_sec_initial;
 				time_hh_mm_obj.time_hh_mm = _dates.get_hh_mm_from_seconds(new_time_sec);
 
-				console.log(">>> After / time_hh_mm_obj.time_sec_offset_from_init :: ",time_hh_mm_obj.time_sec_offset_from_init);
-				console.log(">>> After / time_hh_mm_obj.time_hh_mm :: ",time_hh_mm_obj.time_hh_mm);
-
-				console.log(">>> time_hh_mm_obj :: ",time_hh_mm_obj);
-
 				var element_event_manager = this.get_element_event_manager();
+				if(__v.is_null_object(element_event_manager)) {
+					return;
+				}
+				element_event_manager.set_value_time_jq(time_hh_mm_obj.time_hh_mm);
 
-				var new_json_str_time_hh_mm = JSON.stringify();
+				var new_json_str_time_hh_mm = JSON.stringify(time_hh_mm_obj);
 				this.set_action_context(new_json_str_time_hh_mm);
 
+				// Sibling management
+				/*
 				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
-				if(cur_sibling_action_obj_before != undefined) {
+				var before_sibling_event_manager = element_event_manager.get_before_sibling_event_manager();
+				if(cur_sibling_action_obj_before != undefined && before_sibling_event_manager != undefined) {
+
 					// 앞에 있는 형제 객체의 시작 정보를 가져와 비교합니다.
 					var time_hh_mm_obj_before = cur_sibling_action_obj_before.get_time_hh_mm_obj();
 					var time_sec_before = time_hh_mm_obj_before.time_sec_initial + time_hh_mm_obj_before.time_sec_offset_from_init;
@@ -775,34 +788,34 @@ var action_manager = {
 					if((0 < time_sec_before) && (new_time_sec < time_sec_before)) {
 						// 이전 시작이 지금 시간보다 뒤라면 지금시간보다 10분전으로 세팅해서 업데이트.
 						time_sec_before = new_time_sec - 600;
-						time_hh_mm_obj_before.update_time_hh_mm(time_sec_before);
+						cur_sibling_action_obj_after.set_element_event_manager(before_sibling_event_manager);
+						cur_sibling_action_obj_before.update_time_hh_mm(time_sec_before);
 					} // end inner if
 
-					// wonder.jung / 화면에 변경된 데이터 표시!
-					var before_sibling_event_manager = element_event_manager.get_before_sibling_event_manager();
-					console.log(">>> 화면에 변경된 데이터 표시! / before_sibling_event_manager :: ",before_sibling_event_manager);
 
 				}  // end outer if
 
 				var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
-				if(cur_sibling_action_obj_after != undefined) {
+				var after_sibling_event_manager = element_event_manager.get_after_sibling_event_manager();
+				if(cur_sibling_action_obj_after != undefined && after_sibling_event_manager != undefined) {
 					// 뒤에 있는 형제 객체의 시작 정보를 가져와 비교합니다.
 					var time_hh_mm_obj_after = cur_sibling_action_obj_after.get_time_hh_mm_obj();
 					var time_sec_after = time_hh_mm_obj_after.time_sec_initial + time_hh_mm_obj_after.time_sec_offset_from_init;
 
 					if((0 < time_sec_after) && (time_sec_after < new_time_sec)) {
+						// DEBUG / wonder.jung
+						console.log(">>> 화면에 변경된 데이터 표시! / 002 / after_sibling_event_manager :: ",after_sibling_event_manager);
+
 						// 이후 시작이 지금 시간보다 앞이라면 지금시간보다 10분뒤로 세팅해서 업데이트.
 						time_sec_after = new_time_sec + 600;
-						time_hh_mm_obj_after.update_time_hh_mm(time_sec_after);
+						cur_sibling_action_obj_after.set_element_event_manager(after_sibling_event_manager);
+						cur_sibling_action_obj_after.update_time_hh_mm(time_sec_after);
+
 					} // end inner if
 
-					// wonder.jung
-					var after_sibling_event_manager = element_event_manager.get_after_sibling_event_manager();
-					console.log(">>> 화면에 변경된 데이터 표시! / after_sibling_event_manager :: ",after_sibling_event_manager);
 
 				} // end outer if
-
-				// TODO 여기서 변경된 값이 화면에 표시되려면?
+				*/
 			}
 			,get_time_hh_mm_obj:function() {
 
@@ -830,6 +843,25 @@ var action_manager = {
 			}
 			,get_element_event_manager:function() {
 				return this.element_event_manager;
+			}
+			// DB 업데이트를 위한 전달 객체 만들기 
+			,get_action_data_for_db_update:function(depth) {
+
+				var root_action_obj = this.get_root_action_obj();
+
+				var cur_action_context = _json.parseJSON(this.get_action_context());
+				
+				var action_data_for_db = {
+					action_id:this.get_action_id()
+					, action_collection_type:this.get_action_collection_type()
+					, action_item_type:this.get_action_item_type()
+					, action_name:this.get_action_name()
+					, action_context:cur_action_context
+					, action_coordinate:this.get_coordinate()
+					, root_action_id:root_action_obj.get_action_id()
+				};
+
+				return action_data_for_db;
 			}
 			// REMOVE ME
 			/*
@@ -882,6 +914,100 @@ var action_manager = {
 		action_obj.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map);
 
 		return action_obj;
+	}
+	/*
+		@ Public
+		@ Desc : 두 action 객체를 비교합니다. 비교 대상은 id, hash_key, name, context 입니다. 비교는 반드시 root action 객체로부터 아래로 내려옵니다.
+	*/
+	, compare_root_action:function(prev_root_action_obj, next_root_action_obj) {
+
+		if(prev_root_action_obj.has_parent() || next_root_action_obj.has_parent()) {
+			console.log("!Error! / action.manager.js / compare_root_action / prev_root_action_obj & next_root_action_obj is different!");
+			return;
+		}
+
+		return this.compare_action(prev_root_action_obj, next_root_action_obj);
+	}
+	/*
+		@ Public
+		@ Desc : 두 action 객체를 비교합니다. 비교 대상은 id, hash_key, name, context 입니다. 비교는 반드시 root action 객체로부터 아래로 내려옵니다.
+		@ Usage : action_manager.compare_action(prev_action_obj, next_action_obj);
+	*/
+	, compare_action:function(prev_action_obj, next_action_obj) {
+
+		var has_same_var = true;
+
+		if(this.is_not_valid_action_data_obj(prev_action_obj)) {
+			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_data_obj(prev_action_obj)");
+			return false;
+		}
+		if(this.is_not_valid_action_data_obj(next_action_obj)) {
+			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_data_obj(next_action_obj)");
+			return false;
+		}
+
+		var prev_action_coordinate = prev_action_obj.get_coordinate();
+		var next_action_coordinate = next_action_obj.get_coordinate();
+		var COORDINATE = prev_action_coordinate + "<-->" + next_action_coordinate;
+		
+		if(prev_action_obj.get_action_id() != next_action_obj.get_action_id()) {
+			console.log("");
+			console.log("!Diff Found! / action.manager.js / compare_action / <COORDINATE> / prev_action_obj.get_action_id() != next_action_obj.get_action_id()".replace(/\<COORDINATE\>/gi, COORDINATE));
+			console.log("!Diff Found! / action.manager.js / compare_action / prev_action_obj.get_action_id() ::",prev_action_obj.get_action_id());
+			console.log("!Diff Found! / action.manager.js / compare_action / next_action_obj.get_action_id() ::",next_action_obj.get_action_id());
+			has_same_var = false;
+		}
+		if(prev_action_obj.get_action_hash_key() != next_action_obj.get_action_hash_key()) {
+			console.log("");
+			console.log("!Diff Found! / action.manager.js / compare_action / <COORDINATE> / prev_action_obj.get_action_hash_key() != next_action_obj.get_action_hash_key()".replace(/\<COORDINATE\>/gi, COORDINATE));
+			console.log("!Diff Found! / action.manager.js / compare_action / prev_action_obj.get_action_hash_key() ::",prev_action_obj.get_action_hash_key());
+			console.log("!Diff Found! / action.manager.js / compare_action / next_action_obj.get_action_hash_key() ::",next_action_obj.get_action_hash_key());
+			has_same_var = false;
+		}
+		if(prev_action_obj.get_action_name() != next_action_obj.get_action_name()) {
+			console.log("");
+			console.log("!Diff Found! / action.manager.js / compare_action / <COORDINATE> / prev_action_obj.get_action_name() != next_action_obj.get_action_name()".replace(/\<COORDINATE\>/gi, COORDINATE));
+			console.log("!Diff Found! / action.manager.js / compare_action / prev_action_obj.get_action_name() ::",prev_action_obj.get_action_name());
+			console.log("!Diff Found! / action.manager.js / compare_action / next_action_obj.get_action_name() ::",next_action_obj.get_action_name());
+			has_same_var = false;
+		}
+		if(prev_action_obj.get_action_context() != next_action_obj.get_action_context()) {
+			console.log("");
+			console.log("!Error! / action.manager.js / compare_action / <COORDINATE> / prev_action_obj.get_action_context() != next_action_obj.get_action_context()".replace(/\<COORDINATE\>/gi, COORDINATE));
+			console.log("!Error! / action.manager.js / compare_action / prev_action_obj.get_action_context() ::",prev_action_obj.get_action_context());
+			console.log("!Error! / action.manager.js / compare_action / next_action_obj.get_action_context() ::",next_action_obj.get_action_context());
+			has_same_var = false;
+		}
+
+		var prev_child_action_list = prev_action_obj.get_children();
+		var next_child_action_list = next_action_obj.get_children();
+
+		if(prev_child_action_list == undefined && next_child_action_list != undefined) {
+			console.log("!Error! / action.manager.js / compare_action / prev_child_action_list == undefined && next_child_action_list != undefined");
+			return false;
+		} else if(prev_child_action_list != undefined && next_child_action_list == undefined) {
+			console.log("!Error! / action.manager.js / compare_action / prev_child_action_list != undefined && next_child_action_list == undefined");
+			return false;
+		} else if(prev_child_action_list.length != next_child_action_list.length) {
+			console.log("!Error! / action.manager.js / compare_action / prev_child_action_list.length != next_child_action_list.length");
+			return false;
+		} else if(prev_child_action_list == undefined && next_child_action_list == undefined) {
+			// 상위 객체 비교는 위에서 완료. 자식 객체 비교가 불가. 검사를 종료합니다.
+			return false;
+		}
+
+		for(var idx=0;idx < prev_child_action_list.length; idx++) {
+			var prev_child_action = prev_child_action_list[idx];
+			var next_child_action = next_child_action_list[idx];
+
+			var is_same_child = this.compare_action(prev_child_action, next_child_action);
+
+			if(!is_same_child) {
+				has_same_var = false;
+			}
+		}
+
+		return has_same_var;
 	}
 
 }

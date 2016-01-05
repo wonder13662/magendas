@@ -98,20 +98,9 @@
 
 
 	// test action list
-
-	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM();
-	// $new_action_list_std = $new_action_list->get_std_obj();
-	
-	// $new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
-	// $new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
-
-	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
-	// 2396
-	$new_action_list = $wdj_mysql_interface->get_action_collection(2396);
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(2423, 134);
 	$new_action_list_std = $new_action_list->get_std_obj();
 
-	// $new_action_list_v2 = $wdj_mysql_interface->get_action_collection($new_action_list->get_id());
-	// $new_action_list_std_v2 = $new_action_list_v2->get_std_obj();
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -324,6 +313,9 @@ var new_action_list = action_manager.get_action_obj(new_action_list_std);
 
 console.log("new_action_list :: ",new_action_list);
 // console.log("new_action_list_v2 :: ",new_action_list_v2);
+
+var action_obj_search_result_std = <?php echo json_encode($action_obj_search_result_std);?>;
+console.log("action_obj_search_result_std :: ",action_obj_search_result_std);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

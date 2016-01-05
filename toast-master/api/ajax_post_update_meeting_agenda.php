@@ -123,7 +123,7 @@
 
 
 
-
+	// LEGACY - REMOVE ME
 
 	//  dMMMMMMP dMP dMMMMMMMMb  dMMMMMP dMP     dMP dMMMMb  dMMMMMP 
 	//    dMP   amr dMP"dMP"dMP dMP     dMP     amr dMP dMP dMP      
@@ -142,6 +142,79 @@
 		array_push($result->query_output_arr,$query_output);
 	}
 
+
+
+
+
+
+
+
+
+
+	//     .aMMMb  .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb 
+	//    dMP"dMP dMP"VMP   dMP   amr dMP"dMP dMP dMP 
+	//   dMMMMMP dMP       dMP   dMP dMP dMP dMP dMP  
+	//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP   
+	// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP    
+
+	$IS_INSERT_ACTION_TIMELINE = $params->isYes($params->IS_INSERT_ACTION_TIMELINE);
+	$IS_UPDATE_ACTION_TIMELINE = $params->isYes($params->IS_UPDATE_ACTION_TIMELINE);
+	$IS_DELETE_ACTION_TIMELINE = $params->isYes($params->IS_DELETE_ACTION_TIMELINE);
+	$ACTION_TIMELINE_JSON_STR_ENCODED = $params->getParamString($params->ACTION_TIMELINE_JSON_STR_ENCODED);
+	if($IS_UPDATE_ACTION_TIMELINE==$params->YES){
+
+		$action_timeline_json_obj = JSONManager::get_json_obj($ACTION_TIMELINE_JSON_STR_ENCODED);
+
+		// 업데이트할 부분의 정보만 가져옵니다.
+		$root_action_id = $action_timeline_json_obj->root_action_id;
+		$action_name = $action_timeline_json_obj->action_name;
+		$action_coordinate = $action_timeline_json_obj->action_coordinate;
+
+		// root action
+		$root_action_list = $wdj_mysql_interface->get_root_action_collection($root_action_id, $MEETING_ID);
+		$target_action_obj = $root_action_list->search($action_coordinate);
+		$result->UPDATE_ACTION_TIMELINE_ACTION_COORDINATE = "$action_coordinate";
+		
+		if(ActionItem::is_instance($target_action_obj)) {
+			$action_context = $action_timeline_json_obj->action_context;
+			if(is_null($action_context)) {
+				$result->UPDATE_ACTION_TIMELINE_ERR = "is_null(\$action_context)";
+			}
+			$action_context_str = json_encode($action_context);
+			if(empty($action_context_str)) {
+				$result->UPDATE_ACTION_TIMELINE_ERR = "empty(\$action_context_str)";
+			}
+			if(!is_null($action_context) && !empty($action_context_str)) {
+				$target_action_obj->set_context($action_context_str);
+			} // end inner if
+
+		} // end outer if
+		 
+
+		if(empty($action_name)) {
+			$result->UPDATE_ACTION_TIMELINE_ERR = "empty(\$action_name)";
+		} else if(ActionItem::is_not_instance($target_action_obj)) {
+			$result->UPDATE_ACTION_TIMELINE_ERR = "ActionItem::is_not_instance(\$target_action_obj)";
+		} else {
+			$target_action_obj->set_name($action_name);
+			$target_action_obj_std = $target_action_obj->get_std_obj();
+			$result->target_action_obj_std = $target_action_obj_std;
+
+			$updated_action_obj = $wdj_mysql_interface->copy_action_obj_v2($target_action_obj);
+			$updated_root_action_obj = $updated_action_obj->get_root_action_obj();
+
+			$updated_root_action_id = $updated_root_action_obj->get_id();
+			$result->received_root_action_id = $root_action_id;
+			$result->updated_root_action_id = intval($updated_root_action_id);
+
+			$updated_root_action_list = $wdj_mysql_interface->get_root_action_collection($updated_root_action_id, $MEETING_ID);
+
+			$updated_root_action_list_std = $updated_root_action_list->get_std_obj();
+			$result->updated_action_std = $updated_root_action_list_std;
+
+		} // end outer if
+		
+	} // end final if
 
 
 
