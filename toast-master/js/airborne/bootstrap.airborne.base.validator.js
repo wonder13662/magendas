@@ -44,6 +44,9 @@ airborne.validator = {
 	,isUnsignedNumber:function(targetStr){
 		return $.isNumeric(targetStr) && (0 <= targetStr);
 	}
+	,is_not_unsigned_number:function(targetNumStr){
+		return this.isNotUnsignedNumber(targetNumStr);
+	}
 	,isNotUnsignedNumber:function(targetStr){
 		return !this.isUnsignedNumber(targetStr);
 	}

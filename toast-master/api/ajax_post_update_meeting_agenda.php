@@ -161,7 +161,25 @@
 	$IS_UPDATE_ACTION_TIMELINE = $params->isYes($params->IS_UPDATE_ACTION_TIMELINE);
 	$IS_DELETE_ACTION_TIMELINE = $params->isYes($params->IS_DELETE_ACTION_TIMELINE);
 	$ACTION_TIMELINE_JSON_STR_ENCODED = $params->getParamString($params->ACTION_TIMELINE_JSON_STR_ENCODED);
-	if($IS_UPDATE_ACTION_TIMELINE==$params->YES){
+	if($IS_INSERT_ACTION_TIMELINE==$params->YES){
+
+		$result->IS_INSERT_ACTION_TIMELINE=$params->YES;
+
+		$action_timeline_json_obj = JSONManager::get_json_obj($ACTION_TIMELINE_JSON_STR_ENCODED);
+
+		// INSERT NEW ACTION
+
+	} else if($IS_DELETE_ACTION_TIMELINE==$params->YES){
+
+		$result->IS_INSERT_ACTION_TIMELINE=$params->YES;
+
+		$action_timeline_json_obj = JSONManager::get_json_obj($ACTION_TIMELINE_JSON_STR_ENCODED);
+
+		// DELETE ACTION
+
+	} else if($IS_UPDATE_ACTION_TIMELINE==$params->YES){
+
+		$result->IS_UPDATE_ACTION_TIMELINE=$params->YES;
 
 		$action_timeline_json_obj = JSONManager::get_json_obj($ACTION_TIMELINE_JSON_STR_ENCODED);
 

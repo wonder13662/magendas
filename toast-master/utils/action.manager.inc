@@ -71,19 +71,11 @@ class ActionObject implements Action{
 		// DEBUG
 		$cur_name = $this->get_name();
 		$cur_child_name = $child_action_obj->get_name();
-		// REMOVE ME
-		//$cur_child_coordinate = $child_action_obj->get_coordinate();
-
-		// if(is_null($cur_child_coordinate) || empty($cur_child_coordinate)) {
-		// 	echo "!Error! / add_child / $cur_name <-> $cur_child_name / \$cur_child_coordinate is not valid!<br/>";
-		// 	return;
-		// }
 
 		if(ActionObject::is_not_action_obj($child_action_obj)) {
 			echo "!Error! / add_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj)<br/>";
 			return;
 		}
-
 
 		if(is_null($this->children_action_object_list)) {
 			$this->children_action_object_list = array();
@@ -109,22 +101,6 @@ class ActionObject implements Action{
 			array_push($this->children_action_object_list, $child_action_obj);
 			$child_action_obj->set_parent($this);
 		}
-
-		// REMOVE ME - coordinate, search_map 구성은 root_action 객체를 통해서 진행해야 합니다. 이 두값이 구조체가 완료된 이후에 만들어 질 수 있기 때문입니다.
-		// set search map 
-		/*
-		$cur_meeting_agenda_id = $this->get_meeting_agenda_id();
-		if(!is_null($cur_meeting_agenda_id) && 0 < $cur_meeting_agenda_id) {
-			$this->set_search_map();
-		}
-		$cur_search_map = $this->get_search_map();
-
-		if(is_null($cur_search_map)) {
-			echo "!Error! \ $cur_name <-> $cur_child_name \ is_null(\$cur_search_map)<br/>";
-			return;
-		}
-		$child_action_obj->set_search_map($cur_search_map);
-		*/
 
 	}
 	public function set_children($children_action_object_list) {
@@ -319,26 +295,12 @@ class ActionObject implements Action{
 			// root action collection
 			$this->set_search_map();
 		} else {
-
-			$parent_action_obj = $this->get_parent();
-			if(is_null($parent_action_obj)) {
-				echo "!Error! / $cur_name / set_coordinate / is_null(\$parent_action_obj)<br/>";
-				return;
-			}
-			$parent_action_search_map = $parent_action_obj->get_search_map();
-			if(is_null($parent_action_search_map)) {
-				echo "!Error! / $cur_name / set_coordinate / is_null($parent_action_search_map)<br/>";
-				return;
-			}
-
-			$this->set_search_map($parent_action_search_map);
+			$parent_action_name = $this->get_parent()->get_name();
+			$this->set_search_map($search_map);
 		}
 
-
 		$cur_search_map = $this->get_search_map();
-
 		if(is_null($cur_search_map)) {
-			echo "!Error! / $cur_name / set_coordinate / is_null($cur_search_map)<br/>";
 			return;
 		}
 		$children_action_list = $this->get_children();
@@ -349,9 +311,6 @@ class ActionObject implements Action{
 			$child_action_coordinate = $cur_coordinate . "-" . $idx;
 
 			$child_has_parent = $child_action_obj->has_parent();
-
-			// echo "$cur_name / set_coordinate / \$child_action_name :: $child_action_name / \$child_has_parent :: $child_has_parent<br/>";
-
 			$cur_search_map = $child_action_obj->set_coordinate($child_action_coordinate, $cur_search_map);
 		}
 
@@ -365,10 +324,11 @@ class ActionObject implements Action{
 	// $foo->{$start . $end}
 	public function set_search_map($search_map=null) {
 
+		// DEBUG
 		$cur_name = $this->get_name();
 
 		if(is_null($search_map) && $this->has_parent()) {
-			echo "!Error! / $cur_name / is_null(\$search_map) / root가 아닌 경우는 반드시 유효한 \$search_map을 넘겨주어야 합니다.<br/>";
+			echo "!Error! / set_search_map / $cur_name / is_null(\$search_map) / root가 아닌 경우는 반드시 유효한 \$search_map을 넘겨주어야 합니다.<br/>";
 			return;
 		} else if(is_null($search_map) ) {
 			$search_map = new stdClass();
@@ -505,8 +465,6 @@ class ActionObject implements Action{
 			return;
 		}
 
-		$this->set_parent($action_obj->get_parent());
-		$this->set_children($action_obj->get_children());
 		$this->set_id($action_obj->get_id());
 		$this->set_name($action_obj->get_name());
 
@@ -552,7 +510,7 @@ class ActionCollection extends ActionObject{
 		return false;
 	}
 
-	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0, $has_changed=false) {
+	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0, $has_changed=true) {
 		parent::set_name($action_name);
 		parent::set_collection_type($action_collection_type);
 		$this->set_meeting_agenda_id($meeting_agenda_id);
@@ -694,7 +652,7 @@ class ActionCollection extends ActionObject{
 
 class ActionItem extends ActionObject{
 
-	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=false) {
+	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=true) {
 		parent::set_name($action_name);
 		parent::set_item_type($action_item_type);
 		parent::set_is_shy($is_shy);
@@ -930,7 +888,7 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return $time_seconds;
 	}
 
-	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0, $has_changed=false) {
+	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0, $has_changed=true) {
 
 		parent::set_name($action_name);
 		parent::set_item_type(ActionItem::$TITLE_N_TIME_HH_MM);

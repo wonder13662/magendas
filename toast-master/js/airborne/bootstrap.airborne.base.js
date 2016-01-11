@@ -4,7 +4,8 @@ var airborne = {
 	validator:null
 	,server:null	
 	,bootstrap:{
-		obj:null
+		obj:{
+		}
 		,column:null
 		,modal:null
 		,table_manager:null
@@ -12,6 +13,8 @@ var airborne = {
 			obj:{
 				list:null
 				,table:null
+				,__action:null
+				,__action_list:null
 			}
 			,mobile:{
 				list:null
@@ -548,6 +551,11 @@ airborne.html = {
 		var n = d.getTime();
 
 		return this.getId(raw_id) + "_" + n + "_" + Math.floor((Math.random() * 1000000) + 1);
+	}
+	,auto_increase_num:0
+	,get_id_auto_increase:function(raw_id){
+		this.auto_increase_num += 1;
+		return this.getId(raw_id) + "_" + this.auto_increase_num;
 	}
 	,restoreText:function(safe_text){ // TODO wdjung
 

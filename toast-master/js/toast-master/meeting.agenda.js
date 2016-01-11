@@ -107,44 +107,52 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
+		//     .aMMMb  .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb      dMMMMMMP dMP dMMMMMMMMb dMMMMMP dMP     dMP dMMMMb  dMMMMMP 
+		//    dMP"dMP dMP"VMP   dMP   amr dMP"dMP dMP dMP        dMP   amr dMP"dMP"dMPdMP     dMP     amr dMP dMP dMP      
+		//   dMMMMMP dMP       dMP   dMP dMP dMP dMP dMP        dMP   dMP dMP dMP dMPdMMMP   dMP     dMP dMP dMP dMMMP     
+		//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP        dMP   dMP dMP dMP dMPdMP     dMP     dMP dMP dMP dMP        
+		// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP        dMP   dMP dMP dMP dMPdMMMMMP dMMMMMP dMP dMP dMP dMMMMMP
 
 		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
 
 		// TEST
 		var new_action_list = meeting_agenda_data_obj.new_action_list;
-		_action.add_editable_action_list(
-			// parent_jq
-			container_jq
+		_action_list.add_editable_action_list(
 			// action_list
-			, new_action_list
+			new_action_list
+			// parent_element_set
+			, null
+			// list_container_jq
+			, container_jq
 			// delegate_save_n_reload
 			, _obj.get_delegate(function(cur_outcome_obj){
 
-				var __v = _v_factory.get("add_editable_action_list / delegate_save_n_reload / 141");
-				var action_obj = null;
-				if(	cur_outcome_obj != undefined && 
-					cur_outcome_obj._prop_map != undefined && 
-					cur_outcome_obj._prop_map.__prop_map != undefined && 
-					cur_outcome_obj._prop_map.__prop_map.__action_obj != undefined	) {
+				console.log("HERE / cur_outcome_obj :: ",cur_outcome_obj);
 
-					action_obj = cur_outcome_obj._prop_map.__prop_map.__action_obj;
-				}
-
-				if( action_obj == undefined ) {
-					console.log("!Error! / action_obj == undefined");
-					return;	
-				}
-
-				var meeting_id = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
-				if(__v.is_not_unsigned_number(meeting_id)) {
+				if(	cur_outcome_obj == undefined ) {
+					console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
 					return;
 				}
-				var cur_element_event_manager = cur_outcome_obj._prop_map.__element_event_manager;
-				if(__v.is_null_object(meeting_id)) {
+				if(	_action.is_not_valid_action_item_data_obj(cur_outcome_obj._action_item_obj) ) {
+					console.log("!Error! / delegate_save_n_reload / _action.is_not_valid_action_item_data_obj(cur_outcome_obj._action_item_obj)");
 					return;
 				}
+
+				var action_item_obj = cur_outcome_obj._action_item_obj;
+
+				var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
+				if(_v.is_not_unsigned_number(MEETING_ID)) {
+					console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
+					return;
+				}
+				var cur_element_event_manager = action_item_obj.get_element_event_manager();
+				if(cur_element_event_manager == undefined) {
+					console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
+					return;
+				}
+
+				// REMOVE ME
+				/*
 				var _key = cur_outcome_obj._key;
 				if(__v.is_not_valid_str(_key)) {
 					return;
@@ -152,64 +160,129 @@ wonglish.meeting_agenda_manager = {
 				var _value = cur_outcome_obj._value;
 				action_obj.set_element_event_manager(cur_element_event_manager);
 
-				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
+				var cur_action_item_type = action_obj.get_action_item_type();
+				if(__v.is_not_unsigned_number(cur_action_item_type)) {
+					return;
+				}
 				console.log(">>> _key :: ",_key);
 				console.log(">>> _value :: ",_value);
-				console.log(">>> action_obj :: ",action_obj);
-				console.log(">>> meeting_id :: ",meeting_id);
+				*/
+
+				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
+				console.log(">>> action_item_obj :: ",action_item_obj);
+				console.log(">>> MEETING_ID :: ",MEETING_ID);
 				console.log(">>> cur_element_event_manager :: ",cur_element_event_manager);
 
 				// 업데이트 상태마다 다르게 처리
 				var request_param_obj = null;
-				var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 				if( _obj.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
 
-					console.log("Do something / INSERT");
+					if(action_item_obj.is_item_title_only()) {
+
+						console.log("Do something / INSERT / is_item_title_only");
+
+					} else if(action_item_obj.is_item_title_n_time_hh_mm()) {
+
+						console.log("Do something / INSERT / item_title_n_time_hh_mm / time");
+
+						var cur_action_data_for_db_update = action_item_obj.get_action_data_for_db_update();
+
+						console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
+
+						var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
+
+						var cur_root_action_obj = action_item_obj.get_root_action_obj();
+						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+						var meeting_id = cur_root_context_obj.meeting_id;
+						if(__v.is_not_unsigned_number(meeting_id)) {
+							return;
+						}
+
+						// wonder.jung
+
+						// 0. 복제 완료 이벤트 발생시, 건네 받는 데이터가 shy 레이어가 아닌, 자신의 부모 레이어의 정보임.
+						// shy layer 데이터도 가지고 있어야 할까? 만일 자식 객체가 아무것도 없다면, 어떤 기준으로 자식 객체를 추가해야 할까?
+
+						// shy layer의 데이터가 없다면 자식 레이어는 없다고 정의하는 것이 맞을 듯.
+						// 리스트 레이어 만들때에도 action view 데이터를 참고로 action type을 정의하도록 변경?
+
+						// A - title only / title n time / title only
+						// B - title only / title n time / title n time
+
+						// A, B가 형제 관계. B의 새로운 형제 열을 만드는 것을 클릭한다면 생겨야 할 새로운 형제 레이어는? 이런 경우의 수는 없을까?
+						// 클릭한 객체를 모델로 새로 만든다고 정의함.
+
+						// 1. 새로운 아이템을 생성. shy 모드가 아닌 정말 새 아이템을 만든다. shy 모드는 제거.
+
+
+
+						// 1-1. 새로운 아이템을 추가하는 것이 현재는 불가능한 기능. shy 레이어를 복제, 새로운 event manager를 만들어야 함.
+
+						// jquery로 엘리먼트를 복제. 하위 명칭은 모두 변경되어야 함.
+						// 복제된 엘리먼트로 event manager를 새로 만들어서 연결.
+
+						// 2. action 객체를 추가로 만듬.
+						// 3. element event manager도 새로 만듬.
+
+						request_param_obj =
+						_param
+						.get(_param.IS_INSERT_ACTION_TIMELINE,_param.YES)
+						.get(_param.ACTION_TIMELINE_JSON_STR_ENCODED,cur_action_data_for_db_update_json_str)
+						.get(_param.MEETING_ID,MEETING_ID)
+						;
+
+					}
 
 				} else if( _obj.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
 					
-					if(action_obj.is_item_title_only()) {
+					if(action_item_obj.is_item_title_only()) {
 
 						console.log("Do something / UPDATE / is_item_title_only");
 
-					} else if(action_obj.is_item_title_n_time_hh_mm()) {
+					} else if(action_item_obj.is_item_title_n_time_hh_mm()) {
 						
-						if(_obj.TIME_PROP_HH_MM === _key) {
+						console.log("Do something / UPDATE / item_title_n_time_hh_mm / time");
 
-							console.log("Do something / UPDATE / item_title_n_time_hh_mm / time");
-
-							var time_sec_cur_item = parseInt(_value);
-							if(__v.is_not_unsigned_number(time_sec_cur_item)) {
-								return;
-							}
-							
-							action_obj.update_time_hh_mm(time_sec_cur_item);
-							var cur_action_data_for_db_update = action_obj.get_action_data_for_db_update();
-
-							console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
-
-							var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
-
-							var cur_root_action_obj = action_obj.get_root_action_obj();
-							var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
-							var meeting_id = cur_root_context_obj.meeting_id;
-							if(__v.is_not_unsigned_number(meeting_id)) {
-								return;
-							}
-
-							request_param_obj =
-							_param
-							.get(_param.IS_UPDATE_ACTION_TIMELINE,_param.YES)
-							.get(_param.ACTION_TIMELINE_JSON_STR_ENCODED,cur_action_data_for_db_update_json_str)
-							.get(_param.MEETING_ID,meeting_id)
-							;
-
-
-						} else {
-
-							console.log("Do something / UPDATE / item_title_n_time_hh_mm / title");
-
+						// REMOVE ME
+						/*
+						var time_sec_cur_item = parseInt(_value);
+						if(__v.is_not_unsigned_number(time_sec_cur_item)) {
+							return;
 						}
+						
+						action_item_obj.update_time_hh_mm(time_sec_cur_item);
+						var cur_action_data_for_db_update = action_item_obj.get_action_data_for_db_update();
+
+						console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
+
+						var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
+
+						var cur_root_action_obj = action_item_obj.get_root_action_obj();
+						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+						var meeting_id = cur_root_context_obj.meeting_id;
+						if(__v.is_not_unsigned_number(meeting_id)) {
+							return;
+						}
+						*/
+
+						var cur_action_data_for_db_update = action_item_obj.get_action_data_for_db_update();
+
+						console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
+
+						var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
+
+						var cur_root_action_obj = action_item_obj.get_root_action_obj();
+						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+
+						console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
+						console.log(">>> cur_root_context_obj :: ",cur_root_context_obj);
+
+						request_param_obj =
+						_param
+						.get(_param.IS_UPDATE_ACTION_TIMELINE,_param.YES)
+						.get(_param.ACTION_TIMELINE_JSON_STR_ENCODED,cur_action_data_for_db_update_json_str)
+						.get(_param.MEETING_ID,MEETING_ID)
+						;
 
 					}
 
@@ -224,6 +297,9 @@ wonglish.meeting_agenda_manager = {
 				}
 
 				console.log(">>> request_param_obj :: ",request_param_obj);
+
+				// TEST 
+				return;
 				
 
 				_ajax.send_simple_post(
@@ -239,14 +315,14 @@ wonglish.meeting_agenda_manager = {
 							cur_element_event_manager.release();
 
 
-							var cur_root_action_obj = action_obj.get_root_action_obj();
+							var cur_root_action_obj = action_item_obj.get_root_action_obj();
 							var new_root_action_std_obj = data.updated_action_std;
-							var new_root_action_obj = action_manager.get_action_obj(new_root_action_std_obj);
+							var new_root_action_obj = _action.get_action_obj(new_root_action_std_obj);
 
 							console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
 							console.log(">>> new_root_action_obj :: ",new_root_action_obj);
 
-							action_manager.compare_root_action(cur_root_action_obj, new_root_action_obj);
+							_action.compare_root_action(cur_root_action_obj, new_root_action_obj);
 
 						},
 						// delegate_scope
@@ -256,9 +332,6 @@ wonglish.meeting_agenda_manager = {
 				
 			},this)			
 		);
-
-
-
 
 
 

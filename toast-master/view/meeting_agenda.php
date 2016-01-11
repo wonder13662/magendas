@@ -98,7 +98,8 @@
 
 
 	// test action list
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(2423, 134);
+	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(4774, 134);
 	$new_action_list_std = $new_action_list->get_std_obj();
 
 
@@ -308,11 +309,13 @@ var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
 console.log("new_action_list_std :: ",new_action_list_std);
 // console.log("new_action_list_std_v2 :: ",new_action_list_std_v2);
 
-var new_action_list = action_manager.get_action_obj(new_action_list_std);
-// var new_action_list_v2 = action_manager.get_action_obj(new_action_list_std_v2);
+console.log("_action :: ",_action);
+//airborne.bootstrap.obj.__action
+console.log("airborne.bootstrap.obj.__action :: ",airborne.bootstrap.obj.__action);
+
+var new_action_list = _action.get_action_obj(new_action_list_std);
 
 console.log("new_action_list :: ",new_action_list);
-// console.log("new_action_list_v2 :: ",new_action_list_v2);
 
 var action_obj_search_result_std = <?php echo json_encode($action_obj_search_result_std);?>;
 console.log("action_obj_search_result_std :: ",action_obj_search_result_std);

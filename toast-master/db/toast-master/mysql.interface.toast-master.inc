@@ -6756,16 +6756,6 @@ class MYSQLInterface{
 				continue;
 			}
 
-			// REMOVE ME
-			/*
-			// set child coordinate
-			$child_action_coordinate = $action_list_obj->get_coordinate() . "-" . $idx;
-			$child_item_name = $child_item_obj->get_name();
-			echo "get_action_list_object / $cur_name <--> $child_item_name / set_coordinate / \$child_action_coordinate :: $child_action_coordinate<br/>";
-
-			$child_item_obj->set_coordinate($child_action_coordinate);
-			*/
-
 			// DEBUG
 			// echo "get_action_list_object / $cur_name <--> $child_item_name<br/>";
 
@@ -6946,15 +6936,6 @@ class MYSQLInterface{
 			if($this->is_null_object(__FUNCTION__, $child_list_obj, "child_list_obj")) {
 				return;
 			}
-
-			// REMOVE ME
-			// set child coordinate
-			/*
-			$child_action_coordinate = $action_table_obj->get_coordinate() . "-" . $idx;
-			$child_item_name = $child_list_obj->get_name();
-			echo "get_action_table_object / $cur_action_name <--> $child_item_name / set_coordinate / \$child_action_coordinate :: $child_action_coordinate<br/>";
-			$child_list_obj->set_coordinate($child_action_coordinate);
-			*/
 
 			$action_table_obj->add_child($child_list_obj);
 			$child_list_obj->set_parent($action_table_obj);
@@ -7201,20 +7182,6 @@ class MYSQLInterface{
 				return;
 			}
 
-			// REMOVE ME
-			// DEBUG
-			/*
-			$child_collection_name = $child_collection_obj->get_name();
-			echo "get_action_item_object / $cur_action_name <--> $child_collection_name<br/>";
-
-			// set child coordinate
-			$child_action_coordinate = $action_item->get_coordinate() . "-" . $idx;
-			$child_collection_name = $child_collection_obj->get_name();
-			echo "get_action_item_object / $cur_action_name <--> $child_collection_name / set_coordinate / \$child_action_coordinate :: $child_action_coordinate<br/>";
-
-			$child_collection_obj->set_coordinate($child_action_coordinate);
-			*/
-
 			$action_item->add_child($child_collection_obj);
 			$child_collection_obj->set_parent($action_item);
 		}
@@ -7460,205 +7427,6 @@ class MYSQLInterface{
 
 		return $root_action_list;
 	}
-
-	// REMOVE ME
-	/*
-		@ Public
-		@ Desc : child action item을 parent action list에 추가합니다.
-	*/
-	/*
-	public function add_child_action_item_into_parent_action_list($root_action_collection_obj, $coordinate_parent_action_list, $child_action_item_type, $child_action_item_name, $child_action_item_context="", $child_action_item_is_shy=null) {
-
-		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection_obj, "root_action_collection_obj")){
-			return;
-		}
-		if($this->is_empty(__FUNCTION__, $coordinate_parent_action_list, "coordinate_parent_action_list")){
-			return;
-		}
-		if($this->is_not_action_item_type(__FUNCTION__, $child_action_item_type, "child_action_item_type")){
-			return;
-		}
-		if($this->is_empty(__FUNCTION__, $child_action_item_name, "child_action_item_name")){
-			return;
-		}
-		if(is_null($child_action_item_is_shy)){
-			$child_action_item_is_shy = 0;
-		}
-		$root_action_collection_id = $root_action_collection_obj->get_id();
-
-		// 1. 아이템을 추가할 action list를 가져옵니다.
-		$parent_action_list_obj = $root_action_collection_obj->search($coordinate_parent_action_list);
-		if($this->is_not_action_list(__FUNCTION__, $parent_action_list_obj, "parent_action_list_obj")){
-			return;
-		}
-
-		// 1-1. 새로운 아이템을 받은 파라미터로 만듭니다.
-		$new_action_item = new ActionItem();
-		$new_action_item->set_item_type($child_action_item_type);
-		$child_action_item_type_name = $this->get_action_item_type_name($child_action_item_type);
-		if($this->is_empty(__FUNCTION__, $child_action_item_type_name, "child_action_item_type_name")){
-			return;
-		}
-		$new_action_item->set_item_type_name($child_action_item_type_name);
-
-		$new_action_item->set_name($child_action_item_name);
-		$new_action_item->set_context($child_action_item_context);
-		$new_action_item->set_parent($parent_action_list_obj);
-		$new_action_item->set_order($parent_action_list_obj->get_children_cnt());
-		$new_action_item->set_is_shy($child_action_item_is_shy);
-
-		// 1-2. 아이템을 추가합니다. 업데이트한 결과값을 action item으로 돌려 받습니다.
-		$new_action_item = $this->copy_action_obj_recursive($new_action_item);
-
-		// 1-3. 부모 객체 모두 업데이트가 완료되었습니다. 결과 비교를 진행합니다.
-		$new_root_action_obj = $new_action_item->get_root_action_obj();
-		$new_root_action_id = $new_root_action_obj->get_id();
-
-		if($this->is_equal_number(__FUNCTION__, $root_action_collection_id, $new_root_action_id, "\$root_action_collection_id n \$new_root_action_id")) {
-			return;
-		}
-
-		return $new_action_item;
-
-	}
-	*/
-	// REMOVE ME
-	/*
-		@ Public
-		@ Desc : child action collection parent action item에 추가합니다.
-	*/
-		/*
-	public function add_child_action_collection_into_parent_action_item($root_action_collection_obj, $coordinate_parent_action_item, $child_action_collection_type, $child_action_collection_name, $child_action_collection_is_shy=null) {
-
-		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection_obj, "root_action_collection_obj")){
-			return;
-		}
-		if($this->is_empty(__FUNCTION__, $coordinate_parent_action_item, "coordinate_parent_action_item")){
-			return;
-		}
-		if($this->is_not_action_collection_type(__FUNCTION__, $child_action_collection_type, "child_action_collection_type")){
-			return;
-		}
-		if($this->is_empty(__FUNCTION__, $child_action_collection_name, "child_action_collection_name")){
-			return;
-		}
-		if(is_null($child_action_collection_is_shy)){
-			$child_action_collection_is_shy = 0;
-		}
-		$root_action_collection_id = $root_action_collection_obj->get_id();
-		if($this->is_not_unsigned_number(__FUNCTION__, $root_action_collection_id, "root_action_collection_id")){
-			return;
-		}
-
-
-		// 1. 아이템을 추가할 action list를 가져옵니다.
-		$parent_action_item_obj = $root_action_collection_obj->search($coordinate_parent_action_item);
-		if($this->is_not_action_item(__FUNCTION__, $parent_action_item_obj, "parent_action_item_obj")){
-			return;
-		}
-
-		// 1-1. 새로운 아이템을 받은 파라미터로 만듭니다.
-		$new_action_collection = new ActionCollection();
-		$new_action_collection->set_collection_type($child_action_collection_type);
-		$child_action_collection_type_name = $this->get_action_collection_type_name($child_action_collection_type);
-		if($this->is_empty(__FUNCTION__, $child_action_collection_type_name, "child_action_collection_type_name")){
-			return;
-		}
-		$new_action_collection->set_collection_type_name($child_action_collection_type_name);
-
-		$new_action_collection->set_name($child_action_collection_name);
-		$new_action_collection->set_parent($parent_action_item_obj);
-		$new_action_collection->set_order($parent_action_item_obj->get_children_cnt());
-		$new_action_collection->set_is_shy($child_action_item_is_shy);
-
-		// 1-2. 아이템을 추가합니다. 업데이트한 결과값을 action item으로 돌려 받습니다.
-		$new_action_collection = $this->copy_action_obj_recursive($new_action_collection);
-
-		// 1-3. 부모 객체 모두 업데이트가 완료되었습니다. 결과 비교를 진행합니다.
-		$new_root_action_obj = $new_action_collection->get_root_action_obj();
-		$new_root_action_id = $new_root_action_obj->get_id();
-
-		if($this->is_equal_number(__FUNCTION__, $root_action_collection_id, $new_root_action_id, "\$root_action_collection_id n \$new_root_action_id")) {
-			return;
-		}
-
-		return $new_action_collection;
-
-	}
-	*/
-	// REMOVE ME	
-	/*
-	private function copy_action_obj_recursive($action_obj, $depth=0) {
-
-		// 1. 자신을 복사합니다.
-		// 1-1. copy_action_collection
-		// 1-2. copy_action_item
-		if($this->is_action_collection(__FUNCTION__, $action_obj)){
-			$action_obj = $this->copy_action_collection_v2($action_obj);
-		} else if($this->is_action_item(__FUNCTION__, $action_obj)){
-			// id, hash key가 업데이트됩니다.
-			$action_obj = $this->copy_action_item_v2($action_obj);
-		}
-
-		// 2. 부모가 있는지 확인합니다.
-		$parent_action_obj = $action_obj->get_parent();
-		if(is_null($parent_action_obj)) {
-			// 부모가 없는 최상위 root 객체입니다.
-			return $action_obj;
-		}
-		if($this->is_not_action_obj(__FUNCTION__, $parent_action_obj, "parent_action_obj")){
-			return;
-		}
-
-		// 2-1. 부모가 있다면 부모를 복사합니다.(재귀)
-		$parent_action_obj = $this->copy_action_obj_recursive($parent_action_obj, $depth + 1);
-
-		$action_obj->set_parent($parent_action_obj);
-		$parent_action_obj->add_child($action_obj);
-
-		$action_obj->set_coordinate($parent_action_obj->get_coordinate() . "-" . ($parent_action_obj->get_children_cnt() - 1));
-		$action_obj->set_search_map($parent_action_obj->get_search_map());
-		$parent_action_obj->set_search_map($action_obj->get_search_map());
-
-		// 3. 복사한 부모와 자신을 연결합니다.(DB 관계도 업데이트)
-		if($this->is_action_collection(__FUNCTION__, $action_obj)){
-
-			if($this->is_action_item(__FUNCTION__, $parent_action_obj)) {
-
-				// child list <--> parent item
-				// child table <--> parent item
-				$this->insert_parent_action_item_n_child_collection_v2(
-					// $parent_action_item_obj
-					$parent_action_obj
-					// $child_action_collection_obj
-					, $action_obj
-				);
-
-			} else if($this->is_action_collection(__FUNCTION__, $parent_action_obj) && ($parent_action_obj->is_table() || $action_obj->is_list())) {
-
-				// child list <--> parent table
-				$this->insert_parent_action_table_n_child_action_list_v2(
-					// $parent_action_table
-					$parent_action_obj
-					// $child_action_list
-					, $action_obj
-				);
-
-			}
-
-		} else if($this->is_action_item(__FUNCTION__, $action_obj) && $parent_action_obj->is_list()){
-			$this->insert_parent_list_n_child_item_v2(
-				// $parent_action_list
-				$parent_action_obj
-				// $child_action_item
-				, $action_obj
-			);
-
-		}
-
-		return $action_obj;
-	}
-	*/
 	/*
 		@ Private
 		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다.
@@ -8063,17 +7831,18 @@ class MYSQLInterface{
 		if($this->is_not_action_list(__FUNCTION__, $parent_action_list, "parent_action_list")){
 			return;
 		}
+		$parent_action_list_name = $parent_action_list->get_name();
 		$parent_action_list_id = $parent_action_list->get_id();
-		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id :: $parent_action_list_name")){
 			return;
 		}
 
 		if($this->is_not_action_item(__FUNCTION__, $child_action_item, "child_action_item")){
 			return;
 		}
+		$child_action_item_name = $child_action_item->get_name();
 		$child_action_item_id = $child_action_item->get_id();
-
-		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "\$child_action_item_id :: $child_action_item_name / \$child_action_item_id :: $child_action_item_id")){
 			return;
 		}
 
@@ -8549,12 +8318,19 @@ class MYSQLInterface{
 				// echo "add_action / \$cur_action_name :: $cur_action_name / action is ITEM / parent is LIST / \$has_changed :: $has_changed<br/>";
 				if($action_obj->has_changed() == true) {
 
-					$new_action_context = $action_obj->get_context();
+					// DEBUG
+					// $new_action_context = $action_obj->get_context();
 					// echo "add_action / \$cur_action_name :: $cur_action_name / \$new_action_context :: $new_action_context<br/>";
 
 					$new_action_obj = $this->add_action_item_v2($action_obj);
 					$action_obj->inject($new_action_obj);
+
 				}
+
+				// DEBUG
+				$action_obj_id = $action_obj->get_id();
+				$action_obj_name = $action_obj->get_name();
+				// echo "add_action / \$cur_action_name :: $cur_action_name / \$action_obj_id :: $action_obj_id / \$action_obj_name :: $action_obj_name<br/>";
 
 				$this->insert_parent_list_n_child_item_v2(
 					// $parent_action_list
@@ -8569,17 +8345,11 @@ class MYSQLInterface{
 
 		// treat children
 		for($idx = 0;$idx < count($children_action_obj_list); $idx++) {
+
 			$child_action_obj = $children_action_obj_list[$idx];
+			$this->add_action($child_action_obj);
+			//$child_action_obj = $this->add_action($child_action_obj);
 
-			$child_action_obj = $this->add_action($child_action_obj);
-			// $child_action_obj->set_coordinate($action_obj->get_coordinate() . "-" . $idx);
-
-			if($action_obj->has_no_parent()) {
-				$action_obj->add_child($child_action_obj);	
-			}
-			
-			$child_action_obj->set_search_map($action_obj->get_search_map());
-			$action_obj->set_search_map($child_action_obj->get_search_map());
 		}
 
 		return $action_obj;
@@ -8633,10 +8403,6 @@ class MYSQLInterface{
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
 			// $meeting_agenda_id=-1
 			, $meeting_agenda_id
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 
 
@@ -8652,12 +8418,30 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "19:40"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
+
+		// 1-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Greetings - Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 1-1-1. Welcome guests / Guest introduction
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"New Item"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+			// $is_shy=0
+			, 1
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
 
 
 
@@ -8673,10 +8457,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "19:50"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8684,15 +8464,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Call meeting to order [Chairperson] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -8703,10 +8477,6 @@ class MYSQLInterface{
 			"Welcome guests / Guest introduction"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8717,10 +8487,6 @@ class MYSQLInterface{
 			"Cite the mission of Toastmasters"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8731,10 +8497,6 @@ class MYSQLInterface{
 			"Fill Vacant functions & Share CL process"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8745,10 +8507,6 @@ class MYSQLInterface{
 			"Introduce Toastmaster"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true			
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8767,10 +8525,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "20:00"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8778,15 +8532,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Theme & Role Introduction [Toastmaster] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -8797,10 +8545,6 @@ class MYSQLInterface{
 			"Opening remarks ( Introduce the theme )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8811,10 +8555,6 @@ class MYSQLInterface{
 			"Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:00
@@ -8835,10 +8575,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "20:15"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8846,15 +8582,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Table Topics Session [ Table Topic Master ] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true			
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -8865,12 +8595,6 @@ class MYSQLInterface{
 			"Explain the rules and theme"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8881,10 +8605,6 @@ class MYSQLInterface{
 			"1 to 2 minutes impromptu speaking"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8895,10 +8615,6 @@ class MYSQLInterface{
 			"Timer‘s Report"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8909,10 +8625,6 @@ class MYSQLInterface{
 			"Vote for the Best Table Topic Speaker"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:15
@@ -8935,10 +8647,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "20:25"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8946,15 +8654,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Prepared Speech Session [ Toastmaster ] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true			
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -8965,10 +8667,6 @@ class MYSQLInterface{
 			"Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8979,10 +8677,6 @@ class MYSQLInterface{
 			"Timer‘s Report"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8993,10 +8687,6 @@ class MYSQLInterface{
 			"Vote for the Best Prepared Speech Speaker"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9007,10 +8697,6 @@ class MYSQLInterface{
 			" "
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:25
@@ -9034,10 +8720,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:00"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9045,15 +8727,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Break - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -9064,10 +8740,6 @@ class MYSQLInterface{
 			"Complete Feedback to prepared speakers"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9078,10 +8750,6 @@ class MYSQLInterface{
 			" "
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:00
@@ -9105,12 +8773,29 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:10"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
+		// 7-1. Sublist
+		$child_action_sub_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Mini debate session - Sublist"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_item->add_child($child_action_sub_list);
+
+		// 7-1-1. Welcome guests / Guest introduction
+		$child_action_sub_list_child_action_item =  
+		new ActionItem(
+			// $action_name="New Item"
+			"New Item"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+			// $is_shy=0
+			, 1
+		);
+		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);			
 		// 21:10		
 
 
@@ -9132,10 +8817,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:20"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9143,15 +8824,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Evaluation Session [ General Evaluator ] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -9162,10 +8837,6 @@ class MYSQLInterface{
 			"Introduces Evaluators"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9176,10 +8847,6 @@ class MYSQLInterface{
 			"Timer‘s Report & Vote"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9190,10 +8857,6 @@ class MYSQLInterface{
 			"Ah Counter‘s Ah tally report"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9204,10 +8867,6 @@ class MYSQLInterface{
 			"Grammarian‘s Report"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9218,10 +8877,6 @@ class MYSQLInterface{
 			"General comments on meeting ( < 3 min )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:20
@@ -9242,10 +8897,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:35"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9253,15 +8904,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Award Session [ Toastmaster ] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -9272,10 +8917,6 @@ class MYSQLInterface{
 			"Present award ( < 1 min )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9286,10 +8927,6 @@ class MYSQLInterface{
 			"Closing remarks ( < 2 min )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
 		// 21:35
@@ -9310,10 +8947,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:40"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9321,15 +8954,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Club Business [ Chairperson ] - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -9340,10 +8967,6 @@ class MYSQLInterface{
 			"Club News ( What's new? )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true			
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9354,10 +8977,6 @@ class MYSQLInterface{
 			"Announcement & Role Sign-up for future meeting"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9368,10 +8987,6 @@ class MYSQLInterface{
 			"Guest Comments"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9382,10 +8997,6 @@ class MYSQLInterface{
 			"Acknowledgement"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40	
@@ -9406,10 +9017,6 @@ class MYSQLInterface{
 			, "19:40"
 			// $time_str_hhmm_specific=""
 			, "21:40"
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9417,15 +9024,9 @@ class MYSQLInterface{
 		$child_action_sub_list = 
 		new ActionCollection(
 			// $action_name=""
-			"Sublist"
+			"Call Meeting to adjourn & Group photos - Sublist"
 			// $action_collection_type=1
 			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, -1
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_item->add_child($child_action_sub_list);
 
@@ -9436,10 +9037,6 @@ class MYSQLInterface{
 			"Closing remarks ( < 2min )"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9450,15 +9047,14 @@ class MYSQLInterface{
 			"Group Photo"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
-			// $is_shy=0
-			, 0
-			// $has_changed=false
-			, true
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40
 
-		return $this->add_action($root_action_obj);
+		$root_action_obj = $this->add_action($root_action_obj);
+		$root_action_obj->set_coordinate();
+
+		return $root_action_obj;
 	}
 
 

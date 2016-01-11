@@ -5677,6 +5677,8 @@ airborne.bootstrap.obj = {
 			}
 			,add_element:function(sibling_element_event_manager) {
 
+				console.log("XXX");
+
 				if(sibling_element_event_manager == undefined) {
 					console.log("!Error! / add_element / sibling_element_event_manager == undefined");
 					return;

@@ -17,14 +17,14 @@ airborne.bootstrap.view.obj.list = {
 
 		return true;
 	}
+	,is_not_valid_list_row_text_type:function(list_row_text_type){
+		return !this.is_valid_list_row_text_type(list_row_text_type);
+	}
 	,COLOR_TYPE_LIST_ROW_WHITE:"list-group-item-default"
 	,COLOR_TYPE_LIST_ROW_GREEN:"list-group-item-success"
 	,COLOR_TYPE_LIST_ROW_BLUE:"list-group-item-info"
 	,COLOR_TYPE_LIST_ROW_YELLOW:"list-group-item-warning"
 	,COLOR_TYPE_LIST_ROW_RED:"list-group-item-danger"
-	,is_not_valid_list_row_text_type:function(list_row_text_type){
-		return !this.is_valid_list_row_text_type(list_row_text_type);
-	}
 	// @ Section : LIST META INFO
 	// @ public
 	// @ Desc : 리스트 속성을 정의하는 객체를 만듭니다.
