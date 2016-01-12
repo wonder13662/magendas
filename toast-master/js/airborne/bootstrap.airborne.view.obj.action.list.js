@@ -66,8 +66,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		}
 
 		var cur_first_child_action_item = action_list.get_first_child();
-		if(_action.is_not_valid_action_item_data_obj(cur_first_child_action_item)) {
-			console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_item_data_obj(cur_first_child_action_item)");
+		if(_action.is_not_valid_action_item_obj(cur_first_child_action_item)) {
+			console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_item_obj(cur_first_child_action_item)");
 			return;
 		}
 
@@ -115,8 +115,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_element_set = cur_element_set_arr[idx];
 
 			var cur_action_item_obj = cur_element_set.get_action_item_obj();
-			if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-				console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+				console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 				return;
 			}
 
@@ -377,13 +377,16 @@ airborne.bootstrap.view.obj.__action_list = {
 				, editable_list_meta_info_action_obj
 				// delegate_save_n_reload
 				, delegate_save_n_reload
-				// delegate_fetch_searchable_element_list
-				, null
-				// delegate_show_combo_box_element
-				, null
 				// color_type
 				, color_type
 			);
+
+			console.log("HEREX / list_container_jq :: ",list_container_jq);
+			console.log("HEREX / editable_list_meta_info_action_obj :: ",editable_list_meta_info_action_obj);
+			console.log("HEREX / delegate_save_n_reload :: ",delegate_save_n_reload);
+			console.log("HEREX / color_type :: ",color_type);
+			console.log("HEREX / cur_element_collection_set :: ",cur_element_collection_set);
+
 			if(cur_element_collection_set == undefined) {
 				console.log("!Error! / delegate_add_element / cur_element_collection_set == undefined");
 				return;
@@ -543,8 +546,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			*/
 			,get_element_type:function(){
 				var cur_first_child = get_action_list.get_first_child();
-				if(_action.is_not_valid_action_item_data_obj(cur_first_child)) {
-					console.log("!Error! / get_element_type / _action.is_not_valid_action_item_data_obj(cur_first_child)");
+				if(_action.is_not_valid_action_item_obj(cur_first_child)) {
+					console.log("!Error! / get_element_type / _action.is_not_valid_action_item_obj(cur_first_child)");
 					return;
 				}
 
@@ -603,10 +606,428 @@ airborne.bootstrap.view.obj.__action_list = {
 
 		return editable_list_meta_info_obj;
 	}
+	// @ Section : LIST ELEMENT DRAWING & EVENT
+	// @ public
+	// @ Desc : 화면에 리스트 엘리먼트를 추가합니다. 특정 리스트의 특정 인덱스에 아이템을 추가할 수 있습니다. action item obj가 완성된 형태의 데이터를 나타냅니다.
+	,add_editable_list_element:function(target_element_collection_set, action_item_obj, color_type){
+
+		if(target_element_collection_set == undefined) {
+			console.log("!Error! / add_editable_list_element / target_element_collection_set == undefined");
+			return;
+		}
+		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
+			console.log("!Error! / add_editable_list / _action.is_not_valid_action_item_obj(action_item_obj)");
+			return;
+		}
+		if(this.is_not_valid_color_type_list_row(color_type)) {
+			console.log("!Error! / add_editable_list / this.is_not_valid_color_type_list_row(color_type)");
+			return;
+		}
+
+		// DEBUG
+		// console.log("DEBUG / title : ",editable_list_row_obj.get_list_row_text());
+		// console.log("DEBUG / editable_list_row_obj : ",editable_list_row_obj);
+
+		var editable_list_row_id = action_item_obj.get_coordinate();
+		var editable_list_row_title = _html.get_id_auto_increase(action_item_obj.get_action_name());
+		var editable_list_row_inner_table_selector = "";
+
+		// 아무것도 없는 항목의 추가 버튼이 마우스 오버시 나타나는 경우, 아래 조건으로 제어.
+		var time_xx_yy = "";
+
+		//if( _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == editable_list_row_obj.get_element_type() ){
+		if( action_item_obj.is_item_title_n_time_hh_mm() ){
+
+			var cur_time_hh_mm_obj = action_item_obj.get_time_hh_mm_obj();
+			if(cur_time_hh_mm_obj == undefined) {
+				console.log("!Error! / add_editable_list / cur_time_hh_mm_obj == undefined");
+				return;
+			}
+			time_xx_yy = cur_time_hh_mm_obj.time_hh_mm;
+
+		} else if( action_item_obj.is_item_title_n_time_mm_ss() ){
+
+			console.log("!Error! / add_editable_list / Need to implement!");
+
+		}
+
+		// REMOVE ME
+		var parent_action_list_obj = action_item_obj.get_parent();
+		if(_action.is_not_valid_action_collection_data_obj(parent_action_list_obj)) {
+			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_collection_data_obj(parent_action_list_obj)");
+			return;
+		}
+		//var cur_children_cnt = target_element_collection_set.get_element_set_cnt();
+		var cur_children_cnt = parent_action_list_obj.get_children_cnt();
+
+		// REMOVE ME - action_item에서 처음, 마지막을 확인합니다.
+		// var is_last = ((cur_children_cnt - 1) == target_idx)?true:false;
+		// var is_first = (0 == target_idx)?true:false;
+
+		var editable_list_tag = ""
+		+ "<li class=\"list-group-item  <color_type>\" id=\"<editable_list_row_id>\" type=\"editable_list_row\" idx=\"<row_idx>\" is_first=\"<is_first>\" is_last=\"<is_last>\" event_manager_id=\"<event_manager_id>\" inner_table_selector_id=\"<inner_table_selector_id>\" is_shy=\"<is_shy>\" style=\"<style>\" element_type=\"<element_type>\">"
+			.replace(/\<editable_list_row_id\>/gi, editable_list_row_id)
+			// .replace(/\<row_idx\>/gi, target_idx)
+			.replace(/\<is_first\>/gi, action_item_obj.is_first())
+			.replace(/\<is_last\>/gi, action_item_obj.is_last())
+			.replace(/\<event_manager_id\>/gi, "")
+			.replace(/\<inner_table_selector_id\>/gi, editable_list_row_inner_table_selector)
+			.replace(/\<color_type\>/gi, color_type)
+			.replace(/\<is_shy\>/gi, action_item_obj.get_action_is_shy())
+			// .replace(/\<is_shy\>/gi, is_shy)
+			// shy row는 화면에서 가려줍니다.
+			.replace(/\<style\>/gi, (action_item_obj.get_action_is_shy())?"display:none;":"")
+			.replace(/\<element_type\>/gi, action_item_obj.get_element_type())
+			// 시간을 나타냄. 초기값은 display:none;
+			+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
+			+ time_xx_yy
+			+ "</span>"
+		;
+
+		editable_list_tag += ""
+		// 사용자가 입력한 타이틀을 나타냄. 시간 표시가 있을 경우 우측 패딩을 추가.
+		+ "<span id=\"title\" style=\"padding-left:10px;\" tossed_value=\"<tossed_value>\"><_v></span>"
+			// .replace(/\<_v\>/gi, editable_list_row_title)
+			// .replace(/\<tossed_value\>/gi, editable_list_row_title)
+			.replace(/\<_v\>/gi, action_item_obj.get_action_name())
+			.replace(/\<tossed_value\>/gi, action_item_obj.get_action_name())
+		;
+
+		// 내부 버튼설정
+		editable_list_tag += ""
+			// 수정을 하기 위한 버튼들
+			+ "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;padding-left:20px;\"></span>"
+			+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;padding-left:20px;\"></span>"
+			+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;padding-left:20px;\"></span>"
+			+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"display:none;padding-left:20px;\"></span>"
+		;
+		if(action_item_obj.is_first() && !action_item_obj.get_action_is_shy()){
+			// 첫번째 열에 우측에 element collection set eject 버튼을 노출한다. 
+			editable_list_tag += ""
+			+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;\"></span>"
+			;
+		} else {
+			// 첫번째 열에 우측에 element collection set eject 버튼을 가린다.
+			editable_list_tag += ""
+			+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;display:none;\"></span>"
+			;
+		}
+
+		editable_list_tag += ""
+			// chlidren element container div
+			+ "<div id=\"chlid_shy_element_container\"></div>"
+			// chlidren element container div
+			+ "<div id=\"chlidren_element_container\"></div>"
+			// add on element container div
+			+ "<div id=\"add_on_element_container\"></div>"
+		+ "</li>"
+		;
+		// 태그 그리기 완료
+
+		// 2. 실제 지정된 인덱스에 append 시키기
+		// 2-1. 사용자가 지정한 인덱스에 추가되어야 합니다.
+		var target_before_action_item_obj = undefined;
+		var target_after_action_item_obj = undefined;
+		var new_list_row_jq = undefined;
+		var cur_element_collection_container_jq = target_element_collection_set.get_element_collection_container_jq();
+		if(_v.is_not_jquery_obj(cur_element_collection_container_jq)) {
+			console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(cur_element_collection_container_jq)");
+			return;
+		}
+		var input_group_jq = cur_element_collection_container_jq.find("li#row_input_group");
+		if(_v.is_not_jquery_obj(input_group_jq)) {
+			console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(input_group_jq)");
+			return;
+		}
+
+		console.log("HERER / cur_element_collection_container_jq :: ",cur_element_collection_container_jq);
+
+
+		if(action_item_obj.is_first()) {
+
+			// 최초의 엘리먼트 추가.
+			// input group 을 찾아서 추가해야 합니다.
+			input_group_jq.after(editable_list_tag);
+			new_list_row_jq = input_group_jq.next();
+
+			if(_v.is_not_jquery_obj(new_list_row_jq)) {
+				console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(new_list_row_jq)");
+				return;
+			}
+
+		} else if(action_item_obj.is_not_first()) {
+
+			// 가징 마지막 엘리먼트 추가.
+			// 자신의 앞 형제의 action item의 element set을 가져옵니다.
+			var cur_sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
+			if(_action.is_not_valid_action_item_obj(cur_sibling_action_obj_before)) {
+				console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_item_obj(cur_sibling_action_obj_before)");
+				return;
+			}
+
+			var cur_sibling_element_event_manager_before = cur_sibling_action_obj_before.get_element_event_manager();
+			if(cur_sibling_element_event_manager_before == undefined) {
+				console.log("!Error! / add_editable_list_element / cur_sibling_element_event_manager_before == undefined");
+				return;
+			}
+
+			var cur_sibling_element_jq_before = cur_sibling_element_event_manager_before.get_element_jq();
+			if(_v.is_not_jquery_obj(cur_sibling_element_jq_before)) {
+				console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(cur_sibling_element_jq_before)");
+				return;
+			}
+
+			cur_sibling_element_jq_before.after(editable_list_tag);
+			new_list_row_jq = cur_sibling_element_jq_before.next();
+
+			if(_v.is_not_jquery_obj(new_list_row_jq)) {
+				console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(new_list_row_jq)");
+				return;
+			}
+
+		} else {
+			console.log("!Error! / add_editable_list_element / Not implemented!");
+			return;
+		}
+
+		
+		// 3. 이벤트 붙이기
+		// 4. element set 만들기
+
+		// 엘리먼트의 이벤트 매니저를 만듭니다. Input group은 제외됩니다.
+		// 이벤트 매니저의 전, 후의 형제 관계를 저장합니다.
+
+		var cur_delegate_set_event_manager_prop = target_element_collection_set.get_delegate_set_event_manager_prop();
+		if(cur_delegate_set_event_manager_prop == undefined) {
+			console.log("!Error! / add_editable_list_element / cur_delegate_set_event_manager_prop == undefined");
+			return;
+		}
+
+		var event_manager_list_row = 
+		_action.make_element_event_manager(
+			editable_list_row_id
+			, new_list_row_jq
+			, action_item_obj
+			, cur_delegate_set_event_manager_prop
+		);
+		if(event_manager_list_row == undefined) {
+			console.log("!Error! / add_editable_list_element / event_manager_list_row == undefined");
+			return;
+		}
+		action_item_obj.set_event_manager(event_manager_list_row);
+
+		// 이벤트 매니저의 전, 후의 형제 관계를 저장합니다.
+		var sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
+		var before_event_manager = undefined;
+		if(sibling_action_obj_before != undefined) {
+			before_event_manager = sibling_action_obj_before.get_element_event_manager();	
+		}
+		if(before_event_manager != null){
+			before_event_manager.set_after_sibling_event_manager(event_manager_list_row);	
+			event_manager_list_row.set_before_sibling_event_manager(before_event_manager);
+		}
+
+		var sibling_action_obj_after = action_item_obj.get_sibling_action_obj_after();
+		var after_event_manager = undefined;
+		if(sibling_action_obj_after != undefined) {
+			after_event_manager = sibling_action_obj_after.get_element_event_manager();	
+		}
+		if(after_event_manager != null){
+			after_event_manager.set_before_sibling_event_manager(event_manager_list_row);	
+			event_manager_list_row.set_after_sibling_event_manager(after_event_manager);
+		}
+
+
+		// event manager + element meta info => element set
+		// element set + element set + ... => element collection set
+		target_element_collection_set.push_new_element_set(action_item_obj, event_manager_list_row);
+
+		// set eject event
+		event_manager_list_row.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
+
+			var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;
+
+			// @ 기본 동작
+			// 이벤트 전파를 막습니다.
+			event_click.stopPropagation();
+			// 다른 객체들의 이벤트를 받지 않도록 lock를 설정.
+			var cur_event_hierarchy_manager = _obj.get_event_hierarchy_manager();
+			cur_event_hierarchy_manager.lock();
+
+			// 포커싱 모드로 바꿈.
+			cur_event_manager.show_focusing_mode();
+			
+			
+
+			var cur_element_jq = cur_event_manager.get_element_jq();
+
+			// @ element collection settings
+			var event_click_offset = {top:event_click.pageY,left:event_click.pageX};
+			var clone_element_jq = jsm.boost_clone_element_jq(cur_element_jq, event_click_offset);
+			// set round
+			_obj.set_list_single_row_css_radius(clone_element_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+			var clone_element_offset = clone_element_jq.offset();
+
+			var cur_mousemove_callback_set =
+			cur_event_hierarchy_manager.add_mousemove_callback_set(_obj.get_delegate(function(mousemove_event, event_manager_on_mousemove){
+
+				// 사용자가 선택한 윈도우의 이동
+		        var cur_top = mousemove_event.pageY - jsm.gap;
+		        var cur_left = mousemove_event.pageX - jsm.gap;
+
+				clone_element_jq.offset({top:cur_top,left:cur_left});
+
+				// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
+				// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
+
+				// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
+				cur_event_manager.get_element_set().get_element_collection_set().get_mouse_over_element(mousemove_event, event_manager_on_mousemove.get_all_sibling_element_set_arr());
+
+				// 드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.
+				clone_element_jq.off();
+				clone_element_jq.click(function(e){
+
+					// console.log("드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.");
+
+					var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
+					var cur_sibling_element_set_mouse_over = null;
+					var mouse_over_checksum = null;
+					for(var inner_idx = 0;inner_idx < cur_all_sibling_element_set_arr.length;inner_idx++){
+						var cur_sibling_element_set = cur_all_sibling_element_set_arr[inner_idx];
+
+						// 충돌 검사를 진행한다.
+						mouse_over_checksum = jsm.show_mouse_over_element_set_top_n_bottom(mousemove_event, cur_sibling_element_set);
+
+						// DEBUG
+						// console.log("title for debug : ",cur_sibling_element_set.get_event_manager().get_title_jq_value());
+						if(	cur_sibling_element_set.get_event_manager() != undefined && 
+							"New Last Action" === cur_sibling_element_set.get_event_manager().get_title_jq_value()) {
+
+							// console.log("mouse_over_checksum : ",mouse_over_checksum);
+
+						}
+
+						if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_top){
+							cur_sibling_element_set_mouse_over = cur_sibling_element_set;
+							break;
+						} else if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_bottom){
+							cur_sibling_element_set_mouse_over = cur_sibling_element_set;
+							break;
+						}
+					}
+
+					// 이제 선택한 영역의 아래로 엘리먼트를 추가합니다.
+					// 부모를 옮기기 전의 절대좌표를 얻습니다.
+					var _self_clone_jq = $(this);
+					var prev_offset = _self_clone_jq.offset();
+
+					if(cur_sibling_element_set_mouse_over != undefined){
+						// view mode로 전환합니다.
+						cur_sibling_element_set_mouse_over.get_event_manager().show_view_mode();
+
+						if(mouse_over_checksum.is_hover_top){
+
+							// event manager의 형제 관계를 다시 세팅합니다.
+							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 아래쪽의 엘리먼트
+							var new_after_sibling_event_manager = cur_sibling_element_set_mouse_over.get_event_manager();
+							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
+							var new_before_sibling_event_manager = new_after_sibling_event_manager.get_before_sibling_event_manager();
+							// element set, event manager의 형제 관계를 다시 세팅합니다. 
+							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
+
+							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
+							// 사용자가 드래깅하는 클론과 실제 list row를 선택한 list row 위로 이동시킵니다.
+							// console.log("이제 선택한 영역의 위로 엘리먼트를 추가합니다. / ",cur_sibling_element_set_mouse_over.get_meta_info().get_list_row_text());
+							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(cur_element_jq);
+							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(_self_clone_jq);
+
+						} else {
+
+							// event manager의 형제 관계를 다시 세팅합니다.
+							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 아래쪽의 엘리먼트
+							var new_before_sibling_event_manager = cur_sibling_element_set_mouse_over.get_event_manager();
+							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
+							var new_after_sibling_event_manager = new_before_sibling_event_manager.get_after_sibling_event_manager();
+							// element set, event manager의 형제 관계를 다시 세팅합니다.
+							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
+
+							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
+							// 사용자가 드래깅하는 클론과 실제 list row를 선택한 list row 아래로 이동시킵니다.
+							// console.log("이제 선택한 영역의 아래로 엘리먼트를 추가합니다. / ",cur_sibling_element_set_mouse_over.get_meta_info().get_list_row_text());
+							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(cur_element_jq);
+							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(_self_clone_jq);
+							
+						}
+					}
+
+					// 부모를 옮긴다음, 저장해둔 절대좌표로 설정해줍니다.
+					_self_clone_jq.offset(prev_offset);
+
+					// 엘리먼트 착륙 이후의 델리게이트 객체를 가져옵니다. 충돌 객체가 없는 경우, null을 넘겨 줍니다.
+					var cur_delegate_callback_after_landing_element = null;
+					if(cur_sibling_element_set_mouse_over != undefined){
+						cur_delegate_callback_after_landing_element = 
+						cur_sibling_element_set_mouse_over.get_event_manager().get_delegate_callback_after_landing_element();
+					}
+
+					jsm.land_element(
+						// cur_src_jq
+						cur_element_jq
+						// cur_clone_jq
+						, _self_clone_jq
+						// eject_btn_jq
+						, event_manager_on_mousemove.get_btn_eject_element_jq()
+						// cur_mousemove_callback_set
+						, cur_mousemove_callback_set
+						// cur_element_set_on_mouse_over
+						, cur_sibling_element_set_mouse_over
+						// delegate_on_completed
+						, cur_delegate_callback_after_landing_element
+						// delegate_on_completed_param_event_manager
+						, cur_event_manager
+					); // animation end
+
+					// 열 이동이 끝나면, element conllection set의 모든 element set의 
+					// set_is_hover_top
+					// set_is_hover_bottom
+					// set_is_hover
+					// false로 초기화한다.
+					if(	event_manager_on_mousemove.get_element_set() != undefined && 
+						event_manager_on_mousemove.get_element_set().get_element_collection_set() != undefined ) {
+						event_manager_on_mousemove.get_element_set().get_element_collection_set().refresh_all_elemen_set_is_hover();	
+					}
+
+				}); // click event end
+
+			}, this), cur_event_manager); // end mouse move call back
+		}, this));
+
+		// POST PROCESS
+		// element collection set을 움직일 버튼을 지정.
+		var first_sibling_action_obj = action_item_obj.get_first_sibling_action_obj();
+		if(_action.is_not_valid_action_item_obj(first_sibling_action_obj)) {
+			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_item_obj(first_sibling_action_obj)");
+			return;
+		}
+		var first_element_event_manager = first_sibling_action_obj.get_element_event_manager();
+		if(first_element_event_manager == undefined) {
+			console.log("!Error! / add_editable_list_element / first_element_event_manager == undefined");
+			return;
+		}
+		var cur_btn_collection_eject_jq = first_element_event_manager.get_btn_eject_element_jq();
+		if(_v.is_not_jquery_obj(cur_btn_collection_eject_jq)) {
+			console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(cur_btn_collection_eject_jq)");
+			return;
+		}
+		target_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
+
+		return target_element_collection_set;
+
+	}
 	// @ Section : LIST DRAWING & EVENT
 	// @ public
 	// @ Desc : 화면에 리스트를 추가합니다.
-	,add_editable_list:function(parent_jq, editable_list_meta_info_obj, delegate_save_n_reload, delegate_fetch_searchable_element_list, delegate_show_combo_box_element, color_type){
+	,add_editable_list:function(parent_jq, editable_list_meta_info_obj, delegate_save_n_reload, color_type){
 
 		if(parent_jq == null){
 			console.log("!Error! / add_editable_list / parent_jq == null");
@@ -623,8 +1044,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		
 		var cur_action_list = editable_list_meta_info_obj.get_action_list();
 		var cur_first_child_action_item = cur_action_list.get_first_child();
-		if(_action.is_not_valid_action_item_data_obj(cur_first_child_action_item)) {
-			console.log("!Error! / add_editable_list / _action.is_not_valid_action_item_data_obj(cur_first_child_action_item)");
+		if(_action.is_not_valid_action_item_obj(cur_first_child_action_item)) {
+			console.log("!Error! / add_editable_list / _action.is_not_valid_action_item_obj(cur_first_child_action_item)");
 			return;
 		}
 
@@ -704,114 +1125,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
 
 		+ "</li>"
-		;
-
-
-		// 표시할 리스트 열 태그를 가져옵니다.
-		var children_action_item_cnt = cur_action_list.get_children_cnt();
-		// REMOVE ME
-		//for (var idx = 0; idx < editable_list_row_obj_arr.length; idx++) {
-		for (var idx = 0; idx < children_action_item_cnt; idx++) {
-
-			var cur_child_action_item = cur_action_list.get_child(idx);
-			if(_action.is_not_valid_action_item_data_obj(cur_child_action_item)) {
-				console.log("!Error! / add_editable_list / _action.is_not_valid_action_item_data_obj(cur_child_action_item)");
-				return;
-			}
-
-
-			// DEBUG
-			// console.log("DEBUG / title : ",editable_list_row_obj.get_list_row_text());
-			// console.log("DEBUG / editable_list_row_obj : ",editable_list_row_obj);
-
-			var editable_list_row_id = cur_child_action_item.get_coordinate();
-			var editable_list_row_title = _html.get_id_auto_increase(cur_child_action_item.get_action_name());
-			var editable_list_row_inner_table_selector = "";
-
-			// 아무것도 없는 항목의 추가 버튼이 마우스 오버시 나타나는 경우, 아래 조건으로 제어.
-			var time_xx_yy = "";
-
-			//if( _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == editable_list_row_obj.get_element_type() ){
-			if( cur_child_action_item.is_item_title_n_time_hh_mm() ){
-
-				var cur_time_hh_mm_obj = cur_child_action_item.get_time_hh_mm_obj();
-				if(cur_time_hh_mm_obj == undefined) {
-					console.log("!Error! / add_editable_list / cur_time_hh_mm_obj == undefined");
-					return;
-				}
-				time_xx_yy = cur_time_hh_mm_obj.time_hh_mm;
-
-			} else if( cur_child_action_item.is_item_title_n_time_mm_ss() ){
-
-				console.log("!Error! / add_editable_list / Need to implement!");
-
-			}
-
-			var is_last = ((children_action_item_cnt - 1) == idx)?true:false;
-			var is_first = (0 == idx)?true:false;
-
-			editable_list_tag += ""
-			+ "<li class=\"list-group-item  <color_type>\" id=\"<editable_list_row_id>\" type=\"editable_list_row\" idx=\"<row_idx>\" is_first=\"<is_first>\" is_last=\"<is_last>\" event_manager_id=\"<event_manager_id>\" inner_table_selector_id=\"<inner_table_selector_id>\" is_shy=\"<is_shy>\" style=\"<style>\" element_type=\"<element_type>\">"
-				.replace(/\<editable_list_row_id\>/gi, editable_list_row_id)
-				.replace(/\<row_idx\>/gi, idx)
-				.replace(/\<is_first\>/gi, is_first)
-				.replace(/\<is_last\>/gi, is_last)
-				.replace(/\<event_manager_id\>/gi, "")
-				.replace(/\<inner_table_selector_id\>/gi, editable_list_row_inner_table_selector)
-				.replace(/\<color_type\>/gi, color_type)
-				.replace(/\<is_shy\>/gi, cur_child_action_item.get_action_is_shy())
-				// .replace(/\<is_shy\>/gi, is_shy)
-				// shy row는 화면에서 가려줍니다.
-				.replace(/\<style\>/gi, (cur_child_action_item.get_action_is_shy())?"display:none;":"")
-				.replace(/\<element_type\>/gi, cur_child_action_item.get_element_type())
-				// 시간을 나타냄. 초기값은 display:none;
-				+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
-				+ time_xx_yy
-				+ "</span>"
-			;
-
-			editable_list_tag += ""
-			// 사용자가 입력한 타이틀을 나타냄. 시간 표시가 있을 경우 우측 패딩을 추가.
-			+ "<span id=\"title\" style=\"padding-left:10px;\" tossed_value=\"<tossed_value>\"><_v></span>"
-				// .replace(/\<_v\>/gi, editable_list_row_title)
-				// .replace(/\<tossed_value\>/gi, editable_list_row_title)
-				.replace(/\<_v\>/gi, cur_child_action_item.get_action_name())
-				.replace(/\<tossed_value\>/gi, cur_child_action_item.get_action_name())
-			;
-
-
-			// 내부 버튼설정
-			editable_list_tag += ""
-				// 수정을 하기 위한 버튼들
-				+ "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;padding-left:20px;\"></span>"
-				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;padding-left:20px;\"></span>"
-				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;padding-left:20px;\"></span>"
-				+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"display:none;padding-left:20px;\"></span>"
-			;
-			if(is_first && !cur_child_action_item.get_action_is_shy()){
-				// 첫번째 열에 우측에 element collection set eject 버튼을 노출한다. 
-				editable_list_tag += ""
-				+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;\"></span>"
-				;
-			} else {
-				// 첫번째 열에 우측에 element collection set eject 버튼을 가린다.
-				editable_list_tag += ""
-				+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;display:none;\"></span>"
-				;
-			}
-
-			editable_list_tag += ""
-				// chlidren element container div
-				+ "<div id=\"chlid_shy_element_container\"></div>"
-				// chlidren element container div
-				+ "<div id=\"chlidren_element_container\"></div>"
-				// add on element container div
-				+ "<div id=\"add_on_element_container\"></div>"
-			+ "</li>"
-			;
-
-		}
-		editable_list_tag += ""
 		+ "</ul>"
 		;
 
@@ -824,25 +1137,32 @@ airborne.bootstrap.view.obj.__action_list = {
 
 		// 태그 적용(append) 및 마우스 이벤트 연동하기
 		// 이제 페이지에서 리스트를 볼 수 있습니다.
+
+		// 리스트 열을 묶어주는 ul 태그 부모 리스트를 만듭니다. 이벤트도 설정해줍니다.
 		parent_jq.append(editable_list_tag);
 		var editable_list_jq = parent_jq.children().last();
-		var editable_list_row_arr_jq = editable_list_jq.children();
-
 		cur_element_collection_set.set_element_collection_container_jq(editable_list_jq);
 
+		// wonder.jung
+		// 리스트의 자식 열들을 만듭니다.
+		var editable_list_row_arr_jq = editable_list_jq.children();
+
+		
 
 
 
 
 
 
+		// 엘리먼트와 이벤트 매니저 연결
+		var delegate_set_event_manager_prop_on_list_row = 
+		_obj.get_delegate(function(element_event_manager){
 
-		// 리스트 열 내부에서 선택할 수 있는 요소
-		// 1. 시간 엘리먼트. 
-		// 2. 리스트 내용. 
-		// 2가지 경우의 수가 생길 경우, 서로 다른 타입임을 알려주고 이벤트를 설정해야 함.
-		// 마우스 이벤트 연동하기
-		var delegate_set_event_manager_prop_on_list_row = _obj.get_delegate(function(element_event_manager){
+			// 리스트 열 내부에서 선택할 수 있는 요소
+			// 1. 시간 엘리먼트. 
+			// 2. 리스트 내용. 
+			// 2가지 경우의 수가 생길 경우, 서로 다른 타입임을 알려주고 이벤트를 설정해야 함.
+			// 마우스 이벤트 연동하기
 
 			// console.log("delegate_set_event_manager_prop_on_list_row / element_event_manager :: ",element_event_manager);
 
@@ -869,8 +1189,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			// var cur_element_type = cur_element_meta_info.get_element_type();
 
 			var cur_action_item_obj = element_event_manager.get_action_item_obj();
-			if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-				console.log("!Error! / delegate_set_event_manager_prop_on_list_row / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+				console.log("!Error! / delegate_set_event_manager_prop_on_list_row / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 				return;
 			}
 
@@ -878,6 +1198,7 @@ airborne.bootstrap.view.obj.__action_list = {
 
 			// INPUT GROUP
 			var cur_list_row_grand_parent_jq = cur_list_row_jq.parent();
+
 			// 내부에 자식 객체도 동일한 엘리먼트를 가질수 있으므로 첫번째 검색 결과만 사용합니다.
 			var cur_input_group_jq = cur_list_row_grand_parent_jq.find("li#row_input_group").first();
 			element_event_manager.set_title_input_group_jq(cur_input_group_jq);
@@ -889,20 +1210,9 @@ airborne.bootstrap.view.obj.__action_list = {
 
 			}
 			var time_jq = null;
-			if( _obj.ELEMENT_TYPE_SEARCH_LIST == cur_element_type || 
-				_obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
-				_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
-				_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type || 
-				_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type || 
-				_obj.ELEMENT_TYPE_LIST_ROW_INPUT_TEXT == cur_element_type){
+			if( cur_action_item_obj.is_item() ){
 
-				var btn_edit_jq = cur_list_row_jq.find("span#btn_edit").first();
-				element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
-				
-				if( _obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
-					_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type ||
-					_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type || 
-					_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type ){
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
 					// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
 					time_jq = cur_list_row_jq.find("span#time").first();
@@ -934,22 +1244,22 @@ airborne.bootstrap.view.obj.__action_list = {
 
 					// @ Desc : 시간 입력 그룹의 수정된 시간 취소 버튼
 					var time_input_group_jq_btn_time_cancel_jq = time_input_group_jq.find("button#btn_cancel_time").first();
-					element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);
-				}
-				// REMOVE ME - 수정 가능 여부를 어디에 저장하면 될까?
-				//if( cur_element_meta_info.get_is_editable() == true && !cur_element_meta_info.get_is_shy() ){
-				if( cur_action_item_obj.get_action_is_shy() ){
-
-					var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
-					element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
-
-					var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
-					element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
-
-					var btn_collection_eject_jq = cur_list_row_jq.find("span#btn_collection_eject").first();
-					element_event_manager.set_btn_eject_collection_element_jq(btn_collection_eject_jq);
+					element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);					
 					
 				}
+
+				var btn_edit_jq = cur_list_row_jq.find("span#btn_edit").first();
+				element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
+
+				var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
+				element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
+
+				var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
+				element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
+
+				var btn_collection_eject_jq = cur_list_row_jq.find("span#btn_collection_eject").first();
+				element_event_manager.set_btn_eject_collection_element_jq(btn_collection_eject_jq);
+
 			}
 
 			// ROW TITLE (고정 - 노출되는 값)
@@ -1002,11 +1312,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_add_on_element_container_jq = cur_list_row_jq.find("div#add_on_element_container").first();
 			element_event_manager.set_add_on_element_container_jq(cur_add_on_element_container_jq);
 
-			// 각 엘리먼트는 1개의 정보만을 가지고 이 정보를 업데이트하는 것을 기준으로 설계되었습니다.
-			// 그러므로 열에 시간 정보가 추가되어 이 추가 정보를 제어하는 이벤트를 처리하는 것은 각 컴포넌트 단에서 직접 제어해야 합니다.
-			if(_obj.isValidDelegate(delegate_fetch_searchable_element_list)){
-				element_event_manager.set_delegate_fetch_searchable_element_list(delegate_fetch_searchable_element_list);
-			}
 
 			// 리스트의 입력그룹이 아닌 첫번째 리스트 열에 대해 radius를 적용합니다.
 			var cur_idx = cur_list_row_jq.attr("idx");
@@ -1051,10 +1356,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			// 엘리먼트가 사용자 수정에 의해 새로운 위치로 이동 완료한 뒤에 호출되는 콜백 델리게이트
 			element_event_manager.set_delegate_callback_after_landing_element(_obj.get_delegate(function(cur_event_manager_on_mouse_over){
 
-				var _v = airborne.validator;
-				var _obj = airborne.bootstrap.obj;
-				var _dates = airborne.dates;
-
 				var consoler = airborne.console.get();
 				consoler.off();
 
@@ -1068,7 +1369,8 @@ airborne.bootstrap.view.obj.__action_list = {
 				var cur_sibling_element_event_manager_arr = cur_event_manager_on_mouse_over.get_sibling_element_event_manager_arr(true);
 				var cur_element_set = cur_event_manager_on_mouse_over.get_element_set();
 				var cur_element_collection_set = cur_element_set.get_element_collection_set();
-				var cur_masked_element_set_arr = cur_element_collection_set.ecs_get_masked_element_set_arr(false/*has_input_group*/);
+				var has_input_group = false;
+				var cur_masked_element_set_arr = cur_element_collection_set.ecs_get_masked_element_set_arr(has_input_group);
 
 				for(var idx = 0; idx < cur_masked_element_set_arr.length; idx++) {
 					var cur_masked_element_set = cur_masked_element_set_arr[idx];
@@ -1105,7 +1407,8 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				// 형제 엘리먼트의 디자인 - collection eject btn, corner round - 을 다시 그립니다.
 				console.log("형제 엘리먼트의 디자인 - collection eject btn, corner round - 을 다시 그립니다.");
-				cur_event_manager_on_mouse_over.shape_sibling_element(true/*has_myself*/);
+				var has_myself = true;
+				cur_event_manager_on_mouse_over.shape_sibling_element(has_myself);
 
 				// Save n Reload
 				if(cur_event_manager_on_mouse_over != undefined){
@@ -1137,7 +1440,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				if(cur_event_manager.get_before_sibling_event_manager() == null && cur_event_manager.get_after_sibling_event_manager() == null) return;
 
 				// Do something!
-
 				// shy element의 열이 이동하였을 때, 이동한 열에 맞게 시간을 변경해 줍니다.
 
 			}, this));
@@ -1145,223 +1447,28 @@ airborne.bootstrap.view.obj.__action_list = {
 			return element_event_manager;
 
 		}, this);
-	
 		// 사용자가 새로운 열을 만들수 있도록, 이벤트 매니저 델리게이트 함수를 저장합니다.
 		cur_element_collection_set.set_delegate_set_event_manager_prop(delegate_set_event_manager_prop_on_list_row);
-		
-		// 이후 리스트에 이벤트 매니저를 적용함. 리스트 형이므로 테이블과 다르게 동작. 이 부분은 수정할 것.
-		var cur_list_jq = parent_jq.children().last();
-		var cur_list_row_jq_arr = cur_list_jq.find("li");
 
-		// 엘리먼트의 이벤트 매니저를 만듭니다. Input group은 제외됩니다.
-		// 이벤트 매니저의 전, 후의 형제 관계를 저장합니다.
-		var before_event_manager = null;
-		var cur_list_element_set_arr = []; // 메타 정보, 이벤트 매니저를 통합한 객체 배열.
-		for (var idx = 0; idx < cur_list_row_jq_arr.length; idx++) {
 
-			// 해당 열에 맞는 리스트 열 메타 정보 가져오기.
-			var list_row_element = cur_list_row_jq_arr[idx];
-			var list_row_element_jq = $(list_row_element);
-			var list_row_element_id = list_row_element_jq.attr("id");
-			var list_row_meta_info = null;
 
-			// 엘리먼트와 매칭되는 action item object 찾기
-			var cur_action_item_obj = cur_action_list.search(list_row_element_id);
+		// action item 화면에 표시 및 event manager 만들기
+		var get_children_cnt = cur_action_list.get_children_cnt();
+		for(var idx=0;idx < get_children_cnt;idx++) {
+			var cur_child_action_item_obj = cur_action_list.get_child(idx);
 
-			if(cur_action_item_obj == undefined) {
-				continue;
-			}
-
-			var cur_element_type = cur_action_item_obj.get_element_type();
-			var event_manager_list_row_text = 
-			_action.make_element_event_manager(
-				list_row_element_id
-				, list_row_element_jq
-				, cur_action_item_obj
-				, delegate_set_event_manager_prop_on_list_row
+			cur_element_collection_set = 
+			this.add_editable_list_element(
+				// target_element_collection_set
+				cur_element_collection_set
+				// action_item_obj
+				, cur_child_action_item_obj
+				// color type
+				, color_type
+				// target_idx
+				, idx
 			);
-			if(event_manager_list_row_text == undefined) {
-				console.log("!Error! / add_editable_list / event_manager_list_row_text == undefined");
-			}
-			cur_action_item_obj.set_event_manager(event_manager_list_row_text);
-
-			// 이벤트 매니저의 전, 후의 형제 관계를 저장합니다.
-			if(before_event_manager != null){
-				before_event_manager.set_after_sibling_event_manager(event_manager_list_row_text);	
-				event_manager_list_row_text.set_before_sibling_event_manager(before_event_manager);
-			}
-			before_event_manager = event_manager_list_row_text;
-
-			// event manager + element meta info => element set
-			// element set + element set + ... => element collection set
-			cur_element_collection_set.push_new_element_set(cur_action_item_obj, event_manager_list_row_text);
-
-			// set eject event
-			event_manager_list_row_text.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
-
-				var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;
-
-				// @ 기본 동작
-				// 이벤트 전파를 막습니다.
-				event_click.stopPropagation();
-				// 다른 객체들의 이벤트를 받지 않도록 lock를 설정.
-				var cur_event_hierarchy_manager = _obj.get_event_hierarchy_manager();
-				cur_event_hierarchy_manager.lock();
-
-				// 포커싱 모드로 바꿈.
-				cur_event_manager.show_focusing_mode();
-				
-				
-
-				var cur_element_jq = cur_event_manager.get_element_jq();
-
-				// @ element collection settings
-				var event_click_offset = {top:event_click.pageY,left:event_click.pageX};
-				var clone_element_jq = jsm.boost_clone_element_jq(cur_element_jq, event_click_offset);
-				// set round
-				_obj.set_list_single_row_css_radius(clone_element_jq, _obj.LIST_ROW_RADIUS_NORMAL);
-				var clone_element_offset = clone_element_jq.offset();
-
-				var cur_mousemove_callback_set =
-				cur_event_hierarchy_manager.add_mousemove_callback_set(_obj.get_delegate(function(mousemove_event, event_manager_on_mousemove){
-
-					// 사용자가 선택한 윈도우의 이동
-			        var cur_top = mousemove_event.pageY - jsm.gap;
-			        var cur_left = mousemove_event.pageX - jsm.gap;
-
-					clone_element_jq.offset({top:cur_top,left:cur_left});
-
-					// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
-					// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
-
-					// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
-					cur_event_manager.get_element_set().get_element_collection_set().get_mouse_over_element(mousemove_event, event_manager_on_mousemove.get_all_sibling_element_set_arr());
-
-					// 드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.
-					clone_element_jq.off();
-					clone_element_jq.click(function(e){
-
-						// console.log("드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.");
-
-						var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
-						var cur_sibling_element_set_mouse_over = null;
-						var mouse_over_checksum = null;
-						for(var inner_idx = 0;inner_idx < cur_all_sibling_element_set_arr.length;inner_idx++){
-							var cur_sibling_element_set = cur_all_sibling_element_set_arr[inner_idx];
-
-							// 충돌 검사를 진행한다.
-							mouse_over_checksum = jsm.show_mouse_over_element_set_top_n_bottom(mousemove_event, cur_sibling_element_set);
-
-							// DEBUG
-							// console.log("title for debug : ",cur_sibling_element_set.get_event_manager().get_title_jq_value());
-							if(	cur_sibling_element_set.get_event_manager() != undefined && 
-								"New Last Action" === cur_sibling_element_set.get_event_manager().get_title_jq_value()) {
-
-								// console.log("mouse_over_checksum : ",mouse_over_checksum);
-
-							}
-
-							if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_top){
-								cur_sibling_element_set_mouse_over = cur_sibling_element_set;
-								break;
-							} else if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_bottom){
-								cur_sibling_element_set_mouse_over = cur_sibling_element_set;
-								break;
-							}
-						}
-
-						// 이제 선택한 영역의 아래로 엘리먼트를 추가합니다.
-						// 부모를 옮기기 전의 절대좌표를 얻습니다.
-						var _self_clone_jq = $(this);
-						var prev_offset = _self_clone_jq.offset();
-
-						if(cur_sibling_element_set_mouse_over != undefined){
-							// view mode로 전환합니다.
-							cur_sibling_element_set_mouse_over.get_event_manager().show_view_mode();
-
-							if(mouse_over_checksum.is_hover_top){
-
-								// event manager의 형제 관계를 다시 세팅합니다.
-								// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 아래쪽의 엘리먼트
-								var new_after_sibling_event_manager = cur_sibling_element_set_mouse_over.get_event_manager();
-								// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
-								var new_before_sibling_event_manager = new_after_sibling_event_manager.get_before_sibling_event_manager();
-								// element set, event manager의 형제 관계를 다시 세팅합니다. 
-								cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
-
-								// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
-								// 사용자가 드래깅하는 클론과 실제 list row를 선택한 list row 위로 이동시킵니다.
-								// console.log("이제 선택한 영역의 위로 엘리먼트를 추가합니다. / ",cur_sibling_element_set_mouse_over.get_meta_info().get_list_row_text());
-								cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(cur_element_jq);
-								cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(_self_clone_jq);
-
-							} else {
-
-								// event manager의 형제 관계를 다시 세팅합니다.
-								// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 아래쪽의 엘리먼트
-								var new_before_sibling_event_manager = cur_sibling_element_set_mouse_over.get_event_manager();
-								// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
-								var new_after_sibling_event_manager = new_before_sibling_event_manager.get_after_sibling_event_manager();
-								// element set, event manager의 형제 관계를 다시 세팅합니다.
-								cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
-
-								// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
-								// 사용자가 드래깅하는 클론과 실제 list row를 선택한 list row 아래로 이동시킵니다.
-								// console.log("이제 선택한 영역의 아래로 엘리먼트를 추가합니다. / ",cur_sibling_element_set_mouse_over.get_meta_info().get_list_row_text());
-								cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(cur_element_jq);
-								cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(_self_clone_jq);
-								
-							}
-						}
-
-						// 부모를 옮긴다음, 저장해둔 절대좌표로 설정해줍니다.
-						_self_clone_jq.offset(prev_offset);
-
-						// 엘리먼트 착륙 이후의 델리게이트 객체를 가져옵니다. 충돌 객체가 없는 경우, null을 넘겨 줍니다.
-						var cur_delegate_callback_after_landing_element = null;
-						if(cur_sibling_element_set_mouse_over != undefined){
-							cur_delegate_callback_after_landing_element = 
-							cur_sibling_element_set_mouse_over.get_event_manager().get_delegate_callback_after_landing_element();
-						}
-
-						jsm.land_element(
-							// cur_src_jq
-							cur_element_jq
-							// cur_clone_jq
-							, _self_clone_jq
-							// eject_btn_jq
-							, event_manager_on_mousemove.get_btn_eject_element_jq()
-							// cur_mousemove_callback_set
-							, cur_mousemove_callback_set
-							// cur_element_set_on_mouse_over
-							, cur_sibling_element_set_mouse_over
-							// delegate_on_completed
-							, cur_delegate_callback_after_landing_element
-							// delegate_on_completed_param_event_manager
-							, cur_event_manager
-						); // animation end
-
-						// 열 이동이 끝나면, element conllection set의 모든 element set의 
-						// set_is_hover_top
-						// set_is_hover_bottom
-						// set_is_hover
-						// false로 초기화한다.
-						if(	event_manager_on_mousemove.get_element_set() != undefined && 
-							event_manager_on_mousemove.get_element_set().get_element_collection_set() != undefined ) {
-							event_manager_on_mousemove.get_element_set().get_element_collection_set().refresh_all_elemen_set_is_hover();	
-						}
-
-					}); // click event end
-
-				}, this), cur_event_manager); // end mouse move call back
-			}, this));			
-
-		}
-
-		// POST PROCESS
-		// element collection set을 움직일 버튼을 지정.
-		var cur_btn_collection_eject_jq = editable_list_jq.find("span#btn_collection_eject").first();
-		cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
+		} // for end
 
 		return cur_element_collection_set;
 	}

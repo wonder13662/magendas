@@ -25,93 +25,114 @@ airborne.bootstrap.obj.__action = {
 	,ACTION_ITEM_TYPE_TITLE_N_TIME_HH_MM:2
 	,ACTION_ITEM_TYPE_TITLE_N_TIME_MM_SS:3
 	,ACTION_ITEM_TYPE_SELECT_BOX:4
-	,is_valid_action_collection_data_obj:function(action_collection_data_obj, show_log) {
+	,is_valid_action_collection_data_obj:function(action_collection_data_obj) {
 
-		if(show_log == undefined) {
-			show_log = true;
-		}
-
-		var __v = _v_factory.get("_action.js / is_valid_action_collection_data_obj");
-
-		if(this.is_not_valid_action_data_obj(action_collection_data_obj, show_log)) {
+		if(this.is_not_valid_action_data_obj(action_collection_data_obj)) {
 			return false;
 		}
-		if(__v.is_not_unsigned_number(action_collection_data_obj.action_collection_type, show_log)) {
+		if(_v.is_not_unsigned_number(action_collection_data_obj.action_collection_type)) {
 			return false;
 		}
-		if(__v.is_not_valid_str(action_collection_data_obj.action_collection_type_name, show_log)) {
+		if(_v.is_not_valid_str(action_collection_data_obj.action_collection_type_name)) {
 			return false;
 		}
 
 		return true;
 	}	
-	,is_not_valid_action_collection_data_obj:function(action_collection_data_obj, show_log) {
-
-		if(show_log == undefined) {
-			show_log = true;
-		}
-
-		return !this.is_valid_action_collection_data_obj(action_collection_data_obj, show_log);
+	,is_not_valid_action_collection_data_obj:function(action_collection_data_obj) {
+		return !this.is_valid_action_collection_data_obj(action_collection_data_obj);
 	}
-	,is_valid_action_item_data_obj:function(action_item_data_obj, show_log) {
+	,is_valid_action_item_data_obj:function(action_item_data_obj) {
 
 		if(show_log == undefined) {
 			show_log = true;
 		}
-
-		var __v = _v_factory.get("_action.js / is_valid_action_item_data_obj");
-
-		if(this.is_not_valid_action_data_obj(action_item_data_obj, show_log)) {
+		if(this.is_not_valid_action_data_obj(action_item_data_obj)) {
 			return false;
 		}
-		if(__v.is_not_unsigned_number(action_item_data_obj.action_item_type, show_log)) {
+		if(_v.is_not_unsigned_number(action_item_data_obj.action_item_type)) {
 			return false;
 		}
-		if(__v.is_not_valid_str(action_item_data_obj.action_item_type_name, show_log)) {
-			return false;
-		}
-
-		return true;
-	}	
-	,is_not_valid_action_item_data_obj:function(action_item_data_obj, show_log) {
-
-		if(show_log == undefined) {
-			show_log = true;
-		}
-
-		return !this.is_valid_action_item_data_obj(action_item_data_obj, show_log);
-	}	
-	,is_not_valid_action_data_obj:function(action_data_obj, show_log) {
-
-		if(show_log == undefined) {
-			show_log = true;
-		}
-
-		return !this.is_valid_action_data_obj(action_data_obj, show_log);
-	}
-	,is_valid_action_data_obj:function(action_data_obj, show_log) {
-
-		if(show_log == undefined) {
-			show_log = true;
-		}
-
-		var __v = _v_factory.get("_action.js / is_valid_action_data_obj");
-		if(__v.is_null_object(action_data_obj, show_log)) {
-			return false;
-		}
-		if(__v.is_not_unsigned_number(action_data_obj.action_id, show_log)) {
-			return false;
-		}
-		if(__v.is_not_valid_str(action_data_obj.action_name, show_log)) {
-			return false;
-		}
-		if(__v.is_not_valid_str(action_data_obj.action_hash_key, show_log)) {
+		if(_v.is_not_valid_str(action_item_data_obj.action_item_type_name)) {
 			return false;
 		}
 
 		return true;
 	}
-	,get_action_obj:function(action_data_obj, coordinate, action_hierarchy_search_map) {
+	,is_not_valid_action_item_data_obj:function(action_item_data_obj) {
+		return !this.is_valid_action_item_data_obj(action_item_data_obj);
+	}	
+	,is_not_valid_action_data_obj:function(action_data_obj) {
+		return !this.is_valid_action_data_obj(action_data_obj);
+	}
+	,is_valid_action_data_obj:function(action_data_obj) {
+
+		if(action_data_obj == undefined) {
+			return false;
+		}
+		if(_v.is_not_unsigned_number(action_data_obj.action_id)) {
+			return false;
+		}
+		if(_v.is_not_valid_str(action_data_obj.action_name)) {
+			return false;
+		}
+		if(_v.is_not_valid_str(action_data_obj.action_hash_key)) {
+			return false;
+		}
+
+		return true;
+	}
+	,is_not_valid_action_item_obj:function(action_item_obj){
+		return !this.is_valid_action_item_obj(action_item_obj);
+	}
+	,is_valid_action_item_obj:function(action_item_obj){
+
+		if(action_item_obj == undefined) {
+			return false;
+		} else if(this.is_not_valid_action_obj(action_item_obj)) {
+			return false;
+		} else if(action_item_obj.get_action_item_type == undefined) {
+			return false;
+		} else if(_v.is_not_unsigned_number(action_item_obj.get_action_item_type())) {
+			return false;
+		} else if(action_item_obj.get_action_item_type_name == undefined) {
+			return false;
+		} else if(_v.is_not_valid_str(action_item_obj.get_action_item_type_name())) {
+			return false;
+		}
+
+		return true;
+	}
+	,is_not_valid_action_obj:function(action_obj){
+		return !this.is_valid_action_obj(action_obj);
+	}
+	,is_valid_action_obj:function(action_obj){
+
+		if(action_obj == undefined) {
+			return false;
+		} else if(action_obj.get_action_id == undefined) {
+			return false;
+		} else if(_v.is_not_unsigned_number(action_obj.get_action_id())) {
+			return false;
+		} else if(action_obj.get_action_name == undefined) {
+			return false;
+		} else if(_v.is_not_valid_str(action_obj.get_action_name())) {
+			return false;
+		} else if(action_obj.get_action_context == undefined) {
+			return false;
+		} else if(_v.is_not_valid_str(action_obj.get_action_context())) {
+			return false;
+		} else if(action_obj.get_action_hash_key == undefined) {
+			return false;
+		} else if(_v.is_not_valid_str(action_obj.get_action_hash_key())) {
+			return false;
+		}
+
+		return true;
+	}	
+	// @ Private
+	// @ Desc : 빈 action obj를 돌려줍니다.
+	,get_action_obj_empty:function() {
 
 		var action_obj = {
 			parent_action_object:null
@@ -201,6 +222,230 @@ airborne.bootstrap.obj.__action = {
 				}
 	
 			}
+			// @ Public
+			// @ Desc : 자신을 복제해서 새로운 action obj를 만듭니다.
+			,copy:function(src_action_obj) {
+
+				if(_action.is_not_valid_action_obj(src_action_obj)) {
+					console.log("!Error! / copy / _action.is_not_valid_action_obj(src_action_obj)");
+					return;
+				}
+
+				var action_obj_copy = _action.get_action_obj_empty();
+				action_obj_copy.set_action_name(src_action_obj.get_action_name);
+
+				if(src_action_obj.is_list() || src_action_obj.is_table()) {
+
+					action_obj_copy.set_action_collection_type(src_action_obj.get_action_collection_type());
+					action_obj_copy.set_action_collection_type_name(src_action_obj.get_action_collection_type_name());
+
+				} else if(src_action_obj.is_item()) {
+
+					action_obj_copy.set_action_item_type(src_action_obj.get_action_item_type());
+					action_obj_copy.set_action_item_type_name(src_action_obj.get_action_item_type_name());
+
+				}
+
+				action_obj_copy.set_action_is_shy(false);
+				action_obj_copy.set_changed(true);
+
+				// 복사를 하면 자신의 다음 객체로 만듭니다.
+				this.set_sibling_action_obj_after(action_obj_copy);
+				action_obj_copy.set_sibling_action_obj_before(this);
+
+				// 다음 객체가 있었다면 앞 뒤 형제 관계를 만들어줍니다.
+				var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+				if(cur_sibling_action_obj_after != undefined) {
+					action_obj_copy.set_sibling_action_obj_after(cur_sibling_action_obj_after);	
+					cur_sibling_action_obj_after.set_sibling_action_obj_before(action_obj_copy);
+				}
+
+				// update coordinate, order - 자신의 다음 형제 action obj를 모두 바꿔줘야 합니다. / 자식들도 영향을 받습니다.
+				var max_loop_cnt = 50;
+				for(var idx=0;idx < max_loop_cnt; idx++) {
+
+					if(cur_sibling_action_obj_after == undefined) {
+						break;
+					}
+
+					cur_sibling_action_obj_after.set_changed(true);
+					if(cur_sibling_action_obj_after.is_last()) {
+						break;
+					}
+
+					var cur_sibling_action_obj_before = cur_sibling_action_obj_after.get_sibling_action_obj_before();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
+						console.log("!Error! / copy / _action.is_not_valid_action_obj(cur_sibling_action_obj_before)");
+						return;
+					}
+
+				} // for end
+
+				// coordinate, action order는 DB 업데이트 이후 반영합니다.
+
+				return action_obj_copy;
+
+			}
+			// @ Public
+			// @ Desc : 자신을 삭제합니다.
+			,delete:function() {
+
+				if(this.is_first() && this.is_last()) {
+
+					// 자신 밖에 없는 경우. shy 모드로 변경
+					this.set_action_is_shy(true);
+					this.set_changed(true);
+
+				} else if(this.is_first() && this.is_not_last()) {
+
+					// 첫번째 action obj이고 형제 action이 있는 경우.
+					var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_after)");
+						return;
+					}
+
+					this.set_sibling_action_obj_after();
+					this.set_changed(true);
+					cur_sibling_action_obj_after.set_sibling_action_obj_before();
+					cur_sibling_action_obj_after.set_changed(true);
+
+				} else if(this.is_not_first() && this.is_not_last()) {
+
+					this.set_sibling_action_obj_before();
+					this.set_sibling_action_obj_after();
+					this.set_changed(true);
+
+					// 앞, 뒤로 형제 action이 있는 경우.
+					var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_before)");
+						return;
+					}
+					// 뒤의 형제 action과 나의 action과의 링크 참조를 제거.
+					var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_after)");
+						return;
+					}
+
+					// 자신의 action을 제외한 앞, 뒤 형제끼리 연결
+					cur_sibling_action_obj_before.set_sibling_action_obj_after(cur_sibling_action_obj_after);
+					cur_sibling_action_obj_after.set_sibling_action_obj_before(cur_sibling_action_obj_before);
+					cur_sibling_action_obj_before.set_changed(true);
+					cur_sibling_action_obj_after.set_changed(true);
+
+				} else if(this.is_not_first() && this.is_last()) {
+
+					// 자신이 마지막 action
+					this.set_sibling_action_obj_before();
+					this.set_changed(true);
+
+					// 앞의 형제 가져옴. 나의 action과의 링크 참조를 제거.
+					var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_before)");
+						return;
+					}
+					cur_sibling_action_obj_before.set_sibling_action_obj_after();
+					cur_sibling_action_obj_before.set_changed(true);
+
+				} else {
+					console.log("!Error! / delete / Not implemented!");
+				}
+
+				// coordinate, action order는 DB 업데이트 이후 반영합니다.
+
+			}
+			// @ Public
+			// @ Desc : 자신을 다음 형제 객체 뒤로 옮깁니다.
+			,after:function() {
+
+				if(this.is_first() && this.is_last()) {
+					// 유일한 객체입니다. 아무것도 하지 않습니다.
+				} else if(this.is_first() && this.is_not_last()) {
+
+					// 첫번째 action obj이고 형제 action이 있는 경우.
+					var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_after)");
+						return;
+					}
+
+					cur_sibling_action_obj_after.set_changed(true);
+					cur_sibling_action_obj_after.set_sibling_action_obj_before();
+					cur_sibling_action_obj_after.set_sibling_action_obj_after(this);
+
+					this.set_changed(true);
+					this.set_sibling_action_obj_after();
+					this.set_sibling_action_obj_before(cur_sibling_action_obj_after);
+
+				} else if(this.is_not_first() && this.is_not_last()) {
+
+					// 1,this,3 --> 1,3,this or 1,this,3,4,... --> 1,3,this,4,...
+
+					// 앞, 뒤로 형제 action이 있는 경우.
+					// 자신의 앞, 뒤의 관계 참조를 모두 비움.
+					this.set_sibling_action_obj_before();
+					this.set_sibling_action_obj_after();
+					this.set_changed(true);
+
+					// 앞의 형제 action을 가져옴
+					var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_before)");
+						return;
+					}
+					// 뒤의 형제 action을 가져옴
+					var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after)) {
+						console.log("!Error! / delete / _action.is_not_valid_action_obj(cur_sibling_action_obj_after)");
+						return;
+					}
+
+					// 자신의 action을 제외한 앞, 뒤 형제끼리 연결
+					cur_sibling_action_obj_before.set_sibling_action_obj_after(cur_sibling_action_obj_after);
+					cur_sibling_action_obj_after.set_sibling_action_obj_before(cur_sibling_action_obj_before);
+					cur_sibling_action_obj_after.set_sibling_action_obj_after(this);
+					cur_sibling_action_obj_before.set_changed(true);
+					cur_sibling_action_obj_after.set_changed(true);
+					this.set_sibling_action_obj_before(cur_sibling_action_obj_after);
+
+					var cur_sibling_action_obj_after_after = undefined;
+					if(cur_sibling_action_obj_after.is_not_last()) {
+						cur_sibling_action_obj_after_after = cur_sibling_action_obj_after.get_sibling_action_obj_after();
+
+						if(cur_sibling_action_obj_after_after == undefined) {
+							console.log("!Error! / delete / cur_sibling_action_obj_after_after == undefined");
+							return;
+						}
+					} // if end
+
+					if(cur_sibling_action_obj_after_after == undefined) {
+						return;
+					}
+
+					cur_sibling_action_obj_after_after.set_sibling_action_obj_before(this);
+					this.set_sibling_action_obj_after(cur_sibling_action_obj_after_after);
+
+				} else if(this.is_not_first() && this.is_last()) {
+					// 마지막 객체입니다. 아무것도 하지 않습니다.
+				} else {
+					console.log("!Error! / after / Not implemented!");
+				}
+
+				// coordinate, action order는 DB 업데이트 이후 반영합니다.
+
+			}
+			// @ Public
+			// @ Desc : 자신을 이전 형제 객체 앞으로 옮깁니다.
+			,before:function() {
+
+				// wonder.jung
+
+				// coordinate, action order는 DB 업데이트 이후 반영합니다.
+
+			}
 			,set_parent:function(parent_action_object) {
 				this.parent_action_object = parent_action_object;
 			}
@@ -274,11 +519,43 @@ airborne.bootstrap.obj.__action = {
 			,get_sibling_action_obj_before:function() {
 				return this.sibling_action_obj_before;
 			}
+			,is_not_first:function() {
+				return !this.is_first();
+			}
+			,is_first:function() {
+				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+				if(cur_sibling_action_obj_before != undefined) {
+					return false;
+				}
+				return true;
+			}
+			,get_first_sibling_action_obj:function() {
+				if(this.is_first()) {
+					return this;
+				}
+				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+				if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
+					console.log("!Error! / get_first_sibling_action_obj / this.is_not_valid_action_obj(cur_sibling_action_obj_before)");
+					return;
+				}
+
+				return cur_sibling_action_obj_before.get_first_sibling_action_obj();
+			}
 			,set_sibling_action_obj_after:function(sibling_action_obj_after) {
 				this.sibling_action_obj_after = sibling_action_obj_after;
 			}
 			,get_sibling_action_obj_after:function() {
 				return this.sibling_action_obj_after;
+			}
+			,is_not_last:function() {
+				return !this.is_last();
+			}
+			,is_last:function() {
+				var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+				if(cur_sibling_action_obj_after != undefined) {
+					return false;
+				}
+				return true;
 			}
 			,push_add_on:function(add_on_action_data_obj, coordinate, action_hierarchy_search_map) {
 
@@ -395,49 +672,6 @@ airborne.bootstrap.obj.__action = {
 				return element_type;
 
 			}
-			// @ Public
-			// @ Desc : 실제로 화면에 그릴때 사용되는 타입으로 변환해줍니다. 
-			// 호출 객체부터 시작해서 최하단의 아이템의 타입까지 배열로 반환합니다. 
-			// 단, 각 단계의 형제 아이템의 속성을 동일해야 합니다.
-			,get_element_type_list:function(element_type_list, depth) {
-
-				// DEBUG
-				var cur_action_name = this.get_action_name();
-				console.log("** get_element_type_list / cur_action_name :: ",cur_action_name);
-
-				if(element_type_list == undefined) {
-					element_type_list = [];
-				}
-				if(depth == undefined) {
-					depth = 0;
-				}
-
-				if(this.is_item() && element_type_list.length == depth) {
-					
-					var cur_element_type = this.get_element_type();
-
-					console.log("*** depth :: ",depth);
-					console.log("*** cur_element_type :: ",cur_element_type);
-
-					element_type_list.push(this.get_element_type());	
-
-					depth += 1;
-				}
-
-				if(this.has_no_children()) {
-					return element_type_list;
-				}
-
-				var children_action_object_list = this.get_children();
-				for(var idx = 0;idx < children_action_object_list.length; idx++) {
-					var child_action_obj = children_action_object_list[idx];
-					element_type_list = child_action_obj.get_element_type_list(element_type_list, depth);
-				}
-				
-				
-
-				return element_type_list;
-			}
 			,get_root_action_obj:function() {
 				if(this.parent_action_object == undefined) {
 					return this;	
@@ -479,6 +713,9 @@ airborne.bootstrap.obj.__action = {
 			,is_table:function() {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_TABLE === action_collection_type)?true:false;				
+			}
+			,is_not_item:function() {
+				return !this.is_item();
 			}
 			,is_item:function() {
 				if(	this.is_item_title_only() || 
@@ -626,10 +863,34 @@ airborne.bootstrap.obj.__action = {
 				return this.event_manager;
 			}
 		}
-		action_obj.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map);
 
 		return action_obj;
 	}
+	,get_action_obj:function(action_data_obj, coordinate, action_hierarchy_search_map) {
+
+		var action_obj_empty = this.get_action_obj_empty();
+
+		action_obj_empty.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map);
+
+		return action_obj_empty;
+	}
+	// @ Public
+	// @ Desc : 한 객체에서 다른 객체를 복사합니다. 복사 방법은 복사 대상 자신과 자식이 shy 객체가 있다면 shy 객체까지 포함입니다. 이것은 재귀호출로 이루어 집니다.
+	,copy_action:function(target_action_obj) {
+
+		if(this.is_not_valid_action_obj(target_action_obj)) {
+			console.log("!Error! / copy_action / this.is_not_valid_action_obj(target_action_obj)");
+			return;
+		}
+
+ 		var copy_action_obj = this.get_action_obj();
+ 		
+
+
+
+
+	}
+
 	// @ Public
 	// @ Desc : 두 action 객체를 비교합니다. 비교 대상은 id, hash_key, name, context 입니다. 비교는 반드시 root action 객체로부터 아래로 내려옵니다.
 	,compare_root_action:function(prev_root_action_obj, next_root_action_obj) {
@@ -648,12 +909,12 @@ airborne.bootstrap.obj.__action = {
 
 		var has_same_var = true;
 
-		if(this.is_not_valid_action_data_obj(prev_action_obj)) {
-			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_data_obj(prev_action_obj)");
+		if(this.is_not_valid_action_obj(prev_action_obj)) {
+			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_obj(prev_action_obj)");
 			return false;
 		}
-		if(this.is_not_valid_action_data_obj(next_action_obj)) {
-			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_data_obj(next_action_obj)");
+		if(this.is_not_valid_action_obj(next_action_obj)) {
+			console.log("!Error! / action.manager.js / compare_action / this.is_not_valid_action_obj(next_action_obj)");
 			return false;
 		}
 
@@ -738,8 +999,8 @@ airborne.bootstrap.obj.__action = {
 			console.log("get_element_event_manager / _v.isNotJQueryObj(element_jq)");
 			return null;
 		}
-		if(this.is_not_valid_action_item_data_obj(action_item_obj)) {
-			console.log("get_element_event_manager / this.is_not_valid_action_item_data_obj(action_item_obj)");
+		if(this.is_not_valid_action_item_obj(action_item_obj)) {
+			console.log("get_element_event_manager / this.is_not_valid_action_item_obj(action_item_obj)");
 			return null;
 		}
 		if(_obj.isNotValidDelegate(delegate_set_event_manager_prop)){
@@ -1545,8 +1806,8 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_action_item_obj = this.get_action_item_obj();
 
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / element_event_manager / get_element_type / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / element_event_manager / get_element_type / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				return cur_action_item_obj.get_element_type();
@@ -1576,8 +1837,8 @@ airborne.bootstrap.obj.__action = {
 				console.log("HERE / call_delegate_save_n_reload / cur_search_option_obj :: ",cur_search_option_obj);
 				console.log("HERE / call_delegate_save_n_reload / cur_action_item_obj :: ",cur_action_item_obj);
 
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / element_event_manager / call_delegate_save_n_reload / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / element_event_manager / call_delegate_save_n_reload / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				var cur_element_id = cur_action_item_obj.get_coordinate();
@@ -1847,8 +2108,8 @@ airborne.bootstrap.obj.__action = {
 				cur_sibling_element_event_manager_arr.concat(cur_before_sibling_element_event_manager_arr);
 
 				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / get_sibling_element_event_manager_arr / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / get_sibling_element_event_manager_arr / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 
@@ -1880,8 +2141,8 @@ airborne.bootstrap.obj.__action = {
 				var cur_before_sibling_element_event_manager_arr = [];
 
 				var before_action_item_obj = cur_before_sibling_element_event_manager.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(before_action_item_obj)) {
-					console.log("!Error! / get_before_sibling_element_event_manager_arr / _action.is_not_valid_action_item_data_obj(before_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(before_action_item_obj)) {
+					console.log("!Error! / get_before_sibling_element_event_manager_arr / _action.is_not_valid_action_item_obj(before_action_item_obj)");
 					return;
 				}
 
@@ -1941,8 +2202,8 @@ airborne.bootstrap.obj.__action = {
 				var cur_after_sibling_element_event_manager_arr = [cur_after_sibling_element_event_manager];
 
 				var after_action_item_obj = cur_after_sibling_element_event_manager.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(after_action_item_obj)) {
-					console.log("!Error! / get_after_sibling_element_event_manager_arr / _action.is_not_valid_action_item_data_obj(after_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(after_action_item_obj)) {
+					console.log("!Error! / get_after_sibling_element_event_manager_arr / _action.is_not_valid_action_item_obj(after_action_item_obj)");
 					return;
 				}
 				var loop_limit_counter = 0;
@@ -2762,8 +3023,8 @@ airborne.bootstrap.obj.__action = {
 				var _obj = airborne.bootstrap.obj;
 
 				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / show_input_mode / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_input_mode / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 
@@ -3196,8 +3457,8 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				var cur_element_type = cur_action_item_obj.get_element_type();
@@ -3229,8 +3490,8 @@ airborne.bootstrap.obj.__action = {
 						e.stopPropagation();
 
 						var cur_action_item_obj = _self.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-							console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
 
@@ -3306,7 +3567,7 @@ airborne.bootstrap.obj.__action = {
 			,shape_sibling_element:function(has_myself){
 
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var cur_element_collection_set = this.get_element_set().get_element_collection_set();
 				var cur_element_collection_set_id = cur_element_collection_set.get_element_collection_id();
@@ -3360,7 +3621,10 @@ airborne.bootstrap.obj.__action = {
 						consoler.say("sse / 1-4 / " + cur_element_title);
 						consoler.say("sse / 1-4 / 첫번째 엘리먼트의 eject btn의 이벤트시 동작이 설정됩니다.");
 
-						cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_event_manager.get_btn_eject_collection_element_jq());
+						var cur_btn_eject_collection_element_jq = cur_event_manager.get_btn_eject_collection_element_jq();
+						console.log("HERE / cur_btn_eject_collection_element_jq : ",cur_btn_eject_collection_element_jq);
+
+						cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_eject_collection_element_jq);
 
 					} else if((cur_element_set_arr.length - 1) === idx) {
 
@@ -3376,8 +3640,8 @@ airborne.bootstrap.obj.__action = {
 
 				// set search list data
 				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / set_search_list_data_on_input_group / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_search_list_data_on_input_group / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				var cur_element_type = cur_action_item_obj.get_element_type();
@@ -3529,8 +3793,8 @@ airborne.bootstrap.obj.__action = {
 						_self.clear_title_input_jq_watch_dog_interval();
 
 						var cur_action_item_obj = _self.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-							console.log("!Error! / do_on_event / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / do_on_event / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
 
@@ -3608,8 +3872,8 @@ airborne.bootstrap.obj.__action = {
 
 				// assign time. check time mode.
 				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / set_event_time_editor_on_input_group / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_event_time_editor_on_input_group / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 
@@ -3750,8 +4014,8 @@ airborne.bootstrap.obj.__action = {
 					_self.release();
 
 					var cur_action_item_obj = _self.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / do_on_event_btn_time_ok / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / do_on_event_btn_time_ok / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -4028,8 +4292,8 @@ airborne.bootstrap.obj.__action = {
 					cur_element_set = cur_element_set_arr[0];
 
 					var cur_action_item_obj = cur_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / get_shy_child_element_set / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / get_shy_child_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -4065,8 +4329,8 @@ airborne.bootstrap.obj.__action = {
 					var next_element_set = cur_element_set_arr[idx];
 
 					var next_action_item_obj = next_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(next_action_item_obj)) {
-						console.log("!Error! / get_shy_sibling_element_set / _action.is_not_valid_action_item_data_obj(next_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(next_action_item_obj)) {
+						console.log("!Error! / get_shy_sibling_element_set / _action.is_not_valid_action_item_obj(next_action_item_obj)");
 						return;
 					}
 
@@ -4119,8 +4383,8 @@ airborne.bootstrap.obj.__action = {
 				
 				//element_type
 				var cur_action_item_obj = shy_sibling_element_set.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-					console.log("!Error! / move_shy_sibling_element_set_above_this / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / move_shy_sibling_element_set_above_this / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
@@ -4387,8 +4651,8 @@ airborne.bootstrap.obj.__action = {
 			// 검사중인 엘리먼트가 shy mode인지 확인합니다.
 
 			var cur_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
-			if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-				console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+				console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 				return;
 			}
 
@@ -4398,6 +4662,7 @@ airborne.bootstrap.obj.__action = {
 
 			// 부모,자식,형제 객체에 접근하기 위한 element_set
 			var cur_element_set = event_manager_on_mousemove.get_element_set();
+
 			var cur_children_element_set_arr = cur_element_set.get_children_element_set_arr();
 			var has_children = (_v.is_valid_array(cur_children_element_set_arr))?true:false;
 
@@ -4597,8 +4862,8 @@ airborne.bootstrap.obj.__action = {
 						}
 
 						var child_action_item_obj = cur_child_element_set.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(child_action_item_obj)) {
-							console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_data_obj(child_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(child_action_item_obj)) {
+							console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(child_action_item_obj)");
 							return;
 						}
 
@@ -4669,8 +4934,8 @@ airborne.bootstrap.obj.__action = {
 			console.log("!Error! / get_select_option_obj / _obj.is_not_valid_event_type(event_str)");
 			return null;
 		}
-		if(this.is_not_valid_action_item_data_obj(action_item_obj)) {
-			console.log("!Error! / get_select_option_obj / this.is_not_valid_action_item_data_obj(action_item_obj)");
+		if(this.is_not_valid_action_item_obj(action_item_obj)) {
+			console.log("!Error! / get_select_option_obj / this.is_not_valid_action_item_obj(action_item_obj)");
 			return null;
 		}
 
@@ -4758,11 +5023,15 @@ airborne.bootstrap.obj.__action = {
 			// 이 엘리먼트 컬렉션 셋을 구성하는 엘리먼트 셋들을 의미합니다.
 			// 리스트의 열, 테이블읠 컬럼-필드를 의미합니다.
 			,element_set_arr:[]
-			/*
-				@ public
-				@ scope : Element Collection Set
-				@ desc : Element Set을 Element Collection Set에 추가합니다.
-			*/
+			,get_element_set_cnt:function() {
+				if(_v.is_not_valid_array(this.element_set_arr)) {
+					return -1;
+				}
+				return this.element_set_arr.length;
+			}
+			// @ public
+			// @ scope : Element Collection Set
+			// @ desc : Element Set을 Element Collection Set에 추가합니다.
 			,push_element_set:function(element_set, idx){
 				if(element_set == undefined) return;
 
@@ -4826,11 +5095,8 @@ airborne.bootstrap.obj.__action = {
 			*/
 			,push_new_element_set:function(action_item_obj, event_manager, idx){
 
-				// REMOVE ME
-				// element_meta_info --> action_item_obj
-
-				if(_action.is_not_valid_action_item_data_obj(action_item_obj)) {
-					console.log("!Error! / push_new_element_set / _action.is_not_valid_action_item_data_obj(action_item_obj)");
+				if(_action.is_not_valid_action_item_obj(action_item_obj)) {
+					console.log("!Error! / push_new_element_set / _action.is_not_valid_action_item_obj(action_item_obj)");
 					return;
 				}
 				if(event_manager == undefined) {
@@ -4838,8 +5104,6 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				// REMOVE ME
-				// var cur_element_set = _obj.get_element_set(element_meta_info, event_manager);
 				var cur_element_set = _action.make_element_set(action_item_obj, event_manager);
 
 				event_manager.set_element_set(cur_element_set);
@@ -4853,6 +5117,7 @@ airborne.bootstrap.obj.__action = {
 				// 사용자가 열을 삭제하였을 때의 처리
 
 			}
+			// REMOVE ME
 			/*
 				@ public 
 				@ Scope : Element collection set
@@ -4899,6 +5164,7 @@ airborne.bootstrap.obj.__action = {
 			,get_delegate_add_element:function() {
 				return this.delegate_add_element;
 			}
+			// @ Scope : Element Collection Set
 			,add_element:function(sibling_element_event_manager) {
 
 				console.log("HERE / add_element");
@@ -4907,16 +5173,20 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / add_element / sibling_element_event_manager == undefined");
 					return;
 				}
+				var sibling_action_item_obj = sibling_element_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(sibling_action_item_obj)) {
+					console.log("!Error! / add_element / _action.is_not_valid_action_item_obj(sibling_action_item_obj)");
+					return;
+				}
 
 				var consoler = airborne.console.get();
 				consoler.off();
 
-				var _html = airborne.html;
-				var _view_list = airborne.bootstrap.view.obj.list;
-
 				var new_action_name = sibling_element_event_manager.get_title_input_jq_value();
+
 				console.log("");
 				consoler.say("ecs_a_e / 0 추가되는 엘리먼트 이름 : " + new_action_name);
+				consoler.say("ecs_a_e / 0 추가되는 엘리먼트 이름으로 action item obj를 복사합니다.");
 
 				// 추가하려는 엘리먼트(c)의 바로 위 엘리먼트(a)의 다음 엘리먼트(b) 참조를 가져옵니다.
 				// row a : (추가하려는 엘리먼트의 바로 위 엘리먼트)
@@ -4927,6 +5197,12 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_element_set = sibling_element_event_manager.get_element_set();
 				var cur_element_collection_set = cur_element_set.get_element_collection_set();
+
+				var cur_action_item_obj = cur_element_set.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / add_element / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
 
 				var cur_parent_element_set = sibling_element_event_manager.get_element_set().get_parent_element_set();
 				var cur_parent_element_collection_set;
@@ -4954,7 +5230,8 @@ airborne.bootstrap.obj.__action = {
 					has_sibling_element = true;
 				}
 
-				var cur_element_meta_info_obj = this.get_element_meta_info_obj();
+				// REMOVE ME
+				// var cur_element_meta_info_obj = this.get_element_meta_info_obj();
 				var copy_element_jq;
 				var new_sibling_element_collection_set;
 				if(has_shy_sibling_element && has_sibling_element) {
@@ -4972,7 +5249,9 @@ airborne.bootstrap.obj.__action = {
 
 					// 화면에 표시합니다.
 					copy_element_jq.show();
-					cur_element_meta_info_obj = this.get_element_meta_info_obj();
+
+					// REMOVE ME
+					// cur_element_meta_info_obj = this.get_element_meta_info_obj();
 
 				} else if(is_root_element) {
 
@@ -4984,28 +5263,32 @@ airborne.bootstrap.obj.__action = {
 					var clone_element_jq = sibling_element_jq_above.clone();
 					sibling_element_jq_above.after(clone_element_jq);
 
+					consoler.say("ecs_a_e / 1-2-1 / action item obj를 복사합니다. 새로 지정된 이름으로 업데이트 합니다.");
+
 					copy_element_jq = sibling_element_jq_above.next();
 					// context를 자기 자신으로 변경합니다.
 					copy_element_jq = $(copy_element_jq[0]);
 					
 					var cur_chlidren_element_container_jq = copy_element_jq.find("div#chlidren_element_container");
 					if(cur_chlidren_element_container_jq != undefined) {
-						consoler.say("ecs_a_e / 1-2-1 / ",new_action_name);
-						consoler.say("ecs_a_e / 1-2-1 / 복사한 엘리먼트 내부의 children element container안의 내용을 지웁니다.");
+						consoler.say("ecs_a_e / 1-2-2 / ",new_action_name);
+						consoler.say("ecs_a_e / 1-2-2 / 복사한 엘리먼트 내부의 children element container안의 내용을 지웁니다.");
 						cur_chlidren_element_container_jq.children().remove();	
 					}
 					// 숨김 자식 열도 없앰.
 					var cur_shy_chlid_element_container_jq = copy_element_jq.find("div#chlid_shy_element_container");
 					if(cur_shy_chlid_element_container_jq != undefined) {
-						consoler.say("ecs_a_e / 1-2-2 / ",new_action_name);
-						consoler.say("ecs_a_e / 1-2-2 / 복사한 엘리먼트 내부의 children element container안의 내용을 지웁니다.");
+						consoler.say("ecs_a_e / 1-2-3 / ",new_action_name);
+						consoler.say("ecs_a_e / 1-2-3 / 복사한 엘리먼트 내부의 children element container안의 내용을 지웁니다.");
 						cur_shy_chlid_element_container_jq.children().remove();
 					}
 
-					consoler.say("ecs_a_e / 1-2-3 / ",new_action_name);
-					consoler.say("ecs_a_e / 1-2-3 / 화면에 표시합니다. / ",new_action_name);
+					consoler.say("ecs_a_e / 1-2-4 / ",new_action_name);
+					consoler.say("ecs_a_e / 1-2-4 / 화면에 표시합니다. / ",new_action_name);
 					copy_element_jq.show();
-					cur_element_meta_info_obj = this.get_element_meta_info_obj();
+
+					// REMOVE ME
+					// cur_element_meta_info_obj = this.get_element_meta_info_obj();
 
 				} else {
 
@@ -5059,7 +5342,9 @@ airborne.bootstrap.obj.__action = {
 						consoler.say("ecs_a_e / 1-3-5 / 새로운 리스트를 만들기 위한 필요정보,");
 						consoler.say("ecs_a_e / 1-3-5 / element meta info와 리스트 태그를 붙이기 위한 ecs tag jq를 가져옵니다.");
 
-						cur_element_meta_info_obj = new_sibling_element_collection_set.get_element_meta_info_obj();
+						// REMOVE ME
+						// cur_element_meta_info_obj = new_sibling_element_collection_set.get_element_meta_info_obj();
+
 						new_element_collection_container_jq = new_sibling_element_collection_set.get_element_collection_container_jq();
 					}
 
@@ -5093,12 +5378,17 @@ airborne.bootstrap.obj.__action = {
 				
 				// 엘리먼트 타입을 확인합니다. --> 이걸 어디서 확인하지?
 				var new_element_set;
-				if(_obj.ITEM_TYPE_LIST === cur_element_meta_info_obj.get_item_type()) {
+				// REMOVE ME
+				//if(_obj.ITEM_TYPE_LIST === cur_element_meta_info_obj.get_item_type()) {
+				if(cur_action_item_obj.is_list()) {
+
+					// cur_action_item_obj
 
 					// shy mode에서 추가할 경우는 shy mode 속성을 제거해줍니다.
 
 					// REMOVE ME
-					var cur_list_row_meta_info_arr = cur_element_meta_info_obj.get_list_row_info();
+					// var cur_list_row_meta_info_arr = cur_element_meta_info_obj.get_list_row_info();
+
 					consoler.say("ecs_a_e / 2-1 / ",new_action_name);
 					consoler.say("ecs_a_e / 2-1 / a. 리스트 타입 / 리스트 열에 대한 새로운 메타 정보를 만듭니다. / ",new_action_name);
 					
@@ -5111,7 +5401,8 @@ airborne.bootstrap.obj.__action = {
 						consoler.say("ecs_a_e / 2-1-1 / a. 리스트 타입 / 사용자가 선택한 형제 열의 바로 아래 열에 되어야 합니다.");
 						cur_element_collection_set.say_element_set_arr(consoler.isShow);
 						consoler.say("ecs_a_e / 2-1-1 / cur_element_set_arr : ",cur_element_set_arr);
-						consoler.say("ecs_a_e / 2-1-1 / cur_element_meta_info_obj : ",cur_element_meta_info_obj);
+						// REMOVE ME
+						// consoler.say("ecs_a_e / 2-1-1 / cur_element_meta_info_obj : ",cur_element_meta_info_obj);
 
 						for(var idx = 0; idx < cur_element_set_arr.length; idx++) {
 							var cur_element_set = cur_element_set_arr[idx];
@@ -5159,6 +5450,10 @@ airborne.bootstrap.obj.__action = {
 
 					}
 					
+					// 새로운 열을 action item obj로 추가하는 방법은?
+
+					console.log("HERE / cur_element_set :: ",cur_element_set);
+
 					cur_element_meta_info_obj.add_list_row_info_simple(
 						// action_name
 						new_action_name
@@ -5174,9 +5469,11 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("ecs_a_e / 2-1-6 / list_row_meta_info 가져오기");
 
 					var cur_list_row_info = cur_element_meta_info_obj.get_list_row_info_with_idx(idx_to_add);
+					var element_meta_info = cur_list_row_info;
+
 					var list_row_element_id = _html.getIdRandomTail(new_action_name);
 					var list_row_element_jq = copy_element_jq;
-					var element_meta_info = cur_list_row_info;
+					
 					var delegate_set_event_manager_prop_on_list_row = this.get_delegate_set_event_manager_prop();
 
 					consoler.say("ecs_a_e / 2-1-7 / ",new_action_name);
@@ -5192,6 +5489,7 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("ecs_a_e / 2-1-8 / 사용자가 입력한 열 이름으로 아이디를 새로 지정합니다");
 					list_row_element_jq.attr("id", list_row_element_id);
 
+					// event manager 만들기
 					var event_manager_list_row_text = 
 					_obj.get_element_event_manager(
 						list_row_element_id
@@ -5255,7 +5553,11 @@ airborne.bootstrap.obj.__action = {
 						);
 
 						new_sibling_element_collection_set.set_element_collection_container_jq(event_manager_list_row_text.get_element_container_jq());
-						new_sibling_element_collection_set.ecs_set_btn_collection_eject_jq(event_manager_list_row_text.get_btn_eject_collection_element_jq());
+
+						var cur_btn_eject_collection_element_jq = event_manager_list_row_text.get_btn_eject_collection_element_jq();
+						console.log("HERE / cur_btn_eject_collection_element_jq : ",cur_btn_eject_collection_element_jq);
+
+						new_sibling_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_eject_collection_element_jq);
 
 						consoler.say("ecs_a_e / 2-3-2 / ",new_action_name);
 						consoler.say("ecs_a_e / 2-3-2 / shy element를 화면에서 가립니다.");
@@ -5351,9 +5653,11 @@ airborne.bootstrap.obj.__action = {
 
 					consoler.say("ecs_a_e / 2-6-3 / ",new_action_name);
 					cur_element_collection_set.say_element_set_arr(consoler.isShow);
-					consoler.say("ecs_a_e / 2-6-3 / 완료");
+					consoler.say("ecs_a_e / 2-6-3 / 완료");	
 
-				} else if(_obj.ITEM_TYPE_TABLE === cur_element_meta_info_obj.get_item_type()) {
+				// REMOVE ME
+				//} else if(_obj.ITEM_TYPE_TABLE === cur_element_meta_info_obj.get_item_type()) {
+				} else if(cur_action_item_obj.is_table()) {
 
 					consoler.say("ecs_a_e / 3 / ",new_action_name);
 					consoler.say("ecs_a_e / 3 / 아직 구현되지 않았습니다.");
@@ -5363,7 +5667,8 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("ecs_a_e / 4 / ",new_action_name);
 				consoler.say("ecs_a_e / 4 / 자신만이 아닌 형제의 모든 열의 테두리 디자인을 변경해줍니다.");
 
-				sibling_element_event_manager.shape_sibling_element(true/*has_myself*/);
+				var has_myself = true;
+				sibling_element_event_manager.shape_sibling_element(has_myself);
 
 				// 이벤트 락을 해제합니다. 다른 이벤트를 사용할 수 있도록 복원합니다.
 				var cur_event_hierarchy_manager = _obj.get_event_hierarchy_manager();
@@ -5427,8 +5732,8 @@ airborne.bootstrap.obj.__action = {
 				} else if(prev_element_set != undefined && next_element_set != undefined) {
 
 					var prev_action_item_obj = prev_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(prev_action_item_obj)) {
-						console.log("!Error! / add_element_set / _action.is_not_valid_action_item_data_obj(prev_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(prev_action_item_obj)) {
+						console.log("!Error! / add_element_set / _action.is_not_valid_action_item_obj(prev_action_item_obj)");
 						return;
 					}
 
@@ -5441,8 +5746,8 @@ airborne.bootstrap.obj.__action = {
 						next_element_set_arr.push(cur_element_set);
 
 						var cur_action_item_obj = cur_element_set.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-							console.log("!Error! / add_element_set / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / add_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
 
@@ -5553,8 +5858,8 @@ airborne.bootstrap.obj.__action = {
 				if(element_set == null) return;
 
 				var action_item_obj_delete = element_set.get_action_item_obj();
-				if(_action.is_not_valid_action_item_data_obj(action_item_obj_delete)) {
-					console.log("!Error! / remove_element_set / _action.is_not_valid_action_item_data_obj(action_item_obj_delete)");
+				if(_action.is_not_valid_action_item_obj(action_item_obj_delete)) {
+					console.log("!Error! / remove_element_set / _action.is_not_valid_action_item_obj(action_item_obj_delete)");
 					return;
 				}
 
@@ -5571,8 +5876,8 @@ airborne.bootstrap.obj.__action = {
 					// console.log("제거한 엘리먼트 셋은 배열에서도 제거됩니다.");
 
 					var cur_action_item_obj = cur_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / remove_element_set / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / remove_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -5590,8 +5895,8 @@ airborne.bootstrap.obj.__action = {
 					var cur_element_set = cur_all_element_set_arr[i];
 
 					var cur_action_item_obj = cur_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / debug_element_set_arr / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / debug_element_set_arr / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -5637,8 +5942,8 @@ airborne.bootstrap.obj.__action = {
 					var cur_element_set = this.element_set_arr[idx];
 
 					var cur_action_item_obj = cur_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / say_element_set_arr / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / say_element_set_arr / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -5681,8 +5986,8 @@ airborne.bootstrap.obj.__action = {
 						consoler.say("ecs_get_masked_element_set_arr / cur_element_set : ",cur_element_set);
 
 						var cur_action_item_obj = cur_element_set.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-							console.log("!Error! / ecs_get_masked_element_set_arr / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / ecs_get_masked_element_set_arr / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
 
@@ -5737,8 +6042,8 @@ airborne.bootstrap.obj.__action = {
 					if(cur_element_set == null) continue;
 
 					var cur_action_item_obj = cur_element_set.get_action_item_obj();
-					if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-						console.log("!Error! / get_all_element_set_arr_recursive / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / get_all_element_set_arr_recursive / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 						return;
 					}
 
@@ -6063,7 +6368,7 @@ airborne.bootstrap.obj.__action = {
 			, set_jump_event:function(cur_btn_collection_eject_jq) {
 
 				if(cur_btn_collection_eject_jq == undefined) {
-					console.log("!Error! / airborne.bootstrap.obj.set_jump_event / cur_btn_collection_eject_jq == undefined");
+					console.log("!Error! / set_jump_event / cur_btn_collection_eject_jq == undefined");
 					return;	
 				}
 
@@ -6467,8 +6772,8 @@ airborne.bootstrap.obj.__action = {
 						if(cur_element_set == undefined) continue;
 
 						var cur_action_item_obj = cur_element_set.get_action_item_obj();
-						if(_action.is_not_valid_action_item_data_obj(cur_action_item_obj)) {
-							console.log("!Error! / get_event_manager_from_element_collection_set_arr / _action.is_not_valid_action_item_data_obj(cur_action_item_obj)");
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / get_event_manager_from_element_collection_set_arr / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
 
@@ -6546,8 +6851,8 @@ airborne.bootstrap.obj.__action = {
 		// REMOVE ME params
 		// meta_info --> action item object
 
-		if(_action.is_not_valid_action_item_data_obj(action_item_obj)) {
-			console.log("!Error! / make_element_set / _action.is_not_valid_action_item_data_obj(action_item_obj)");
+		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
+			console.log("!Error! / make_element_set / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;
 		}
 		if(event_manager == undefined) {

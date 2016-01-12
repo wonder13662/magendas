@@ -133,8 +133,8 @@ wonglish.meeting_agenda_manager = {
 					console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
 					return;
 				}
-				if(	_action.is_not_valid_action_item_data_obj(cur_outcome_obj._action_item_obj) ) {
-					console.log("!Error! / delegate_save_n_reload / _action.is_not_valid_action_item_data_obj(cur_outcome_obj._action_item_obj)");
+				if(	_action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj) ) {
+					console.log("!Error! / delegate_save_n_reload / _action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj)");
 					return;
 				}
 
@@ -194,7 +194,8 @@ wonglish.meeting_agenda_manager = {
 						var cur_root_action_obj = action_item_obj.get_root_action_obj();
 						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
 						var meeting_id = cur_root_context_obj.meeting_id;
-						if(__v.is_not_unsigned_number(meeting_id)) {
+						if(_v.is_not_unsigned_number(meeting_id)) {
+							console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(meeting_id)");
 							return;
 						}
 
