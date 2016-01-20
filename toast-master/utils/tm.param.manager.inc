@@ -290,6 +290,9 @@ class ToastMasterParamManager{
 	public $ACTION_ITEM_TYPE_TITLE_ONLY=1;
 	public $ACTION_ITEM_TYPE_TITLE_N_TIME_HH_MM=2;
 
+	// PDF SETTINGS
+	public $FONT_SIZE_LARGE="FONT_SIZE_LARGE";
+	public $FONT_SIZE_SMALL="FONT_SIZE_SMALL";
 }
 
 ?>

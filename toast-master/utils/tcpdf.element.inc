@@ -120,7 +120,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 		} else if($type == self::$BORDER_STYLE_CARD_BOARD_HEAD_DARK_GRAY) {
@@ -131,7 +132,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 		} else if($type == self::$BORDER_STYLE_CARD_BOARD_GRAY_TAIL) {
@@ -145,7 +147,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);			
 
 			$border_style=
@@ -164,7 +167,8 @@ class TCPDFElement{
 				, 'cap' => 'squre'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 			$border_style=
@@ -183,7 +187,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 			$border_style=
@@ -226,24 +231,33 @@ class TCPDFElement{
 	private static $FONT_STYLE_BOLD="B";
 	private static $FONT_STYLE_NORMAL="";
 
+	public static $FONT_SIZE_LARGE="FONT_SIZE_LARGE";
+	public static $FONT_SIZE_SMALL="FONT_SIZE_SMALL";	
+
 	private static $FONT_SIZE_TITLE=8;
 	private static $FONT_SIZE_CONTENT=8;
 	private static $FONT_SIZE_CONTENT_SMALL=6;
 	public static $CARD_BOARD_TITLE_FONT_SIZE=8;
-	public static $CARD_BOARD_SIMPLE_TABE_FONT_SIZE=6;
+	public static $CARD_BOARD_TITLE_FONT_SIZE_LARGE=9;
+	public static $CARD_BOARD_TITLE_FONT_SIZE_HUGE=12;
+	public static $CARD_BOARD_SIMPLE_TABLE_FONT_SIZE=6;
 
 	private static $CARD_BOARD_CONTENT_FONT="helvetica";
 	private static $CARD_BOARD_CONTENT_FONT_STYLE="";
 	public static $CARD_BOARD_CONTENT_FONT_SIZE=8;
+	public static $CARD_BOARD_CONTENT_FONT_SIZE_LARGE=9;
 
 	private static $SIMPLE_TABLE_TITLE_SMALL_FONT="helvetica";
 	private static $SIMPLE_TABLE_TITLE_SMALL_FONT_STYLE="B";
+
 	public static $SIMPLE_TABLE_TITLE_SMALL_FONT_SIZE=6;
 	public static $SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE=7;
+	public static $SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE=8;
 
 	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT="helvetica";
 	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT_STYLE="";
 	public static $SIMPLE_TABLE_CONTENT_SMALL_FONT_SIZE=6;
+	public static $SIMPLE_TABLE_CONTENT_FONT_SIZE_LARGE=9;
 
 	private $font_name;		// 텍스트에 사용되는 폰트 정보.
 	public function set_font_name($font_name) {
@@ -270,6 +284,10 @@ class TCPDFElement{
 	}
 
 	public function set_font(){
+
+		$cur_font_name = $this->get_font_name();
+		$cur_font_size = $this->get_font_size();
+
 		$this->pdf->SetFont(
 		    $this->get_font_name()
 		    , $this->get_font_style()
@@ -503,8 +521,10 @@ class TCPDFElement{
 	public function get_text_height_on_font($cell_width, $text){
 		// 텍스트 높이를 확인하기 전에 폰트 설정을 합니다.
 		$this->set_font();
-		// return round($this->pdf->getStringHeight($cell_width, $text), 2);
-		return CEIL($this->pdf->getStringHeight($cell_width, $text));
+
+		// return round($this->pdf->getStringHeight($cell_width, $text), 1);
+		return round($this->pdf->getStringHeight($cell_width, $text), 1);
+		// return CEIL($this->pdf->getStringHeight($cell_width, $text));
 	}
 
 	private $text_color_arr;
@@ -885,7 +905,7 @@ class TCPDFElement{
 
 		// USER CUSTOM - CELL BORDER
 		if($is_last == true) {
-
+			// wonder.jung
 			if( self::$ELEMENT_TYPE_TABLE_FIELD == $element_type ) {
 				$element_prop->set_cell_border_style(self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY));
 			} else {
@@ -975,12 +995,21 @@ class TCPDFElement{
 		}
 
 		// 사용자가 입력한 텍스트를 기준으로 cell height를 구합니다.
-		$element_prop->updateTextProps($element_prop->get_raw_text());
+		$element_prop->updateTextProps(
+			// $raw_text=null
+			$element_prop->get_raw_text()
+			// $text_x_pos_offset=0
+			, 0
+			// $received_cell_height=0
+			, 0
+			// $font_size=10
+			, $element_prop->get_font_size()
+		);
 
 		return $element_prop;
 	}
 
-	public function updateTextProps($raw_text=null, $text_x_pos_offset=0, $received_cell_height=0) {
+	public function updateTextProps($raw_text=null, $text_x_pos_offset=0, $received_cell_height=0, $font_size=10) {
 
 		$cur_raw_text = $this->get_raw_text();
 		if(empty($raw_text) && empty($cur_raw_text)) {
@@ -1008,7 +1037,18 @@ class TCPDFElement{
 		$raw_text_width = $this->get_text_width_on_font($raw_text);
 
 		// http://www.tcpdf.org/doc/code/classTCPDF.html
-		$raw_text_height = $this->get_text_height_on_font(10, "A");
+		// wonder.jung - 왜 폰트가 고정이지??
+		$raw_text_height = 
+		$this->get_text_height_on_font(
+			// $cell_width
+			10
+			// $text
+			, "A"
+		);
+
+		// echo "\$raw_text :: $raw_text<br/>";
+		// echo "\$raw_text_height :: $raw_text_height<br/><br/>";
+
 		$this->set_text_height_single_line($raw_text_height);
 
 		// b-1-1. 좌우 패딩이 포함된 너비를 구합니다.

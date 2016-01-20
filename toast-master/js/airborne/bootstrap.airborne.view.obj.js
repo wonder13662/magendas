@@ -353,9 +353,7 @@ airborne.bootstrap.obj = {
 	// @ private
 	// @ Desc : 리스트의 첫번째 열의 상단 좌,우의 모서리를 ridius 4px로 둥글게 만들어 줍니다.
 	,set_list_first_row_css_radius:function(cur_list_row_jq, cur_radius){
-		var _v = airborne.validator;
-		var _obj = airborne.bootstrap.obj;
-
+		
 		if(_v.isNotJQueryObj(cur_list_row_jq)){
 			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
 			return;

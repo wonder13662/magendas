@@ -66,7 +66,7 @@ airborne.validator = {
 		return false;
 	}
 	,is_not_valid_array:function(targetArr){
-		return this.isNotValidArray(targetArr);	
+		return this.isNotValidArray(targetArr);
 	}
 	,isNotValidArray:function(targetArr){
 		return !this.isValidArray(targetArr);

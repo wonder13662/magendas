@@ -225,9 +225,9 @@ var param_manager = {
 	, OPACITY_DISABLED:".6"
 	, IS_DATA_FROM_DB:"IS_DATA_FROM_DB"
 
-
-
-
+	// PDF SETTINGS
+	, FONT_SIZE_LARGE:"FONT_SIZE_LARGE"
+	, FONT_SIZE_SMALL:"FONT_SIZE_SMALL"
 
 	,get:function(param_name, param_value){
 		var param_obj = {

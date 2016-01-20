@@ -145,28 +145,12 @@ wonglish.meeting_agenda_manager = {
 					console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
 					return;
 				}
-				var cur_element_event_manager = action_item_obj.get_element_event_manager();
+				var cur_element_event_manager = action_item_obj.get_event_manager();
 				if(cur_element_event_manager == undefined) {
 					console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
 					return;
 				}
-
-				// REMOVE ME
-				/*
-				var _key = cur_outcome_obj._key;
-				if(__v.is_not_valid_str(_key)) {
-					return;
-				}
-				var _value = cur_outcome_obj._value;
-				action_obj.set_element_event_manager(cur_element_event_manager);
-
-				var cur_action_item_type = action_obj.get_action_item_type();
-				if(__v.is_not_unsigned_number(cur_action_item_type)) {
-					return;
-				}
-				console.log(">>> _key :: ",_key);
-				console.log(">>> _value :: ",_value);
-				*/
+				cur_element_event_manager.release();
 
 				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
 				console.log(">>> action_item_obj :: ",action_item_obj);
@@ -240,38 +224,22 @@ wonglish.meeting_agenda_manager = {
 
 						console.log("Do something / UPDATE / is_item_title_only");
 
+						var cur_root_action_obj = action_item_obj.get_root_action_obj();
+						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+
+						console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
+						console.log(">>> cur_root_context_obj :: ",cur_root_context_obj);
+
+
 					} else if(action_item_obj.is_item_title_n_time_hh_mm()) {
 						
 						console.log("Do something / UPDATE / item_title_n_time_hh_mm / time");
 
-						// REMOVE ME
-						/*
-						var time_sec_cur_item = parseInt(_value);
-						if(__v.is_not_unsigned_number(time_sec_cur_item)) {
-							return;
-						}
-						
-						action_item_obj.update_time_hh_mm(time_sec_cur_item);
 						var cur_action_data_for_db_update = action_item_obj.get_action_data_for_db_update();
 
 						console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
 
 						var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
-
-						var cur_root_action_obj = action_item_obj.get_root_action_obj();
-						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
-						var meeting_id = cur_root_context_obj.meeting_id;
-						if(__v.is_not_unsigned_number(meeting_id)) {
-							return;
-						}
-						*/
-
-						var cur_action_data_for_db_update = action_item_obj.get_action_data_for_db_update();
-
-						console.log(">>> cur_action_data_for_db_update :: ",cur_action_data_for_db_update);
-
-						var cur_action_data_for_db_update_json_str = JSON.stringify(cur_action_data_for_db_update);
-
 						var cur_root_action_obj = action_item_obj.get_root_action_obj();
 						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
 
@@ -293,13 +261,17 @@ wonglish.meeting_agenda_manager = {
 
 				}
 
+
 				if(request_param_obj == undefined) {
+					console.log("HERE / request_param_obj == undefined / stop");
 					return;
 				}
 
 				console.log(">>> request_param_obj :: ",request_param_obj);
 
 				// TEST 
+				console.log("HERE / 001");
+				
 				return;
 				
 
@@ -2059,6 +2031,37 @@ wonglish.meeting_agenda_manager = {
 									,_param
 									.get(_param.MEETING_ID, selected_value)
 									.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+								);
+
+							},this)
+
+						);
+
+					}
+				);
+
+
+				this._self.addExtraBtn(	
+					// btn_title
+					"PRINT LARGE"
+					// desc
+					, "Go pdf view to print out on large size"
+					// delegate_scope
+					, this
+					// delegate_btn_clicked
+					, function(selected_key, selected_value){
+
+						// 현재 타임라인 내용을 업데이트 뒤에 PDF 뷰로 이동한다.
+						update_timeline(
+							// delegate_func_after_update_timeline
+							_obj.get_delegate(function(){
+
+								_link.open_new_window(
+									_link.PDF_VIEWER
+									,_param
+									.get(_param.MEETING_ID, selected_value)
+									.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+									.get(_param.FONT_SIZE_LARGE, _param.FONT_SIZE_LARGE)
 								);
 
 							},this)

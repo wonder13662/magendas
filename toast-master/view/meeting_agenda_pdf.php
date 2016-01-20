@@ -28,6 +28,8 @@ $member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $para
 $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
 $executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
 
+$FONT_SIZE_LARGE = $params->getParamString($params->FONT_SIZE_LARGE);
+
 // @ required
 $wdj_mysql_interface->close();
 
@@ -112,6 +114,8 @@ $wdj_pdf->draw_toast_master_time_guide_line_simple_table(
 	, $wdj_first_row_y_pos
 	// element_set_width
 	, $wdj_second_column_width
+	// font_type
+	, $FONT_SIZE_LARGE
 );
 
 
@@ -139,6 +143,8 @@ $wdj_pdf->draw_toastmaster_officer(
 	, $wdj_second_column_width
 	// data
 	, $executive_member_list
+	// font_type
+	, $FONT_SIZE_LARGE
 );
 
 /*
@@ -151,6 +157,7 @@ dMP   dMP dMP dMP dMPdMMMMMP dMMMMMP dMP dMP dMP dMMMMMP
 
 */
 
+// REMOVE ME IN FUTURE
 // TEST
 //$test_json_2_rows = "[[{\"__action_list\":[],\"__action_name\":\"Present awrard ( < 1 min )\",\"__prop_map\":{\"__add_on_obj_list\":[],\"__time_sec\":\"\",\"__is_shy\":false}},{\"__action_list\":[],\"__action_name\":\"Closing remarks ( < 2 min )\",\"__prop_map\":{\"__add_on_obj_list\":[],\"__time_sec\":\"\",\"__is_shy\":false}}],[{\"__action_list\":[],\"__action_name\":\"Present awrard ( < 1 min )\",\"__prop_map\":{\"__add_on_obj_list\":[],\"__time_sec\":\"\",\"__is_shy\":false}},{\"__action_list\":[],\"__action_name\":\"Closing remarks ( < 2 min )\",\"__prop_map\":{\"__add_on_obj_list\":[],\"__time_sec\":\"\",\"__is_shy\":false}}]]";
 //JSONManager::get_json_obj_safe($test_json_2_rows);
@@ -173,7 +180,7 @@ $wdj_pdf->draw_card_board_timeline_V2(
 	// title
 	"Schedule"
 	// x pos
-	, 2.6
+	, 2
 	// y pos
 	, $wdj_first_row_y_pos
 	// cell width
@@ -188,6 +195,8 @@ $wdj_pdf->draw_card_board_timeline_V2(
 	, $today_role_list
 	// today_speech_speaker
 	, $today_speech_speaker_v2_list
+	// font_type=null
+	, $FONT_SIZE_LARGE
 );
 
 
