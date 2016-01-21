@@ -718,7 +718,7 @@ airborne.bootstrap.view.obj.__action_list = {
 		// element set + element set + ... => element collection set
 		target_element_collection_set.push_new_element_set(action_item_obj, event_manager_list_row);
 
-		// set eject event
+		// set eject btn event
 		event_manager_list_row.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
 
 			var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;

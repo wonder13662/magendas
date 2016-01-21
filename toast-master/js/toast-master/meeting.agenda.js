@@ -285,7 +285,7 @@ wonglish.meeting_agenda_manager = {
 						// delegate_func
 						function(data){
 							console.log(">>> data : ",data);
-							cur_element_event_manager.release();
+							
 
 
 							var cur_root_action_obj = action_item_obj.get_root_action_obj();

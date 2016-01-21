@@ -351,9 +351,9 @@ airborne.bootstrap.obj = {
 	// @ Section : LIST ROW CSS MODIFIER
 	,LIST_ROW_RADIUS_NORMAL:4
 	// @ private
-	// @ Desc : 리스트의 첫번째 열의 상단 좌,우의 모서리를 ridius 4px로 둥글게 만들어 줍니다.
+	// @ Desc : 리스트의 첫번째 열의 상단 좌,우의 모서리를 입력값에 맞게 둥글게 만들어 줍니다.
 	,set_list_first_row_css_radius:function(cur_list_row_jq, cur_radius){
-		
+
 		if(_v.isNotJQueryObj(cur_list_row_jq)){
 			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
 			return;
@@ -367,6 +367,23 @@ airborne.bootstrap.obj = {
 		cur_list_row_jq.css("border-top-right-radius",cur_radius_str);
 		cur_list_row_jq.css("border-top-left-radius",cur_radius_str);
 	}
+	// @ private
+	// @ Desc : 리스트의 첫번째 열의 상단 좌,우의 모서리를 ridius 4px로 둥글게 만들어 줍니다.
+	,set_list_first_row_round:function(cur_list_row_jq) {
+
+		if(_v.isNotJQueryObj(cur_list_row_jq)){
+			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
+			return;
+		}
+
+		this.remove_list_row_css_radius(cur_list_row_jq);
+		this.set_list_first_row_css_radius(cur_list_row_jq, this.LIST_ROW_RADIUS_NORMAL);
+	}
+	// @ private
+	// @ Desc : 리스트의 첫번째와 마지막 열 사이의 모든 열들을  상단 좌,우의 모서리의 ridius를 제거해서 네모난 모양으로 바꿔줍니다.
+	,remove_list_row_round:function(cur_list_row_jq){
+		this.remove_list_row_css_radius(cur_list_row_jq);
+	}	
 	// @ private
 	// @ Desc : 리스트의 첫번째와 마지막 열 사이의 모든 열들을  상단 좌,우의 모서리의 ridius를 제거해서 네모난 모양으로 바꿔줍니다.
 	,remove_list_row_css_radius:function(cur_list_row_jq){
@@ -384,11 +401,8 @@ airborne.bootstrap.obj = {
 		cur_list_row_jq.css("border-bottom-left-radius","");
 	}
 	// @ private
-	// @ Desc : 리스트의 마지막 열의 하단 좌,우의 모서리를 ridius 4px로 둥글게 만들어 줍니다.
+	// @ Desc : 리스트의 마지막 열의 하단 좌,우의 모서리를 입력값에 맞게 둥글게 만들어 줍니다.
 	,set_list_last_row_css_radius:function(cur_list_row_jq, cur_radius){
-		var _v = airborne.validator;
-		var _obj = airborne.bootstrap.obj;
-
 		if(_v.isNotJQueryObj(cur_list_row_jq)){
 			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
 			return;
@@ -403,12 +417,20 @@ airborne.bootstrap.obj = {
 		cur_list_row_jq.css("border-bottom-right-radius",cur_radius_str);
 		cur_list_row_jq.css("border-bottom-left-radius",cur_radius_str);
 	}
-	// @ private
-	// @ Desc : 리스트에 오직 1개의 열만 있을 경우, 상,하,좌,우의 모든 모서리를 ridius 4px로 둥글게 만들어 줍니다.
-	,set_list_single_row_css_radius:function(cur_list_row_jq, cur_radius){
-		var _v = airborne.validator;
-		var _obj = airborne.bootstrap.obj;
+	// @ public 
+	// @ Desc : 리스트의 마지막 열의 하단 좌,우의 모서리를 ridius 4px로 둥글게 만들어 줍니다.
+	,set_list_last_row_round:function(cur_list_row_jq){
+		if(_v.isNotJQueryObj(cur_list_row_jq)){
+			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
+			return;
+		}
 
+		this.remove_list_row_css_radius(cur_list_row_jq);
+		this.set_list_last_row_css_radius(cur_list_row_jq, this.LIST_ROW_RADIUS_NORMAL);
+	}
+	// @ private
+	// @ Desc : 리스트에 오직 1개의 열만 있을 경우, 상,하,좌,우의 모든 모서리를 입력값에 맞게 둥글게 만들어 줍니다.
+	,set_list_single_row_css_radius:function(cur_list_row_jq, cur_radius){
 		if(_v.isNotJQueryObj(cur_list_row_jq)){
 			console.log("!Error! / set_element_css_radius / _v.isNotJQueryObj(cur_list_row_jq)");
 			return;
@@ -424,6 +446,17 @@ airborne.bootstrap.obj = {
 		cur_list_row_jq.css("border-top-left-radius",cur_radius_str);
 		cur_list_row_jq.css("border-bottom-right-radius",cur_radius_str);
 		cur_list_row_jq.css("border-bottom-left-radius",cur_radius_str);
+	}
+	// @ public
+	// @ Desc : 리스트에 오직 1개의 열만 있을 경우, 상,하,좌,우의 모든 모서리를 ridius 4px로 둥글게 만들어 줍니다.
+	,set_list_single_row_round:function(cur_list_row_jq){
+		if(_v.isNotJQueryObj(cur_list_row_jq)){
+			console.log("!Error! / set_list_single_row_round / _v.isNotJQueryObj(cur_list_row_jq)");
+			return;
+		}
+
+		this.remove_list_row_css_radius(cur_list_row_jq);
+		this.set_list_single_row_css_radius(cur_list_row_jq, this.LIST_ROW_RADIUS_NORMAL);
 	}
 	,COLOR_TYPE_ELEMENT_WHITE:"color_type_element_white"
 	,COLOR_TYPE_ELEMENT_GREEN:"color_type_element_green"
@@ -4753,6 +4786,9 @@ airborne.bootstrap.obj = {
 					console.log("!Error! / airborne.view.obj / remove_mousemove_callback_set / mouse_move_callback_set == null");
 					return;
 				} 
+
+				console.log("설마 / mouse_move_callback_set :: ",mouse_move_callback_set);
+
 				var mousemove_callback_set_edited_arr = [];
 				for (var idx = 0; idx < this.mousemove_callback_set_arr.length; idx++) {
 					var cur_mousemove_callback_set = this.mousemove_callback_set_arr[idx];
