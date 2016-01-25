@@ -81,19 +81,6 @@ class ActionObject implements Action{
 			$this->children_action_object_list = array();
 		}
 
-		// REMOVE ME - 로직적으로 오류가 발생하지 않도록 자식을 추가하는 것은 DAO 레이어의 역할.
-		/*
-		$duplicated_child_action_obj = null;
-		$child_action_coordinate = $child_action_obj->get_coordinate();
-		if(!empty($child_action_coordinate)) {
-			$duplicated_child_action_obj = $this->search($child_action_coordinate);
-		}
-		if(!is_null($duplicated_child_action_obj)) {
-			echo "!Error! / add_child / $cur_name <-> $cur_child_name / !is_null(\$duplicated_child_action_obj) / \$child_action_coordinate :: $child_action_coordinate<br/>";
-			return;
-		}
-		*/
-
 		if(!is_null($child_action_obj)) {
 
 			$child_action_name = $child_action_obj->get_name();
@@ -513,6 +500,13 @@ class ActionCollection extends ActionObject{
 	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0, $has_changed=true) {
 		parent::set_name($action_name);
 		parent::set_collection_type($action_collection_type);
+
+		if(ActionCollection::$ACTION_COLLECTION_TYPE_LIST == $action_collection_type) {
+			parent::set_collection_type_name(ActionCollection::$ACTION_COLLECTION_TYPE_NAME_LIST);
+		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $action_collection_type) {
+			parent::set_collection_type_name(ActionCollection::$ACTION_COLLECTION_TYPE_NAME_TABLE);
+		}
+
 		$this->set_meeting_agenda_id($meeting_agenda_id);
 		parent::set_is_shy($is_shy);
 		parent::set_changed($has_changed);
@@ -554,6 +548,9 @@ class ActionCollection extends ActionObject{
 	public static $ACTION_COLLECTION_TYPE_LIST=1; 		// ActionCollection::$ACTION_COLLECTION_TYPE_LIST
 	public static $ACTION_COLLECTION_TYPE_TABLE=2;		// ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
 
+	public static $ACTION_COLLECTION_TYPE_NAME_LIST="LIST";
+	public static $ACTION_COLLECTION_TYPE_NAME_TABLE="TABLE";
+
 	public function is_list() {
 
 		$action_collection_type = parent::get_collection_type();
@@ -567,7 +564,7 @@ class ActionCollection extends ActionObject{
 
 	public function is_table() {
 
-		$action_collection_type = parent::get_action_collection_type();
+		$action_collection_type = parent::get_collection_type();
 
 		if(is_null($action_collection_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_TABLE != $this->action_collection_type)) {
 			return false;
@@ -609,6 +606,20 @@ class ActionCollection extends ActionObject{
 		}
 
 		return $has_no_parent;
+	}
+
+	private $add_on_action_parent_obj;
+	public function set_add_on_action_parent_obj($add_on_action_parent_obj) {
+		$this->add_on_action_parent_obj = $add_on_action_parent_obj;
+	}
+	public function get_add_on_action_parent_obj() {
+		return $this->add_on_action_parent_obj;
+	}
+	public function has_add_on_parent(){
+		if(!is_null($this->add_on_action_parent_obj)) {
+			return true;
+		}
+		return false;
 	}
 
 	// @ Override
@@ -703,8 +714,24 @@ class ActionItem extends ActionObject{
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();	
 		}
+
+		$cur_add_on_list = $this->get_add_on_list();
+
+		// action obj --> action std obj로 변환
+		$cur_add_on_std_list = array();
+		for($idx=0; $idx < count($cur_add_on_list); $idx++) {
+			$cur_action_obj = $cur_add_on_list[$idx];
+
+			if(ActionObject::is_not_action_obj($cur_action_obj)) {
+				echo "!Error! \$this->is_not_action_obj(\$cur_action_obj)<br/>";
+				return;
+			}
+
+			$cur_action_obj_std = $cur_action_obj->get_std_obj();
+			array_push($cur_add_on_std_list, $cur_action_obj_std);
+		}		
 		
-		$std_obj->add_on_action_object_list = $this->get_add_on_list();
+		$std_obj->add_on_action_object_list = $cur_add_on_std_list;
 
 		return parent::get_std_obj($std_obj);
 	}	
@@ -725,6 +752,11 @@ class ActionItem extends ActionObject{
 			array_push($this->add_on_action_object_list, $add_on_collection);
 		}
 
+		// wonder.jung11
+		// add on object는 부모 객체를 가지고 있어야 할까?
+		// 가지고 있다면 parent <--> child와는 다르게 add on parent <--> add on child로 관계가 만들어 져야 하지 않을까?
+
+
 	}
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
@@ -742,6 +774,7 @@ class ActionItem extends ActionObject{
 	public static $TITLE_N_TIME_HH_MM=2;	// ActionItem::$TITLE_N_TIME_HH_MM
 	public static $TITLE_N_TIME_MM_SS=3;	// ActionItem::$TITLE_N_TIME_MM_SS
 	public static $SELECT_BOX=4;			// ActionItem::$SELECT_BOX
+	public static $TITLE_ONLY_FIXED=5;		// ActionItem::$TITLE_ONLY_FIXED
 
 	/*
 		@ Public
@@ -757,7 +790,8 @@ class ActionItem extends ActionObject{
 		if(	ActionItem::$TITLE_ONLY == $action_item_type ||
 			ActionItem::$TITLE_N_TIME_HH_MM == $action_item_type ||
 			ActionItem::$TITLE_N_TIME_MM_SS == $action_item_type ||
-			ActionItem::$SELECT_BOX == $action_item_type ) {
+			ActionItem::$SELECT_BOX == $action_item_type ||
+			ActionItem::$TITLE_ONLY_FIXED == $action_item_type ) {
 
 			return true;
 		}

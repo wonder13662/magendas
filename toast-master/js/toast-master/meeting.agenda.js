@@ -51,8 +51,7 @@ wonglish.meeting_agenda_manager = {
 		var _html = airborne.html;
 		var _server = airborne.server;
 		var _obj = airborne.bootstrap.obj;
-		var _view_list = airborne.bootstrap.view.obj.list;
-		var _view_table = airborne.bootstrap.view.obj.table;
+		var _action_table = airborne.bootstrap.view.obj.table;
 
 		obj.meeting_agenda_container_id = meeting_agenda_container_id;
 		var container_jq = $("div#"+meeting_agenda_container_id);
@@ -87,6 +86,20 @@ wonglish.meeting_agenda_manager = {
 		var is_log_in_user = meeting_agenda_data_set.is_log_in_user;
 		var login_user_info = meeting_agenda_data_set.login_user_info;
 
+		// contents - search options
+		var search_option_arr_members = [];
+		if(_v.isValidArray(meeting_agenda_data_obj.member_list)){
+			for (var idx = 0; idx < meeting_agenda_data_obj.member_list.length; idx++) {
+				var cur_member_obj = meeting_agenda_data_obj.member_list[idx];
+
+				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_id);
+				search_option_arr_members.push(cur_select_option);
+			}
+
+			// 빈값으로 지정할 수 있는 필드를 추가한다.
+			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
+		}		
+
 
 
 
@@ -117,6 +130,7 @@ wonglish.meeting_agenda_manager = {
 
 		// TEST
 		var new_action_list = meeting_agenda_data_obj.new_action_list;
+		var new_action_element_collection_set = 
 		_action_list.add_editable_action_list(
 			// action_list
 			new_action_list
@@ -126,8 +140,6 @@ wonglish.meeting_agenda_manager = {
 			, container_jq
 			// delegate_save_n_reload
 			, _obj.get_delegate(function(cur_outcome_obj){
-
-				console.log("HERE / cur_outcome_obj :: ",cur_outcome_obj);
 
 				if(	cur_outcome_obj == undefined ) {
 					console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
@@ -150,7 +162,6 @@ wonglish.meeting_agenda_manager = {
 					console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
 					return;
 				}
-				cur_element_event_manager.release();
 
 				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
 				console.log(">>> action_item_obj :: ",action_item_obj);
@@ -159,7 +170,7 @@ wonglish.meeting_agenda_manager = {
 
 				// 업데이트 상태마다 다르게 처리
 				var request_param_obj = null;
-				if( _obj.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
+				if( _action.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
 
 					if(action_item_obj.is_item_title_only()) {
 
@@ -218,7 +229,7 @@ wonglish.meeting_agenda_manager = {
 
 					}
 
-				} else if( _obj.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
+				} else if( _action.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
 					
 					if(action_item_obj.is_item_title_only()) {
 
@@ -255,13 +266,19 @@ wonglish.meeting_agenda_manager = {
 
 					}
 
-				} else if( _obj.EVENT_TYPE_DELETE_ITEM == cur_outcome_obj._event ) {
+				} else if( _action.EVENT_TYPE_DELETE_ITEM == cur_outcome_obj._event ) {
 
 					console.log("Do something / DELETE");
 
+				} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+					
+					console.log("Fetch select box data / action_item_obj :: ",action_item_obj);
+					console.log("Fetch select box data / search_option_arr_members :: ",search_option_arr_members);
+
+					return search_option_arr_members;
 				}
 
-
+				cur_element_event_manager.release();
 				if(request_param_obj == undefined) {
 					console.log("HERE / request_param_obj == undefined / stop");
 					return;
@@ -303,11 +320,11 @@ wonglish.meeting_agenda_manager = {
 					)
 				); // ajax done.				
 				
-			},this)			
+			},this)	
 		);
 
 
-
+/*
 		//  dMMMMMMP dMP dMMMMMMMMb dMMMMMP dMP     dMP dMMMMb  dMMMMMP 
 		//    dMP   amr dMP"dMP"dMPdMP     dMP     amr dMP dMP dMP      
 		//   dMP   dMP dMP dMP dMPdMMMP   dMP     dMP dMP dMP dMMMP     
@@ -393,6 +410,7 @@ wonglish.meeting_agenda_manager = {
 				
 			},this)
 		);
+*/
 
 
 
@@ -428,6 +446,7 @@ wonglish.meeting_agenda_manager = {
 		// dP .dMP dMP     dMP     dMP     dMP.aMP dMP dMP    
 		// VMMMP" dMP     dMMMMMP dMMMMMP  VMMMP" dMP dMP     
 
+		// REAL
 		// json format 객체를 이용한 테이블 생성
 		var today_speech_speaker_v2_list = meeting_agenda_data_obj.today_speech_speaker_v2_list;
 		console.log(">>> today_speech_speaker_v2_list : ",today_speech_speaker_v2_list);
@@ -457,7 +476,7 @@ wonglish.meeting_agenda_manager = {
 
 		// set table row element type
 		var last_json_for_speakers = 
-		_view_table.add_search_list_type({
+		_action_table.add_search_list_type({
 
 			key_access_prop_name:"__speech_project_title"
 			, value_access_prop_name:"__speech_project_id"
@@ -486,7 +505,7 @@ wonglish.meeting_agenda_manager = {
 		});
 
 		var element_collection_set_speakers = 
-		_view_table.add_editable_table_V2(
+		_action_table.add_editable_table_V2(
 			// parent_jq
 			container_jq
 			// table_title
@@ -682,6 +701,13 @@ wonglish.meeting_agenda_manager = {
 		);
 
 
+		// wonder.jung
+		// TEST
+		
+
+
+
+
 
 
 
@@ -731,20 +757,6 @@ wonglish.meeting_agenda_manager = {
 		};
 		var loop_len = (today_role_list_sorted.length/2);
 		var member_role_cnt_list = meeting_agenda_data_set.member_role_cnt_list;
-
-		// contents - search options
-		var search_option_arr_members = [];
-		if(_v.isValidArray(meeting_agenda_data_obj.member_list)){
-			for (var idx = 0; idx < meeting_agenda_data_obj.member_list.length; idx++) {
-				var cur_member_obj = meeting_agenda_data_obj.member_list[idx];
-
-				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_id);
-				search_option_arr_members.push(cur_select_option);
-			}
-
-			// 빈값으로 지정할 수 있는 필드를 추가한다.
-			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
-		}
 
 		// raw data list
 		var table_raw_data_todays_role_list = []; 
@@ -813,7 +825,7 @@ wonglish.meeting_agenda_manager = {
 
 		// set table row element type
 		var last_json_for_todays_role = 
-		_view_table.add_title_type({
+		_action_table.add_title_type({
 
 			key_access_prop_name:"__left_role_name"
 
@@ -837,7 +849,7 @@ wonglish.meeting_agenda_manager = {
 
 		// create table
 		var element_collection_set_todays_role = 
-		_view_table.add_editable_table_V2(
+		_action_table.add_editable_table_V2(
 			// parent_jq
 			container_jq
 			// table_title
@@ -940,7 +952,7 @@ wonglish.meeting_agenda_manager = {
 
 		// set table row element type
 		var last_json_for_word_n_quote = 
-		_view_table.add_title_type({
+		_action_table.add_title_type({
 
 			key_access_prop_name:"__title"
 
@@ -952,7 +964,7 @@ wonglish.meeting_agenda_manager = {
 
 		// create table
 		var element_collection_set_word_n_quote = 
-		_view_table.add_editable_table_V2(
+		_action_table.add_editable_table_V2(
 			// parent_jq
 			container_jq
 			// table_title
@@ -1042,7 +1054,7 @@ wonglish.meeting_agenda_manager = {
 
 		// set table row element type
 		var last_json_for_today_news = 
-		_view_table.add_input_text_type({
+		_action_table.add_input_text_type({
 
 			column_title:"News Contents"
 			, key_access_prop_name:"__news_content"
@@ -1051,7 +1063,7 @@ wonglish.meeting_agenda_manager = {
 
 		// create table
 		var element_collection_set_news =
-		_view_table.add_editable_table_V2(
+		_action_table.add_editable_table_V2(
 			// parent_jq
 			container_jq
 			// table_title
@@ -1218,7 +1230,7 @@ wonglish.meeting_agenda_manager = {
 
 		// set table row element type
 		var last_json_for_executive_members = 
-		_view_table.add_title_type({
+		_action_table.add_title_type({
 
 			key_access_prop_name:"__officer_name"
 
@@ -1232,7 +1244,7 @@ wonglish.meeting_agenda_manager = {
 
 		// create table
 		var element_collection_set_executive_members =
-		_view_table.add_editable_table_V2(
+		_action_table.add_editable_table_V2(
 			// parent_jq
 			container_jq
 			// table_title
@@ -1289,11 +1301,11 @@ wonglish.meeting_agenda_manager = {
 
 
 
-		if(element_collection_set_timeline != undefined){
+		if(new_action_element_collection_set != undefined){
 			
-			_view_list.set_add_on_json_format_on_list(
+			_action_list.set_add_on_json_format_on_list(
 				// src_element_collection_set
-				element_collection_set_timeline
+				new_action_element_collection_set
 				// target_element_collection_set_arr
 				,[
 					element_collection_set_speakers
@@ -1305,16 +1317,16 @@ wonglish.meeting_agenda_manager = {
 
 			// element collection set jumpers
 			if(element_collection_set_speakers != undefined) {
-				element_collection_set_speakers.add_element_collection_set_jump_spot(element_collection_set_timeline);	
+				element_collection_set_speakers.add_element_collection_set_jump_spot(new_action_element_collection_set);	
 			}
 			if(element_collection_set_todays_role != undefined) {
-				element_collection_set_todays_role.add_element_collection_set_jump_spot(element_collection_set_timeline);	
+				element_collection_set_todays_role.add_element_collection_set_jump_spot(new_action_element_collection_set);	
 			}
 			if(element_collection_set_word_n_quote != undefined) {
-				element_collection_set_word_n_quote.add_element_collection_set_jump_spot(element_collection_set_timeline);	
+				element_collection_set_word_n_quote.add_element_collection_set_jump_spot(new_action_element_collection_set);	
 			}
 			if(element_collection_set_news != undefined) {
-				element_collection_set_news.add_element_collection_set_jump_spot(element_collection_set_timeline);	
+				element_collection_set_news.add_element_collection_set_jump_spot(new_action_element_collection_set);
 			}
 
 		}
@@ -1334,8 +1346,8 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
+		// REMOVE ME
+		/*
 		var update_timeline = function(delegate_func_after_update_timeline) {
 
 			var cur_element_set_arr = element_collection_set_timeline.get_element_set_arr();
@@ -1407,6 +1419,7 @@ wonglish.meeting_agenda_manager = {
 			}
 			// 타임 라인 리스트와 업데이트 연동 / 끝
 		}
+		*/
 
 
 

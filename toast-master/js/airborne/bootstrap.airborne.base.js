@@ -15,6 +15,7 @@ var airborne = {
 				,table:null
 				,__action:null
 				,__action_list:null
+				,__action_table:null
 			}
 			,mobile:{
 				list:null

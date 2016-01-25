@@ -1938,9 +1938,6 @@ airborne.bootstrap.view.obj.list = {
 	// @ Desc : src_element_collection_set에서 저장된 json format 데이터로 자신 내부에 포함될 element collection set을 골라 집어 넣습니다.
 	,set_add_on_json_format_on_list:function(src_element_collection_set, target_element_collection_set_arr){
 
-		var _v = airborne.validator;
-		var _obj = airborne.bootstrap.obj;
-
 		if(src_element_collection_set == undefined){
 			console.log("!Error! / airborne.view.obj.list / set_add_on_json_format_on_list / src_element_collection_set == undefined");
 			return;

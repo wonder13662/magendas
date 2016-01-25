@@ -228,11 +228,13 @@ class MYSQLInterface{
 		}
 		return true;
 	}	
-
+	private function is_action_table($function_name="", $target, $param_name=""){
+		return !$this->is_not_action_table($function_name, $target, $param_name);
+	}
 	private function is_not_action_table($function_name="", $target, $param_name=""){
-
-		if($this->is_not_instance($function_name, $target, $param_name)) {
-			return;
+		$is_not_instance = ActionCollection::is_not_instance($target);
+		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
 		}
 
 		$is_action_table = $target->is_table();
@@ -6211,10 +6213,10 @@ class MYSQLInterface{
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-				"SELECT COUNT(AINCAC.parent_action_item_id) AS __item_add_on_collection_cnt"
+				"SELECT COUNT(AINAOAC.parent_action_item_id) AS __item_add_on_collection_cnt"
 				,"FROM PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION AS AINAOAC"
 				,"WHERE AINAOAC.parent_action_item_id=$parent_action_item_id"
-				,"ORDER BY AINAOAC.order"
+				,"ORDER BY AINAOAC.`order`"
 			)
 		);
 		$query_manager->select_one();
@@ -6232,14 +6234,13 @@ class MYSQLInterface{
 		}
 
 		// 아이템 사이에 넣을 수 있도록 100 단위로 ordering 값을 지정해줍니다.
-		$is_shy_child = ($__item_add_on_collection_cnt == 0)?1:0;
 		$new_order = intval($__item_add_on_collection_cnt) * 100;
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
 				"INSERT INTO PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION"
-				,"(`parent_action_item_id`,`add_on_action_collection_id`,`order`,`is_shy_child`)"
-				,"VALUES ($parent_action_item_id,$add_on_action_collection_id,$new_order,$is_shy_child)"
+				,"(`parent_action_item_id`,`add_on_action_collection_id`,`order`)"
+				,"VALUES ($parent_action_item_id,$add_on_action_collection_id,$new_order)"
 			)
 		);
 		$query_manager->modify();
@@ -7222,7 +7223,7 @@ class MYSQLInterface{
 					, $__item_add_on_collection_order
 					, $__item_add_on_collection_is_shy
 				);
-			} else if($this->COLLECTION_TYPE_LIST == $__item_add_on_collection_type) {
+			} else if($this->COLLECTION_TYPE_TABLE == $__item_add_on_collection_type) {
 				// 2. 테이블 형일 경우.
 				$add_on_colllection_obj = 
 				$this->get_action_table_object(
@@ -7233,6 +7234,7 @@ class MYSQLInterface{
 			}
 
 			if($this->is_null_object(__FUNCTION__, $add_on_collection_obj, "add_on_collection_obj")){
+				echo "\$this->is_null_object(\$add_on_collection_obj)<br/>";
 				return;
 			}
 
@@ -8250,11 +8252,9 @@ class MYSQLInterface{
 		}
 
 		// DEBUG
-		$cur_action_name = $action_obj->get_name();
-		// echo "add_action / \$cur_action_name :: $cur_action_name<br/>";
-
-		// wonder.jung
-		$children_action_obj_list = $action_obj->get_children();
+		// $cur_action_name = $action_obj->get_name();
+		// echo "<br/>add_action / 0 / \$cur_action_name :: $cur_action_name<br/>";
+		
 		if($action_obj->has_no_parent() && $action_obj->is_list()) {
 
 			// 최상단 객체인 경우의 처리.
@@ -8267,6 +8267,31 @@ class MYSQLInterface{
 			);
 			$action_obj->inject($root_action_obj);
 
+		} else if($this->is_action_collection(__FUNCTION__, $action_obj) && $action_obj->has_add_on_parent() && $action_obj->has_changed() == true) {
+
+			// add on action collection 타입인 경우의 처리.
+			// add on action collection을 등록합니다.
+			$new_action_obj = $this->add_action_collection_v2($action_obj);
+			$action_obj->inject($new_action_obj);
+
+			// add on action parent와 add on action collection을 연결합니다.
+			$cur_add_on_action_parent_obj = $action_obj->get_add_on_action_parent_obj();
+			$cur_add_on_action_parent_obj_id = $cur_add_on_action_parent_obj->get_id();
+			if(ActionObject::is_not_action_obj($cur_add_on_action_parent_obj)) {
+				echo "!Error! / add_action / ActionObject::is_not_action_obj(\$cur_add_on_action_parent_obj)<br/>";
+				return;
+			}
+
+			$this->insert_parent_action_item_n_add_on_collection(
+				// $parent_action_item_id
+				$cur_add_on_action_parent_obj_id
+				// $add_on_action_collection_id
+				, $action_obj->get_id()
+				// $order=-1
+				, $action_obj->get_order()
+			);
+
+
 		} else if($action_obj->has_parent() && $this->is_action_collection(__FUNCTION__, $action_obj)) {
 
 			// 1. LIST
@@ -8274,6 +8299,10 @@ class MYSQLInterface{
 
 			// $root_action_list = $action_obj->get_root_action_obj();
 			$parent_action_obj = $action_obj->get_parent();
+
+			// DEBUG
+			// $has_changed = $action_obj->has_changed();
+			// echo "add_action / 0 / \$cur_action_name :: $cur_action_name / \$has_changed :: $has_changed<br/>";
 
 			// 객체가 새로 만들어지거나 변경된 경우에만 DB에 추가합니다.
 			// action collection 객체를 DB에 추가합니다.
@@ -8293,6 +8322,12 @@ class MYSQLInterface{
 				);
 
 			} else if($this->is_action_table(__FUNCTION__, $parent_action_obj) && $this->is_action_list(__FUNCTION__, $action_obj)) {
+
+				// DEBUG
+				// $parent_action_name = $parent_action_obj->get_name();
+				// echo "add_action / 2-3 \$parent_action_name :: $parent_action_name<br/>";
+				// $parent_action_id = $parent_action_obj->get_id();
+				// echo "add_action / 2-3 \$parent_action_id :: $parent_action_id<br/>";
 
 				$this->insert_parent_action_table_n_child_action_list_v2(
 					// $parent_action_table
@@ -8344,13 +8379,36 @@ class MYSQLInterface{
 		} // end outer if	
 
 		// treat children
+		$children_action_obj_list = $action_obj->get_children();
 		for($idx = 0;$idx < count($children_action_obj_list); $idx++) {
-
 			$child_action_obj = $children_action_obj_list[$idx];
 			$this->add_action($child_action_obj);
-			//$child_action_obj = $this->add_action($child_action_obj);
-
 		}
+
+		// treat add on
+		if(ActionItem::is_instance($action_obj)) {
+
+			$add_on_action_obj_list = $action_obj->get_add_on_list();
+			$action_obj_id = $action_obj->get_id();
+			for($idx = 0;$idx < count($add_on_action_obj_list); $idx++) {
+				$add_on_action_obj = $add_on_action_obj_list[$idx];
+
+				// add on parent action obj를 지정해줍니다.
+				$add_on_action_obj->set_add_on_action_parent_obj($action_obj);
+
+				// order
+				$add_on_action_obj->set_order($idx * 100);
+
+				// DEBUG
+				// $add_on_action_name = $add_on_action_obj->get_name();
+				// echo "\$add_on_action_name :: $add_on_action_name<br/>";
+
+				// 추가 액션을 등록.
+				$add_on_action_obj = $this->add_action($add_on_action_obj);
+
+			} // for end
+
+		} // if end
 
 		return $action_obj;
 	}
@@ -8557,6 +8615,212 @@ class MYSQLInterface{
 			, ActionItem::$TITLE_ONLY
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
+
+
+
+
+		// add_on inner table
+		// 3-1-2-1. Today's Role
+		$child_action_sub_list_child_action_item_sub_table = 
+		new ActionCollection(
+			// $action_name=""
+			"Today's Role"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
+		);
+		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
+
+
+		// 3-1-2-1-1. Column List - Right Role Name List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Left Role Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-1-1-1. Column List Field - Toastmaster
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Toastmaster"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-1-2. Column List Field - Grammarian
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Grammarian"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-1-3. Column List Field - Timer
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Timer"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-1-4. Column List Field - Table Topic Master
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Table Topic Master"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// 3-1-2-1-2. Column List - Right Role Name List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Left Member Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-1-2-1. Column List Field - Toastmaster
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-2-2. Column List Field - Grammarian
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-2-3. Column List Field - Timer
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-2-4. Column List Field - Table Topic Master
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// 3-1-2-1-3. Column List - Right Role Name List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Right Role Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-1-3-1. Column List Field - General Evaluator
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"General Evaluator"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-3-2. Column List Field - Ah & Vote Counter
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Ah & Vote Counter"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-3-3. Column List Field - Word & Quote Master
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Word & Quote Master"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-3-4. Column List Field - Mini Debate Master
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Mini Debate Master"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
+
+
+		// 3-1-2-1-4. Column List - Right Role Name List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Right Member Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-1-4-1. Column List Field - Toastmaster
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-4-2. Column List Field - Grammarian
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-4-3. Column List Field - Timer
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+		// 3-1-2-1-4-4. Column List Field - Table Topic Master
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 20:00
 
 
