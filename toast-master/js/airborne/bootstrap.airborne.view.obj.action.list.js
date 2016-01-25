@@ -622,35 +622,33 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "</span>"
 		;
 
+		var title_style = "";
+		if(action_item_obj.is_item_title_n_time_hh_mm()) {
+			title_style = "padding-left:10px;";
+		}
 		editable_list_tag += ""
 		// 사용자가 입력한 타이틀을 나타냄. 시간 표시가 있을 경우 우측 패딩을 추가.
-		+ "<span id=\"title\" style=\"padding-left:10px;\" tossed_value=\"<tossed_value>\"><_v></span>"
+		+ "<span id=\"title\" style=\"<style>\" tossed_value=\"<tossed_value>\"><_v></span>"
 			.replace(/\<_v\>/gi, action_item_obj.get_action_name())
 			.replace(/\<tossed_value\>/gi, action_item_obj.get_action_name())
+			.replace(/\<style\>/gi, title_style)
 		;
 
 		// 내부 버튼설정
 		editable_list_tag += ""
 			// 수정을 하기 위한 버튼들
-			+ "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;padding-left:20px;\"></span>"
-			+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;padding-left:20px;\"></span>"
-			+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;padding-left:20px;\"></span>"
-			+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"display:none;padding-left:20px;\"></span>"
+			+ "<div id=\"btn_eject\" style=\"height:20px;width:20px;float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;margin-left:4px;padding-left:10px;display:none;\">"
+				+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"position:relative;top:9px;left:0px;\"></span>"
+			+ "</div>"
+			
+			+ "<div id=\"btn_remove\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
+			+ "</div>"
+
+			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "</div>"
 		;
-		// REMOVE ME
-		/*
-		if(action_item_obj.is_first() && !action_item_obj.get_action_is_shy()){
-			// 첫번째 열에 우측에 element collection set eject 버튼을 노출한다. 
-			editable_list_tag += ""
-			+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;\"></span>"
-			;
-		} else {
-			// 첫번째 열에 우측에 element collection set eject 버튼을 가린다.
-			editable_list_tag += ""
-			+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;padding-left:20px;display:none;\"></span>"
-			;
-		}
-		*/
 
 		editable_list_tag += ""
 			// chlidren element container div
@@ -1111,9 +1109,11 @@ airborne.bootstrap.view.obj.__action_list = {
 			// COLOR
 			var cur_list_row_color = cur_list_row_jq.css("color");
 			var cur_list_row_background_color = cur_list_row_jq.css("background-color");
+			var cur_list_row_border_color = cur_list_row_jq.css("border-color");
 
 			element_event_manager.set_element_color(cur_list_row_color);
 			element_event_manager.set_element_background_color(cur_list_row_background_color);
+			element_event_manager.set_element_border_color(cur_list_row_border_color);
 
 			// COLOR_TYPE
 			element_event_manager.set_element_color_type(color_type);
@@ -1138,15 +1138,15 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_input_group_jq = cur_list_row_grand_parent_jq.find("li#row_input_group").first();
 			element_event_manager.set_title_input_group_jq(cur_input_group_jq);
 
-			if(	_obj.ELEMENT_TYPE_TITLE_ADDABLE == cur_element_type ){
-
-				var btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
+			if(cur_action_item_obj.is_item_title_only() || cur_action_item_obj.is_item_title_n_time_hh_mm()){
+				// REMOVE ME
+				//var btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
+				var btn_add_jq = cur_list_row_jq.find("div#btn_add").first();
 				element_event_manager.set_btn_add_element_jq(btn_add_jq);
-
 			}
 
-			var time_jq = null;
-			if( cur_action_item_obj.is_item() ){
+			var time_jq = undefined;
+			if(cur_action_item_obj.is_item()){
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
@@ -1184,13 +1184,16 @@ airborne.bootstrap.view.obj.__action_list = {
 					
 				}
 
-				var btn_edit_jq = cur_list_row_jq.find("span#btn_edit").first();
-				element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
+				// REMOVE ME
+				// var btn_edit_jq = cur_list_row_jq.find("span#btn_edit").first();
+				// element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
 
-				var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
+				// var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
+				var btn_remove_jq = cur_list_row_jq.find("div#btn_remove").first();
 				element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
 
-				var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
+				// var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
+				var btn_eject_jq = cur_list_row_jq.find("div#btn_eject").first();
 				element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
 
 				// REMOVE ME
@@ -1225,7 +1228,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_title_input_btn_cancel_jq = cur_input_group_jq.find("button#btn_cancel").first();
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
 
-			var cur_list_row_btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
+			//var cur_list_row_btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
+			var cur_list_row_btn_add_jq = cur_list_row_jq.find("div#btn_add").first();
 			if(cur_list_row_btn_add_jq.length > 0){
 				element_event_manager.set_btn_add_element_jq(cur_list_row_btn_add_jq);	
 			}
@@ -1321,19 +1325,13 @@ airborne.bootstrap.view.obj.__action_list = {
 						consoler.say("첫번째 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
 						_obj.set_list_first_row_css_radius(cur_element_jq, _obj.LIST_ROW_RADIUS_NORMAL);
-						// REMOVE ME
-						// cur_sibling_element_event_manager.show_btn_eject_collection_element_jq();
 					} else if(cur_element_jq.next().length == 0) {
 						consoler.say("마지막 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
 						_obj.set_list_last_row_css_radius(cur_element_jq, _obj.LIST_ROW_RADIUS_NORMAL);
-						// REMOVE ME
-						// cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
 					} else {
 						consoler.say("중간의 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
-						// REMOVE ME
-						// cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
 					}	
 					cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
 				}

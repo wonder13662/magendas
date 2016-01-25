@@ -5,6 +5,7 @@ airborne.bootstrap.obj.__action = {
 	,COLOR_TYPE_LIST_ROW_BLUE:"list-group-item-info"
 	,COLOR_TYPE_LIST_ROW_YELLOW:"list-group-item-warning"
 	,COLOR_TYPE_LIST_ROW_RED:"list-group-item-danger"
+	,COLOR_FOCUS_YELLOW:"#FFCC66"
 	,is_not_valid_color_type:function(color_type) {
 		return !this.is_valid_color_type(color_type);
 	}
@@ -1456,7 +1457,7 @@ airborne.bootstrap.obj.__action = {
 				return this.action_item_obj;
 			}
 			,event_hierarchy_manager:event_hierarchy_manager
-			,item_focus_color:this.COLOR_FOCUS_YELLOW
+			,item_focus_color:_action.COLOR_FOCUS_YELLOW
 			,is_shy_row:false
 
 			// @ required
@@ -1481,6 +1482,14 @@ airborne.bootstrap.obj.__action = {
 			,get_element_background_color:function(){
 				return this.element_background_color;	
 			}
+			,element_border_color:null 
+			,set_element_border_color:function(element_border_color){
+				this.element_border_color = element_border_color;	
+			}
+			,get_element_border_color:function(){
+				return this.element_border_color;	
+			}
+
 			,element_container_jq:null
 			,set_element_container_jq:function(element_container_jq){
 				if(_v.isNotJQueryObj(element_container_jq)){
@@ -1908,7 +1917,7 @@ airborne.bootstrap.obj.__action = {
 				// 포커싱 시에 노출되는 타이틀 길이를 줄여줍니다.
 				var _html = airborne.html;
 				var cur_title_jq_value = this.get_title_jq_value();
-				var cur_text_head = _html.getTextHead(cur_title_jq_value, 10);
+				var cur_text_head = _html.getTextHead(cur_title_jq_value, 60);
 
 				// 새로운 값이라면 변경, 아니면 중단
 				if(cur_text_head == cur_title_jq_value) return;
@@ -3386,10 +3395,11 @@ airborne.bootstrap.obj.__action = {
 			,get_element_set:function(){
 				return this.element_set;
 			}
-			// wonder.jung11
+			// REMOVE ME
 			// @ Public
 			// @ Scopd 		: Action Obj
 			// @ Desc 		: select box에 들어갈 option list 정보를 리턴하는 delegate 객체입니다. 인자로 이벤트가 발생한 event manager를 넣어줍니다.
+			/*
 			,delegate_fetch_select_list:null
 			,set_delegate_fetch_select_list:function() {
 				if(_obj.isNotValidDelegate(delegate_fetch_select_list)){
@@ -3402,6 +3412,7 @@ airborne.bootstrap.obj.__action = {
 
 				return this.delegate_fetch_select_list;
 			}
+			*/
 			,delegate_add_searchable_element:null
 			,set_delegate_add_searchable_element:function(delegate_add_searchable_element){
 				if(_obj.isNotValidDelegate(delegate_add_searchable_element)){
@@ -3528,13 +3539,14 @@ airborne.bootstrap.obj.__action = {
 				this.show_element_jq();
 				this.show_parent_container_jq();
 				this.show_title_jq();
-				this.show_btn_add_element_jq();
+				
 				if(cur_action_item_obj.is_item_select_box()) {
 					this.show_btn_edit_element_jq();
 				} else if(cur_action_item_obj.get_action_is_not_shy()) {
 					this.show_btn_edit_element_jq();
 					this.show_btn_remove_element_jq();
 					this.show_btn_eject_element_jq();
+					this.show_btn_add_element_jq();
 				}
 
 				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
@@ -3595,13 +3607,6 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("em_sim / 1 / ELEMENT_TYPE_SEARCH_LIST | ELEMENT_TYPE_TABLE_SEARCH_LIST");
 
 					this.show_input_mode_search_n_select();
-
-				} else if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-
-					consoler.say("em_sim / 2 /",cur_title);
-					consoler.say("em_sim / 2 / ELEMENT_TYPE_TIME");
-
-					this.show_input_mode_time();
 
 				} else {
 
@@ -3719,8 +3724,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_input_mode_search_n_select:function(){
 
-				// wonder.jung11
-
 				this.hide_all();
 
 				this.show_parent_container_jq();
@@ -3750,14 +3753,17 @@ airborne.bootstrap.obj.__action = {
 				this.off_btn_add_element_jq();
 			}
 			,set_colors_back:function(){
-				if(this.element_jq == null) return;
+				if(this.element_jq == undefined) return;
 				this.element_jq.css("color",this.element_color);
 				this.element_jq.css("background-color",this.element_background_color);
+				this.element_jq.css("border-color",this.element_border_color);
 			}
 			,set_colors_reverse:function(){
-				if(this.element_jq == null) return;
+				if(this.element_jq == undefined) return;
+
 				this.element_jq.css("color",this.element_background_color);
 				this.element_jq.css("background-color",this.element_color);
+				this.element_jq.css("border-color",this.element_color);
 			}
 			,update_row_title:function(){
 				if(this.title_jq == null || this.title_input_jq == null) return;
@@ -3932,9 +3938,7 @@ airborne.bootstrap.obj.__action = {
 			,set_btn_event_color:function(target_jq){
 				if(target_jq == null) return;
 
-				var item_focus_color = this.item_focus_color;
 				var _self = this;
-				var _html = airborne.html;
 
 				target_jq.mouseenter(function(e){
 					_self.set_btn_color_focus(target_jq);
@@ -3944,15 +3948,21 @@ airborne.bootstrap.obj.__action = {
 				});
 			}
 			,set_btn_color_focus:function(target_jq){
+
 				if(target_jq == null) return;
 				if(this.is_lock()) return;
 
-				var item_focus_color = this.item_focus_color;
-				target_jq.css("color", item_focus_color);
+				var item_focus_color = _action.COLOR_FOCUS_YELLOW;
+				var cur_background_color = target_jq.css("background-color");
+
+				target_jq.css("color", this.element_color);
+				target_jq.css("background-color", item_focus_color);
 			}
 			,set_btn_color_back:function(target_jq){
 				if(target_jq == null) return;
-				target_jq.css("color", "");
+
+				target_jq.css("color", _action.COLOR_TYPE_LIST_ROW_WHITE);
+				target_jq.css("background-color", "");
 			}
 
 			// http://patorjk.com/software/taag/#p=display&h=1&f=Rowan%20Cap&t=Event%20Manager%20-%20functions
@@ -4054,6 +4064,7 @@ airborne.bootstrap.obj.__action = {
 				}
 				
 				var cur_btn_add_element_jq = this.get_btn_add_element_jq();
+
 				if(cur_btn_add_element_jq != null){
 					cur_btn_add_element_jq.off();
 					this.set_btn_event_color(cur_btn_add_element_jq);
@@ -4071,21 +4082,25 @@ airborne.bootstrap.obj.__action = {
 				}
 				var cur_element_type = cur_action_item_obj.get_element_type();
 
-				if(	this.title_jq != null && 
-					(
-						_obj.ELEMENT_TYPE_INPUT_TEXT==cur_element_type 			|| 
-						_obj.ELEMENT_TYPE_SEARCH_LIST==cur_element_type 		||
-						_obj.ELEMENT_TYPE_TABLE_INPUT_TEXT==cur_element_type 	|| 
-						_obj.ELEMENT_TYPE_TABLE_SEARCH_LIST==cur_element_type
-					)
-				){
+				var cur_element_jq = this.get_element_jq();
+				if(cur_element_jq != undefined) {
+					cur_element_jq.click(function(e){
 
-					this.title_jq.off();
-					this.set_btn_event_color(this.title_jq);
-					this.title_jq.click(function(e){
-						if(_self.is_lock()) return;
 						e.stopPropagation();
-						_self.on_edit_btn_click();
+						if(_self.is_lock()) return;
+
+						var cur_action_item_obj = _self.get_action_item_obj();
+						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+							console.log("!Error! / this.title_jq.click / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+							return;
+						}
+
+						if(cur_action_item_obj.get_action_is_shy()){
+							_self.on_add_btn_click();
+						} else {
+							_self.on_edit_btn_click();	
+						}
+						
 					});
 				}
 				
@@ -4359,7 +4374,6 @@ airborne.bootstrap.obj.__action = {
 				// 	return;
 				// }
 
-				// wonder.jung11
 				// get_search_list_arr - 검색 대상 리스트 데이터를 event manager에게 넘겨 줍니다.
 				// var cur_search_list_arr = cur_delegate_fetch_select_list._func.apply(cur_delegate_fetch_select_list._scope, [this]);
 
