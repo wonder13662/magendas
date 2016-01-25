@@ -2073,7 +2073,7 @@ airborne.bootstrap.obj.__action = {
 
 				cur_delegte_move_title_input_group_jq._func.apply(
 					cur_delegte_move_title_input_group_jq._scope
-					, [cur_element_jq, cur_element_container_jq,cur_title_input_group_jq]
+					, [cur_element_jq, cur_element_container_jq, cur_title_input_group_jq, this]
 				);
 			}
 			,title_input_label_jq:null 
@@ -3644,9 +3644,6 @@ airborne.bootstrap.obj.__action = {
 
 				console.log("Event Manager / show_input_mode_shy_list   ");
 
-				var _v = airborne.validator;
-				var _obj = airborne.bootstrap.obj;
-
 				// element set에서 추가 버튼을 눌렀을 때의 작동.
 				this.hide_all();
 
@@ -3674,6 +3671,15 @@ airborne.bootstrap.obj.__action = {
 
 				this.show_parent_container_jq();
 				this.show_title_jq();
+
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm) {
+					this.show_time_jq();
+				}
 
 				this.move_title_input_group_jq();
 
@@ -4451,7 +4457,9 @@ airborne.bootstrap.obj.__action = {
 					_self.clear_title_input_jq_value();
 					_self.rollback_title_jq_text();
 
-					_self.show_view_mode();
+					// 입력 모드 이전인 수정 모드로 돌아간다.
+					_self.show_edit_mode();
+
 					_self.set_btn_color_back(_self.get_title_jq());
 
 					_self.remove_all_element_of_search_output_list_jq();

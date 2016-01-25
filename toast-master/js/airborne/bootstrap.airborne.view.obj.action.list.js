@@ -1267,29 +1267,42 @@ airborne.bootstrap.view.obj.__action_list = {
 			}
 
 			// 리스트 열을 클릭했을 때, 입력 그룹의 위치를 클릭한 리스트 열로 변경하는 델리게이트 설정 
-			element_event_manager.set_delegte_move_title_input_group_jq(_obj.get_delegate(function(cur_element_jq, cur_element_container_jq, cur_title_input_group_jq){
+			element_event_manager.set_delegte_move_title_input_group_jq(_obj.get_delegate(function(cur_element_jq, cur_element_container_jq, cur_title_input_group_jq, cur_event_manager){
+
+				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_delegte_move_title_input_group_jq / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
 
 				// 1. 현재 열에 저장된 텍스트를 가져옵니다.
 				var cur_title_jq = cur_element_container_jq.find("span#title").first();
 				var cur_title = cur_title_jq.html();
 
-				// 3. 사용자가 선택한 열의 위치에 입력 그룹 폼 열을 위치시킵니다.
-				cur_element_jq.after(cur_title_input_group_jq);
+				// 3. 사용자가 선택한 열의 위에 입력 그룹 폼 열을 위치시킵니다.
+				cur_element_jq.before(cur_title_input_group_jq);
 
-				// 4. 사용자가 선택한 열을 가립니다.
-				cur_element_jq.hide();
-
-				// 5. 위치에 따라 INPUT GROUP의 테두리 모양을 변경합니다.
+				// 4. 위치에 따라 INPUT GROUP의 테두리 모양을 변경합니다.
 				var cur_idx = cur_element_jq.attr("idx");
-				var is_first = (cur_element_jq.attr("is_first") == "true");
-				var is_last = (cur_element_jq.attr("is_last") == "true");
+				var is_first = cur_action_item_obj.is_first();
+				var is_last = cur_action_item_obj.is_last();
 
-				if(is_first && is_last){
-					_obj.set_list_single_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
-				} else if(is_first){
-					_obj.set_list_first_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
-				} else if(is_last){
-					_obj.set_list_last_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+				if(cur_action_item_obj.is_first() && cur_action_item_obj.is_last()){
+					// 1개의 엘리먼트만 있는 경우
+					_obj.set_list_first_row_round(cur_title_input_group_jq);
+					_obj.set_list_last_row_round(cur_element_jq);
+				} else if(cur_action_item_obj.is_first() && cur_action_item_obj.is_not_last()){
+					// 첫번째 엘리먼트 선택, 다음에 n개의 형제 엘리먼트가 있다.
+					_obj.set_list_first_row_round(cur_title_input_group_jq);
+					_obj.remove_list_row_round(cur_element_jq);
+				} else if(cur_action_item_obj.is_not_first() && cur_action_item_obj.is_not_last()){
+					// 중간의 엘리먼트를 선택. 앞,뒤로 형제 엘리먼트가 있다.
+					_obj.remove_list_row_round(cur_title_input_group_jq);
+					_obj.remove_list_row_round(cur_element_jq);
+				} else if(cur_action_item_obj.is_not_first() && cur_action_item_obj.is_last()){
+					// 마지막 엘리먼트를 선택, 앞으로 형제 엘리먼트가 있다.
+					_obj.remove_list_row_round(cur_title_input_group_jq);
+					_obj.set_list_last_row_round(cur_element_jq);
 				}
 
 			}, this));
