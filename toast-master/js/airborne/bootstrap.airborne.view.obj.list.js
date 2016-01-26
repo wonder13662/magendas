@@ -667,27 +667,22 @@ airborne.bootstrap.view.obj.list = {
 	*/
 	,add_editable_action_list:function(list_element_type_arr, action_list, list_title, parent_element_set, list_container_jq, delegate_save_n_reload) {
 
-		var _v = airborne.validator;
-		var _html = airborne.html;
-		var _obj = airborne.bootstrap.obj;
-		var _dates = airborne.dates;
-		var _view_list = airborne.bootstrap.view.obj.list;
-
-		var __v = _v_factory.get("airborne.bootstrap.obj.list / add_editable_action_list / 679");
-		if(__v.is_not_valid_array(list_element_type_arr)) {
+		if(_v.is_not_valid_array(list_element_type_arr)) {
+			console.log("!Error! / add_editable_action_list / _v.is_not_valid_array(list_element_type_arr)");
 			return;
 		}
-		if(__v.is_not_valid_str(list_title)) {
+		if(_v.is_not_valid_str(list_title)) {
+			console.log("!Error! / add_editable_action_list / _v.is_not_valid_str(list_title)");
 			return;
 		}
-		if(__v.is_null_object(list_container_jq)) {
+		if(list_container_jq == undefined) {
+			console.log("!Error! / add_editable_action_list / list_container_jq == undefined");
 			return;
 		}
 		if(_obj.isNotValidDelegate(delegate_save_n_reload)){
-			__v.show_err_msg("_obj.isNotValidDelegate(delegate_save_n_reload)", "delegate_save_n_reload", delegate_save_n_reload);
+			console.log("!Error! / add_editable_action_list / _obj.isNotValidDelegate(delegate_save_n_reload)");
 			return;
 		}
-
 
 		var consoler = airborne.console.get();
 		consoler.off();
@@ -791,11 +786,12 @@ airborne.bootstrap.view.obj.list = {
 						var cur_action_list = cur_action_list_list[inner_idx];
 						var cur_list_title = cur_element_set.get_meta_info().get_prop_map().__action_name;
 
-						var __v = _v_factory.get("airborne.bootstrap.obj.list / add_editable_action_list / inner loop / 791");
-						if(__v.is_not_valid_array(cur_action_list)) {
+						if(_v.is_not_valid_array(cur_action_list)) {
+							console.log("!Error! / add_editable_action_list / _v.is_not_valid_array(cur_action_list)");
 							return;
 						}
-						if(__v.is_not_valid_str(cur_list_title)) {
+						if(_v.is_not_valid_str(cur_list_title)) {
+							console.log("!Error! / add_editable_action_list / _v.is_not_valid_str(cur_list_title)");
 							return;
 						}
 

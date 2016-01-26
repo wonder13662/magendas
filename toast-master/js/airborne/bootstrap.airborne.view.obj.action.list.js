@@ -52,8 +52,8 @@ airborne.bootstrap.view.obj.__action_list = {
 	*/
 	,add_editable_action_list:function(action_list, parent_element_set, list_container_jq, delegate_on_event) {
 
-		if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-			console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_collection_data_obj(action_list)");
+		if(_action.is_not_valid_action_obj(action_list)) {
+			console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_obj(action_list)");
 			return;
 		}
 		if(list_container_jq == undefined) {
@@ -151,14 +151,14 @@ airborne.bootstrap.view.obj.__action_list = {
 				for(inner_idx = 0; inner_idx < inner_length; inner_idx++){
 
 					var cur_action_list = cur_action_list_list[inner_idx];
-					if(_action.is_not_valid_action_collection_data_obj(cur_action_list)) {
-						console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_collection_data_obj(cur_action_list)");
+					if(_action.is_not_valid_action_obj(cur_action_list)) {
+						console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_obj(cur_action_list)");
 						return;
 					}
 
 					var cur_list_title = cur_action_list.get_action_name();
-					if(_action.is_not_valid_action_collection_data_obj(cur_action_list)) {
-						console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_collection_data_obj(cur_action_list)");
+					if(_action.is_not_valid_action_obj(cur_action_list)) {
+						console.log("!Error! / add_editable_action_list / _action.is_not_valid_action_obj(cur_action_list)");
 						return;
 					}
 					if(_v.is_not_valid_str(cur_list_title)) {
@@ -229,22 +229,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				} // inner for end
 
 			}
-			// wonder.jung11
-
-			// DEBUG
-			// REMOVE ME
-			/*
-			var msg = 
-			"add_editable_action_list / <list_title> / <idx> / cur_action_list_list / "
-			.replace(/\<list_title\>/gi, list_title)
-			.replace(/\<idx\>/gi, idx)
-			;
-			consoler.say(msg, cur_action_list_list);
-
-			if(_v.is_not_valid_array(cur_action_list_list)){
-				continue;
-			}
-			*/
 
 			// DEBUG
 			var msg = 
@@ -265,8 +249,8 @@ airborne.bootstrap.view.obj.__action_list = {
 	*/
 	,get_delegate_add_list_row_info:function(action_list) {
 
-		if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-			console.log("!Error! / get_delegate_add_list_row_info / _action.is_not_valid_action_collection_data_obj(action_list)");
+		if(_action.is_not_valid_action_obj(action_list)) {
+			console.log("!Error! / get_delegate_add_list_row_info / _action.is_not_valid_action_obj(action_list)");
 			return;
 		}
 
@@ -289,8 +273,8 @@ airborne.bootstrap.view.obj.__action_list = {
 
 		// Legacy - get_editable_list_input_text_row_from_action_item
 
-		if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-			console.log("!Error! / get_delegate_add_list_row_info / _action.is_not_valid_action_collection_data_obj(action_list)");
+		if(_action.is_not_valid_action_obj(action_list)) {
+			console.log("!Error! / get_delegate_add_list_row_info / _action.is_not_valid_action_obj(action_list)");
 			return;
 		}
 
@@ -314,8 +298,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		if(this.is_not_valid_list_row_text_type(list_row_text_type)){
 			list_row_text_type = this.LIST_ROW_TEXT_TYPE_NORMAL;
 		}
-		if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-			console.log("!Error! / get_editable_list_row_obj / _action.is_not_valid_action_collection_data_obj(action_list)");
+		if(_action.is_not_valid_action_obj(action_list)) {
+			console.log("!Error! / get_editable_list_row_obj / _action.is_not_valid_action_obj(action_list)");
 			return;
 		}
 
@@ -405,8 +389,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		var delegate_add_element = 
 		_obj.get_delegate(function(action_list, cur_delegate_add_element){
 
-			if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-				console.log("!Error! / delegate_add_element / _action.is_not_valid_action_collection_data_obj(action_list)");
+			if(_action.is_not_valid_action_obj(action_list)) {
+				console.log("!Error! / delegate_add_element / _action.is_not_valid_action_obj(action_list)");
 				return;
 			}
 
@@ -475,8 +459,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			console.log("!Error! / get_editable_list_meta_info_obj / delegate_add_list_row_info == undefined");
 			return null;
 		}
-		if(_action.is_not_valid_action_collection_data_obj(action_list)) {
-			console.log("!Error! / delegate_add_element / _action.is_not_valid_action_collection_data_obj(action_list)");
+		if(_action.is_not_valid_action_obj(action_list)) {
+			console.log("!Error! / delegate_add_element / _action.is_not_valid_action_obj(action_list)");
 			return;
 		}
 
@@ -599,8 +583,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		}
 
 		var parent_action_list_obj = action_item_obj.get_parent();
-		if(_action.is_not_valid_action_collection_data_obj(parent_action_list_obj)) {
-			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_collection_data_obj(parent_action_list_obj)");
+		if(_action.is_not_valid_action_obj(parent_action_list_obj)) {
+			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_obj(parent_action_list_obj)");
 			return;
 		}
 		var cur_children_cnt = parent_action_list_obj.get_children_cnt();
@@ -948,15 +932,8 @@ airborne.bootstrap.view.obj.__action_list = {
 			return;
 		}
 
-		// REMOVE ME
-		// var cur_btn_collection_eject_jq = first_element_event_manager.get_btn_eject_collection_element_jq();
-		// if(_v.is_not_jquery_obj(cur_btn_collection_eject_jq)) {
-		// 	console.log("!Error! / add_editable_list_element / _v.is_not_jquery_obj(cur_btn_collection_eject_jq)");
-		// 	return;
-		// }
-		// if(action_item_obj.is_first() && action_item_obj.get_action_is_not_shy()) {
-		// 	target_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);	
-		// }
+		// WARNING! - 이 메서드는 action item obj가 자식 객체를 가지더라도 action item obj 자체 데이터만 표현합니다. 
+		// 자식 객체가 있다면 외부에서 자식 객체를 이 메서드의 인자로 넘겨주어 처리해야 합니다.
 
 		return target_element_collection_set;
 
@@ -1184,10 +1161,6 @@ airborne.bootstrap.view.obj.__action_list = {
 					
 				}
 
-				// REMOVE ME
-				// var btn_edit_jq = cur_list_row_jq.find("span#btn_edit").first();
-				// element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
-
 				// var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
 				var btn_remove_jq = cur_list_row_jq.find("div#btn_remove").first();
 				element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
@@ -1195,10 +1168,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				// var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
 				var btn_eject_jq = cur_list_row_jq.find("div#btn_eject").first();
 				element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
-
-				// REMOVE ME
-				// var btn_collection_eject_jq = cur_list_row_jq.find("span#btn_collection_eject").first();
-				// element_event_manager.set_btn_eject_collection_element_jq(btn_collection_eject_jq);
 
 			}
 
@@ -1279,8 +1248,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				// 2. 위치에 따라 INPUT GROUP의 테두리 모양을 변경합니다.
 				var is_first = cur_action_item_obj.is_first();
 				var is_last = cur_action_item_obj.is_last();
-
-				console.log(">>> event_mode :: ",event_mode);
 
 				if(_action.EVENT_TYPE_ADD_ROW === event_mode) {
 					// 1-1. add row
@@ -1473,6 +1440,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			return;
 		}
 
+		console.log("HERE / XXX / 111");
 		if(_v.is_not_valid_array(target_element_collection_set_arr)){
 			console.log("!Error! / set_add_on_json_format_on_list / _v.is_not_valid_array(target_element_collection_set_arr)");
 			return;
