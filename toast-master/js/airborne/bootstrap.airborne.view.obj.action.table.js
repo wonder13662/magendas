@@ -2861,7 +2861,7 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 		var table_id = _html.get_id_auto_increase(table_title);
-		var cur_element_collection_set = _obj.get_element_collection_set(table_id);
+		var cur_element_collection_set = _action.make_element_collection_set(table_id);
 		var table_tag = ""
 		+ "<div class=\"panel panel-default\" id=\"<_v>\" style=\"margin-top:10px;margin-bottom:6px;\">".replace(/\<_v\>/gi, table_id)
 			+ "<div class=\"panel-heading\" style=\"text-align:center;\">"
@@ -2869,10 +2869,20 @@ airborne.bootstrap.view.obj.__action_table = {
 					.replace(/\<_v\>/gi, table_title)
 					.replace(/\<id\>/gi, table_id)
 				// buttons / Common
-				+ "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;\">&nbsp;</span>"
-				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;\">&nbsp;</span>"
-				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;\">&nbsp;</span>"
-				+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;\"></span>"
+				// + "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;\">&nbsp;</span>"
+
+				+ "<div id=\"btn_remove\" style=\"height:20px;width:20px;float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;margin-left:4px;padding-left:10px;display:none;\">"
+					+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\">&nbsp;</span>"
+				+ "</div>"
+
+				+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+					+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;\">&nbsp;</span>"
+				+ "</div>"
+					
+				+ "<div id=\"btn_collection_eject\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
+					+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"float:right;\"></span>"
+				+ "</div>"
+
 			+ "</div>"
 			+ "<table class=\"table\">"
 				+ "<tbody id=\"today_role_table\">"
@@ -3015,10 +3025,25 @@ airborne.bootstrap.view.obj.__action_table = {
 
 				// field cell control buttons.
 				table_tag += ""
-					+ "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;\">&nbsp;</span>"
-					+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;\">&nbsp;</span>"
-					+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;\">&nbsp;</span>"
-					+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"display:none;padding-left:20px;\"></span>"
+					// REMOVE ME
+					// + "<span id=\"btn_edit\" class=\"glyphicon glyphicon-pencil\" style=\"display:none;\">&nbsp;</span>"
+
+					+ "<div id=\"btn_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;display:none;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
+						+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
+					+ "</div>"
+
+					+ "<div id=\"btn_remove\" style=\"height:20px;width:20px;float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-left:4px;padding-left:10px;display:none;margin-bottom:-10px;\">"
+						+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:absolute;top:9px;left:8px;\">&nbsp;</span>"
+					+ "</div>"
+
+					+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;margin-left:4px;border-radius:4px;display:none;margin-bottom:-10px;\">"
+						+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:absolute;top:9px;left:9px;\">&nbsp;</span>"
+					+ "</div>"
+						
+
+					// + "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"display:none;\">&nbsp;</span>"
+					// + "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"display:none;\">&nbsp;</span>"
+					// + "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"display:none;padding-left:20px;\"></span>"
 				+ "</td>"
 				;
 
@@ -3043,6 +3068,8 @@ airborne.bootstrap.view.obj.__action_table = {
 		var cur_table_title_set_jq = cur_table_jq.find("div.panel-heading");
 		cur_element_collection_set.set_element_collection_container_jq(cur_table_jq);
 
+		console.log("HERE / cur_table_jq :: ",cur_table_jq);
+
 		var cur_btn_collection_eject_jq = cur_table_title_set_jq.find("span#btn_collection_eject");
 		cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
 		
@@ -3058,13 +3085,16 @@ airborne.bootstrap.view.obj.__action_table = {
 			
 			// COLOR
 			var cur_table_column_color = cur_table_column_set_jq.css("color");
-			var cur_table_title_background_color = cur_table_column_set_jq.css("background-color");
+			var cur_table_column_background_color = cur_table_column_set_jq.css("background-color");
+			var cur_table_column_border_color = cur_table_column_set_jq.css("border-color");
 
 			element_event_manager.set_element_color(cur_table_column_color);
-			element_event_manager.set_element_background_color(cur_table_title_background_color);
+			element_event_manager.set_element_background_color(cur_table_column_background_color);
+			element_event_manager.set_element_border_color(cur_table_column_border_color);
 
 			// CONTAINER
 			var element_container_jq = cur_table_column_set_jq.parent();
+
 			element_event_manager.set_element_container_jq(element_container_jq);
 			element_event_manager.set_element_id(element_event_manager.event_manager_id);
 
@@ -3072,13 +3102,16 @@ airborne.bootstrap.view.obj.__action_table = {
 			var cur_input_group_jq = cur_table_column_set_jq.parent().parent().find("tr#input_group_column_text");
 			element_event_manager.set_title_input_group_jq(cur_input_group_jq);
 
-			var btn_edit_jq = cur_table_column_set_jq.find("span#btn_edit");
-			element_event_manager.set_btn_edit_element_jq(btn_edit_jq);
+			var btn_add_jq = cur_table_column_set_jq.find("div#btn_add");
+			element_event_manager.set_btn_add_element_jq(btn_add_jq);
 
-			var btn_remove_jq = cur_table_column_set_jq.find("span#btn_remove");
+			var btn_remove_jq = cur_table_column_set_jq.find("div#btn_remove");
 			element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
 
-			var btn_eject_jq = cur_table_column_set_jq.find("span#btn_eject");
+			var btn_remove_jq = cur_table_column_set_jq.find("div#btn_remove");
+			element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
+
+			var btn_eject_jq = cur_table_column_set_jq.find("div#btn_eject");
 			element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
 
 			if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
@@ -3145,29 +3178,18 @@ airborne.bootstrap.view.obj.__action_table = {
 
 			element_event_manager.set_delegate_add_searchable_element(_obj.get_delegate_add_searchable_element());
 
-			// REMOVE ME
-			// element_event_manager.set_delegate_fetch_select_list(delegate_fetch_select_list);
-			// if(_obj.isValidDelegate(delegate_fetch_searchable_element_list)){
-			// 	element_event_manager.set_delegate_fetch_searchable_element_list(delegate_fetch_searchable_element_list);
-			// }
-
 			return element_event_manager;
 
 		}, this);
 
 
 		
-		// REMOVE ME
-		// var cur_table_row_meta_info_arr = received_editable_table_meta_info_obj.get_table_row_info_arr();
 		var cur_table_row_arr = cur_table_jq.find("tr#column_text_container");
 		for (var idx_row = 0; idx_row < cur_table_row_arr.length; idx_row++) {
 
 			var table_row_element = cur_table_row_arr[idx_row];
 			var table_row_element_jq = $(table_row_element);
 			var table_row_column_text_jq_arr = table_row_element_jq.find("td#column_text_container");
-
-			// REMOVE ME
-			// var cur_table_row_column_meta_info_arr = cur_table_row_meta_info_arr[idx];
 
 			var event_manager_table_column_arr = [];
 			var before_event_manager = null;
@@ -3185,27 +3207,10 @@ airborne.bootstrap.view.obj.__action_table = {
 					return;
 				}
 
-				// REMOVE ME - 수정 가능하지 않은 TITLE일 경우에는 다른 표시가 필요함.
-				// var cur_table_row_column_meta_info = cur_table_row_column_meta_info_arr[inner_idx];
-				// if(cur_table_row_column_meta_info.get_is_editable() == false) continue;
-
 				var table_row_column_text_element = table_row_column_text_jq_arr[idx_column];
 				var table_row_column_text_element_jq = $(table_row_column_text_element);
 
 				var event_manager_id_table_column = this.get_table_field_id(table_id, idx_row, idx_column);
-
-				// REMOVE ME
-				// var element_meta_info = cur_table_row_column_meta_info;
-
-				// 삭제 및 추가시 확인하는 조건. (테이블은 컬럼이 속한 모든 행을 삭제.)
-				// element_meta_info.item_type = _obj.ITEM_TYPE_TABLE; 
-				// var event_manager_table_column_text = 
-				// _obj.get_element_event_manager(
-				// 	event_manager_id_table_column
-				// 	, table_row_column_text_element_jq
-				// 	, element_meta_info
-				// 	, delegate_set_event_manager_prop_on_table_column
-				// );
 
 				var event_manager_table_column_text = 
 				_action.make_element_event_manager(
@@ -3238,11 +3243,11 @@ airborne.bootstrap.view.obj.__action_table = {
 					var is_last = (cur_element_jq.attr("is_last") == "true");
 
 					if(is_first && is_last){
-						_obj.set_list_single_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+						_obj.set_list_single_row_round(cur_title_input_group_jq);
 					} else if(is_first){
-						_obj.set_list_first_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+						_obj.set_list_first_row_round(cur_title_input_group_jq);
 					} else if(is_last){
-						_obj.set_list_last_row_css_radius(cur_title_input_group_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+						_obj.set_list_last_row_round(cur_title_input_group_jq);
 					}
 
 				}, this));
@@ -3324,7 +3329,7 @@ airborne.bootstrap.view.obj.__action_table = {
 					var clone_element_container_jq = jsm.boost_clone_element_jq(cur_element_container_jq, event_click_offset);
 
 					// set round
-					_obj.set_list_single_row_css_radius(clone_element_container_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+					_obj.set_list_single_row_round(clone_element_container_jq, _obj.LIST_ROW_RADIUS_NORMAL);
 					var clone_element_offset = clone_element_container_jq.offset();
 
 					var cur_mousemove_callback_set =
@@ -3338,6 +3343,9 @@ airborne.bootstrap.view.obj.__action_table = {
 
 						// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
 						// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
+
+						console.log("HERE / add_mousemove_callback_set / mousemove_event :: ",mousemove_event);
+						console.log("HERE / add_mousemove_callback_set / cur_event_manager :: ",cur_event_manager);
 
 						// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
 						// 자신의 테이블 열의 모든 객체들을 가져옵니다.

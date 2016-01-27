@@ -163,8 +163,11 @@ wonglish.meeting_agenda_manager = {
 					return;
 				}
 
+				var cur_root_action_obj = action_item_obj.get_root_action_obj();
+
 				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
 				console.log(">>> action_item_obj :: ",action_item_obj);
+				console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
 				console.log(">>> MEETING_ID :: ",MEETING_ID);
 				console.log(">>> cur_element_event_manager :: ",cur_element_event_manager);
 

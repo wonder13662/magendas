@@ -72,7 +72,7 @@ airborne.bootstrap.view.obj.__action_list = {
 		}
 
 		var consoler = airborne.console.get();
-		// consoler.off();
+		consoler.off();
 
 		// DEBUG
 		var list_title = action_list.get_action_name();
@@ -139,7 +139,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_action_list_list = cur_action_item_obj.get_children();
 			var cur_action_add_on_list = cur_action_item_obj.get_add_on_list();
 			var cur_action_item_name = cur_action_item_obj.get_action_name();
-			console.log(cur_action_item_name + " / READY / ",cur_action_item_obj);
 			if(cur_action_item_obj.has_children()) {
 
 				// 4-2-1. 일반적인 자식 객체를 가지고 있는 경우, 화면에 표시
@@ -211,9 +210,6 @@ airborne.bootstrap.view.obj.__action_list = {
 						console.log("2. add on table / " + cur_action_add_on_obj_name);
 
 						var cur_element_jq = cur_action_item_obj.get_event_manager().get_element_jq();
-						console.log(">>> cur_element_jq :: ",cur_element_jq);
-						console.log(">>> _action_list :: ",_action_list);
-						console.log(">>> _action_table :: ",_action_table);
 
 						_action_table.add_editable_table_from_action_table(
 							// parent_jq
@@ -773,8 +769,8 @@ airborne.bootstrap.view.obj.__action_list = {
 
 			// 포커싱 모드로 바꿈.
 			cur_event_manager.show_focusing_mode();
-			
-			
+
+			// wonder.jung11
 
 			var cur_element_jq = cur_event_manager.get_element_jq();
 
@@ -1161,14 +1157,11 @@ airborne.bootstrap.view.obj.__action_list = {
 					
 				}
 
-				// var btn_remove_jq = cur_list_row_jq.find("span#btn_remove").first();
 				var btn_remove_jq = cur_list_row_jq.find("div#btn_remove").first();
 				element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
 
-				// var btn_eject_jq = cur_list_row_jq.find("span#btn_eject").first();
 				var btn_eject_jq = cur_list_row_jq.find("div#btn_eject").first();
 				element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
-
 			}
 
 			// ROW TITLE (고정 - 노출되는 값)
@@ -1228,11 +1221,11 @@ airborne.bootstrap.view.obj.__action_list = {
 			var is_first = (cur_list_row_jq.attr("is_first") == "true");
 			var is_last = (cur_list_row_jq.attr("is_last") == "true");
 			if(is_first && is_last){
-				_obj.set_list_single_row_css_radius(cur_list_row_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+				_obj.set_list_single_row_round(cur_list_row_jq);
 			} else if(is_first){
-				_obj.set_list_first_row_css_radius(cur_list_row_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+				_obj.set_list_first_row_round(cur_list_row_jq);
 			} else if(is_last){
-				_obj.set_list_last_row_css_radius(cur_list_row_jq, _obj.LIST_ROW_RADIUS_NORMAL);
+				_obj.set_list_last_row_round(cur_list_row_jq);
 			}
 
 			// 리스트 열을 클릭했을 때, 입력 그룹의 위치를 클릭한 리스트 열로 변경하는 델리게이트 설정 
@@ -1301,7 +1294,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			element_event_manager.set_delegate_callback_after_landing_element(_obj.get_delegate(function(cur_event_manager_on_mouse_over){
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var cur_before_sibling_event_manager = cur_event_manager_on_mouse_over.get_before_sibling_event_manager();
 				var cur_after_sibling_event_manager = cur_event_manager_on_mouse_over.get_after_sibling_event_manager();
@@ -1440,7 +1433,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			return;
 		}
 
-		console.log("HERE / XXX / 111");
 		if(_v.is_not_valid_array(target_element_collection_set_arr)){
 			console.log("!Error! / set_add_on_json_format_on_list / _v.is_not_valid_array(target_element_collection_set_arr)");
 			return;

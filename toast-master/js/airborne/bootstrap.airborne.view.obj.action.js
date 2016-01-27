@@ -59,6 +59,9 @@ airborne.bootstrap.obj.__action = {
 	,ACTION_ITEM_TYPE_TITLE_N_TIME_MM_SS:3
 	,ACTION_ITEM_TYPE_SELECT_BOX:4
 	,ACTION_ITEM_TYPE_TITLE_ONLY_FIXED:5
+	,ACTION_ITEM_TYPE_TITLE_ONLY_ADDABLE:6
+	// @ Desc : select box 타입. 열을 추가할 수 있습니다.
+	,ACTION_ITEM_TYPE_SELECT_BOX_ADDABLE:7
 	,is_valid_action_collection_data_obj:function(action_collection_data_obj) {
 
 		if(this.is_not_valid_action_data_obj(action_collection_data_obj)) {
@@ -119,16 +122,22 @@ airborne.bootstrap.obj.__action = {
 	,is_valid_action_item_obj:function(action_item_obj){
 
 		if(action_item_obj == undefined) {
+			console.log("HERE / is_valid_action_obj / 001");
 			return false;
 		} else if(this.is_not_valid_action_obj(action_item_obj)) {
+			console.log("HERE / is_valid_action_obj / 002");
 			return false;
 		} else if(action_item_obj.get_action_item_type == undefined) {
+			console.log("HERE / is_valid_action_obj / 003");
 			return false;
 		} else if(_v.is_not_unsigned_number(action_item_obj.get_action_item_type())) {
+			console.log("HERE / is_valid_action_obj / 004");
 			return false;
 		} else if(action_item_obj.get_action_item_type_name == undefined) {
+			console.log("HERE / is_valid_action_obj / 005");
 			return false;
 		} else if(_v.is_not_valid_str(action_item_obj.get_action_item_type_name())) {
+			console.log("HERE / is_valid_action_obj / 006");
 			return false;
 		}
 
@@ -1137,6 +1146,35 @@ airborne.bootstrap.obj.__action = {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_LIST === action_collection_type)?true:false;
 			}
+			,is_table_child_column_list_field_item:function() {
+
+				var cur_parent_action_obj = this.get_parent();
+				if(_action.is_not_valid_action_obj(cur_parent_action_obj)) {
+					console.log("!Error! / is_table_child_column_list / _action.is_not_valid_action_obj(cur_parent_action_obj)");
+					return;
+				}
+
+				// DEBUG
+				if(cur_parent_action_obj.is_table_child_column_list() && this.is_item()) {
+					return true;
+				}
+				return false;
+			}
+			,is_table_child_column_list:function() {
+				var cur_parent_action_obj = this.get_parent();
+				if(cur_parent_action_obj == undefined) {
+					return false;
+				}
+				if(_action.is_not_valid_action_obj(cur_parent_action_obj)) {
+					console.log("!Error! / is_table_child_column_list / _action.is_not_valid_action_obj(cur_parent_action_obj)");
+					return;
+				}
+
+				if(cur_parent_action_obj.is_table() && this.is_list()) {
+					return true;
+				}
+				return false;
+			}
 			,is_table:function() {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_TABLE === action_collection_type)?true:false;				
@@ -1152,7 +1190,9 @@ airborne.bootstrap.obj.__action = {
 					this.is_item_title_n_time_hh_mm() || 
 					this.is_item_title_n_time_mm_ss() || 
 					this.is_item_select_box() ||
-					this.is_item_title_only_fixed() ) {
+					this.is_item_title_only_fixed() ||
+					this.is_item_select_box_addable()
+					) {
 
 					return true;
 				}
@@ -1184,7 +1224,14 @@ airborne.bootstrap.obj.__action = {
 				var action_item_type = this.get_action_item_type();
 				return (_action.ACTION_ITEM_TYPE_TITLE_ONLY_FIXED === action_item_type)?true:false;
 			}
-
+			,is_item_title_only_addable:function() {
+				var action_item_type = this.get_action_item_type();
+				return (_action.ACTION_ITEM_TYPE_TITLE_ONLY_ADDABLE === action_item_type)?true:false;
+			}
+			,is_item_select_box_addable:function() {
+				var action_item_type = this.get_action_item_type();
+				return (_action.ACTION_ITEM_TYPE_SELECT_BOX_ADDABLE === action_item_type)?true:false;
+			}
 			// @ Private
 			// @ Desc : 사용자에 의해 값이 변경되면 이 플래그를 true로 변경합니다.
 			,changed:false
@@ -1524,21 +1571,24 @@ airborne.bootstrap.obj.__action = {
 			}
 			,element_color:null
 			,set_element_color:function(element_color){
-				this.element_color = element_color;	
+				element_color_hex = _color.rgb_to_hex(element_color);
+				this.element_color = element_color_hex;	
 			}
 			,get_element_color:function(){
 				return this.element_color;	
 			}
 			,element_background_color:null 
 			,set_element_background_color:function(element_background_color){
-				this.element_background_color = element_background_color;	
+				element_background_color_hex = _color.rgb_to_hex(element_background_color);
+				this.element_background_color = element_background_color_hex;	
 			}
 			,get_element_background_color:function(){
 				return this.element_background_color;	
 			}
 			,element_border_color:null 
 			,set_element_border_color:function(element_border_color){
-				this.element_border_color = element_border_color;	
+				element_border_color_hex = _color.rgb_to_hex(element_border_color);
+				this.element_border_color = element_border_color_hex;	
 			}
 			,get_element_border_color:function(){
 				return this.element_border_color;	
@@ -1966,12 +2016,17 @@ airborne.bootstrap.obj.__action = {
 					this.set_title_jq_attr_tossed_value(new_title);
 				}
 			}
-			,show_title_jq_text_head:function(){
+			,show_title_jq_text_head:function(text_head_length){
+
+				if(text_head_length == undefined || _v.is_not_unsigned_number(text_head_length)) {
+					text_head_length = 60;
+				}
+
 				if(this.title_jq == null && this.title_input_jq == null) return;
 				// 포커싱 시에 노출되는 타이틀 길이를 줄여줍니다.
 				var _html = airborne.html;
 				var cur_title_jq_value = this.get_title_jq_value();
-				var cur_text_head = _html.getTextHead(cur_title_jq_value, 60);
+				var cur_text_head = _html.getTextHead(cur_title_jq_value, text_head_length);
 
 				// 새로운 값이라면 변경, 아니면 중단
 				if(cur_text_head == cur_title_jq_value) return;
@@ -3550,6 +3605,9 @@ airborne.bootstrap.obj.__action = {
 
 			}
 			,is_view_mode:false
+			,get_is_view_mode:function() {
+				return this.is_view_mode;
+			}
 			,show_view_mode:function(){
 
 				if(this.is_view_mode) return;
@@ -3738,7 +3796,7 @@ airborne.bootstrap.obj.__action = {
 					this.show_time_jq();
 				}
 
-				// wonder.jung11 - 이곳에서 input_mode_type을 넘겨준다.
+				// 이곳에서 input_mode_type을 넘겨준다.
 				this.move_title_input_group_jq(event_mode);
 
 				this.show_title_input_group_jq();
@@ -3818,17 +3876,39 @@ airborne.bootstrap.obj.__action = {
 				this.off_btn_add_element_jq();
 			}
 			,set_colors_back:function(){
-				if(this.element_jq == undefined) return;
-				this.element_jq.css("color",this.element_color);
-				this.element_jq.css("background-color",this.element_background_color);
-				this.element_jq.css("border-color",this.element_border_color);
-			}
-			,set_colors_reverse:function(){
-				if(this.element_jq == undefined) return;
 
-				this.element_jq.css("color",this.element_background_color);
-				this.element_jq.css("background-color",this.element_color);
-				this.element_jq.css("border-color",this.element_color);
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_colors_back / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_element_jq = this.get_element_jq();
+				if(cur_element_jq == undefined) return;
+
+				cur_element_jq.css("color",this.get_element_color());
+				cur_element_jq.css("background-color",this.element_background_color);
+				cur_element_jq.css("border-color",this.get_element_border_color());
+
+			}
+			// @ Public
+			// @ Scope  	: Event Manager
+			// @ Desc 		: 객체의 색상을 반전시킵니다.
+			,set_colors_reverse:function(){
+
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_colors_reverse / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_element_jq = this.get_element_jq();
+				if(cur_element_jq == undefined) return;
+
+				cur_element_jq.css("color",this.element_background_color);
+				cur_element_jq.css("background-color",this.element_color);
+				cur_element_jq.css("border-color",this.get_element_color());
+
 			}
 			,update_row_title:function(){
 				if(this.title_jq == null || this.title_input_jq == null) return;
@@ -4075,7 +4155,13 @@ airborne.bootstrap.obj.__action = {
 				
 				// 일반적인 리스트 형태의 이벤트 처리
 				// 포커싱 시에 노출되는 타이틀 길이를 줄여줍니다.
-				this.show_title_jq_text_head();
+				var is_table_child_column_list_field_item = cur_action_item_obj.is_table_child_column_list_field_item();
+				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+					// 테이블 컬럼일 경우, 5 글자만 노출
+					this.show_title_jq_text_head(5);	
+				} else {
+					this.show_title_jq_text_head();	
+				}
 
 				var _self = this;
 				if(this.btn_remove_element_jq != null){
@@ -4274,6 +4360,11 @@ airborne.bootstrap.obj.__action = {
 				var cur_action_item_obj = this.get_action_item_obj();
 				var cur_element_collection_set = this.get_element_set().get_element_collection_set();
 				var cur_element_jq = this.get_element_jq();
+
+				// 테이블 형일 경우는 엘리먼트 형태를 바꾸지 않습니다.
+				if(cur_action_item_obj.is_table_child_column_list_field_item) {
+					return;
+				}
 
 				// 모든 엘리먼트의 eject btn을 숨깁니다.
 				var cur_first_sibling_action_obj = cur_action_item_obj.get_first_sibling_action_obj();
@@ -4918,7 +5009,6 @@ airborne.bootstrap.obj.__action = {
 				// 더 이상 이벤트를 받지 않도록 잠급니다.
 				this.lock();
 
-				// wonder.jung11
 				// 입력 패턴을 새로운 열을 추가하는 형식으로 보여줍니다.
 				this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
 
@@ -5405,10 +5495,33 @@ airborne.bootstrap.obj.__action = {
 
 			// 이전과 동일한 상태라면 중단.
 			var was_hover = event_manager_on_mousemove.get_was_hover();
-			
-			
 
-			// TEST
+			var cur_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
+			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+				console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+				return;
+			}
+
+			if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+				// 테이블의 테두리 색상을 변경하는 처리.
+				var cur_element_collection_set = event_manager_on_mousemove.get_element_set().get_element_collection_set();
+				var cur_element_collection_container_jq = cur_element_collection_set.get_element_collection_container_jq();
+
+				var is_hover_element_set = _obj.is_hover(mousemove_event, cur_element_collection_container_jq);
+
+				if(cur_element_collection_set.get_was_hover() !== is_hover_element_set) {
+					cur_element_collection_set.set_was_hover(is_hover_element_set);
+					
+					if(is_hover_element_set) {
+						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
+					} else {
+						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
+
+					} // end inner if
+
+				} // end outer if
+
+			} // end outer if
 
 			/*
 			if(id_for_test.indexOf("table_todaysrole") > -1){
@@ -5445,11 +5558,6 @@ airborne.bootstrap.obj.__action = {
 
 			// 검사중인 엘리먼트가 shy mode인지 확인합니다.
 
-			var cur_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
-			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-				console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
-				return;
-			}
 
 			// get_children_element_set_arr
 			consoler.say("mmc / 1 / ",title_for_test);
@@ -6748,9 +6856,6 @@ airborne.bootstrap.obj.__action = {
 							// 원본을 노출합니다.
 							cur_src_jq.css("opacity","1");
 
-							// wonder.jung
-							console.log("land_element / remove_mousemove_callback_set / cur_mousemove_callback_set :: ",cur_mousemove_callback_set);
-
 							// 모든 이벤트 관련 데이터 초기화.
 							// remove mouse move call back
 							cur_event_hierarchy_manager.remove_mousemove_callback_set(cur_mousemove_callback_set);
@@ -6946,7 +7051,6 @@ airborne.bootstrap.obj.__action = {
 							cur_event_manager = 
 							cur_element_set_on_mouse_over.get_event_manager();
 
-							// wonder.jung
 							var event_manager_on_mouse_over = cur_element_set_on_mouse_over.get_event_manager();
 						}
 
@@ -7026,16 +7130,30 @@ airborne.bootstrap.obj.__action = {
 			}
 			,get_mouse_over_element_container:function(mouse_event, target_event_manager){
 
-				var _v = airborne.validator;
-				var _obj = airborne.bootstrap.obj;
-
 				// 마우스 이둥시, 엘리먼트에 대한 충돌 검사를 진행합니다.
 				// 충돌 했을 경우, 충돌 엘리먼트 셋 배열에 추가합니다.
 				// 충돌하지 않았을 경우, view mode로 돌려 놓습니다.
 
 				// 테이블 내의 각 열을 대표하는 element container jq를 가져옵니다.
-				var cur_element_json = target_event_manager.get_element_meta_info().get_element_json();
 
+				// REMOVE ME
+				// var cur_element_json = target_event_manager.get_element_meta_info().get_element_json();
+
+				// wonder.jung11
+				// 모든 엘리먼트 셋을 가져와서 충돌 검사를 합니다.
+
+				// 충돌한 모든 열의 엘리먼트 셋을 focusing mode로 바꿉니다.
+
+				// 충돌하지 않은 모든 엘리먼트 셋을 view mode로 바꿉니다.
+
+				console.log("get_mouse_over_element_container / target_event_manager :: ",target_event_manager);
+
+
+				//var cur_sibling_action_obj_list = target_event_manager.get_sibling_action_obj_list();
+
+
+				// REMOVE ME
+				/*
 				var element_set_on_mouse_over_arr = [];
 				var cur_all_vertical_ref_arr = cur_element_json.get_all_vertical_ref_arr(false, false);
 				for (var idx = 0; idx < cur_all_vertical_ref_arr.length; idx++) {
@@ -7083,8 +7201,11 @@ airborne.bootstrap.obj.__action = {
 					}
 
 				} // for end
+				*/
 
-				return element_set_on_mouse_over_arr;
+				// 충돌한 element set을 반환합니다.
+
+				//return element_set_on_mouse_over_arr;
 			}
 			/*
 				@ public
@@ -7262,7 +7383,15 @@ airborne.bootstrap.obj.__action = {
 				}
 
 			}
-
+			// @ Public
+			// @ Scope  	: Element Collection Set
+			,was_hover:false
+			,set_was_hover:function(was_hover) {
+				this.was_hover = was_hover;
+			}
+			,get_was_hover:function() {
+				return this.was_hover;
+			}
 		}
 
 		return element_collection_set;
@@ -7783,6 +7912,9 @@ airborne.bootstrap.obj.__action = {
 
 			}
 			,mousemove_callback_set_arr:[]
+			// @ Public
+			// @ Scope  	: event_hierarchy_manager
+			// @ Desc 		: mouse move 시 검사하는 callback set을 추가합니다.
 			,add_mousemove_callback_set:function(mousemove_callback, event_manager){
 				if(mousemove_callback == null){
 					console.log("!Error! / airborne.view.obj / add_mousemove_callback / mousemove_callback == null");

@@ -775,6 +775,8 @@ class ActionItem extends ActionObject{
 	public static $TITLE_N_TIME_MM_SS=3;	// ActionItem::$TITLE_N_TIME_MM_SS
 	public static $SELECT_BOX=4;			// ActionItem::$SELECT_BOX
 	public static $TITLE_ONLY_FIXED=5;		// ActionItem::$TITLE_ONLY_FIXED
+	public static $TITLE_ONLY_ADDABLE=6;	// ActionItem::$TITLE_ONLY_ADDABLE
+	public static $SELECT_BOX_ADDABLE=7;	// ActionItem::$SELECT_BOX_ADDABLE
 
 	/*
 		@ Public
@@ -791,7 +793,9 @@ class ActionItem extends ActionObject{
 			ActionItem::$TITLE_N_TIME_HH_MM == $action_item_type ||
 			ActionItem::$TITLE_N_TIME_MM_SS == $action_item_type ||
 			ActionItem::$SELECT_BOX == $action_item_type ||
-			ActionItem::$TITLE_ONLY_FIXED == $action_item_type ) {
+			ActionItem::$TITLE_ONLY_FIXED == $action_item_type ||
+			ActionItem::$TITLE_ONLY_ADDABLE == $action_item_type ||
+			ActionItem::$SELECT_BOX_ADDABLE == $action_item_type ) {
 
 			return true;
 		}
