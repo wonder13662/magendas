@@ -1228,6 +1228,9 @@ airborne.bootstrap.obj.__action = {
 				var action_item_type = this.get_action_item_type();
 				return (_action.ACTION_ITEM_TYPE_TITLE_ONLY_ADDABLE === action_item_type)?true:false;
 			}
+			,is_not_item_select_box_addable:function() {
+				return !this.is_item_select_box_addable();
+			}
 			,is_item_select_box_addable:function() {
 				var action_item_type = this.get_action_item_type();
 				return (_action.ACTION_ITEM_TYPE_SELECT_BOX_ADDABLE === action_item_type)?true:false;
@@ -2446,7 +2449,7 @@ airborne.bootstrap.obj.__action = {
 				this.call_delegate_before_save_n_reload();
 				console.log("변경된 데이터를 저장하기 전에 자신의 element json 정보를 업데이트 합니다.");
 
-				if( cur_action_item_obj.is_item_select_box() && _action.EVENT_TYPE_UPDATE_ITEM == cur_event_type ){
+				if( (cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable()) && _action.EVENT_TYPE_UPDATE_ITEM == cur_event_type ){
 
 					if(_obj.is_not_valid_search_option(cur_search_option_obj)){
 						console.log("!Error! / element_event_manager / call_delegate_save_n_reload / this.is_not_valid_search_option(cur_search_option_obj)");
@@ -2525,7 +2528,7 @@ airborne.bootstrap.obj.__action = {
 				this.call_delegate_before_save_n_reload();
 				console.log("변경된 데이터를 저장하기 전에 자신의 element json 정보를 업데이트 합니다.");
 
-				if( cur_action_item_obj.is_item_select_box() && _action.EVENT_TYPE_UPDATE_ITEM == cur_event_type ){
+				if( (cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable())  && _action.EVENT_TYPE_UPDATE_ITEM == cur_event_type ){
 
 					if(_obj.is_not_valid_search_option(cur_search_option_obj)){
 						console.log("!Error! / element_event_manager / call_delegate_save_n_reload / this.is_not_valid_search_option(cur_search_option_obj)");
@@ -2551,7 +2554,7 @@ airborne.bootstrap.obj.__action = {
 					cur_element_key = this.get_title_jq_value();
 					cur_element_value = cur_element_key;
 
-				} else if( cur_action_item_obj.is_item_select_box() && _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_event_type ){
+				} else if( (cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable()) && _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_event_type ){
 
 					console.log("Add select option");
 
@@ -3653,12 +3656,16 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_jq();
 				
 				if(cur_action_item_obj.is_item_select_box()) {
+
 					this.show_btn_edit_element_jq();
+
 				} else if(cur_action_item_obj.get_action_is_not_shy()) {
+
 					this.show_btn_edit_element_jq();
 					this.show_btn_remove_element_jq();
 					this.show_btn_eject_element_jq();
 					this.show_btn_add_element_jq();
+
 				}
 
 				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
@@ -3716,7 +3723,7 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("em_sim / 0 /",cur_title);
 
 				// input mode를 인자로 넘겨준 경우를 우선 처리합니다.
-				if( cur_action_item_obj.is_item_select_box() ) {
+				if( cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable() ) {
 
 					consoler.say("em_sim / 1 /",cur_title);
 					consoler.say("em_sim / 1 / ELEMENT_TYPE_SEARCH_LIST | ELEMENT_TYPE_TABLE_SEARCH_LIST");
@@ -3887,8 +3894,9 @@ airborne.bootstrap.obj.__action = {
 				if(cur_element_jq == undefined) return;
 
 				cur_element_jq.css("color",this.get_element_color());
-				cur_element_jq.css("background-color",this.element_background_color);
-				cur_element_jq.css("border-color",this.get_element_border_color());
+				// cur_element_jq.css("background-color",this.element_background_color);
+				this.set_color_background(this.get_element_background_color());
+				this.set_color_border(this.get_element_border_color());
 
 			}
 			// @ Public
@@ -3906,10 +3914,29 @@ airborne.bootstrap.obj.__action = {
 				if(cur_element_jq == undefined) return;
 
 				cur_element_jq.css("color",this.element_background_color);
-				cur_element_jq.css("background-color",this.element_color);
-				cur_element_jq.css("border-color",this.get_element_color());
+				// cur_element_jq.css("background-color",this.element_color);
+				this.set_color_background(this.get_element_color());
+				this.set_color_border(this.get_element_color());
 
 			}
+			// @ Public
+			// @ Scope 		: Event Manager
+			// @ Desc 		: 객체의 테두리 색상을 바꿉니다.
+			,set_color_border:function(border_color){
+				var cur_element_jq = this.get_element_jq();
+				if(cur_element_jq == undefined) return;
+
+				cur_element_jq.css("border-color",border_color);
+			}
+			// @ Public
+			// @ Scope 		: Event Manager
+			// @ Desc 		: 객체의 테두리 색상을 바꿉니다.
+			,set_color_background:function(background_color){
+				var cur_element_jq = this.get_element_jq();
+				if(cur_element_jq == undefined) return;
+
+				cur_element_jq.css("background-color",background_color);
+			}			
 			,update_row_title:function(){
 				if(this.title_jq == null || this.title_input_jq == null) return;
 
@@ -4531,9 +4558,9 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / set_search_list_data_on_input_group / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
-				if(cur_action_item_obj.is_not_item_select_box()) {
+				if(cur_action_item_obj.is_not_item_select_box() && cur_action_item_obj.is_not_item_select_box_addable()) {
 					// 검색 리스트 타입이 아니면 중단합니다.
-					console.log("!Error! / set_search_list_data_on_input_group / cur_action_item_obj.is_not_item_select_box()");
+					console.log("!Error! / set_search_list_data_on_input_group / cur_action_item_obj.is_not_item_select_box() && cur_action_item_obj.is_not_item_select_box_addable()");
 					return;
 				}
 
@@ -5009,12 +5036,27 @@ airborne.bootstrap.obj.__action = {
 				// 더 이상 이벤트를 받지 않도록 잠급니다.
 				this.lock();
 
-				// 입력 패턴을 새로운 열을 추가하는 형식으로 보여줍니다.
-				this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
+				// 입력 형식이 2가지로 나뉘어 처리됩니다.
+				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+					// 1. TABLE FIELD ACTION ITEM
+					// row에 여러패턴이 섞여 있으므로 기본값을 가지는 열을 추가해야 합니다.
+					console.log("row에 여러패턴이 섞여 있으므로 기본값을 가지는 열을 추가해야 합니다. / cur_action_item_obj :: ",cur_action_item_obj);
 
-				// set input group events
-				this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
-				this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+					// wonder.jung11
+					_action_table.add_editable_table_row(cur_action_item_obj.get_parent().get_parent());
+
+					this.release();
+
+				} else {
+					// 2. LIST ACTION ITEM
+					// 입력 패턴을 새로운 열을 추가하는 형식으로 보여줍니다.
+					this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
+
+					// set input group events
+					this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+					this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+				}
+
 				
 			}
 			,on_edit_btn_click:function(){
@@ -5033,7 +5075,7 @@ airborne.bootstrap.obj.__action = {
 				this.hide_title_jq_text_head();
 
 				// set search list data
-				if(cur_action_item_obj.is_item_select_box()) {
+				if(cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable()) {
 					this.set_search_list_data_on_input_group();	
 				}
 				this.show_input_mode();
@@ -5489,6 +5531,15 @@ airborne.bootstrap.obj.__action = {
 				return;	
 			}
 
+			// REMOVE ME
+			/*
+			if(mousemove_event.left_window === true) {
+				// 윈도우를 나간 경우의 처리.
+				console.log("윈도우를 나간 경우의 처리.");
+				event_manager_on_mousemove.show_view_mode();
+				return;
+			}
+			*/
 
 			var element_jq_on_mousemove = event_manager_on_mousemove.get_element_jq();
 			var is_hover = _obj.is_hover(mousemove_event, element_jq_on_mousemove);
@@ -5503,7 +5554,7 @@ airborne.bootstrap.obj.__action = {
 			}
 
 			if(cur_action_item_obj.is_table_child_column_list_field_item()) {
-				// 테이블의 테두리 색상을 변경하는 처리.
+				// Table의 테두리 색상을 변경하는 처리.
 				var cur_element_collection_set = event_manager_on_mousemove.get_element_set().get_element_collection_set();
 				var cur_element_collection_container_jq = cur_element_collection_set.get_element_collection_container_jq();
 
@@ -5511,11 +5562,43 @@ airborne.bootstrap.obj.__action = {
 
 				if(cur_element_collection_set.get_was_hover() !== is_hover_element_set) {
 					cur_element_collection_set.set_was_hover(is_hover_element_set);
+
+					var cur_parent_action_table_obj = cur_action_item_obj.get_parent().get_parent();
+					if(_action.is_not_valid_action_obj(cur_parent_action_table_obj)) {
+						console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_parent_action_table_obj)");
+						return;
+					}
+					var cur_parent_action_object_add_on = cur_parent_action_table_obj.get_parent_add_on();
+					if(_action.is_not_valid_action_obj(cur_parent_action_object_add_on)) {
+						console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_parent_action_object_add_on)");
+						return;
+					}
+					var cur_parent_action_object_add_on_event_manager = cur_parent_action_object_add_on.get_event_manager();
 					
 					if(is_hover_element_set) {
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
+
+						// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
+						// 부모 item의 버튼은 모두 가립니다.
+						cur_parent_action_object_add_on_event_manager.set_color_border(event_manager_on_mousemove.get_element_color());
+						cur_parent_action_object_add_on_event_manager.set_color_background(event_manager_on_mousemove.get_element_color());
+						cur_parent_action_object_add_on_event_manager.hide_btn_eject_element_jq();
+						cur_parent_action_object_add_on_event_manager.hide_btn_remove_element_jq();
+						cur_parent_action_object_add_on_event_manager.hide_btn_edit_element_jq();
+						cur_parent_action_object_add_on_event_manager.hide_btn_add_element_jq();
+
 					} else {
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
+
+						// 부모 item이 있다면 원래 배경색으로 돌려놓습니다.
+						// 부모 item의 버튼은 모두 보여줍니다.
+						var parent_action_object_add_on_element_jq = cur_parent_action_object_add_on_event_manager.get_element_jq();
+						var is_hover_parent_action_object_add_on = _obj.is_hover(mousemove_event, parent_action_object_add_on_element_jq);
+						if(is_hover_parent_action_object_add_on) {
+							cur_parent_action_object_add_on_event_manager.show_edit_mode();
+						} else {
+							cur_parent_action_object_add_on_event_manager.show_view_mode();
+						}
 
 					} // end inner if
 
@@ -7903,6 +7986,7 @@ airborne.bootstrap.obj.__action = {
 							var dummy_event = {
 								pageX:-100
 								,pageY:-100
+								,left_window:true
 							}
 
 				            _self.do_after_mousemove_event(dummy_event);
