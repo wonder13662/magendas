@@ -803,6 +803,7 @@ airborne.bootstrap.obj.__action = {
 				return !this.is_first();
 			}
 			,is_first:function() {
+
 				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
 				if(cur_sibling_action_obj_before != undefined) {
 					return false;
@@ -813,17 +814,17 @@ airborne.bootstrap.obj.__action = {
 			// @ Scope 	: action obj
 			// @ Desc 	: 자신이 속한 형제 리스트에서 몇번째 인덱스인지 알려줍니다.
 			,get_idx:function() {
+
 				var cur_first_sibling_action_obj = this.get_first_sibling_action_obj();
 				if(_action.is_not_valid_action_obj(cur_first_sibling_action_obj)) {
 					console.log("!Error! / get_sibling_idx / this.is_not_valid_action_obj(cur_first_sibling_action_obj)");
 					return -1;
 				}
 
-				var cur_sibling_action_obj_after = undefined;
+				var cur_sibling_action_obj_after = cur_first_sibling_action_obj;
 				var max_loop_cnt = 50;
 				for(var idx = 0; idx < max_loop_cnt; idx++) {
-
-					cur_sibling_action_obj_after = cur_first_sibling_action_obj.get_sibling_action_obj_after();
+					
 					if(cur_sibling_action_obj_after == undefined) {
 						console.log("!Error! / get_sibling_idx / cur_sibling_action_obj_after == undefined");
 						return -1;
@@ -846,21 +847,35 @@ airborne.bootstrap.obj.__action = {
 					if(cur_coordinate === cur_sibling_action_obj_after_coordinate) {
 						return idx;
 					}
+
+					cur_sibling_action_obj_after = cur_sibling_action_obj_after.get_sibling_action_obj_after();
 				}
 
 				return -1;
 			}
-			,get_first_sibling_action_obj:function() {
+			,get_first_sibling_action_obj:function(repeat_cnt) {
+
+				var max_repeat_cnt = 100;
+				if(repeat_cnt == undefined) {
+					repeat_cnt = 0;
+				} else if(max_repeat_cnt < repeat_cnt) {
+					console.log("!Error! / get_first_sibling_action_obj / max_repeat_cnt < repeat_cnt");
+					return;
+				} else {
+					repeat_cnt++;
+				}
+
 				if(this.is_first()) {
 					return this;
 				}
+
 				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
 				if(_action.is_not_valid_action_obj(cur_sibling_action_obj_before)) {
 					console.log("!Error! / get_first_sibling_action_obj / this.is_not_valid_action_obj(cur_sibling_action_obj_before)");
 					return;
 				}
 
-				return cur_sibling_action_obj_before.get_first_sibling_action_obj();
+				return cur_sibling_action_obj_before.get_first_sibling_action_obj(repeat_cnt);
 			}
 			,set_sibling_action_obj_after:function(sibling_action_obj_after) {
 				this.sibling_action_obj_after = sibling_action_obj_after;

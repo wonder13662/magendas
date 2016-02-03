@@ -2142,7 +2142,6 @@ airborne.bootstrap.view.obj.__action_table = {
 	// @ Desc : 화면에 테이블의 열을 추가합니다. 테이블 열을 구성하는 정보는 모두 action table 객체에서 가져옵니다. 각 필드는 기본값을 갖습니다.
 	,add_editable_table_row:function(action_table_obj) {
 
-		// wonder.jung11
 		if(_action.is_not_valid_action_obj(action_table_obj)) {
 			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_obj(action_table_obj)");
 			return;
@@ -2298,7 +2297,6 @@ airborne.bootstrap.view.obj.__action_table = {
 
 	}
 	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_element_collection_set, delegate_on_event) {
-		// wonder.jung11
 
 		// 각 테이블 row 내부, column 프로퍼티의 마우스 이벤트에 대한 처리.
 		var delegate_set_event_manager_prop_on_table_column = _obj.get_delegate(function(element_event_manager){
@@ -2657,8 +2655,8 @@ airborne.bootstrap.view.obj.__action_table = {
 						if(cur_sibling_element_set_mouse_over != undefined){
 
 							var cur_sibling_event_manager_mouse_over = cur_sibling_element_set_mouse_over.get_event_manager();
-							if(cur_sibling_event_manager_mouse_over != undefined) {
-								console.log("!Error! / clone_element_container_jq.click / cur_sibling_event_manager_mouse_over != undefined");
+							if(cur_sibling_event_manager_mouse_over == undefined) {
+								console.log("!Error! / clone_element_container_jq.click / cur_sibling_event_manager_mouse_over == undefined");
 								return;
 							}
 
@@ -2681,7 +2679,12 @@ airborne.bootstrap.view.obj.__action_table = {
 							// view mode로 전환합니다.
 							cur_sibling_event_manager_mouse_over.show_view_mode();
 
+							console.log("HERE / cur_action_item_obj :: ",cur_action_item_obj);
+
 							var cur_action_item_obj_idx = cur_action_item_obj.get_idx();
+
+							console.log("HERE / cur_action_item_obj_idx :: ",cur_action_item_obj_idx);
+
 							if(_v.is_not_unsigned_number(cur_action_item_obj_idx)) {
 								console.log("!Error! / clone_element_container_jq.click / _v.is_not_unsigned_number(cur_action_item_obj_idx)");
 								return;
@@ -2696,7 +2699,7 @@ airborne.bootstrap.view.obj.__action_table = {
 								// TODO
 								// action item의 형제 관계를 바꿉니다. 
 								// 같은 row의 모든 형제 관계를 변경해줘야 합니다.
-								for (var idx_column = 0; idx_column < colspan_cnt; idx_column++) {
+								for (var idx_column = 0; idx_column < action_table_obj.get_children_cnt(); idx_column++) {
 
 									var cur_column_child_action_list_obj = action_table_obj.get_child(idx_column);
 									if(_action.is_not_valid_action_obj(cur_column_child_action_list_obj)) {
@@ -2725,7 +2728,7 @@ airborne.bootstrap.view.obj.__action_table = {
 								// TODO
 								// action item의 형제 관계를 바꿉니다. 
 								// 같은 row의 모든 형제 관계를 변경해줘야 합니다.
-								for (var idx_column = 0; idx_column < colspan_cnt; idx_column++) {
+								for (var idx_column = 0; idx_column < action_table_obj.get_children_cnt(); idx_column++) {
 
 									var cur_column_child_action_list_obj = action_table_obj.get_child(idx_column);
 									if(_action.is_not_valid_action_obj(cur_column_child_action_list_obj)) {
@@ -3054,8 +3057,6 @@ airborne.bootstrap.view.obj.__action_table = {
 
 		var cur_btn_collection_eject_jq = cur_table_title_set_jq.find("span#btn_collection_eject");
 		cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
-		
-
 
 		
 		var cur_table_row_arr = cur_table_jq.find("tr#column_text_container");
@@ -3064,8 +3065,8 @@ airborne.bootstrap.view.obj.__action_table = {
 			var table_row_element = cur_table_row_arr[idx_row];
 			var table_row_element_jq = $(table_row_element);
 			this.set_event_table_row_field_element(table_row_element_jq, action_table_obj, idx_row, cur_element_collection_set, delegate_on_event);
-			// wonder.jung11
 
+			// REMOVE ME
 			/*
 			
 			var table_row_column_text_jq_arr = table_row_element_jq.find("td#column_text_container");
