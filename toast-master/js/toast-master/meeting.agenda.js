@@ -665,7 +665,8 @@ wonglish.meeting_agenda_manager = {
 					,_obj.get_delegate(function(data){
 
 	            		// 타임라인을 업데이트 합니다.
-	            		update_timeline();
+	            		// REMOVE ME
+	            		// update_timeline();
 
 	            		// LEGACY
 	            		if( request_param_obj.IS_INSERT_SPEECH == _param.YES || request_param_obj.IS_DELETE_SPEECH == _param.YES ) {
@@ -907,7 +908,8 @@ wonglish.meeting_agenda_manager = {
 
 		            	console.log(">>> today's role / data : ",data);
 
-		            	update_timeline();
+		            	// REMOVE ME
+		            	// update_timeline();
 
 		            	// 이벤트를 릴리즈, 초기 상태로 전환합니다.
 		            	// cur_element_event_manager.release();
@@ -1029,7 +1031,8 @@ wonglish.meeting_agenda_manager = {
 
 		            	console.log(">>> word n quote / data : ",data);
 
-		            	update_timeline();
+		            	// REMOVE ME
+		            	// update_timeline();
 
 		            	// 이벤트를 릴리즈, 초기 상태로 전환합니다.
 		            	// cur_element_event_manager.release();
@@ -1198,7 +1201,8 @@ wonglish.meeting_agenda_manager = {
 
 		            	} else {
 
-		            		update_timeline();
+		            		// REMOVE ME
+		            		// update_timeline();
 
 		            	}
 
@@ -1288,7 +1292,8 @@ wonglish.meeting_agenda_manager = {
 
 		            	console.log(">>> exec members / data : ",data);
 
-		            	update_timeline();
+		            	// REMOVE ME
+		            	// update_timeline();
 
 		            	// TODO 이벤트 릴리스도 공통 로직 (call_delegate_save_n_reload)안에 포함되어야 할 듯.
 		            	// 이벤트를 릴리즈, 초기 상태로 전환합니다.
@@ -2038,6 +2043,8 @@ wonglish.meeting_agenda_manager = {
 					, function(selected_key, selected_value){
 
 						// 현재 타임라인 내용을 업데이트 뒤에 PDF 뷰로 이동한다.
+						// REMOVE ME
+						/*
 						update_timeline(
 							// delegate_func_after_update_timeline
 							_obj.get_delegate(function(){
@@ -2052,7 +2059,14 @@ wonglish.meeting_agenda_manager = {
 							},this)
 
 						);
+						*/
 
+						_link.open_new_window(
+							_link.PDF_VIEWER
+							,_param
+							.get(_param.MEETING_ID, selected_value)
+							.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+						);
 					}
 				);
 
@@ -2068,6 +2082,8 @@ wonglish.meeting_agenda_manager = {
 					, function(selected_key, selected_value){
 
 						// 현재 타임라인 내용을 업데이트 뒤에 PDF 뷰로 이동한다.
+						// REMOVE ME
+						/*
 						update_timeline(
 							// delegate_func_after_update_timeline
 							_obj.get_delegate(function(){
@@ -2083,6 +2099,7 @@ wonglish.meeting_agenda_manager = {
 							},this)
 
 						);
+						*/
 
 					}
 				);

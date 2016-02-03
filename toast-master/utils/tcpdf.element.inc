@@ -221,13 +221,13 @@ class TCPDFElement{
 	//   dMMMP   dMP dMP dMP dMP   dMP     
 	//  dMP     dMP.aMP dMP dMP   dMP      
 	// dMP      VMMMP" dMP dMP   dMP    
-	private static $DEFAULT_FONT="helvetica";
+	private static $DEFAULT_FONT="nanumgothic";
 	//private static $DEFAULT_FONT="dejavusans";
 	//private static $DEFAULT_FONT="helvetica";
 
 	//helvetica
 
-	private static $FONT_NAME_DEFAULT="helvetica";
+	private static $FONT_NAME_DEFAULT="nanumgothic";
 	private static $FONT_STYLE_BOLD="B";
 	private static $FONT_STYLE_NORMAL="";
 
@@ -242,19 +242,19 @@ class TCPDFElement{
 	public static $CARD_BOARD_TITLE_FONT_SIZE_HUGE=12;
 	public static $CARD_BOARD_SIMPLE_TABLE_FONT_SIZE=6;
 
-	private static $CARD_BOARD_CONTENT_FONT="helvetica";
+	private static $CARD_BOARD_CONTENT_FONT="nanumgothic";
 	private static $CARD_BOARD_CONTENT_FONT_STYLE="";
 	public static $CARD_BOARD_CONTENT_FONT_SIZE=8;
 	public static $CARD_BOARD_CONTENT_FONT_SIZE_LARGE=9;
 
-	private static $SIMPLE_TABLE_TITLE_SMALL_FONT="helvetica";
+	private static $SIMPLE_TABLE_TITLE_SMALL_FONT="nanumgothic";
 	private static $SIMPLE_TABLE_TITLE_SMALL_FONT_STYLE="B";
 
 	public static $SIMPLE_TABLE_TITLE_SMALL_FONT_SIZE=6;
 	public static $SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE=7;
 	public static $SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE=8;
 
-	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT="helvetica";
+	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT="nanumgothic";
 	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT_STYLE="";
 	public static $SIMPLE_TABLE_CONTENT_SMALL_FONT_SIZE=6;
 	public static $SIMPLE_TABLE_CONTENT_FONT_SIZE_LARGE=9;

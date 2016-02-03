@@ -7,7 +7,7 @@ class TCPDFManager{
 
 	private $pdf;
 	private $service_root_path;
-	private $default_font="helvetica";
+	private $default_font="nanumgothic";
 
 	public function TCPDFManager($service_root_path){
 		$this->pdf = $this->get_empty_pdf();

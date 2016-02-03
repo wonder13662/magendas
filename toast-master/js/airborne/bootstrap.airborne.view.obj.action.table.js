@@ -2502,6 +2502,8 @@ airborne.bootstrap.view.obj.__action_table = {
 			// set eject event
 			event_manager_table_column_text.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
 
+				console.log("HERE / 001");
+
 				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 					console.log("!Error! / set_delegate_btn_eject_click / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
@@ -2555,28 +2557,63 @@ airborne.bootstrap.view.obj.__action_table = {
 					// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
 					// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
 
-					console.log("HERE / add_mousemove_callback_set / mousemove_event :: ",mousemove_event);
-					console.log("HERE / add_mousemove_callback_set / cur_event_manager :: ",cur_event_manager);
-
 					// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
 					// 자신의 테이블 열의 모든 객체들을 가져옵니다.
-					cur_event_manager.get_element_set().get_element_collection_set().get_mouse_over_element_container(mousemove_event, cur_event_manager);
+					var action_item_row_on_mouse_over_arr = cur_event_manager.get_element_set().get_element_collection_set().get_action_item_obj_mouse_over(mousemove_event, cur_event_manager);
+
+					console.log("001 / action_item_row_on_mouse_over_arr :: ",action_item_row_on_mouse_over_arr);
 
 					// 움직이는 열을 클릭하면 충돌 검사를 통해 선택된 열 위 또는 아래로 붙임.
 					clone_element_container_jq.off();
 					clone_element_container_jq.click(function(e){
 
-						// 테이블의 열 배열을 가져와야 한다.
+						// wonder.jung11
 
-						// REMOVE ME
-						// var cur_element_json = cur_event_manager.get_element_meta_info().get_element_json();
-						// var cur_all_vertical_ref_arr = cur_element_json.get_all_vertical_ref_arr(false, false);
+						// 테이블의 열 배열을 가져와야 한다.
 
 						var cur_sibling_element_set_mouse_over = null;
 						var mouse_over_checksum = null;
 
-						cur_table_action_item_obj_list
+						// cur_table_action_item_obj_list = cur_event_manager.get_element_set().get_element_collection_set().get_action_item_obj_mouse_over(mousemove_event, cur_event_manager);
 
+						console.log("002 / action_item_row_on_mouse_over_arr :: ",action_item_row_on_mouse_over_arr);
+
+						for (var idx = 0; idx < action_item_row_on_mouse_over_arr.length; idx++) {
+							var cur_action_item_obj = action_item_row_on_mouse_over_arr[idx];
+
+							if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+								console.log("!Error! / add_editable_table_from_action_table / _action.is_not_valid_action_item_obj(cur_table_action_item_obj)");
+								return;
+							}
+
+							var cur_event_manager = cur_action_item_obj.get_event_manager();
+							if(cur_event_manager == undefined) {
+								console.log("!Error! / clone_element_container_jq.click / cur_event_manager == undefined");
+								return;
+							}
+
+							var cur_element_set = cur_event_manager.get_element_set();
+							if(cur_element_set == undefined) {
+								console.log("!Error! / clone_element_container_jq.click / cur_element_set == undefined");
+								return;
+							}
+
+							// 충돌 검사를 진행한다.
+							mouse_over_checksum = jsm.show_mouse_over_element_container_set_top_n_bottom(mousemove_event, cur_element_set);
+							if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_top){
+								cur_sibling_element_set_mouse_over = cur_element_set;
+								break;
+							} else if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_bottom){
+								cur_sibling_element_set_mouse_over = cur_element_set;
+								break;
+							} // end if
+
+						}
+
+						console.log("mouse_over_checksum :: ",mouse_over_checksum);
+
+						// REMOVE ME
+						/*
 						for (var idx_row = 0; idx_row < cur_table_action_item_obj_list.length; idx_row++) {
 							var cur_table_action_item_obj = cur_table_action_item_obj_list[idx_row];
 							if(_action.is_not_valid_action_item_obj(cur_table_action_item_obj)) {
@@ -2606,6 +2643,7 @@ airborne.bootstrap.view.obj.__action_table = {
 								break;
 							} // end if
 						}
+						*/
 
 						// cur_action_item_obj
 						// 옮겨갈 테이블 element container set의 위, 아래 위치를 판단, 참조를 가져옵니다.
@@ -2914,9 +2952,7 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 
-		// wonder.jung11
 		// 1개의 row가 테이블에 추가됩니다.
-
 		for (var idx_row = 0; idx_row < rowspan_cnt; idx_row++) {
 
 			var is_last_row = ((rowspan_cnt.length - 1) == idx_row)?true:false;
