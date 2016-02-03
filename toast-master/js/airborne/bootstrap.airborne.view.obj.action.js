@@ -572,7 +572,19 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_parent_action_obj = this.get_parent();
 				if(_action.is_not_valid_action_obj(cur_parent_action_obj)) {
-					console.log("!Error! / dive_into_them / _action.is_not_valid_action_obj(cur_parent_action_obj)");
+					console.log("!Error! / dive_into_indixes / _action.is_not_valid_action_obj(cur_parent_action_obj)");
+					return;
+				}
+
+				var idx_this = this.get_idx();
+				if(_v.is_unsigned_number(idx_before_action_item_obj) && idx_this === idx_before_action_item_obj) {
+					console.log("!Error! / dive_into_indixes / idx_this === idx_before_action_item_obj");
+					console.log("111 / idx_this ::: ",idx_this);
+					console.log("111 / idx_before_action_item_obj ::: ",idx_before_action_item_obj);
+					return;
+				}
+				if(_v.is_unsigned_number(idx_after_action_item_obj) && idx_this === idx_after_action_item_obj) {
+					console.log("!Error! / dive_into_indixes / idx_this === idx_after_action_item_obj");
 					return;
 				}
 
@@ -601,8 +613,20 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / dive_into_them / _action.is_not_valid_action_item_obj(new_before_action_item_obj)");
 					return;
 				}
+				if(new_before_action_item_obj != undefined && (new_before_action_item_obj.get_coordinate() === this.get_coordinate())) {
+
+					console.log("dive_into_them / new_before_action_item_obj.get_coordinate() ::: ",new_before_action_item_obj.get_coordinate());
+					console.log("dive_into_them / this.get_coordinate() ::: ",this.get_coordinate());
+
+					console.log("!Error! / dive_into_them / new_before_action_item_obj.get_coordinate() === this.get_coordinate()");
+					return;
+				}
 				if(new_after_action_item_obj != undefined && _action.is_not_valid_action_item_obj(new_after_action_item_obj)) {
 					console.log("!Error! / dive_into_them / _action.is_not_valid_action_item_obj(new_after_action_item_obj)");
+					return;
+				}
+				if(new_after_action_item_obj != undefined && (new_after_action_item_obj.get_coordinate() === this.get_coordinate())) {
+					console.log("!Error! / dive_into_them / new_after_action_item_obj.get_coordinate() === this.get_coordinate()");
 					return;
 				}
 
@@ -640,16 +664,24 @@ airborne.bootstrap.obj.__action = {
 					// 자신과 연결
 					new_before_action_item_obj.set_sibling_action_obj_after(this);
 					this.set_sibling_action_obj_before(new_before_action_item_obj);
+
+					console.log("HERE / XXX / 001-1 / ",new_before_action_item_obj.get_coordinate());
+					console.log("HERE / XXX / 001-2 / ",this.get_coordinate());
 				}
 				if(_action.is_valid_action_item_obj(new_after_action_item_obj)) {
 					// 자신과 연결
 					new_after_action_item_obj.set_sibling_action_obj_before(this);
 					this.set_sibling_action_obj_after(new_after_action_item_obj);
+
+					console.log("HERE / XXX / 002-1 / ",new_after_action_item_obj.get_coordinate());
+					console.log("HERE / XXX / 002-2 / ",this.get_coordinate());
 				}
 
 				// 순서 변경 이후 첫번째 객체를 가져와 부모 객체가 있다면 연결해줍니다.
 				var first_sibling_action_item_obj = undefined;
 				if(_action.is_valid_action_obj(parent_action_obj)) {
+					// wonder.jung11
+					console.log("HERE / XXX / 0001");
 					first_sibling_action_item_obj = this.get_first_sibling_action_obj();
 				}
 				if(_action.is_valid_action_item_obj(first_sibling_action_item_obj)) {
@@ -855,7 +887,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			,get_first_sibling_action_obj:function(repeat_cnt) {
 
-				var max_repeat_cnt = 100;
+				var max_repeat_cnt = 50;
 				if(repeat_cnt == undefined) {
 					repeat_cnt = 0;
 				} else if(max_repeat_cnt < repeat_cnt) {
@@ -874,6 +906,10 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / get_first_sibling_action_obj / this.is_not_valid_action_obj(cur_sibling_action_obj_before)");
 					return;
 				}
+
+				console.log("HERE / repeat_cnt ::: ",repeat_cnt);
+				console.log("HERE / action name ::: ",cur_sibling_action_obj_before.get_action_name());
+				console.log("HERE / action coordinate ::: ",cur_sibling_action_obj_before.get_coordinate());
 
 				return cur_sibling_action_obj_before.get_first_sibling_action_obj(repeat_cnt);
 			}
