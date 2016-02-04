@@ -266,6 +266,9 @@ airborne.bootstrap.obj = {
 
 		return delegate_obj;
 	}
+	,is_outside:function(event_obj, target_jq){
+		return !this.is_hover(event_obj, target_jq);
+	}
 	,is_hover:function(event_obj, target_jq){
 
 		if(event_obj == undefined) {
