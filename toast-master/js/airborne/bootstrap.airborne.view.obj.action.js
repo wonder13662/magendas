@@ -6944,6 +6944,8 @@ airborne.bootstrap.obj.__action = {
 				}
 				, show_mouse_over_element_container_set_top_n_bottom:function(mouse_event, target_element_set) {
 
+
+
 					if(mouse_event == undefined) {
 						console.log("!Error! / show_mouse_over_element_container_set_top_n_bottom / mouse_event == undefined");
 						return;
@@ -7018,7 +7020,7 @@ airborne.bootstrap.obj.__action = {
 
 					var cur_table_row_jq = target_element_collection_set.get_table_row_jq();
 
-					console.log("show_mouse_over_table_row_element_top_n_bottom / target_element_collection_set ::: ",target_element_collection_set);
+					// console.log("show_mouse_over_table_row_element_top_n_bottom / target_element_collection_set ::: ",target_element_collection_set);
 
 					
 
@@ -7043,21 +7045,35 @@ airborne.bootstrap.obj.__action = {
 						target_element_collection_set.set_is_hover_bottom(false);
 						has_changed = true;
 					}
-
-					
-
-					// 변경된 내역이 없다면 중단.
 					if(!has_changed){
+						// 변경된 내역이 없다면 중단.
 						return {is_hover_top:is_hover_top,is_hover_bottom:is_hover_bottom,has_changed:has_changed};
 					}
 
 					// wonder.jung11
 					var cur_element_set_arr = target_element_collection_set.get_element_set_arr();
+					var cur_sibling_element_set_arr = [];
+					var cur_action_item_idx = -1;
+					var cur_table_action_obj = undefined;
+					var cur_action_item_obj = undefined;
 					for(var idx = 0; idx < cur_element_set_arr.length; idx++) {
+
 						var cur_element_set = cur_element_set_arr[idx];
+						var cur_element_jq = cur_element_set.get_event_manager().get_element_jq();
+
+						if( _obj.is_outside(mouse_event, cur_element_jq) ) {
+							continue;
+						}
+
 						var cur_event_manager = cur_element_set.get_event_manager();
 						var cur_action_item_obj = cur_event_manager.get_action_item_obj();
-						var cur_coordinate = cur_action_item_obj.get_coordinate();
+						cur_action_item_idx = cur_action_item_obj.get_idx();
+						cur_table_action_obj = cur_action_item_obj.get_parent().get_parent();
+
+						break;
+
+						// REMOVE ME
+						/*
 
 						console.log("cur_coordinate ::: ",cur_coordinate);
 
@@ -7072,8 +7088,20 @@ airborne.bootstrap.obj.__action = {
 							cur_event_manager.show_view_mode();
 
 						} // end if
+						*/
 
 					} // end for
+
+					// console.log("cur_sibling_element_set_arr ::: ",cur_sibling_element_set_arr);
+					// console.log("cur_table_action_obj ::: ",cur_table_action_obj);
+
+					if(target_element_collection_set.get_is_hover_top()) {
+						console.log("show dummy on top / " + cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate());
+					} else if(target_element_collection_set.get_is_hover_bottom()) {
+						console.log("show dummy on bottom / " + cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate());
+					} else {
+						// console.log("show dummy outside");
+					}
 
 					return {is_outside:is_outside,is_hover_top:is_hover_top,is_hover_bottom:is_hover_bottom,has_changed:has_changed};				
 				}	

@@ -2570,8 +2570,6 @@ airborne.bootstrap.view.obj.__action_table = {
 					var cur_sibling_element_set_mouse_over = null;
 					var cur_element_collection_set = event_manager_toss.get_element_set().get_element_collection_set();
 					var mouse_over_checksum = jsm.show_mouse_over_table_row_element_top_n_bottom(mousemove_event, cur_element_collection_set);
-
-
 					
 					// , show_mouse_over_table_row_element_top_n_bottom:function(mouse_event, target_element_collection_set) {
 
@@ -2614,13 +2612,15 @@ airborne.bootstrap.view.obj.__action_table = {
 					}
 					*/
 
+
+					// REMOVE ME
+					/*
 					var cur_table_row_jq = cur_element_collection_set.get_table_row_jq();
 					if( mouse_over_checksum != undefined && 
 						mouse_over_checksum.has_changed && 
 						mouse_over_checksum.is_hover_top){
 
 						console.log("is_hover_top");
-						console.log(">> cur_table_row_jq ::: ",cur_table_row_jq);
 
 						// 사용자가 이동시킬수 있는 위치를 보여준다.
 
@@ -2629,7 +2629,6 @@ airborne.bootstrap.view.obj.__action_table = {
 								mouse_over_checksum.is_hover_bottom){
 
 						console.log("is_hover_bottom");
-						console.log(">> cur_table_row_jq ::: ",cur_table_row_jq);
 
 						// 사용자가 이동시킬수 있는 위치를 보여준다.
 
@@ -2638,11 +2637,11 @@ airborne.bootstrap.view.obj.__action_table = {
 								mouse_over_checksum.is_outside) {
 
 						console.log("is_outside");
-						console.log(">> cur_table_row_jq ::: ",cur_table_row_jq);
 
 						// 사용자가 이동시킬수 있는 위치를 보여준다.
 
 					}
+					*/
 
 
 
@@ -3025,7 +3024,6 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 		var table_id = _html.get_id_auto_increase(table_title);
-		// wonder.jung11 - 열별로 element set을 가지도록 설정을 변경해야 할듯.
 		var cur_element_collection_set = _action.make_element_collection_set(table_id);
 		var table_tag = ""
 		+ "<div class=\"panel panel-default\" id=\"<_v>\" style=\"margin-top:10px;margin-bottom:6px;\">".replace(/\<_v\>/gi, table_id)
