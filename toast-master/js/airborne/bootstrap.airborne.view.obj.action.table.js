@@ -3025,6 +3025,7 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 		var table_id = _html.get_id_auto_increase(table_title);
+		// wonder.jung11 - 열별로 element set을 가지도록 설정을 변경해야 할듯.
 		var cur_element_collection_set = _action.make_element_collection_set(table_id);
 		var table_tag = ""
 		+ "<div class=\"panel panel-default\" id=\"<_v>\" style=\"margin-top:10px;margin-bottom:6px;\">".replace(/\<_v\>/gi, table_id)
