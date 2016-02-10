@@ -2140,13 +2140,28 @@ airborne.bootstrap.view.obj.__action_table = {
 	}	
 	// @ public
 	// @ Desc : 화면에 테이블의 열을 추가합니다. 테이블 열을 구성하는 정보는 모두 action table 객체에서 가져옵니다. 각 필드는 기본값을 갖습니다.
-	,add_editable_table_row:function(action_table_obj) {
+	,add_editable_table_row:function(action_item_obj, cur_table_element_collection_set) {
 
+		if(_action.is_valid_action_item_obj(action_item_obj)) {
+			console.log("!Error! / add_editable_table_row / _action.is_valid_action_item_obj(action_item_obj)");
+			return;
+		}
+
+		if(action_item_obj.is_not_table_child_column_list_field_item()) {
+			console.log("!Error! / add_editable_table_row / action_table_obj.is_not_table_child_column_list_field_item()");
+			return;
+		}
+
+		var action_table_obj = cur_action_item_obj.get_parent().get_parent();
 		if(_action.is_not_valid_action_obj(action_table_obj)) {
 			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_obj(action_table_obj)");
 			return;
 		}
 
+		if(cur_table_element_collection_set == undefined) {
+			console.log("!Error! / add_editable_table_row / cur_table_element_collection_set == undefined");
+			return;
+		}
 
 		var table_title = action_table_obj.get_action_name();
 		if(_v.is_not_valid_str(table_title)) {
@@ -2258,9 +2273,6 @@ airborne.bootstrap.view.obj.__action_table = {
 		var cur_event_manager = action_table_obj.get_first_child().get_last_child().get_event_manager();
 		console.log("cur_event_manager ::: ",cur_event_manager);
 
-		var cur_element_collection_set = cur_event_manager.get_element_set().get_element_collection_set();
-		console.log("cur_element_collection_set ::: ",cur_element_collection_set);
-
 		var cur_delegate_save_n_reload = cur_event_manager.get_delegate_save_n_reload();
 		console.log("cur_delegate_save_n_reload ::: ",cur_delegate_save_n_reload);
 
@@ -2287,8 +2299,8 @@ airborne.bootstrap.view.obj.__action_table = {
 			, action_table_obj
 			// idx_row
 			, action_table_obj.get_first_child().get_children_cnt() - 1
-			// cur_element_collection_set
-			, cur_element_collection_set
+			// cur_table_element_collection_set
+			, cur_table_element_collection_set
 			// delegate_on_event
 			, cur_delegate_save_n_reload
 		);
@@ -2296,10 +2308,28 @@ airborne.bootstrap.view.obj.__action_table = {
 		console.log("add_editable_table_row / new_last_row_jq :: ",new_last_row_jq);
 
 	}
-	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_element_collection_set, delegate_on_event) {
+	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_table_element_collection_set, delegate_on_event) {
+
+		// wonder.jung11
 
 		// table_row_jq를 element collection set에 저장
-		cur_element_collection_set.set_table_row_jq(table_row_element_jq);
+		// cur_element_collection_set.set_table_row_jq(table_row_element_jq);
+		if(cur_table_element_collection_set == undefined) {
+			console.log("!Error! / add_editable_table_from_action_table / cur_table_element_collection_set == undefined");
+			return;
+		}
+
+		// table row를 관리할 element collection set을 만듭니다.
+		var cur_table_row_id = cur_table_element_collection_set.get_id() + "_" +  idx_row;
+		var cur_table_row_element_collection_set = _action.make_element_collection_set(cur_table_row_id);
+		if(cur_table_row_element_collection_set == undefined) {
+			console.log("!Error! / add_editable_table_from_action_table / cur_table_row_element_collection_set == undefined");
+			return;
+		}
+		cur_table_row_element_collection_set.set_table_row_jq(table_row_element_jq);
+
+		// table row를 table에 등록합니다.
+		cur_table_element_collection_set.ecs_push_child_element_collection_set(cur_table_row_element_collection_set);
 
 		// 각 테이블 row 내부, column 프로퍼티의 마우스 이벤트에 대한 처리.
 		var delegate_set_event_manager_prop_on_table_column = _obj.get_delegate(function(element_event_manager){
@@ -3024,7 +3054,7 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 		var table_id = _html.get_id_auto_increase(table_title);
-		var cur_element_collection_set = _action.make_element_collection_set(table_id);
+		var cur_table_element_collection_set = _action.make_element_collection_set(table_id);
 		var table_tag = ""
 		+ "<div class=\"panel panel-default\" id=\"<_v>\" style=\"margin-top:10px;margin-bottom:6px;\">".replace(/\<_v\>/gi, table_id)
 			+ "<div class=\"panel-heading\" style=\"text-align:center;\">"
@@ -3132,6 +3162,12 @@ airborne.bootstrap.view.obj.__action_table = {
 			var is_last_row = ((rowspan_cnt.length - 1) == idx_row)?true:false;
 			var is_first_row = (0 == idx_row)?true:false;
 
+			// wonder.jung11
+			// TODO 
+			// 1. 열을 추가하는 메서드를 사용하면 안되는 이유는 무엇?
+
+			//,add_editable_table_row:function(action_table_obj) {
+
 			table_tag += ""
 			+ "<tr id=\"column_text_container\" is_first=\"<is_first>\" is_last=\"<is_last>\" style=\"<style>\">"
 				.replace(/\<is_first\>/gi, is_first_row)
@@ -3224,10 +3260,10 @@ airborne.bootstrap.view.obj.__action_table = {
 		// 3-1. mouseenter, mouseleave
 		var cur_table_jq = parent_jq.children().last();
 		var cur_table_title_set_jq = cur_table_jq.find("div.panel-heading");
-		cur_element_collection_set.set_element_collection_container_jq(cur_table_jq);
+		cur_table_element_collection_set.set_element_collection_container_jq(cur_table_jq);
 
 		var cur_btn_collection_eject_jq = cur_table_title_set_jq.find("span#btn_collection_eject");
-		cur_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
+		cur_table_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
 
 		
 		var cur_table_row_arr = cur_table_jq.find("tr#column_text_container");
@@ -3235,11 +3271,11 @@ airborne.bootstrap.view.obj.__action_table = {
 
 			var table_row_element = cur_table_row_arr[idx_row];
 			var table_row_element_jq = $(table_row_element);
-			this.set_event_table_row_field_element(table_row_element_jq, action_table_obj, idx_row, cur_element_collection_set, delegate_on_event);
+			this.set_event_table_row_field_element(table_row_element_jq, action_table_obj, idx_row, cur_table_element_collection_set, delegate_on_event);
 
 		}
 
-		return cur_element_collection_set;
+		return cur_table_element_collection_set;
 	}
 
 	// @ private

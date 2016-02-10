@@ -1188,6 +1188,12 @@ airborne.bootstrap.obj.__action = {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_LIST === action_collection_type)?true:false;
 			}
+			,is_not_table_child_column_list_field_item:function() {
+				return !this.is_table_child_column_list_field_item();
+			}
+			// @ Public
+			// @ Scope 	 : action obj
+			// @ Desc 	 : 테이블에 속한 컬럼의 필드 action item인지 확인.
 			,is_table_child_column_list_field_item:function() {
 
 				var cur_parent_action_obj = this.get_parent();
@@ -5082,7 +5088,7 @@ airborne.bootstrap.obj.__action = {
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
 					// 1. TABLE FIELD ACTION ITEM
 					// row에 여러패턴이 섞여 있으므로 기본값을 가지는 열을 추가해야 합니다.
-					_action_table.add_editable_table_row(cur_action_item_obj.get_parent().get_parent());
+					_action_table.add_editable_table_row(cur_action_item_obj);
 					this.release();
 
 				} else {
@@ -5971,8 +5977,6 @@ airborne.bootstrap.obj.__action = {
 	// 부모 리스트 <- 부모 리스트의 열 <- 리스트 <- 리스트의 열 <- 자식 리스트 <- 자식 리스트의 열	
 	,make_element_collection_set:function(element_collection_id){
 
-		var _obj = airborne.bootstrap.obj;
-
 		var element_collection_set = {
 			element_collection_id:element_collection_id
 			,set_element_collection_id:function(element_collection_id){
@@ -5981,11 +5985,9 @@ airborne.bootstrap.obj.__action = {
 			,get_element_collection_id:function(){
 				return this.element_collection_id;
 			}
-			/*
-				@ public
-				@ scope : Element collection set / ecs
-				@ desc : 엘리먼트 컬렉션 셋의 기본적인 정보를 보여줍니다. 디버깅 용도.
-			*/
+			// @ public
+			// @ scope : Element collection set / ecs
+			// @ desc : 엘리먼트 컬렉션 셋의 기본적인 정보를 보여줍니다. 디버깅 용도.
 			,say_yourself:function(is_show){
 
 				if(is_show == undefined || is_show != true) {
@@ -6754,11 +6756,11 @@ airborne.bootstrap.obj.__action = {
 			,get_parent_element_set:function(){
 				return this.parent_element_set;
 			}
-			/*
-				@ Desc : 이 엘리먼트 컬렉션 셋이 가지고 있는 자식 엘리먼트 컬렉션 셋들을 의미합니다. 
-				@ Scope : element collection set / ecs
-				@ Warning : 엘리먼트 셋을 받지 않습니다.
-			*/
+			// wonder.jung11
+			
+			// @ Desc : 이 엘리먼트 컬렉션 셋이 가지고 있는 자식 엘리먼트 컬렉션 셋들을 의미합니다. 
+			// @ Scope : element collection set / ecs
+			// @ Warning : 엘리먼트 셋을 받지 않습니다.
 			,children_element_collection_set_arr:[]
 			,ecs_push_child_element_collection_set:function(child_element_collection_set){
 
@@ -7023,6 +7025,7 @@ airborne.bootstrap.obj.__action = {
 					// console.log("show_mouse_over_table_row_element_top_n_bottom / target_element_collection_set ::: ",target_element_collection_set);
 
 					
+					// wonder.jung11
 
 					// 충돌 검사를 진행한다.
 					// 충돌했다면 포커싱 등의 처리.
@@ -7035,12 +7038,10 @@ airborne.bootstrap.obj.__action = {
 					if(	target_element_collection_set.get_is_hover_top() != is_hover_top ){
 						target_element_collection_set.set_is_hover_top(is_hover_top);
 						has_changed = true;
-					}
-					if( target_element_collection_set.get_is_hover_bottom() != is_hover_bottom){
+					} else if( target_element_collection_set.get_is_hover_bottom() != is_hover_bottom){
 						target_element_collection_set.set_is_hover_bottom(is_hover_bottom);
 						has_changed = true;
-					}
-					if( target_element_collection_set.get_is_hover_top() || target_element_collection_set.get_is_hover_bottom() && is_outside ) {
+					} else if( is_outside ) {
 						target_element_collection_set.set_is_hover_top(false);
 						target_element_collection_set.set_is_hover_bottom(false);
 						has_changed = true;
@@ -7050,7 +7051,6 @@ airborne.bootstrap.obj.__action = {
 						return {is_hover_top:is_hover_top,is_hover_bottom:is_hover_bottom,has_changed:has_changed};
 					}
 
-					// wonder.jung11
 					var cur_element_set_arr = target_element_collection_set.get_element_set_arr();
 					var cur_sibling_element_set_arr = [];
 					var cur_action_item_idx = -1;
