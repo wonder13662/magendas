@@ -2263,17 +2263,24 @@ airborne.bootstrap.view.obj.__action_table = {
 		}
 
 		last_row_jq.after(table_row_tag);
-		var new_last_row_jq = last_row_jq.parent().children().last();
+		var cur_children_arr = last_row_jq.parent().children();
+		var new_last_row_jq = undefined;
+		// 새로 추가된 열을 검색해서 찾는다. 마지막 열을 반환하는 것은 정확하지 않음.
+		for(var idx=0;idx < cur_children_arr.length;idx++) {
+			var cur_children_ele = cur_children_arr[idx];
+			if(last_row_jq[0] == cur_children_ele) {
+				new_last_row_jq = $(cur_children_arr[idx + 1]);
+				break;
+			}
+		}
+		if(new_last_row_jq == undefined) {
+			console.log("!Error! / add_editable_table_row / new_last_row_jq == undefined");
+			return;
+		}
 
 		// 뷰가 추가되었습니다. 
-
-		console.log("XXX / action_table_obj ::: ",action_table_obj);
 		var cur_event_manager = action_table_obj.get_first_child().get_last_child().get_event_manager();
-		console.log("cur_event_manager ::: ",cur_event_manager);
-
 		var cur_delegate_save_n_reload = cur_event_manager.get_delegate_save_n_reload();
-		console.log("cur_delegate_save_n_reload ::: ",cur_delegate_save_n_reload);
-
 
 		// action table obj에서 새로운 열의 정보가 추가되어야 합니다.
 		for (var idx_column = 0; idx_column < action_table_obj.get_children_cnt(); idx_column++) {
@@ -2303,7 +2310,7 @@ airborne.bootstrap.view.obj.__action_table = {
 			, cur_delegate_save_n_reload
 		);
 
-		console.log("add_editable_table_row / new_last_row_jq :: ",new_last_row_jq);
+		console.log("HERE /**/ add_editable_table_row / new_last_row_jq :: ",new_last_row_jq);
 
 	}
 	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_table_element_collection_set, delegate_on_event) {

@@ -4288,26 +4288,27 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_element_jq = this.get_element_jq();
 				if(cur_element_jq != undefined) {
+					var _self_toss = this;
 					cur_element_jq.click(function(e){
 
-						console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
+						// console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
 
 						e.stopPropagation();
 						if(_self.is_lock()) return;
+
+						var cur_action_item_obj_toss = _self_toss.get_action_item_obj();
 
 						var cur_action_item_obj = _self.get_action_item_obj();
 						if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 							console.log("!Error! / this.title_jq.click / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 							return;
 						}
-
-						console.log("HERE / XXX / cur_element_jq.click / 002 / ",cur_action_name);
+						var cur_action_item_name = cur_action_item_obj.get_action_name();
+						var cur_action_item_name_toss = cur_action_item_obj_toss.get_action_name();
 
 						if(cur_action_item_obj.get_action_is_shy()){
-							console.log("HERE / XXX / cur_element_jq.click / 002-1 / ",cur_action_name);
 							_self.on_add_btn_click();
 						} else {
-							console.log("HERE / XXX / cur_element_jq.click / 002-2 / ",cur_action_name);
 							_self.on_edit_btn_click();	
 						}
 						
@@ -5563,7 +5564,18 @@ airborne.bootstrap.obj.__action = {
 			if(cur_action_item_obj.is_table_child_column_list_field_item()) {
 				// Table의 테두리 색상을 변경하는 처리.
 				var cur_element_collection_set = event_manager_on_mousemove.get_element_set().get_element_collection_set();
-				var cur_element_collection_container_jq = cur_element_collection_set.get_element_collection_container_jq();
+				if(cur_element_collection_set == undefined) {
+					console.log("!Error! / add_mousemove_callback_set / cur_element_collection_set == undefined");
+					return;
+				}
+
+				var cur_table_element_collection_set = cur_element_collection_set.ecs_get_parent_element_collection_set();
+				if(cur_table_element_collection_set == undefined) {
+					console.log("!Error! / add_mousemove_callback_set / cur_table_element_collection_set == undefined");
+					return;
+				}
+
+				var cur_element_collection_container_jq = cur_table_element_collection_set.get_element_collection_container_jq();
 
 				var is_hover_element_set = _obj.is_hover(mousemove_event, cur_element_collection_container_jq);
 
@@ -5581,7 +5593,7 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 					var cur_parent_action_object_add_on_event_manager = cur_parent_action_object_add_on.get_event_manager();
-					
+
 					if(is_hover_element_set) {
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
 
