@@ -122,22 +122,16 @@ airborne.bootstrap.obj.__action = {
 	,is_valid_action_item_obj:function(action_item_obj){
 
 		if(action_item_obj == undefined) {
-			console.log("HERE / is_valid_action_obj / 001");
 			return false;
 		} else if(this.is_not_valid_action_obj(action_item_obj)) {
-			console.log("HERE / is_valid_action_obj / 002");
 			return false;
 		} else if(action_item_obj.get_action_item_type == undefined) {
-			console.log("HERE / is_valid_action_obj / 003");
 			return false;
 		} else if(_v.is_not_unsigned_number(action_item_obj.get_action_item_type())) {
-			console.log("HERE / is_valid_action_obj / 004");
 			return false;
 		} else if(action_item_obj.get_action_item_type_name == undefined) {
-			console.log("HERE / is_valid_action_obj / 005");
 			return false;
 		} else if(_v.is_not_valid_str(action_item_obj.get_action_item_type_name())) {
-			console.log("HERE / is_valid_action_obj / 006");
 			return false;
 		}
 
@@ -1644,7 +1638,27 @@ airborne.bootstrap.obj.__action = {
 			,get_element_border_color:function(){
 				return this.element_border_color;	
 			}
-
+			/*
+			// wonder.jung11
+			// @ Public
+			// @ Scope : Event Manager
+			// @ Desc : element border top color
+			,set_element_border_top_color:function(element_border_top_color){
+				this.element_jq.css("border-top", "5px solid " + element_border_top_color);
+			}
+			,reset_element_border_top_color:function(){
+				this.element_jq.css("border-top", "1px solid " + this.get_element_border_color());	
+			}
+			// @ Public
+			// @ Scope : Event Manager
+			// @ Desc : element border bottom color
+			,set_element_border_bottom_color:function(element_border_bottom_color){
+				this.element_jq.css("border-bottom", "5px solid " + element_border_bottom_color);
+			}
+			,reset_element_border_bottom_color:function(){
+				this.element_jq.css("border-bottom", "1px solid " + this.get_element_border_color());		
+			}
+			*/
 			,element_container_jq:null
 			,set_element_container_jq:function(element_container_jq){
 				if(_v.isNotJQueryObj(element_container_jq)){
@@ -2532,11 +2546,6 @@ airborne.bootstrap.obj.__action = {
 					console.log("call_delegate_save_n_reload / Need to implement!");
 
 				}
-				// cur_action_item_obj.set_event_manager(this);
-
-				// REMOVE ME
-				// var cur_outcome_obj = _action.get_outcome_obj(cur_element_id, cur_element_key, cur_element_value, cur_event_type, cur_element_prop_map);
-				// cur_delegate_save_n_reload._func.apply(cur_delegate_save_n_reload._scope,[cur_outcome_obj]);
 
 				var cur_outcome_obj = 
 				_action.get_outcome_obj(
@@ -2607,9 +2616,6 @@ airborne.bootstrap.obj.__action = {
 					console.log("Add select option");
 
 				}
-
-				// REMOVE ME
-				// cur_action_item_obj.set_event_manager(this);
 
 				var cur_outcome_obj = 
 				_action.get_outcome_obj(
@@ -3555,24 +3561,6 @@ airborne.bootstrap.obj.__action = {
 			,get_element_set:function(){
 				return this.element_set;
 			}
-			// REMOVE ME
-			// @ Public
-			// @ Scopd 		: Action Obj
-			// @ Desc 		: select box에 들어갈 option list 정보를 리턴하는 delegate 객체입니다. 인자로 이벤트가 발생한 event manager를 넣어줍니다.
-			/*
-			,delegate_fetch_select_list:null
-			,set_delegate_fetch_select_list:function() {
-				if(_obj.isNotValidDelegate(delegate_fetch_select_list)){
-					console.log("!Error! / set_delegate_fetch_select_list / _obj.isNotValidDelegate(delegate_fetch_select_list)");
-					return;
-				}
-				this.delegate_fetch_select_list = delegate_fetch_select_list;
-			}
-			,get_delegate_fetch_select_list:function() {
-
-				return this.delegate_fetch_select_list;
-			}
-			*/
 			,delegate_add_searchable_element:null
 			,set_delegate_add_searchable_element:function(delegate_add_searchable_element){
 				if(_obj.isNotValidDelegate(delegate_add_searchable_element)){
@@ -3584,32 +3572,6 @@ airborne.bootstrap.obj.__action = {
 			,get_delegate_add_searchable_element:function(){
 				return this.delegate_add_searchable_element;
 			}
-			// REMOVE ME
-			/*
-			,delegate_fetch_combo_box_list_data:null
-			,set_delegate_fetch_combo_box_list_data:function(delegate_fetch_combo_box_list_data){
-				if(_obj.isNotValidDelegate(delegate_fetch_combo_box_list_data)){
-					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_delegate_fetch_combo_box_list_data / _obj.isNotValidDelegate(delegate_fetch_combo_box_list_data)");
-					return;
-				}
-				this.delegate_fetch_combo_box_list_data = delegate_fetch_combo_box_list_data;
-			}
-			,get_delegate_fetch_combo_box_list_data:function(delegate_fetch_combo_box_list_data){
-				return this.delegate_fetch_combo_box_list_data;
-			}
-			,delegate_fetch_searchable_element_list:null
-			,set_delegate_fetch_searchable_element_list:function(delegate_fetch_searchable_element_list){
-				if(_obj.isNotValidDelegate(delegate_fetch_searchable_element_list)){
-					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_delegate_fetch_searchable_element_list / _obj.isNotValidDelegate(delegate_fetch_searchable_element_list)");
-					return;
-				}
-				this.delegate_fetch_searchable_element_list = delegate_fetch_searchable_element_list;
-			}
-			,get_delegate_fetch_searchable_element_list:function(){
-				return this.delegate_fetch_searchable_element_list;
-			}
-
-			*/
 			,delegate_callback_after_landing_element:null
 			,set_delegate_callback_after_landing_element:function(delegate_callback_after_landing_element){
 				if(_obj.isNotValidDelegate(delegate_callback_after_landing_element)){
@@ -4322,9 +4284,13 @@ airborne.bootstrap.obj.__action = {
 				}
 				var cur_element_type = cur_action_item_obj.get_element_type();
 
+				var cur_action_name = this.get_action_item_obj().get_action_name();
+
 				var cur_element_jq = this.get_element_jq();
 				if(cur_element_jq != undefined) {
 					cur_element_jq.click(function(e){
+
+						console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
 
 						e.stopPropagation();
 						if(_self.is_lock()) return;
@@ -4335,9 +4301,13 @@ airborne.bootstrap.obj.__action = {
 							return;
 						}
 
+						console.log("HERE / XXX / cur_element_jq.click / 002 / ",cur_action_name);
+
 						if(cur_action_item_obj.get_action_is_shy()){
+							console.log("HERE / XXX / cur_element_jq.click / 002-1 / ",cur_action_name);
 							_self.on_add_btn_click();
 						} else {
+							console.log("HERE / XXX / cur_element_jq.click / 002-2 / ",cur_action_name);
 							_self.on_edit_btn_click();	
 						}
 						
@@ -5086,9 +5056,16 @@ airborne.bootstrap.obj.__action = {
 
 				// 입력 형식이 2가지로 나뉘어 처리됩니다.
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+
+					var cur_table_element_collection_set = this.get_element_set().get_element_collection_set().ecs_get_parent_element_collection_set();
+					if(cur_table_element_collection_set == undefined) {
+						console.log("!Error! / on_add_btn_click / cur_table_element_collection_set == undefined");
+						return;
+					}
+
 					// 1. TABLE FIELD ACTION ITEM
 					// row에 여러패턴이 섞여 있으므로 기본값을 가지는 열을 추가해야 합니다.
-					_action_table.add_editable_table_row(cur_action_item_obj);
+					_action_table.add_editable_table_row(cur_action_item_obj, cur_table_element_collection_set);
 					this.release();
 
 				} else {
@@ -5279,8 +5256,6 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 
-					// REMOVE ME
-					//is_shy = cur_element_set.get_meta_info().get_is_shy();
 					is_shy = cur_action_item_obj.get_action_is_shy();
 				}
 				if(is_shy === true){
@@ -5316,8 +5291,6 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 
-					// REMOVE ME
-					//if(next_element_set.get_meta_info().get_is_shy()) {
 					if(next_action_item_obj.get_action_is_shy()) {
 						shy_element_set = next_element_set;
 						break;
@@ -5575,16 +5548,6 @@ airborne.bootstrap.obj.__action = {
 				return;	
 			}
 
-			// REMOVE ME
-			/*
-			if(mousemove_event.left_window === true) {
-				// 윈도우를 나간 경우의 처리.
-				console.log("윈도우를 나간 경우의 처리.");
-				event_manager_on_mousemove.show_view_mode();
-				return;
-			}
-			*/
-
 			var element_jq_on_mousemove = event_manager_on_mousemove.get_element_jq();
 			var is_hover = _obj.is_hover(mousemove_event, element_jq_on_mousemove);
 
@@ -5650,37 +5613,6 @@ airborne.bootstrap.obj.__action = {
 
 			} // end outer if
 
-			/*
-			if(id_for_test.indexOf("table_todaysrole") > -1){
-			//if(event_manager_on_mousemove.get_id() == "editable_list_row_input_12"){
-				console.log("here! / ",title_for_test);
-				console.log("was_hover : " + was_hover + "\tis_hover : " + is_hover);
-
-				// 
-				var x_pos = mousemove_event.pageX;
-				var y_pos = mousemove_event.pageY;
-				var target_position = element_jq_on_mousemove.offset();
-				var target_width = element_jq_on_mousemove.outerWidth();
-				var target_height = element_jq_on_mousemove.outerHeight();
-
-				var is_valid_y_pos = ((target_position.top < y_pos) && (y_pos < (target_position.top + target_height)))?true:false;
-				var is_valid_x_pos = ((target_position.left < x_pos) && (x_pos < (target_position.left + target_width)))?true:false;
-
-				var output = 
-				"x_pos : <x_pos>\ty_pos : <y_pos>\ttop : <top>\tleft : <left>\twidth : <width>\theight : <height>\theight : <height>\tis_valid_y_pos : <is_valid_y_pos>\tis_valid_x_pos : <is_valid_x_pos>"
-				.replace(/\<x_pos\>/gi, x_pos)
-				.replace(/\<y_pos\>/gi, y_pos)
-				.replace(/\<top\>/gi, target_position.top)
-				.replace(/\<left\>/gi, target_position.left)
-				.replace(/\<width\>/gi, target_width)
-				.replace(/\<height\>/gi, target_height)
-				.replace(/\<is_valid_y_pos\>/gi, is_valid_y_pos)
-				.replace(/\<is_valid_x_pos\>/gi, is_valid_x_pos)
-				;
-				console.log(output);
-			}
-			*/
-
 			if(was_hover === is_hover) return;
 
 			// 검사중인 엘리먼트가 shy mode인지 확인합니다.
@@ -5706,11 +5638,39 @@ airborne.bootstrap.obj.__action = {
 			var has_sibling = false;
 			var has_shy_sibling = false;
 			if(cur_parent_element_set != undefined) {
-				cur_sibling_element_set_arr = cur_parent_element_set.get_children_element_set_arr();
-				cur_sibling_shy_element_set_arr = cur_parent_element_set.get_child_shy_element_set_arr();
 
-				has_sibling = (_v.is_valid_array(cur_sibling_element_set_arr))?true:false;
-				has_shy_sibling = (_v.is_valid_array(cur_sibling_shy_element_set_arr))?true:false;
+
+
+				// wonder.jung11
+
+				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+					// 1. TABLE	- shy 모드를 사용하지 않습니다.
+
+					console.log("HERE / cur_action_item_obj ::: ",cur_action_item_obj);
+					console.log("HERE / cur_parent_element_set ::: ",cur_parent_element_set);
+
+					has_sibling = false;
+					has_shy_sibling = false;
+
+				} else if(cur_action_item_obj.get_parent().is_list()){
+					// 2. LIST	
+					cur_sibling_element_set_arr = cur_parent_element_set.get_children_element_set_arr();
+					cur_sibling_shy_element_set_arr = cur_parent_element_set.get_child_shy_element_set_arr();
+
+					has_sibling = (_v.is_valid_array(cur_sibling_element_set_arr))?true:false;
+					has_shy_sibling = (_v.is_valid_array(cur_sibling_shy_element_set_arr))?true:false;
+
+				} else {
+					console.log("!Error! / add_mousemove_callback_set / Unknown!");
+				}
+
+
+
+				
+
+				
+
+
 			}
 
 			// mouse over를 기록합니다.
@@ -5843,7 +5803,7 @@ airborne.bootstrap.obj.__action = {
 					event_manager_on_mousemove.on_mouse_over();
 				}
 
-				if(cur_parent_element_set != null){
+				if(cur_parent_element_set != undefined){
 					consoler.say("mmc / 4-2 / ",title_for_test);
 					consoler.say("mmc / 4-2 / 부모 객체는 mouse leave(view mode) 상태가 됩니다.");
 
@@ -5860,7 +5820,7 @@ airborne.bootstrap.obj.__action = {
 
 				event_manager_on_mousemove.on_mouse_over();
 				
-				if(cur_parent_element_set != null){
+				if(cur_parent_element_set != undefined && !cur_action_item_obj.is_table_child_column_list_field_item()){
 
 					consoler.say("mmc / 5-1 / ",title_for_test);
 					consoler.say("mmc / 5-1 / 부모 객체는 mouse leave(view mode) 상태가 됩니다.");
@@ -6371,17 +6331,9 @@ airborne.bootstrap.obj.__action = {
 
 					new_element_set.get_event_manager().show_btn_eject_collection_element_jq()
 
-					// REMOVE ME
-					// var cur_element_collection_set = new_element_set.get_element_collection_set();
-					// if(cur_element_collection_set != undefined) {
-					// 	cur_element_collection_set.ecs_set_btn_collection_eject_jq(new_element_set.get_event_manager().get_btn_eject_collection_element_jq());	
-					// }
-					//cur_element_collection_set_id
 					consoler.say("ecs_aes / 2-1 / ",cur_element_id);
 					consoler.say("ecs_aes / 2-1 / 처음 추가된 엘리먼트라면 테두리를 고쳐줍니다");
 
-					// REMOVE ME
-					// consoler.say("ecs_aes / 2-1 / cur_element_collection_set_id : ",cur_element_collection_set_id);
 					consoler.say("ecs_aes / 2-1 / this.element_set_arr : ",this.element_set_arr);
 
 					new_element_set.get_event_manager().shape_sibling_element();
@@ -6420,8 +6372,6 @@ airborne.bootstrap.obj.__action = {
 							return;
 						}
 
-						// REMOVE ME
-						//if(cur_element_set.get_meta_info().get_list_row_id() == prev_element_set.get_meta_info().get_list_row_id()){
 						if(cur_action_item_obj.get_coordinate() == prev_action_item_obj.get_coordinate()){
 
 							consoler.say("ecs_aes / 5 / ",cur_element_id);
@@ -6663,8 +6613,6 @@ airborne.bootstrap.obj.__action = {
 						// 입력 그룹을 제외한 엘리먼트 셋을 돌려줍니다.
 						// TYPE으로 정의하도록 수정해야 합니다.
 
-						// REMOVE ME
-						//if(!cur_element_set.get_meta_info().get_is_shy()) {
 						if(!cur_action_item_obj.get_action_is_shy()) {
 							masked_element_set_arr.push(cur_element_set);
 						}
@@ -6717,8 +6665,6 @@ airborne.bootstrap.obj.__action = {
 					}
 
 					// no shy mode
-					// REMOVE ME
-					//if(cur_element_set.get_meta_info().get_is_shy()) {
 					if(cur_action_item_obj.get_action_is_shy()) {	
 						continue;
 					}
@@ -6757,19 +6703,38 @@ airborne.bootstrap.obj.__action = {
 				return this.parent_element_set;
 			}
 			// wonder.jung11
-			
+			// @ Desc : 이 엘리먼트 컬렉션 셋이 가지고 있는 부모 엘리먼트 컬렉션 셋을 관리합니다.
+			// @ Scope : element collection set / ecs
+			,parent_element_collection_set:undefined
+			,ecs_set_parent_element_collection_set:function(parent_element_collection_set) {
+
+				if(parent_element_collection_set == undefined){
+					console.log("!Error! / ecs_set_parent_element_collection_set / parent_element_collection_set == undefined");
+					return;
+				}
+
+				this.parent_element_collection_set = parent_element_collection_set;
+			}
+			,ecs_get_parent_element_collection_set:function(parent_element_collection_set) {
+				return this.parent_element_collection_set;
+			}
 			// @ Desc : 이 엘리먼트 컬렉션 셋이 가지고 있는 자식 엘리먼트 컬렉션 셋들을 의미합니다. 
 			// @ Scope : element collection set / ecs
 			// @ Warning : 엘리먼트 셋을 받지 않습니다.
 			,children_element_collection_set_arr:[]
 			,ecs_push_child_element_collection_set:function(child_element_collection_set){
 
-				if(child_element_collection_set == undefined) return;
+				if(child_element_collection_set == undefined) {
+					console.log("!Error! / ecs_push_child_element_collection_set / child_element_collection_set == undefined");
+					return;	
+				} 
 
 				var cur_ecs_id = child_element_collection_set.get_element_collection_id();
 				console.log("ecs_push_child_element_collection_set / ",cur_ecs_id );
 
 				this.children_element_collection_set_arr.push(child_element_collection_set);
+
+				child_element_collection_set.ecs_set_parent_element_collection_set(this);
 			}
 			,get_children_element_collection_set_arr:function(){
 				return this.children_element_collection_set_arr;
@@ -6782,6 +6747,24 @@ airborne.bootstrap.obj.__action = {
 			,get_table_row_jq:function() {
 				return this.table_row_jq;
 			}
+			// 테이블일 경우, mousemove에 따라 guide row를 나타내는 tr element의 참조
+			,table_guide_row_jq:undefined
+			,set_table_guide_row_jq:function(table_guide_row_jq) {
+				this.table_guide_row_jq = table_guide_row_jq;
+			}
+			,remove_table_guide_row_jq:function() {
+				if(this.table_guide_row_jq == undefined) {
+					return;
+				}
+
+				this.table_guide_row_jq.remove();
+				this.table_guide_row_jq = undefined;
+			}
+			,get_table_guide_row_jq:function() {
+				return this.table_guide_row_jq;
+			}
+			// REMOVE ME
+			/*
 			,is_outside:undefined
 			,set_is_outside:function(is_outside) {
 				this.is_outside = is_outside;
@@ -6803,6 +6786,7 @@ airborne.bootstrap.obj.__action = {
 			,get_is_hover_bottom:function() {
 				return this.is_hover_bottom;
 			}
+			*/
 			// 리스트 혹은 테이블 전체의 이벤트를 받는 버튼
 			,btn_collection_eject_jq:undefined
 			/*
@@ -7009,101 +6993,97 @@ airborne.bootstrap.obj.__action = {
 				// @ Public
 				// @ Scope 	: Jump Spot Manager
 				// @ Desc 	: 테이블의 row에 mouse over 여부를 확인. focus mode, view mode로 전환해준다. 이벤트 상태 결과를 객체로 반환한다. 
-				, show_mouse_over_table_row_element_top_n_bottom:function(mouse_event, target_element_collection_set) {
+				, show_mouse_over_table_row_element_top_n_bottom:function(mouse_event, event_manager_on_mousemove, table_action_obj) {
 
 					if(mouse_event == undefined) {
 						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / mouse_event == undefined");
 						return;
 					}
-					if(target_element_collection_set == undefined) {
-						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / target_element_collection_set == undefined");
+					if(event_manager_on_mousemove == undefined) {
+						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / event_manager_on_mousemove == undefined");
+						return;
+					}
+					if(_action.is_not_valid_action_obj(table_action_obj)) {
+						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / _action.is_not_valid_action_obj(table_action_obj)");
 						return;
 					}
 
-					var cur_table_row_jq = target_element_collection_set.get_table_row_jq();
-
-					// console.log("show_mouse_over_table_row_element_top_n_bottom / target_element_collection_set ::: ",target_element_collection_set);
-
-					
-					// wonder.jung11
-
-					// 충돌 검사를 진행한다.
-					// 충돌했다면 포커싱 등의 처리.
-					var is_outside = _obj.is_outside(mouse_event, cur_table_row_jq);
-					var is_hover_top = _obj.is_hover_top(mouse_event, cur_table_row_jq);
-					var is_hover_bottom = _obj.is_hover_bottom(mouse_event, cur_table_row_jq);
-
-					// 충돌 --> 충돌하지 않음 혹은 충돌하지 않음 --> 충돌 로 상태 변경 시
-					var has_changed = false;
-					if(	target_element_collection_set.get_is_hover_top() != is_hover_top ){
-						target_element_collection_set.set_is_hover_top(is_hover_top);
-						has_changed = true;
-					} else if( target_element_collection_set.get_is_hover_bottom() != is_hover_bottom){
-						target_element_collection_set.set_is_hover_bottom(is_hover_bottom);
-						has_changed = true;
-					} else if( is_outside ) {
-						target_element_collection_set.set_is_hover_top(false);
-						target_element_collection_set.set_is_hover_bottom(false);
-						has_changed = true;
-					}
-					if(!has_changed){
-						// 변경된 내역이 없다면 중단.
-						return {is_hover_top:is_hover_top,is_hover_bottom:is_hover_bottom,has_changed:has_changed};
+					var hovering_table_field_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
+					if(_action.is_not_valid_action_item_obj(hovering_table_field_action_item_obj)) {
+						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / _action.is_not_valid_action_item_obj(hovering_table_field_action_item_obj)");
+						return;
 					}
 
-					var cur_element_set_arr = target_element_collection_set.get_element_set_arr();
-					var cur_sibling_element_set_arr = [];
-					var cur_action_item_idx = -1;
-					var cur_table_action_obj = undefined;
-					var cur_action_item_obj = undefined;
-					for(var idx = 0; idx < cur_element_set_arr.length; idx++) {
+					var hovering_table_row_jq = event_manager_on_mousemove.get_element_set().get_element_collection_set().get_table_row_jq();
+					if(hovering_table_row_jq == undefined) {
+						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / hovering_table_row_jq == undefined");
+						return;
+					}
 
-						var cur_element_set = cur_element_set_arr[idx];
-						var cur_element_jq = cur_element_set.get_event_manager().get_element_jq();
+					var first_table_column_list_obj = table_action_obj.get_first_child_action_obj();
+					if(_action.is_not_valid_action_obj(first_table_column_list_obj)) {
+						console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / _action.is_not_valid_action_obj(first_table_column_list_obj)");
+						return;
+					}
 
-						if( _obj.is_outside(mouse_event, cur_element_jq) ) {
+					var idx_changed = -1;
+					var mouse_move_checksum = 
+					{
+						is_hover_top:false
+						,is_hover_bottom:false
+						,is_outside:false
+						,has_changed:false
+						,action_item_obj_mouse_over:undefined
+					};
+					for(var idx = 0; idx < first_table_column_list_obj.get_children_cnt();idx++) {
+
+						var table_column_field_obj = first_table_column_list_obj.get_child(idx);
+						if(_action.is_not_valid_action_item_obj(table_column_field_obj)) {
+							console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / _action.is_not_valid_action_item_obj(table_column_field_obj)");
+							return;
+						}
+
+						// 타이틀 표시 열은 제외합니다.
+						if(table_column_field_obj.is_item_title_only_fixed()) {
 							continue;
 						}
 
-						var cur_event_manager = cur_element_set.get_event_manager();
-						var cur_action_item_obj = cur_event_manager.get_action_item_obj();
-						cur_action_item_idx = cur_action_item_obj.get_idx();
-						cur_table_action_obj = cur_action_item_obj.get_parent().get_parent();
+						// 현재 열은 제외합니다.
+						if(hovering_table_field_action_item_obj.get_idx() === table_column_field_obj.get_idx()) {
+							continue;
+						}
 
-						break;
+						// 
+						var cur_element_collection_set = table_column_field_obj.get_event_manager().get_element_set().get_element_collection_set();
+						if(cur_element_collection_set == undefined) {
+							console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / cur_element_collection_set == undefined");
+							return;
+						}
 
-						// REMOVE ME
-						/*
+						var cur_table_row_jq = cur_element_collection_set.get_table_row_jq();
+						if(cur_table_row_jq == undefined) {
+							console.log("!Error! / show_mouse_over_table_row_element_top_n_bottom / cur_table_row_jq == undefined");
+							return;
+						}
+						
+						// 충돌 검사를 진행한다.
+						var is_outside = _obj.is_outside(mouse_event, cur_table_row_jq);
+						var is_hover_top = _obj.is_hover_top(mouse_event, cur_table_row_jq);
+						var is_hover_bottom = _obj.is_hover_bottom(mouse_event, cur_table_row_jq);
 
-						console.log("cur_coordinate ::: ",cur_coordinate);
+						mouse_move_checksum.is_outside = is_outside;
+						mouse_move_checksum.is_hover_top = is_hover_top;
+						mouse_move_checksum.is_hover_bottom = is_hover_bottom;
 
-						// 변경되었다면 엘리먼트 상태를 다르게 나타내어 준다.
-						if((target_element_collection_set.get_is_hover_top() || target_element_collection_set.get_is_hover_bottom())){
-							// show focusing
-							console.log("show focusing");
-							cur_event_manager.show_focusing_mode();
-						} else if(!target_element_collection_set.get_is_hover_top() && !target_element_collection_set.get_is_hover_bottom()){
-							// hide focusing, show view mode
-							console.log("hide focusing, show view mode");
-							cur_event_manager.show_view_mode();
-
-						} // end if
-						*/
+						if(is_hover_top || is_hover_bottom) {
+							mouse_move_checksum.action_item_obj_mouse_over = table_column_field_obj;
+							return mouse_move_checksum;
+						}
 
 					} // end for
 
-					// console.log("cur_sibling_element_set_arr ::: ",cur_sibling_element_set_arr);
-					// console.log("cur_table_action_obj ::: ",cur_table_action_obj);
+					return mouse_move_checksum;
 
-					if(target_element_collection_set.get_is_hover_top()) {
-						console.log("show dummy on top / " + cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate());
-					} else if(target_element_collection_set.get_is_hover_bottom()) {
-						console.log("show dummy on bottom / " + cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate());
-					} else {
-						// console.log("show dummy outside");
-					}
-
-					return {is_outside:is_outside,is_hover_top:is_hover_top,is_hover_bottom:is_hover_bottom,has_changed:has_changed};				
 				}	
 				, land_element:function(cur_src_jq, cur_clone_jq, eject_btn_jq, cur_mousemove_callback_set, cur_element_set_on_mouse_over, delegate_on_completed, delegate_on_completed_param_event_manager, hovering_element_collection_set) {
 
@@ -7226,8 +7206,6 @@ airborne.bootstrap.obj.__action = {
 				});
 				cur_btn_collection_eject_jq.click(function(event_click){
 
-					console.log("HERE / 001");
-
 					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
 					if(cur_event_hierarchy_manager.is_lock()) {
 						return;
@@ -7247,7 +7225,6 @@ airborne.bootstrap.obj.__action = {
 					_self_eject_btn_jq.hide();
 
 					// @ element collection settings
-					console.log("cur_element_collection_container_jq : ",cur_element_collection_container_jq);
 					var clone_element_collection_container_jq = jsm.boost_clone_element_jq(cur_element_collection_container_jq);
 
 					// 마우스 커서의 위치를 따라서 창이 움직입니다.
@@ -7420,6 +7397,11 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / get_action_item_obj_mouse_over / target_event_manager == undefined");
 					return;
 				}
+				var target_element_container_jq = target_event_manager.get_element_container_jq();
+				if(target_element_container_jq == undefined) {
+					console.log("!Error! / get_action_item_obj_mouse_over / target_element_container_jq == undefined");
+					return;
+				}
 
 				// 마우스 이둥시, 엘리먼트에 대한 충돌 검사를 진행합니다.
 				// 충돌 했을 경우, 충돌 엘리먼트 셋 배열에 추가합니다.
@@ -7431,33 +7413,42 @@ airborne.bootstrap.obj.__action = {
 				// 충돌한 모든 열의 엘리먼트 셋을 focusing mode로 바꿉니다.
 				// 충돌하지 않은 모든 엘리먼트 셋을 view mode로 바꿉니다.
 				var target_action_item_obj = target_event_manager.get_action_item_obj();
-				var target_element_container_jq = target_event_manager.get_element_container_jq();
+				if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
+					console.log("!Error! / get_action_item_obj_mouse_over / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+					return;
+				}
+				
 
 				var action_item_row_on_mouse_over_arr = [];
-				var action_item_obj_mouse_over = undefined;
+
 				if(target_action_item_obj.is_table_child_column_list_field_item()) {
 					
-					var cur_parent_action_obj = target_action_item_obj.get_parent();
-					var cur_parent_sibling_action_obj_list = cur_parent_action_obj.get_sibling_action_obj_list();
-					// initialize.
-					action_item_row_on_mouse_over_arr = [];
+					var table_action_obj = target_action_item_obj.get_parent().get_parent();
+					if(_action.is_not_valid_action_obj(table_action_obj)) {
+						console.log("!Error! / get_action_item_obj_mouse_over / _action.is_not_valid_action_obj(table_action_obj)");
+						return;
+					}
 
-					for (var idx = 0; idx < cur_parent_sibling_action_obj_list.length; idx++) {
-						var cur_parent_action_obj = cur_parent_sibling_action_obj_list[idx];
+					for (var idx = 0; idx < table_action_obj.get_children_cnt(); idx++) {
+						var cur_table_column_list_action_obj = table_action_obj.get_child(idx);
+						if(_action.is_not_valid_action_obj(cur_table_column_list_action_obj)) {
+							console.log("!Error! / get_action_item_obj_mouse_over / _action.is_not_valid_action_obj(cur_table_column_list_action_obj)");
+							return;
+						}
 
-						var children_action_item_obj_list = cur_parent_action_obj.get_children();
-
-						for (var inner_idx = 0; inner_idx < children_action_item_obj_list.length; inner_idx++) {
-
-							// table의 모든 action item을 조회합니다.
-							var cur_child_action_item_obj = children_action_item_obj_list[inner_idx];
+						for (var inner_idx = 0; inner_idx < cur_table_column_list_action_obj.get_children_cnt(); inner_idx++) {
+							var cur_table_field_action_item_obj = cur_table_column_list_action_obj.get_child(inner_idx);
+							if(_action.is_not_valid_action_item_obj(cur_table_field_action_item_obj)) {
+								console.log("!Error! / get_action_item_obj_mouse_over / _action.is_not_valid_action_item_obj(cur_table_field_action_item_obj)");
+								return;
+							} // end if
 
 							// 제목 표시 열은 제거합니다.
-							if(cur_child_action_item_obj.is_item_title_only_fixed()) {
+							if(cur_table_field_action_item_obj.is_item_title_only_fixed()) {
 								continue;
 							}
 
-							var cur_event_manager = cur_child_action_item_obj.get_event_manager();
+							var cur_event_manager = cur_table_field_action_item_obj.get_event_manager();
 							var cur_element_set = cur_event_manager.get_element_set();
 							var cur_element_container_jq = cur_event_manager.get_element_container_jq();
 
@@ -7466,13 +7457,12 @@ airborne.bootstrap.obj.__action = {
 								continue;
 							}
 
-
 							// 충돌 검사를 진행한다. 테이블인 경우 엘리먼트가 속한 row가 충돌검사의 기준이 됨.
 							var is_hover = _obj.is_hover(mouse_event, cur_element_container_jq);
 
 							// 충돌한 엘리먼트는 무조건 반환.
 							if(cur_element_set.get_is_hover()) {
-								action_item_row_on_mouse_over_arr.push(cur_child_action_item_obj);	
+								action_item_row_on_mouse_over_arr.push(cur_table_field_action_item_obj);	
 							}
 
 							// 충돌 --> 충돌 혹은 충돌하지 않음 --> 충돌하지 않음 로 상태 변경 없다면 종료.
@@ -7490,9 +7480,10 @@ airborne.bootstrap.obj.__action = {
 								cur_event_manager.show_view_mode();
 							}
 
+
 						} // end inner for
 
-					} // end outer for
+ 					} // end outer for
 
 				} // end if
 
@@ -7620,8 +7611,6 @@ airborne.bootstrap.obj.__action = {
 						}
 
 						// shy mode 제거.
-						// REMOVE ME
-						//if(cur_element_set.get_meta_info().get_is_shy()) continue;
 						if(cur_action_item_obj.get_action_is_shy()) continue;
 
 						// 1. 자신의 element container jq 가져오기.
@@ -7698,9 +7687,6 @@ airborne.bootstrap.obj.__action = {
 	// 엘리먼트들이 모여 구성된 리스트나 테이블을 한꺼번에 제어하는 것은 element_collection_set을 이용한다.	
 	,make_element_set:function(action_item_obj, event_manager){
 
-		// REMOVE ME params
-		// meta_info --> action item object
-
 		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
 			console.log("!Error! / make_element_set / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;
@@ -7715,13 +7701,6 @@ airborne.bootstrap.obj.__action = {
 			,get_action_item_obj:function() {
 				return this.action_item_obj;
 			}
-			// REMOVE ME
-			/*
-			meta_info:meta_info
-			,get_meta_info:function(){
-				return this.meta_info;
-			}
-			*/
 			,event_manager:event_manager
 			,get_event_manager:function(){
 				return this.event_manager;
@@ -7797,9 +7776,6 @@ airborne.bootstrap.obj.__action = {
 								var cur_element_set = cur_element_set_arr[charlie_idx];
 
 								has_shy_child = cur_element_set.get_action_item_obj().get_action_is_shy();
-
-								// REMOVE ME
-								// has_shy_child = cur_element_set.get_meta_info().get_is_shy();
 
 								if(has_shy_child) break;
 							}
@@ -7949,11 +7925,9 @@ airborne.bootstrap.obj.__action = {
 
 				return child_shy_element_set_arr;
 			}
-			/*
-				@ private
-				@ Scope : element set
-				@ Desc : children collection set - 리스트의 열, 테이블의 필드가 자식 리스트, 자식 테이블을 포함하는 경우. event manager에게 전해줌.
-			*/
+			// @ private
+			// @ Scope : element set
+			// @ Desc : children collection set - 리스트의 열, 테이블의 필드가 자식 리스트, 자식 테이블을 포함하는 경우. event manager에게 전해줌.
 			,es_add_child_element_collection_set:function(child_element_collection_set){
 				var cur_event_manager = this.get_event_manager();
 				if(cur_event_manager == undefined) {
@@ -7965,10 +7939,11 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				// REMOVE ME
-				// var cur_child_ecs_id = child_element_collection_set.get_element_collection_id();
 				cur_event_manager.em_push_child_element_collection_set(child_element_collection_set);
 			}
+			// @ private
+			// @ Scope : element set
+			// @ Desc : 
 			,get_children_element_collection_set_arr:function(){
 				var cur_event_manager = this.get_event_manager();
 				if(cur_event_manager == undefined) {
@@ -8035,6 +8010,14 @@ airborne.bootstrap.obj.__action = {
 			}
 			,get_is_hover_bottom:function(){
 				return this.is_hover_bottom;
+			}
+			,is_outside:false
+			,set_is_outside:function(is_outside){
+				if(is_outside == null || (is_outside != true && is_outside != false)) return;
+				return this.is_outside = is_outside;
+			}
+			,get_is_outside:function(){
+				return this.is_outside;
 			}
 			,refresh_is_hover:function(){
 				this.set_is_hover(false);
