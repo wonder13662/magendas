@@ -1638,27 +1638,6 @@ airborne.bootstrap.obj.__action = {
 			,get_element_border_color:function(){
 				return this.element_border_color;	
 			}
-			/*
-			// wonder.jung11
-			// @ Public
-			// @ Scope : Event Manager
-			// @ Desc : element border top color
-			,set_element_border_top_color:function(element_border_top_color){
-				this.element_jq.css("border-top", "5px solid " + element_border_top_color);
-			}
-			,reset_element_border_top_color:function(){
-				this.element_jq.css("border-top", "1px solid " + this.get_element_border_color());	
-			}
-			// @ Public
-			// @ Scope : Event Manager
-			// @ Desc : element border bottom color
-			,set_element_border_bottom_color:function(element_border_bottom_color){
-				this.element_jq.css("border-bottom", "5px solid " + element_border_bottom_color);
-			}
-			,reset_element_border_bottom_color:function(){
-				this.element_jq.css("border-bottom", "1px solid " + this.get_element_border_color());		
-			}
-			*/
 			,element_container_jq:null
 			,set_element_container_jq:function(element_container_jq){
 				if(_v.isNotJQueryObj(element_container_jq)){
@@ -3638,6 +3617,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				this.is_view_mode = true;
+				this.is_focusing_mode = false;
 			}
 			,show_parent_view_mode:function(){
 				var cur_element_set = this.get_element_set();
@@ -3685,9 +3665,16 @@ airborne.bootstrap.obj.__action = {
 				this.set_colors_reverse();
 
 				this.is_view_mode = false;
+				this.is_focusing_mode = false;
+			}
+			,is_focusing_mode:false
+			,get_is_focusing_mode:function() {
+				return this.is_focusing_mode;
 			}
 			// @ Desc : 제목을 포커싱(색상 반전)하여 보여줍니다. 버튼은 모두 숨깁니다.
 			,show_focusing_mode:function(){
+
+				if(this.is_focusing_mode) return;
 
 				// DEBUG
 				// var cur_title = this.get_title_jq_value();
@@ -3712,6 +3699,7 @@ airborne.bootstrap.obj.__action = {
 				this.set_colors_reverse();
 
 				this.is_view_mode = false;
+				this.is_focusing_mode = true;
 			}
 			,show_input_mode:function(event_mode){
 
@@ -3750,6 +3738,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				this.is_view_mode = false;
+				this.is_focusing_mode = false;
 			}
 			,show_input_mode_shy_table:function(){
 				var _v = airborne.validator;
@@ -5651,10 +5640,6 @@ airborne.bootstrap.obj.__action = {
 			var has_shy_sibling = false;
 			if(cur_parent_element_set != undefined) {
 
-
-
-				// wonder.jung11
-
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
 					// 1. TABLE	- shy 모드를 사용하지 않습니다.
 
@@ -5675,13 +5660,6 @@ airborne.bootstrap.obj.__action = {
 				} else {
 					console.log("!Error! / add_mousemove_callback_set / Unknown!");
 				}
-
-
-
-				
-
-				
-
 
 			}
 
@@ -6714,7 +6692,6 @@ airborne.bootstrap.obj.__action = {
 			,get_parent_element_set:function(){
 				return this.parent_element_set;
 			}
-			// wonder.jung11
 			// @ Desc : 이 엘리먼트 컬렉션 셋이 가지고 있는 부모 엘리먼트 컬렉션 셋을 관리합니다.
 			// @ Scope : element collection set / ecs
 			,parent_element_collection_set:undefined
@@ -7469,29 +7446,42 @@ airborne.bootstrap.obj.__action = {
 								continue;
 							}
 
-							// 충돌 검사를 진행한다. 테이블인 경우 엘리먼트가 속한 row가 충돌검사의 기준이 됨.
-							var is_hover = _obj.is_hover(mouse_event, cur_element_container_jq);
+							// 충돌 위치가 위, 아래 인지 확인한다.
+							var is_hover_top = _obj.is_hover_top(mouse_event, cur_element_container_jq);
+							var is_hover_bottom = _obj.is_hover_bottom(mouse_event, cur_element_container_jq);
+
+							// 1. is_hover_top인 경우, 
+							// cur_table_field_action_item_obj가 
+							// target_action_item_obj의 아래에 위치하면 중단. 목적지가 원래 위치와 같기 때문.
+							var is_selected_row_under_target_row = (cur_table_field_action_item_obj.get_idx() == (target_action_item_obj.get_idx() + 1));
+							if(is_hover_top && is_selected_row_under_target_row) {
+								cur_event_manager.show_view_mode();
+								continue;
+							}
+
+							// 2. is_hover_bottom인 경우, 
+							// cur_table_field_action_item_obj가 
+							// target_action_item_obj의 위에 위치하면 중단. 목적지가 원래 위치와 같기 때문.
+							var is_selected_row_over_target_row = ((cur_table_field_action_item_obj.get_idx() + 1) == (target_action_item_obj.get_idx()));
+							if(is_hover_bottom && is_selected_row_over_target_row) {
+								cur_event_manager.show_view_mode();
+								continue;
+							}
 
 							// 충돌한 엘리먼트는 무조건 반환.
-							if(cur_element_set.get_is_hover()) {
+							if(is_hover_top || is_hover_bottom) {
 								action_item_row_on_mouse_over_arr.push(cur_table_field_action_item_obj);	
 							}
 
-							// 충돌 --> 충돌 혹은 충돌하지 않음 --> 충돌하지 않음 로 상태 변경 없다면 종료.
-							if(cur_element_set.get_is_hover() == is_hover){
-								continue;	
-							} 
-
-							// 충돌 --> 충돌하지 않음 혹은 충돌하지 않음 --> 충돌 로 상태 변경 시
-							cur_element_set.set_is_hover(is_hover);
-
 							// 충돌했다면 포커싱 등의 처리.
-							if(cur_element_set.get_is_hover()){
+							if(is_hover_top || is_hover_bottom){
 								cur_event_manager.show_focusing_mode();
-							} else {
+							} else if(!is_hover_top && !is_hover_bottom) {
 								cur_event_manager.show_view_mode();
+							} else {
+								console.log("!Error! / get_action_item_obj_mouse_over / Unknown");
+								return;
 							}
-
 
 						} // end inner for
 
@@ -7999,6 +7989,8 @@ airborne.bootstrap.obj.__action = {
 				return this.element_collection_set
 			}
 			// event management
+			// @ Public
+			// @ Scope : element set
 			,is_hover:false
 			,set_is_hover:function(is_hover){
 				if(is_hover == null || (is_hover != true && is_hover != false)) return;
@@ -8007,6 +7999,8 @@ airborne.bootstrap.obj.__action = {
 			,get_is_hover:function(){
 				return this.is_hover;
 			}
+			// @ Public
+			// @ Scope : element set
 			,is_hover_top:false
 			,set_is_hover_top:function(is_hover_top){
 				if(is_hover_top == null || (is_hover_top != true && is_hover_top != false)) return;
@@ -8015,6 +8009,8 @@ airborne.bootstrap.obj.__action = {
 			,get_is_hover_top:function(){
 				return this.is_hover_top;
 			}
+			// @ Public
+			// @ Scope : element set
 			,is_hover_bottom:false
 			,set_is_hover_bottom:function(is_hover_bottom){
 				if(is_hover_bottom == null || (is_hover_bottom != true && is_hover_bottom != false)) return;
@@ -8023,6 +8019,8 @@ airborne.bootstrap.obj.__action = {
 			,get_is_hover_bottom:function(){
 				return this.is_hover_bottom;
 			}
+			// @ Public
+			// @ Scope : element set
 			,is_outside:false
 			,set_is_outside:function(is_outside){
 				if(is_outside == null || (is_outside != true && is_outside != false)) return;

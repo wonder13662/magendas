@@ -308,6 +308,12 @@ airborne.bootstrap.obj = {
 	}
 	,is_hover_bottom:function(event_obj, target_jq){
 
+		var is_hover = this.is_hover(event_obj, target_jq);
+		var is_hover_top = this.is_hover_top(event_obj, target_jq);
+
+		return (is_hover && !is_hover_top);
+
+		/*
 		// 대상 객체 하단에 mouse over 인지 판단
 
 		var x_pos = event_obj.pageX;
@@ -320,6 +326,7 @@ airborne.bootstrap.obj = {
 		var is_valid_x_pos = ((target_position.left < x_pos) && (x_pos < (target_position.left + target_width)))?true:false;
 
 		return (is_valid_y_pos && is_valid_x_pos)?true:false;	
+		*/
 	}
 	,isOverLapping:function(target_a_ele, target_b_ele){
 
