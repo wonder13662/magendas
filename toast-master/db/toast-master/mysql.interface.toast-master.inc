@@ -8496,7 +8496,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"New Item"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 			// $is_shy=0
 			, 1
 		);
@@ -8535,7 +8535,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Welcome guests / Guest introduction"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8545,7 +8545,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Cite the mission of Toastmasters"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8555,7 +8555,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Fill Vacant functions & Share CL process"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8565,7 +8565,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Introduce Toastmaster"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8603,7 +8603,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Opening remarks ( Introduce the theme )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8613,7 +8613,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8954,7 +8954,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Explain the rules and theme"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8964,7 +8964,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"1 to 2 minutes impromptu speaking"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8974,7 +8974,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Timer‘s Report"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -8984,7 +8984,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Vote for the Best Table Topic Speaker"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:15
@@ -9026,7 +9026,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9099,7 +9099,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
@@ -9178,7 +9178,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Timer‘s Report"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9188,7 +9188,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Vote for the Best Prepared Speech Speaker"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9198,7 +9198,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			" "
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:25
@@ -9241,7 +9241,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Complete Feedback to prepared speakers"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9251,7 +9251,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			" "
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:00
@@ -9293,7 +9293,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"New Item"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 			// $is_shy=0
 			, 1
 		);
@@ -9338,7 +9338,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Introduces Evaluators"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9348,7 +9348,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Timer‘s Report & Vote"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9358,7 +9358,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Ah Counter‘s Ah tally report"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9368,7 +9368,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Grammarian‘s Report"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9378,7 +9378,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"General comments on meeting ( < 3 min )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:20
@@ -9418,7 +9418,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Present award ( < 1 min )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9428,7 +9428,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Closing remarks ( < 2 min )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
 		// 21:35
@@ -9468,7 +9468,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Club News ( What's new? )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9478,7 +9478,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Announcement & Role Sign-up for future meeting"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9488,7 +9488,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Guest Comments"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9498,7 +9498,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Acknowledgement"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40	
@@ -9538,7 +9538,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Closing remarks ( < 2min )"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
@@ -9548,7 +9548,7 @@ class MYSQLInterface{
 			// $action_name="New Item"
 			"Group Photo"
 			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
+			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40

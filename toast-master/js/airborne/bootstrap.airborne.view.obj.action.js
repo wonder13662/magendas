@@ -1290,6 +1290,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			,is_item:function() {
 				if(	this.is_item_title_only() || 
+					this.is_item_title_only_addable() || 
 					this.is_item_title_n_time_hh_mm() || 
 					this.is_item_title_n_time_mm_ss() || 
 					this.is_item_select_box() ||
@@ -3705,12 +3706,20 @@ airborne.bootstrap.obj.__action = {
 				this.show_element_jq();
 				this.show_parent_container_jq();
 				this.show_title_jq();
+
+				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
+
+				console.log("is_addable ::: ",is_addable);
 				
 				if(cur_action_item_obj.is_item_select_box()) {
 
+					console.log("HERE / 001");
+
 					this.show_btn_edit_element_jq();
 
-				} else if(cur_action_item_obj.get_action_is_not_shy()) {
+				} else if(cur_action_item_obj.get_action_is_not_shy() && is_addable) {
+
+					console.log("HERE / 002");
 
 					this.show_btn_edit_element_jq();
 					this.show_btn_remove_element_jq();
@@ -4032,10 +4041,8 @@ airborne.bootstrap.obj.__action = {
 			// @ desc : 리스트의 열을 삭제합니다.
 			,remove_element:function(){
 
-				// wonder.jung11
-
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
@@ -4443,7 +4450,7 @@ airborne.bootstrap.obj.__action = {
 			,shape_sibling_element:function(){
 
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				var cur_element_collection_set = this.get_element_set().get_element_collection_set();
