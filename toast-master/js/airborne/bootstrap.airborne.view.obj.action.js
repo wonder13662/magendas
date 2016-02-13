@@ -824,7 +824,6 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				// wonder.jung11
 				var table_column_list_obj_arr = this.get_children();
 				if(_v.is_not_valid_array(table_column_list_obj_arr)) {
 					console.log("!Error! / get_table_row_field_arr / _v.is_not_valid_array(table_column_list_obj_arr)");
@@ -3680,6 +3679,7 @@ airborne.bootstrap.obj.__action = {
 
 				this.is_view_mode = true;
 				this.is_focusing_mode = false;
+				this.is_child_focusing_mode = false;
 			}
 			,show_parent_view_mode:function(){
 				var cur_element_set = this.get_element_set();
@@ -3709,17 +3709,11 @@ airborne.bootstrap.obj.__action = {
 
 				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
 
-				console.log("is_addable ::: ",is_addable);
-				
 				if(cur_action_item_obj.is_item_select_box()) {
-
-					console.log("HERE / 001");
 
 					this.show_btn_edit_element_jq();
 
 				} else if(cur_action_item_obj.get_action_is_not_shy() && is_addable) {
-
-					console.log("HERE / 002");
 
 					this.show_btn_edit_element_jq();
 					this.show_btn_remove_element_jq();
@@ -3736,6 +3730,7 @@ airborne.bootstrap.obj.__action = {
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
+				this.is_child_focusing_mode = false;
 			}
 			,is_focusing_mode:false
 			,get_is_focusing_mode:function() {
@@ -3770,7 +3765,33 @@ airborne.bootstrap.obj.__action = {
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = true;
+				this.is_child_focusing_mode = false;
 			}
+			// @ Public
+			// @ Scope 		: Event Manager
+			// @ Desc 		: 자식 LIST, TABLE이 Focusing Mode로 변경시, 자식 LIST, TABLE의 focusing 색상을 동일하게 적용해줍니다.
+			,is_child_focusing_mode:false
+			,get_is_child_focusing_mode:function(){
+				return this.is_child_focusing_mode;
+			}
+			,show_child_focusing_mode:function(child_element_color) {
+
+				if(this.is_child_focusing_mode) return;
+
+				// wonder.jung11
+
+				this.set_color_border(child_element_color);
+				this.set_color_background(child_element_color);
+				this.hide_btn_eject_element_jq();
+				this.hide_btn_remove_element_jq();
+				this.hide_btn_edit_element_jq();
+				this.hide_btn_add_element_jq();
+
+				this.is_view_mode = false;
+				this.is_focusing_mode = false;
+				this.is_child_focusing_mode = true;
+			}
+
 			,show_input_mode:function(event_mode){
 
 				var cur_action_item_obj = this.get_action_item_obj();
@@ -3809,6 +3830,7 @@ airborne.bootstrap.obj.__action = {
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
+				this.is_child_focusing_mode = false;
 			}
 			,show_input_mode_shy_table:function(){
 				var _v = airborne.validator;
@@ -3963,7 +3985,6 @@ airborne.bootstrap.obj.__action = {
 				if(cur_element_jq == undefined) return;
 
 				cur_element_jq.css("color",this.get_element_color());
-				// cur_element_jq.css("background-color",this.element_background_color);
 				this.set_color_background(this.get_element_background_color());
 				this.set_color_border(this.get_element_border_color());
 
@@ -3983,7 +4004,6 @@ airborne.bootstrap.obj.__action = {
 				if(cur_element_jq == undefined) return;
 
 				cur_element_jq.css("color",this.element_background_color);
-				// cur_element_jq.css("background-color",this.element_color);
 				this.set_color_background(this.get_element_color());
 				this.set_color_border(this.get_element_color());
 
@@ -5644,19 +5664,21 @@ airborne.bootstrap.obj.__action = {
 					var cur_parent_action_object_add_on_event_manager = cur_parent_action_object_add_on.get_event_manager();
 
 					if(is_hover_element_set) {
-						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
 
 						// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
 						// 부모 item의 버튼은 모두 가립니다.
-						cur_parent_action_object_add_on_event_manager.set_color_border(event_manager_on_mousemove.get_element_color());
-						cur_parent_action_object_add_on_event_manager.set_color_background(event_manager_on_mousemove.get_element_color());
-						cur_parent_action_object_add_on_event_manager.hide_btn_eject_element_jq();
-						cur_parent_action_object_add_on_event_manager.hide_btn_remove_element_jq();
-						cur_parent_action_object_add_on_event_manager.hide_btn_edit_element_jq();
-						cur_parent_action_object_add_on_event_manager.hide_btn_add_element_jq();
+						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
+						cur_parent_action_object_add_on_event_manager.show_child_focusing_mode(event_manager_on_mousemove.get_element_color());
 
 					} else {
+
+						// 자신의 테두리 색은 원래대로 되돌려 놓습니다.
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
+
+						// 자신 말고 다른 자식 객체에 마우스 커서가 올라가 있어 부모 item이 색상이 이미 변한경우의 처리
+						if(cur_parent_action_object_add_on_event_manager.get_is_child_focusing_mode()) {
+							return;
+						}
 
 						// 부모 item이 있다면 원래 배경색으로 돌려놓습니다.
 						// 부모 item의 버튼은 모두 보여줍니다.
@@ -8098,7 +8120,6 @@ airborne.bootstrap.obj.__action = {
 			// @ Scope : element set
 			// @ Desc : 사용자가 삭제할 경우의 처리.
 			,remove_element_set:function() {
-				// wonder.jung11
 				var cur_element_set = this;
 
 				var cur_element_collection_set = undefined;

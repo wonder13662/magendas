@@ -9472,6 +9472,144 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
+
+		// add_on inner table
+		// 10-1-1-1. Today's Role
+		$child_action_sub_list_child_action_item_sub_table = 
+		new ActionCollection(
+			// $action_name=""
+			"Club News"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
+		);
+		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
+
+		// 5-1-1-1-1. Column List - Project Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Project Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 5-1-1-1-1-1. Column List Field - Speech Project
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Project"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 5-1-1-1-1-2. Column List Field - Speech Project Editable
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX_ADDABLE
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// 5-1-1-1-2. Column List - Speech Title Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Speech Title Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 5-1-1-1-2-1. Column List Field - Speech Title
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Title"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 5-1-1-1-2-2. Column List Field - Speech Title Editable
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_ADDABLE
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// 5-1-1-1-3. Column List - Speaker Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Speaker Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 5-1-1-1-3-1. Column List Field - Speaker
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Speaker"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 5-1-1-1-3-2. Column List Field - Speaker Editable
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX_ADDABLE
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// 5-1-1-1-4. Column List - Evaluator Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Evaluator Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 5-1-1-1-4-1. Column List Field - Evaluator
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Evaluator"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 5-1-1-1-4-2. Column List Field - Evaluator Editable
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX_ADDABLE
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
+
+
+
+
 		// 10-1-2. Announcement & Role Sign-up for future meeting
 		$child_action_sub_list_child_action_item =  
 		new ActionItem(
