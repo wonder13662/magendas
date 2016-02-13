@@ -549,14 +549,17 @@ airborne.bootstrap.obj.__action = {
 				cur_action_hierarchy_search_map[cur_coordinate] = undefined;
 				this.set_action_hierarchy_search_map(cur_action_hierarchy_search_map);
 
-				this.reset_root_coordinate();
-
 				// CHECK
 				var search_outcome = root_action_obj.search(cur_coordinate);
 				if(_action.is_valid_action_obj(search_outcome)) {
 					console.log("!Error! / remove / _action.is_valid_action_obj(search_outcome)");
+					console.log("search_outcome ::: ",search_outcome);
+					console.log("search_outcome ::: ",search_outcome.get_coordinate());
+					console.log("cur_coordinate ::: ",cur_coordinate);
 					return;
 				}
+
+				this.reset_root_coordinate();
 
 			}
 			// @ Public
@@ -788,6 +791,64 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				return null;
+			}
+			// @ Public
+			// @ Scope 	: Action Table Obj
+			// @ Desc 	: 테이블 필드 객체일 경우, 같은 row의 action item의 배열을 돌려줍니다.
+			,get_table_row_sibling_arr:function() {
+				if(this.is_not_table_child_column_list_field_item()) {
+					console.log("!Error! / get_table_row_sibling_arr / this.is_not_table()");
+					return;
+				}
+
+				var table_action_obj = this.get_parent().get_parent();
+				return table_action_obj.get_table_row_field_arr(this.get_idx());
+			}
+			// @ Public
+			// @ Scope 	: Action Table Obj
+			// @ Desc 	: 테이블 형태로 사용할 경우, 테이블의 필드 객체들을 row 기준으로 필드 배열을 돌려줍니다.
+			,get_table_row_field_arr:function(selected_idx) {
+				if(this.is_not_table()) {
+					console.log("!Error! / get_table_row_field_arr / this.is_not_table()");
+					return;
+				}
+
+				if(_v.is_not_unsigned_number(selected_idx)) {
+					console.log("!Error! / get_table_row_field_arr / _v.is_not_unsigned_number(selected_idx)");
+					return;
+				}
+
+				var cur_children_cnt = this.get_children_cnt();
+				if(cur_children_cnt <= selected_idx) {
+					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx");
+					return;
+				}
+
+				// wonder.jung11
+				var table_column_list_obj_arr = this.get_children();
+				if(_v.is_not_valid_array(table_column_list_obj_arr)) {
+					console.log("!Error! / get_table_row_field_arr / _v.is_not_valid_array(table_column_list_obj_arr)");
+					return;
+				}
+
+				var table_row_field_action_arr = [];
+				for(var idx = 0;idx < table_column_list_obj_arr.length;idx++) {
+					var table_column_list_obj = table_column_list_obj_arr[idx];
+					if(_action.is_not_valid_action_obj(table_column_list_obj)) {
+						console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(table_column_list_obj)");
+						return;
+					}
+
+					var table_column_field_action_item_obj = table_column_list_obj.get_child(selected_idx);
+					if(_action.is_not_valid_action_item_obj(table_column_field_action_item_obj)) {
+						console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_obj(table_column_field_action_item_obj)");
+						return;
+					}
+
+					table_row_field_action_arr.push(table_column_field_action_item_obj);
+				}
+
+				return table_row_field_action_arr;
 			}
 			,set_first_child_action_obj:function(child_first_action_obj) {
 
@@ -3966,10 +4027,12 @@ airborne.bootstrap.obj.__action = {
 				if(this.element_container_jq == null) return;
 				this.element_container_jq.remove();
 			}
-			// @ public
+			// @ private
 			// @ scope : Event Manager
 			// @ desc : 리스트의 열을 삭제합니다.
 			,remove_element:function(){
+
+				// wonder.jung11
 
 				var consoler = airborne.console.get();
 				// consoler.off();
@@ -3979,24 +4042,20 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / remove_element / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
-				var cur_sibling_action_obj_before = cur_action_item_obj.get_sibling_action_obj_before();
-				var cur_sibling_action_obj_after = cur_action_item_obj.get_sibling_action_obj_after();
-				var cur_action_collection_obj = cur_action_item_obj.get_parent();
-				if(_action.is_not_valid_action_obj(cur_action_collection_obj)) {
-					console.log("!Error! / remove_element / _action.is_not_valid_action_obj(cur_action_collection_obj)");
-					return;
-				}
+				var debug_msg = cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate();
+
 
 				var element_name = this.get_title_jq_value();
 				var element_collection_set_name = this.get_element_set().get_element_collection_set().get_element_collection_id();
-				consoler.say("remove_element / rr");
+				consoler.say("remove_element / rr / " + debug_msg);
 				consoler.say("rr / 0 / en : " + element_name);
 				consoler.say("rr / 0 / ecsn : " + element_collection_set_name);
+				consoler.say("rr / 0 / cur_action_item_obj : ",cur_action_item_obj);
 
 				if(this.element_jq == null) return;
 
 				if(cur_action_item_obj.is_only_one()) {
-					consoler.say("rr / 1-1 / 마지막 1개열이 삭제될 경우, shy row로 바꿉니다.");
+					consoler.say("rr / 1-1 / 마지막 1개열이 삭제될 경우, shy row로 바꿉니다. / " + debug_msg);
 					cur_action_item_obj.set_action_is_shy(true);
 
 					var cur_parent_event_manager = this.get_parent_event_manager();
@@ -4030,6 +4089,12 @@ airborne.bootstrap.obj.__action = {
 				cur_element_collection_set.remove_element_set(cur_element_set);
 				var cur_element_container_jq = this.get_element_container_jq();
 
+				var cur_action_collection_obj = cur_action_item_obj.get_parent();
+				if(_action.is_not_valid_action_obj(cur_action_collection_obj)) {
+					console.log("!Error! / remove_element / _action.is_not_valid_action_obj(cur_action_collection_obj)");
+					return;
+				}
+
 				if(cur_action_collection_obj.is_table()){
 
 					if(cur_element_container_jq == null) return;
@@ -4057,9 +4122,6 @@ airborne.bootstrap.obj.__action = {
 
 				}
 
-				// action item obj treat
-				cur_action_item_obj.remove();
-
 				// 첫번째 아이템을 가져와 삭제 이후의 상황을 판단합니다.
 				var cur_first_sibling_action_obj = cur_action_item_obj.get_first_sibling_action_obj();
 				if(cur_first_sibling_action_obj != undefined && _action.is_not_valid_action_item_obj(cur_first_sibling_action_obj)) {
@@ -4070,6 +4132,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				// 자신이 삭제 대상. 그러므로 자신이 아닌 다른 객체들의 모양을 변경해주어야 한다.
+				var cur_sibling_action_obj_before = cur_action_item_obj.get_sibling_action_obj_before();
 				var cur_event_manager_before = undefined;
 				if(cur_sibling_action_obj_before != undefined) {
 					cur_event_manager_before = cur_sibling_action_obj_before.get_event_manager();
@@ -4078,6 +4141,7 @@ airborne.bootstrap.obj.__action = {
 					cur_event_manager_before.shape_sibling_element();
 				}
 
+				var cur_sibling_action_obj_after = cur_action_item_obj.get_sibling_action_obj_after();
 				var cur_event_manager_after = undefined;
 				if(cur_sibling_action_obj_after != undefined) {
 					cur_event_manager_after = cur_sibling_action_obj_after.get_event_manager();
@@ -4085,6 +4149,17 @@ airborne.bootstrap.obj.__action = {
 				if(cur_event_manager_after != undefined) {
 					cur_event_manager_after.shape_sibling_element();
 				}
+
+				// element set을 삭제해줍니다.
+				var cur_element_set = this.get_element_set();
+				if(cur_element_set == undefined) {
+					console.log("!Error! / remove_element / cur_element_set == undefined");
+					return;
+				}
+				cur_element_set.remove_element_set();
+
+				// action item obj treat
+				cur_action_item_obj.remove();
 
 			}
 			,is_lock:function(){
@@ -4199,109 +4274,32 @@ airborne.bootstrap.obj.__action = {
 
 						e.stopPropagation();
 
-						if(cur_action_item_obj.is_table_child_column_list_field_item()) {
-							// 1. TABLE FIELD ELEMENT
+						// action item obj의 삭제는 데이터 업데이트 이후에 이루어집니다.
+						var action_item_obj_clicked = _self.get_action_item_obj();
+						if(_action.is_not_valid_action_item_obj(action_item_obj_clicked)) {
+							console.log("!Error! / this.btn_remove_element_jq.click / _action.is_not_valid_action_item_obj(action_item_obj_clicked)");
+							return;
+						}
 
-							// wonder.jung11
+						if(action_item_obj_clicked.is_table_child_column_list_field_item()) {
+							// 1. REMOVE TABLE FIELD ELEMENT
 							// 자신의 row sibling element를 모두 불러서 화면에서 지워줍니다.
-
-							var table_action_obj = cur_action_item_obj.get_parent().get_parent();
-							if(_action.is_not_valid_action_obj(table_action_obj)) {
-								console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(table_action_obj)");
-								return;
-							}
-
-							var table_column_list_obj_arr = table_action_obj.get_children();
-							if(_v.is_not_valid_array(table_column_list_obj_arr)) {
-								console.log("!Error! / on_mouse_over / _v.is_not_valid_array(table_column_list_obj_arr)");
-								return;
-							}
-
-							for(var idx = 0;idx < table_column_list_obj_arr.length;idx++) {
-								var table_column_list_obj = table_column_list_obj_arr[idx];
-								if(_action.is_not_valid_action_obj(table_column_list_obj)) {
-									console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(table_column_list_obj)");
+							var cur_table_row_field_arr = action_item_obj_clicked.get_table_row_sibling_arr();
+							for(var idx = 0; idx < cur_table_row_field_arr.length; idx++) {
+								var cur_table_row_field_obj = cur_table_row_field_arr[idx];
+								if(_action.is_not_valid_action_item_obj(cur_table_row_field_obj)) {
+									console.log("!Error! / this.btn_remove_element_jq.click / _action.is_not_valid_action_item_obj(cur_table_row_field_obj)");
 									return;
 								}
-
-								var table_column_field_action_item_obj = table_column_list_obj.get_child(cur_action_item_obj.get_idx());
-								if(_action.is_not_valid_action_item_obj(table_column_field_action_item_obj)) {
-									console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_obj(table_column_field_action_item_obj)");
-									return;
-								}
-
-								// table_column_field_action_item_obj 이것을 인자로 처리
-
-								// table row의 element collection set도 제외되어야 함.
-
+								cur_table_row_field_obj.get_event_manager().remove_element();
 							}
-
-
 
 						} else {
-							// 2. LIST ROW ELEMENT
+							// 2. REMOVE LIST ROW ELEMENT
 							_self.remove_element();
-
-							// 자신의 엘리먼트를 화면에서 지웁니다
-							// 자신의 형제 엘리먼트들의 테두리를 다시 그립니다.
-							_self.shape_sibling_element();
-
-							// wonder.jung11
-							// 아래 동작을 메서드로 뺍니다.
-							// 엘리먼트 자신이 부모 밑의 엘리먼트라면 부모 안의 참조를 지워준다.
-							var cur_element_set = undefined;
-							if(_self.get_element_set() != undefined) {
-								cur_element_set = _self.get_element_set();
-							}
-							if(cur_element_set != undefined) {
-								cur_element_set.remove_element_set();
-							}
-
-							// REMOVE ME
-							/*
-							var cur_element_collection_set = undefined;
-							if(cur_element_set != undefined) {
-								cur_element_collection_set = cur_element_set.get_element_collection_set();
-							}
-							var cur_parent_element_set = undefined;
-							if(cur_element_collection_set != undefined) {
-								cur_parent_element_set = cur_element_collection_set.get_parent_element_set();
-							}
-							var prev_children_element_collection_set_arr = undefined;
-							if(cur_parent_element_set != undefined) {
-								prev_children_element_collection_set_arr = cur_parent_element_set.get_children_element_collection_set_arr();
-							}
-							if(_v.is_valid_array(prev_children_element_collection_set_arr)) {
-
-								var next_children_element_collection_set_arr = [];
-								for(var idx=0; idx < prev_children_element_collection_set_arr.length;idx++) {
-
-									var prev_children_element_collection_set = prev_children_element_collection_set_arr[idx];
-									if(prev_children_element_collection_set.get_element_set_arr() == undefined) {
-										continue;
-									}
-
-									if(prev_children_element_collection_set.get_element_set_arr().length > 0) {
-										// 엘리먼트가 있다면 새로운 컬렉션 배열에 추가.
-										next_children_element_collection_set_arr.push(prev_children_element_collection_set);
-									} else {
-										// 엘리먼트가 없다면 새로운 컬렉션 배열에 포함되지 않는다.	
-										// 컨테이너 참조 역시 제거합니다.
-										prev_children_element_collection_set.get_element_collection_container_jq().remove();
-									}
-									
-								}
-
-								// 부모 엘리먼트 셋의 자식 엘리먼트 컬렉션 배열 정보 업데이트.
-								cur_parent_element_set.get_children_element_collection_set_arr(next_children_element_collection_set_arr);
-							}
-							*/
 						}
 
 						_self.release();
-
-
-
 						_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_NONE, _obj.EVENT_TYPE_DELETE_ITEM);
 					});
 				}

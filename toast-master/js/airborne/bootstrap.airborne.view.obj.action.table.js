@@ -2180,9 +2180,6 @@ airborne.bootstrap.view.obj.__action_table = {
 			.replace(/\<is_last\>/gi, is_last_row)
 		;
 
-		// wonder.jung11
-		console.log("HERE / TARGET / " + action_item_obj.get_action_name() + " / " + action_item_obj.get_coordinate() + " / " + action_item_obj.get_idx());
-
 		// field 별로 순회하면서 column - field를 그려줍니다.
 		var idx_row = action_table_obj.get_first_child().get_children_cnt();
 		var selected_row_jq = undefined;
@@ -2310,8 +2307,6 @@ airborne.bootstrap.view.obj.__action_table = {
 
 	}
 	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_table_element_collection_set, delegate_on_event) {
-
-		// wonder.jung11
 
 		// table_row_jq를 element collection set에 저장
 		// cur_element_collection_set.set_table_row_jq(table_row_element_jq);
@@ -2586,10 +2581,6 @@ airborne.bootstrap.view.obj.__action_table = {
 					// 포커싱된 테이블 열의 모든 객체들을 가져옵니다.
 					var action_item_row_on_mouse_over_arr = event_manager_toss.get_element_set().get_element_collection_set().get_action_item_obj_mouse_over(mousemove_event, event_manager_toss);
 
-
-					// 충돌 검사를 진행, 클릭시 변경될 열의 모습을 사용자에게 미리 보여준다.
-					// wonder.jung11
-					
 					var cur_sibling_element_set_mouse_over = null;
 					var cur_element_collection_set = event_manager_toss.get_element_set().get_element_collection_set();
 					if(cur_element_collection_set == undefined) {
@@ -3053,12 +3044,6 @@ airborne.bootstrap.view.obj.__action_table = {
 
 			var is_last_row = ((rowspan_cnt.length - 1) == idx_row)?true:false;
 			var is_first_row = (0 == idx_row)?true:false;
-
-			// wonder.jung11
-			// TODO 
-			// 1. 열을 추가하는 메서드를 사용하면 안되는 이유는 무엇?
-
-			//,add_editable_table_row:function(action_table_obj) {
 
 			table_tag += ""
 			+ "<tr id=\"column_text_container\" is_first=\"<is_first>\" is_last=\"<is_last>\" style=\"<style>\">"
