@@ -1399,7 +1399,7 @@ airborne.bootstrap.obj.__action = {
 
 				var first_child_action_list_obj = this.get_child(0);
 				if(_action.is_not_valid_action_obj(first_child_action_list_obj)) {
-					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_action_obj(first_child_action_list_obj)");
+					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(first_child_action_list_obj)");
 					return;
 				}
 				var rowspan_cnt = first_child_action_list_obj.get_children_cnt();
@@ -4198,54 +4198,109 @@ airborne.bootstrap.obj.__action = {
 						if(!confirm("Remove this row.\nAre you sure?")) return;
 
 						e.stopPropagation();
-						_self.remove_element();
 
-						// 자신의 엘리먼트를 화면에서 지웁니다
-						// 자신의 형제 엘리먼트들의 테두리를 다시 그립니다.
-						_self.shape_sibling_element();
-						_self.release();
+						if(cur_action_item_obj.is_table_child_column_list_field_item()) {
+							// 1. TABLE FIELD ELEMENT
 
-						// 엘리먼트 자신이 부모 밑의 엘리먼트라면 부모 안의 참조를 지워준다.
-						var cur_element_set = undefined;
-						if(_self.get_element_set() != undefined) {
-							cur_element_set = _self.get_element_set();
-						}
-						var cur_element_collection_set = undefined;
-						if(cur_element_set != undefined) {
-							cur_element_collection_set = cur_element_set.get_element_collection_set();
-						}
-						var cur_parent_element_set = undefined;
-						if(cur_element_collection_set != undefined) {
-							cur_parent_element_set = cur_element_collection_set.get_parent_element_set();
-						}
-						var prev_children_element_collection_set_arr = undefined;
-						if(cur_parent_element_set != undefined) {
-							prev_children_element_collection_set_arr = cur_parent_element_set.get_children_element_collection_set_arr();
-						}
-						if(_v.is_valid_array(prev_children_element_collection_set_arr)) {
+							// wonder.jung11
+							// 자신의 row sibling element를 모두 불러서 화면에서 지워줍니다.
 
-							var next_children_element_collection_set_arr = [];
-							for(var idx=0; idx < prev_children_element_collection_set_arr.length;idx++) {
-
-								var prev_children_element_collection_set = prev_children_element_collection_set_arr[idx];
-								if(prev_children_element_collection_set.get_element_set_arr() == undefined) {
-									continue;
-								}
-
-								if(prev_children_element_collection_set.get_element_set_arr().length > 0) {
-									// 엘리먼트가 있다면 새로운 컬렉션 배열에 추가.
-									next_children_element_collection_set_arr.push(prev_children_element_collection_set);
-								} else {
-									// 엘리먼트가 없다면 새로운 컬렉션 배열에 포함되지 않는다.	
-									// 컨테이너 참조 역시 제거합니다.
-									prev_children_element_collection_set.get_element_collection_container_jq().remove();
-								}
-								
+							var table_action_obj = cur_action_item_obj.get_parent().get_parent();
+							if(_action.is_not_valid_action_obj(table_action_obj)) {
+								console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(table_action_obj)");
+								return;
 							}
 
-							// 부모 엘리먼트 셋의 자식 엘리먼트 컬렉션 배열 정보 업데이트.
-							cur_parent_element_set.get_children_element_collection_set_arr(next_children_element_collection_set_arr);
+							var table_column_list_obj_arr = table_action_obj.get_children();
+							if(_v.is_not_valid_array(table_column_list_obj_arr)) {
+								console.log("!Error! / on_mouse_over / _v.is_not_valid_array(table_column_list_obj_arr)");
+								return;
+							}
+
+							for(var idx = 0;idx < table_column_list_obj_arr.length;idx++) {
+								var table_column_list_obj = table_column_list_obj_arr[idx];
+								if(_action.is_not_valid_action_obj(table_column_list_obj)) {
+									console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(table_column_list_obj)");
+									return;
+								}
+
+								var table_column_field_action_item_obj = table_column_list_obj.get_child(cur_action_item_obj.get_idx());
+								if(_action.is_not_valid_action_item_obj(table_column_field_action_item_obj)) {
+									console.log("!Error! / on_mouse_over / _action.is_not_valid_action_item_obj(table_column_field_action_item_obj)");
+									return;
+								}
+
+								// table_column_field_action_item_obj 이것을 인자로 처리
+
+								// table row의 element collection set도 제외되어야 함.
+
+							}
+
+
+
+						} else {
+							// 2. LIST ROW ELEMENT
+							_self.remove_element();
+
+							// 자신의 엘리먼트를 화면에서 지웁니다
+							// 자신의 형제 엘리먼트들의 테두리를 다시 그립니다.
+							_self.shape_sibling_element();
+
+							// wonder.jung11
+							// 아래 동작을 메서드로 뺍니다.
+							// 엘리먼트 자신이 부모 밑의 엘리먼트라면 부모 안의 참조를 지워준다.
+							var cur_element_set = undefined;
+							if(_self.get_element_set() != undefined) {
+								cur_element_set = _self.get_element_set();
+							}
+							if(cur_element_set != undefined) {
+								cur_element_set.remove_element_set();
+							}
+
+							// REMOVE ME
+							/*
+							var cur_element_collection_set = undefined;
+							if(cur_element_set != undefined) {
+								cur_element_collection_set = cur_element_set.get_element_collection_set();
+							}
+							var cur_parent_element_set = undefined;
+							if(cur_element_collection_set != undefined) {
+								cur_parent_element_set = cur_element_collection_set.get_parent_element_set();
+							}
+							var prev_children_element_collection_set_arr = undefined;
+							if(cur_parent_element_set != undefined) {
+								prev_children_element_collection_set_arr = cur_parent_element_set.get_children_element_collection_set_arr();
+							}
+							if(_v.is_valid_array(prev_children_element_collection_set_arr)) {
+
+								var next_children_element_collection_set_arr = [];
+								for(var idx=0; idx < prev_children_element_collection_set_arr.length;idx++) {
+
+									var prev_children_element_collection_set = prev_children_element_collection_set_arr[idx];
+									if(prev_children_element_collection_set.get_element_set_arr() == undefined) {
+										continue;
+									}
+
+									if(prev_children_element_collection_set.get_element_set_arr().length > 0) {
+										// 엘리먼트가 있다면 새로운 컬렉션 배열에 추가.
+										next_children_element_collection_set_arr.push(prev_children_element_collection_set);
+									} else {
+										// 엘리먼트가 없다면 새로운 컬렉션 배열에 포함되지 않는다.	
+										// 컨테이너 참조 역시 제거합니다.
+										prev_children_element_collection_set.get_element_collection_container_jq().remove();
+									}
+									
+								}
+
+								// 부모 엘리먼트 셋의 자식 엘리먼트 컬렉션 배열 정보 업데이트.
+								cur_parent_element_set.get_children_element_collection_set_arr(next_children_element_collection_set_arr);
+							}
+							*/
 						}
+
+						_self.release();
+
+
 
 						_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_NONE, _obj.EVENT_TYPE_DELETE_ITEM);
 					});
@@ -8033,6 +8088,55 @@ airborne.bootstrap.obj.__action = {
 				this.set_is_hover(false);
 				this.set_is_hover_top(false);
 				this.set_is_hover_bottom(false);
+			}
+			// @ Public
+			// @ Scope : element set
+			// @ Desc : 사용자가 삭제할 경우의 처리.
+			,remove_element_set:function() {
+				// wonder.jung11
+				var cur_element_set = this;
+
+				var cur_element_collection_set = undefined;
+				if(cur_element_set != undefined) {
+					cur_element_collection_set = cur_element_set.get_element_collection_set();
+				} 
+
+				// 1. LIST
+				var cur_parent_element_set = undefined;
+				if(cur_element_collection_set != undefined) {
+					cur_parent_element_set = cur_element_collection_set.get_parent_element_set();
+				}
+				var prev_children_element_collection_set_arr = undefined;
+				if(cur_parent_element_set != undefined) {
+					prev_children_element_collection_set_arr = cur_parent_element_set.get_children_element_collection_set_arr();
+				}
+				if(_v.is_valid_array(prev_children_element_collection_set_arr)) {
+
+					var next_children_element_collection_set_arr = [];
+					for(var idx=0; idx < prev_children_element_collection_set_arr.length;idx++) {
+
+						var prev_children_element_collection_set = prev_children_element_collection_set_arr[idx];
+						if(prev_children_element_collection_set.get_element_set_arr() == undefined) {
+							continue;
+						}
+
+						if(prev_children_element_collection_set.get_element_set_arr().length > 0) {
+							// 엘리먼트가 있다면 새로운 컬렉션 배열에 추가.
+							next_children_element_collection_set_arr.push(prev_children_element_collection_set);
+						} else {
+							// 엘리먼트가 없다면 새로운 컬렉션 배열에 포함되지 않는다.	
+							// 컨테이너 참조 역시 제거합니다.
+							prev_children_element_collection_set.get_element_collection_container_jq().remove();
+						}
+						
+					}
+
+					// 부모 엘리먼트 셋의 자식 엘리먼트 컬렉션 배열 정보 업데이트.
+					cur_parent_element_set.get_children_element_collection_set_arr(next_children_element_collection_set_arr);
+				}
+
+				// 2. TABLE
+
 			}
 		}
 

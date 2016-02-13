@@ -8617,8 +8617,6 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-		// wonder.jung11
-
 
 		// add_on inner table
 		// 3-1-2-1. Today's Role
@@ -8822,6 +8820,103 @@ class MYSQLInterface{
 			, ActionItem::$SELECT_BOX
 		);
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+
+
+		// add_on inner table
+		// 3-1-2-2. Today's Role
+		$child_action_sub_list_child_action_item_sub_table = 
+		new ActionCollection(
+			// $action_name=""
+			"Word & Quote"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
+		);
+		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
+
+		// 3-1-2-2-1. Column List - Title Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Title Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-2-1-1. Column List Field - Word
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Word"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 3-1-2-2-1-2. Column List Field - Word Desc
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Word Desc"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 3-1-2-2-1-3. Column List Field - Quote
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Quote"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
+		// wonder.jung
+		// 3-1-2-2-2. Column List - Speech Title Column List
+		$child_action_sub_list_child_action_item_sub_table_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Text Column List"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
+
+		// 3-1-2-2-2-1. Column List Field - Word Text
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 3-1-2-2-2-2. Column List Field - Word Desc Text
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// 3-1-2-2-2-3. Column List Field - Quote Desc Text
+		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY
+		);
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
+
 		// 20:00
 
 
@@ -8935,8 +9030,6 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-
-		// wonder.jung11
 
 		// add_on inner table
 		// 5-1-1-1. Today's Role
