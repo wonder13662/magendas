@@ -1057,9 +1057,10 @@ class TCPDFElement{
 		// b-2. 사용자의 글의 글자수를 구합니다.
 		$raw_text_char_count = STRLEN($raw_text);
 
+		// REMOVE ME
 		// b-3. 사용자의 글자당 길이를 구합니다. (이 값을 이용해서 몇 번째 글자에서 2줄로 분할할지가 결정됩니다.)
 		// $raw_char_width = ROUND(($raw_text_width/$raw_text_char_count),1);
-		$raw_char_width = CEIL($raw_text_width/$raw_text_char_count);
+		// $raw_char_width = CEIL($raw_text_width/$raw_text_char_count);
 
 		// 좌,우의 패딩 너비를 제외한 셀의 너비가 사용자 입력 글자가 가질 수 있는 최대 너비입니다.
 		if($this->get_cell_width() > 0) {
@@ -1149,6 +1150,7 @@ class TCPDFElement{
 			while($cur_cnt < $max_loop_cnt) {
 
 				$sub_text = SUBSTR($raw_text_to_slice, 0, $slice_length);
+
 				$sub_text_width = $this->get_text_width_on_font($sub_text);
 
 				// if(strpos($raw_text,"Your time is limited") !== FALSE) {
@@ -1167,6 +1169,21 @@ class TCPDFElement{
 
 
 				if($cur_max_text_width < $sub_text_width) {
+
+					$prev_sub_text_last_char = SUBSTR($prev_sub_text, (strlen($prev_sub_text) - 1), strlen($prev_sub_text));
+					$sub_text_next = SUBSTR($raw_text_to_slice, ($slice_length - 1), ($slice_length * 2) - 1);
+					$next_sub_text_fisrt_char = SUBSTR($sub_text_next, 0, 1);
+					$last_pos_white_space = -1;
+					if(strcmp($prev_sub_text_last_char," ") != 0 && strcmp($next_sub_text_fisrt_char," ") != 0) {
+						// 나눈 줄의 마지막 글자가 공백이 아니다. && 다음 줄의 첫글자가 공백이 아니다.
+						// 그렇다면 단어가 줄바꿈으로 둘로 나뉜것이다.
+						// 이 단어는 다음줄에 표시한다.
+
+						$last_pos_white_space = strrpos($prev_sub_text," ");
+						$prev_sub_text = SUBSTR($prev_sub_text, 0, $last_pos_white_space);
+						$_raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
+					}
+
 					// 문자열을 시작하는 인덱스를 조정합니다.
 					// 1을 빼지 않을 경우, 다음 열의 첫번째 문자가 사라집니다.
 					array_push($text_arr, $prev_sub_text);
@@ -1175,10 +1192,15 @@ class TCPDFElement{
 					// echo "\$slice_length : $slice_length<br/>";
 					// echo "before / $raw_text_to_slice<br/>";
 					$raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
-					// echo "after / $raw_text_to_slice<br/>";
 
+					// 첫 글자가 공백이면 제거
+					$raw_text_to_slice_fisrt_char = SUBSTR($raw_text_to_slice, 0, 1);
+					if(strcmp($raw_text_to_slice_fisrt_char," ") == 0) {
+						$raw_text_to_slice = SUBSTR($raw_text_to_slice, 1, strlen($raw_text_to_slice));
+					}
+
+					// echo "after / $raw_text_to_slice<br/>";
 					$slice_length = 1;
-					
 					
 				} else if($slice_length == $raw_text_char_count) {
 					// 마지막 열의 마지막 글자를 검사함. 입력하고 종료한다.

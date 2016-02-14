@@ -2738,6 +2738,24 @@ class TCPDFManager{
 		} else {
 			$round_desc = $meeting_agenda_round . "th";	
 		}
+
+
+		// 2016-02-14
+		// Osan TM ( id = 13 ) 차수 노출 안함
+		if($meeting_agenda_obj->__membership_id == 13) {
+
+$tbl = <<<EOD
+<table cellspacing="0" cellpadding="0" border="0">
+    <tr style="text-align:center;">
+        <td>
+            <b><span color="#FFFFFF" style="font-size:x-large;">$meeting_agenda_obj->__membership_desc Meeting</span></b>
+        </td>
+    </tr>
+</table>    
+EOD;
+
+		} else {
+
 $tbl = <<<EOD
 <table cellspacing="0" cellpadding="0" border="0">
     <tr style="text-align:center;">
@@ -2747,6 +2765,8 @@ $tbl = <<<EOD
     </tr>
 </table>    
 EOD;
+		}
+
 		$this->pdf->writeHTMLCell(
 		//@param $w (float) Cell width. If 0, the cell extends up to the right margin.
 		    150
