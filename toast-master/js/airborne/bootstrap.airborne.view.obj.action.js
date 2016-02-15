@@ -181,9 +181,61 @@ airborne.bootstrap.obj.__action = {
 			,action_is_shy:null
 			,coordinate:null
 			,action_hierarchy_search_map:null
+			,action_depth_arr:null
+			,set_action_depth_arr:function(action_depth_arr) {
+				if(_v.is_not_valid_array(action_depth_arr)) {
+					console.log("!Error! / set_action_depth_arr / _v.is_not_valid_array(action_depth_arr)");
+					return;
+				}
+				this.action_depth_arr = action_depth_arr;
+			}
+			,get_action_depth_arr:function() {
+				return this.action_depth_arr;
+			}
+			,get_action_depth:function(has_shy) {
+
+				if(has_shy == undefined) {
+					has_shy = false;
+				}
+
+				var cur_action_depth_arr = this.get_action_depth_arr();
+				if(_v.is_not_valid_array(cur_action_depth_arr)) {
+					console.log("!Error! / get_action_depth / _v.is_not_valid_array(cur_action_depth_arr)");
+					return;
+				}
+
+				var cur_depth = this.get_depth();
+				if(_v.is_not_unsigned_number(cur_depth)) {
+					console.log("!Error! / get_action_depth / _v.is_not_unsigned_number(cur_depth)");
+					return;
+				}
+
+				if(cur_action_depth_arr.length <= cur_depth) {
+					console.log("!Error! / get_action_depth / cur_action_depth_arr.length <= cur_depth");
+					return;
+				}
+
+				var cur_action_depth = cur_action_depth_arr[cur_depth];
+				if(has_shy == false) {
+					// 기본값은 shy element를 포함하지 않습니다.
+					var cur_action_depth_no_shy = [];
+					for(var idx = 0; idx < cur_action_depth.length; idx++) {
+						var cur_action_obj = cur_action_depth[idx];
+						if(cur_action_obj.get_action_is_shy()) {
+							continue;
+						}
+
+						cur_action_depth_no_shy.push(cur_action_obj);
+					}
+
+					cur_action_depth = cur_action_depth_no_shy;
+				}
+
+				return cur_action_depth;
+			}
 			,external_select_box_option_list:null
 			,event_manager:null
-			,set_action_data:function(action_data_obj, coordinate, action_hierarchy_search_map) {
+			,set_action_data:function(action_data_obj, coordinate, action_hierarchy_search_map, action_depth_arr, depth) {
 
 				if(_action.is_not_valid_action_data_obj(action_data_obj)) {
 					console.log("!Error! / set_action_data / _action.is_not_valid_action_data_obj(action_data_obj) / ",action_data_obj);
@@ -212,13 +264,29 @@ airborne.bootstrap.obj.__action = {
 				action_hierarchy_search_map[my_coordinate] = this;
 				this.set_action_hierarchy_search_map(action_hierarchy_search_map);
 
+				// ACTION DEPTH
+				if(depth == undefined) {
+					depth = 0;
+				} else {
+					depth += 1;
+				}
+				if(action_depth_arr == undefined) {
+					action_depth_arr = [];
+					action_depth_arr.push([this]);
+				} else if(action_depth_arr.length == depth){
+					action_depth_arr.push([this]);
+				} else {
+					action_depth_arr[depth].push(this);
+				}
+				this.set_action_depth_arr(action_depth_arr);
+
 				// CHILDREN ACTION OBJ LIST
 				if(action_data_obj.children_action_object_list != undefined) {
 					for(var idx = 0;idx < action_data_obj.children_action_object_list.length;idx++) {
 
 						var child_action_data_obj = action_data_obj.children_action_object_list[idx];
 						var child_coordinate = this.get_coordinate() + "-" + idx;
-						var child_action_obj = _action.get_action_obj(child_action_data_obj, child_coordinate, action_hierarchy_search_map);
+						var child_action_obj = _action.get_action_obj(child_action_data_obj, child_coordinate, action_hierarchy_search_map, action_depth_arr, depth);
 
 						// 자신이 자식 객체의 부모 객체가 됩니다.
 						child_action_obj.set_parent(this);
@@ -971,6 +1039,32 @@ airborne.bootstrap.obj.__action = {
 				}
 				return [];
 			}
+			// @ Public
+			// @ Scope 	: action obj
+			// @ Desc 	: root로 부터 자신의 depth를 구합니다.
+			,get_depth:function() {
+
+				console.log("");
+
+				var max_depth_loop = 10;
+				var prev_parent_obj = this;
+				var cur_depth = 0;
+				for(var idx = 0; idx < max_depth_loop; idx++) {
+					prev_parent_obj = prev_parent_obj.get_parent();
+					if(prev_parent_obj == undefined) {
+						break;
+					}
+
+					cur_depth += 1;
+				}
+
+				// DEBUG
+				var cur_action_name = this.get_action_name();
+				var cur_coordinate = this.get_coordinate();
+				console.log("get_depth / " + cur_action_name + " / " + cur_coordinate +  " / " + cur_depth,this);
+
+				return cur_depth;
+			}
 			,is_not_last:function() {
 				return !this.is_last();
 			}
@@ -1494,11 +1588,11 @@ airborne.bootstrap.obj.__action = {
 
 		return action_obj;
 	}
-	,get_action_obj:function(action_data_obj, coordinate, action_hierarchy_search_map) {
+	,get_action_obj:function(action_data_obj, coordinate, action_hierarchy_search_map, action_depth_arr, depth) {
 
 		var action_obj_empty = this.get_action_obj_empty();
 
-		action_obj_empty.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map);
+		action_obj_empty.set_action_data(action_data_obj, coordinate, action_hierarchy_search_map, action_depth_arr, depth);
 
 		return action_obj_empty;
 	}
@@ -3777,8 +3871,6 @@ airborne.bootstrap.obj.__action = {
 			,show_child_focusing_mode:function(child_element_color) {
 
 				if(this.is_child_focusing_mode) return;
-
-				// wonder.jung11
 
 				this.set_color_border(child_element_color);
 				this.set_color_background(child_element_color);
@@ -6866,6 +6958,9 @@ airborne.bootstrap.obj.__action = {
 				@ Desc 		: 엘리먼트 콜렉션 셋을 이동시키는 eject btn jq 참조를 지정합니다.
 			*/
 			,ecs_set_btn_collection_eject_jq:function(btn_collection_eject_jq){
+
+				// wonder.jung11
+
 				this.btn_collection_eject_jq = btn_collection_eject_jq;
 
 				// btn_collection_eject를 설정하면 자동으로 관련 이벤트가 주입됩니다.
@@ -7243,7 +7338,7 @@ airborne.bootstrap.obj.__action = {
 				// 사용자 선택한 엘리먼트의 처음 너비. 이 너비를 가직고 이동합니다.
 				var cur_element_collection_set = this;
 				var cur_element_collection_container_jq = this.get_element_collection_container_jq();
-				
+
 				// 사용자 선택시, 마우스 커서보다 안쪽으로 엘리먼트를 이동시키기 위한 여유값.
 				var gap = 20;
 				// 사용자 취소시, 원래위치로 돌아오기 위한 좌표.
