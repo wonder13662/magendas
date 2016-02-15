@@ -220,11 +220,14 @@ airborne.bootstrap.obj = {
 		
 		return this.getTagSelect(id, filtered_select_options_arr);
 	}
-	,isNotValidDelegate:function(target_delegate){
-		return !this.isValidDelegate(target_delegate);
+	,is_not_valid_delegate:function(target_delegate){
+		return !this.is_valid_delegate(target_delegate);
 	}
 	,is_valid_delegate:function(target_delegate){
 		return this.isValidDelegate(target_delegate);
+	}
+	,isNotValidDelegate:function(target_delegate){
+		return !this.isValidDelegate(target_delegate);
 	}
 	,isValidDelegate:function(target_delegate){
 		if(target_delegate == null){
@@ -242,10 +245,10 @@ airborne.bootstrap.obj = {
 
 		return true;
 	}
-	,get_delegate:function(delegate_func, delegate_scope){
-		return this.getDelegate(delegate_func, delegate_scope);
+	,get_delegate:function(delegate_func, delegate_scope, delegate_param_arr){
+		return this.getDelegate(delegate_func, delegate_scope, delegate_param_arr);
 	}
-	,getDelegate:function(delegate_func, delegate_scope){
+	,getDelegate:function(delegate_func, delegate_scope, delegate_param_arr){
 		if(delegate_func == null){
 			console.log("airborne.bootstrap.obj / getDelegate / delegate_func == null");
 			return null;
@@ -259,7 +262,23 @@ airborne.bootstrap.obj = {
 		{
 			_func:delegate_func
 			, _scope:delegate_scope
+			, _param_obj_arr:delegate_param_arr
 			, _apply:function(param_arr){
+
+				if(_v.is_valid_array(param_arr) && _v.is_valid_array(this._param_obj_arr)) {
+					console.log("_apply / 001 / param_arr ::: ",param_arr);
+					console.log("_apply / 001 / this._param_obj_arr :: ",this._param_obj_arr);
+					param_arr = param_arr.concat(this._param_obj_arr);
+
+				} else if(_v.is_not_valid_array(param_arr) && _v.is_valid_array(this._param_obj_arr)) {
+					console.log("_apply / 002 / param_arr ::: ",param_arr);
+					console.log("_apply / 002 / this._param_obj_arr ::: ",this._param_obj_arr);
+					param_arr = this._param_obj_arr;
+
+				}
+
+				console.log("_apply / param_arr ::: ",param_arr);
+
 				this._func.apply(this._scope,param_arr);
 			}
 		}
@@ -3199,7 +3218,7 @@ airborne.bootstrap.obj = {
 					_obj.remove_list_row_css_radius(cur_element_jq);
 
 					// 모든 엘리먼트의 eject btn을 가립니다.
-					cur_event_manager.hide_btn_eject_collection_element_jq();
+					// cur_event_manager.hide_btn_eject_collection_element_jq();
 					if( 0 == idx ) {
 
 						// 첫번째 엘리먼트의 처리

@@ -2885,6 +2885,9 @@ airborne.bootstrap.view.obj.__action_table = {
 			// 엘리먼트가 사용자 수정에 의해 새로운 위치로 이동 완료한 뒤에 호출되는 콜백 델리게이트
 			event_manager_table_column_text.set_delegate_callback_after_landing_element(_obj.get_delegate(function(cur_event_manager_on_mouse_over){
 
+				// wonder.jung11
+				console.log("XXX / cur_event_manager_on_mouse_over ::: ",cur_event_manager_on_mouse_over);
+
 				// Save n Reload
 				if(cur_event_manager_on_mouse_over != undefined){
 					cur_event_manager_on_mouse_over.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_NONE, _obj.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER);	
@@ -2951,7 +2954,7 @@ airborne.bootstrap.view.obj.__action_table = {
 				// 	+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:absolute;top:9px;left:8px;\">&nbsp;</span>"
 				// + "</div>"
 					
-				+ "<div id=\"btn_collection_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-bottom:-10px;margin-left:4px;margin-right:-5px;display:none;\">"
+				+ "<div id=\"btn_collection_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
 					+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
 				+ "</div>"
 
@@ -3134,10 +3137,11 @@ airborne.bootstrap.view.obj.__action_table = {
 		var cur_table_jq = parent_jq.children().last();
 		var cur_table_title_set_jq = cur_table_jq.find("div.panel-heading");
 		cur_table_element_collection_set.set_element_collection_container_jq(cur_table_jq);
+		action_table_obj.set_table_element_collection_set(cur_table_element_collection_set);
 
-		// wonder.jung11
 		var cur_btn_collection_eject_jq = cur_table_title_set_jq.find("span#btn_collection_eject");
 		cur_table_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
+
 
 		
 		var cur_table_row_arr = cur_table_jq.find("tr#column_text_container");
@@ -3149,38 +3153,20 @@ airborne.bootstrap.view.obj.__action_table = {
 
 		}
 
-		// 리스트 처리가 완료된 뒤에 아래 동작을 실행해야 합니다.
-		// 1. TABLE이 add on element인 경우라면 parent의 element와 그 형제 element 사이에서 테이블을 이동할 수 있습니다.
-		/*
-		var cur_parent_add_on = action_table_obj.get_parent_add_on();
-		if(cur_parent_add_on != undefined) {
-
-			if(_action.is_not_valid_action_obj(cur_parent_add_on)) {
-				console.log("!Error! / add_editable_table_from_action_table / _action.is_not_valid_action_obj(cur_parent_add_on)");
-				return;
-			}
-
-			// 다른 엘리먼트에 추가된 테이블인 경우, 부모 엘리먼트와 그 형제들을 jump spot으로 추가해줍니다.
-			var cur_action_depth_arr = cur_parent_add_on.get_action_depth();
-			console.log("HERE / 000 / cur_action_depth_arr ::: ",cur_action_depth_arr);
-
-			for (var idx_depth = 0; idx_depth < cur_action_depth_arr.length; idx_depth++) {
-				var cur_action_obj_depth = cur_action_depth_arr[idx_depth];
-
-				console.log("HERE / 000 / cur_action_obj_depth ::: ",cur_action_obj_depth.get_action_name());
-
-				var cur_element_collection_set = cur_action_obj_depth.get_event_manager().get_element_set().get_element_collection_set();
-
-				console.log("HERE / 001 / cur_element_collection_set ::: ",cur_element_collection_set);
-
-				
-
-				//cur_table_element_collection_set.add_element_collection_set_jump_spot();
-			}
-
-		}
-		*/
-
+		// delegate - after drawing element 를 추가합니다.
+		action_table_obj.add_delegate_after_element_drawing(
+			// create delegate
+			_obj.get_delegate(
+				// _func	
+				function(param_action_table_obj){
+					param_action_table_obj.update_table_jump_spot();
+				}
+				// _scope
+				, this
+				// _param_obj_arr
+				, [action_table_obj]
+			)
+		);
 
 		return cur_table_element_collection_set;
 	}

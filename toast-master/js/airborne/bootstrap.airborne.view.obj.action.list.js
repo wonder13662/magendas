@@ -234,7 +234,30 @@ airborne.bootstrap.view.obj.__action_list = {
 			;
 			consoler.say(msg, cur_action_list_list);
 
-		} // for end			
+		} // for end	
+
+
+		// wonder.jung11
+		// root 객체라면 후처리 작업을 진행합니다.
+		// 1. 그려진 리스트를 대상으로 jump spot 대상 확인.
+		if(action_list.has_no_parent() && action_list.has_no_parent_add_on()) {
+			console.log("root 객체라면 후처리 작업을 진행합니다.");
+			console.log("1. 그려진 리스트를 대상으로 jump spot 대상 확인.");
+
+			var cur_action_name = action_list.get_action_name();
+			var cur_coordinate = action_list.get_coordinate();
+			var cur_idx = action_list.get_idx();
+
+			var debug_msg = 
+			"XXX / <cur_action_name> / <cur_coordinate> / <cur_idx>"
+			.replace(/\<cur_action_name\>/gi, cur_action_name)
+			.replace(/\<cur_coordinate\>/gi, cur_coordinate)
+			.replace(/\<cur_idx\>/gi, cur_idx)
+			;
+			// console.log(debug_msg);
+
+			action_list.call_delegate_after_element_drawing();
+		}
 
 
 		return cur_element_collection_set;
@@ -1329,7 +1352,8 @@ airborne.bootstrap.view.obj.__action_list = {
 						consoler.say("중간의 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
 					}	
-					cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
+					// REMOVE ME
+					// cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
 				}
 
 				// action item obj의 순서 바꾸기.
@@ -1452,45 +1476,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 				console.log("delegate_do_to_all_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 				return;
-			}
-
-			// REMOVE ME
-
-			/*
-			var action_info = cur_element_set.get_meta_info().get_prop_map();
-
-			var add_on_obj_list;
-			if( action_info != undefined && 
-				action_info.__prop_map != undefined && 
-				_v.is_valid_array(action_info.__prop_map.__add_on_obj_list)) {
-
-				add_on_obj_list = action_info.__prop_map.__add_on_obj_list;
-			}
-
-			if(_v.is_valid_array(add_on_obj_list)){
-				var inner_idx;
-				var inner_length = add_on_obj_list.length;
-				for(inner_idx = 0; inner_idx < inner_length; inner_idx++){
-					var cur_add_on_selector_id = add_on_obj_list[inner_idx].id;
-
-					// 가져온 타겟 엘리먼트 중에 해당하는 selector id가 있는지 확인합니다.
-					var target_idx;
-					var target_length = target_element_collection_set_arr.length;
-					for(target_idx = 0; target_idx < target_length; target_idx++){
-						var target_element_collection_set = target_element_collection_set_arr[target_idx];
-
-						// 맞다면 해당 element set에 target element collection set을 넣습니다.
-						if(target_element_collection_set == undefined) {
-							console.log("!Error! / airborne.view.obj.list / delegate_do_to_all_element_set / target_element_collection_set == undefined");
-							return;
-						} else if(cur_add_on_selector_id == target_element_collection_set.get_element_collection_id()){
-							cur_element_set.get_event_manager().push_add_on_element_collection_set(target_element_collection_set);
-						}
-					} // target for end
-
-				} // inner for end
-			}	
-			*/		
+			}		
 
 		},this);
 		var cur_event_manager = src_element_collection_set.get_element_set_arr()[0].get_event_manager();
