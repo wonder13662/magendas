@@ -236,8 +236,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 		} // for end	
 
-
-		// wonder.jung11
 		// root 객체라면 후처리 작업을 진행합니다.
 		// 1. 그려진 리스트를 대상으로 jump spot 대상 확인.
 		if(action_list.has_no_parent() && action_list.has_no_parent_add_on()) {
@@ -609,7 +607,7 @@ airborne.bootstrap.view.obj.__action_list = {
 		var cur_children_cnt = parent_action_list_obj.get_children_cnt();
 
 		var editable_list_tag = ""
-		+ "<li class=\"list-group-item  <color_type>\" id=\"<editable_list_row_id>\" type=\"editable_list_row\" idx=\"<row_idx>\" is_first=\"<is_first>\" is_last=\"<is_last>\" event_manager_id=\"<event_manager_id>\" inner_table_selector_id=\"<inner_table_selector_id>\" is_shy=\"<is_shy>\" style=\"<style>\" element_type=\"<element_type>\">"
+		+ "<li class=\"list-group-item  <color_type>\" id=\"<editable_list_row_id>\" type=\"editable_list_row\" idx=\"<row_idx>\" is_first=\"<is_first>\" is_last=\"<is_last>\" event_manager_id=\"<event_manager_id>\" inner_table_selector_id=\"<inner_table_selector_id>\" is_shy=\"<is_shy>\" style=\"<style>\" element_type=\"<element_type>\" height_input_text=\"51px\">"
 			.replace(/\<editable_list_row_id\>/gi, editable_list_row_id)
 			.replace(/\<is_first\>/gi, action_item_obj.is_first())
 			.replace(/\<is_last\>/gi, action_item_obj.is_last())
@@ -630,12 +628,19 @@ airborne.bootstrap.view.obj.__action_list = {
 			title_style = "padding-left:10px;";
 		}
 		editable_list_tag += ""
-		// 사용자가 입력한 타이틀을 나타냄. 시간 표시가 있을 경우 우측 패딩을 추가.
-		+ "<span id=\"title\" style=\"<style>\" tossed_value=\"<tossed_value>\"><_v></span>"
-			.replace(/\<_v\>/gi, action_item_obj.get_action_name())
-			.replace(/\<tossed_value\>/gi, action_item_obj.get_action_name())
-			.replace(/\<style\>/gi, title_style)
-		;
+		// 사용자가 타이틀을 수정할 때 노출되는 input field
+		// wonder.jung11
+			// + "<div id=\"row_input_text\" class=\"form-group col-lg-9\" style=\"padding-left:0px;padding-right:7px;width:80%;float:left;margin-bottom:0px;margin-top:-3px;margin-left:14px;display:none;\">"
+			+ "<div id=\"row_input_text\" class=\"form-group col-lg-9\" style=\"padding-left:0px;padding-right:7px;width:80%;float:left;display:none;\">"
+				+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Keyword\">"
+			+ "</div>"
+
+			// 사용자가 입력한 타이틀을 나타냄. 시간 표시가 있을 경우 우측 패딩을 추가.
+			+ "<span id=\"title\" style=\"<style>\" tossed_value=\"<tossed_value>\"><_v></span>"
+				.replace(/\<_v\>/gi, action_item_obj.get_action_name())
+				.replace(/\<tossed_value\>/gi, action_item_obj.get_action_name())
+				.replace(/\<style\>/gi, title_style)
+			;
 
 		// 내부 버튼설정
 		editable_list_tag += ""
@@ -651,9 +656,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
 			+ "</div>"
-		;
 
-		editable_list_tag += ""
 			// chlidren element container div
 			+ "<div id=\"chlid_shy_element_container\"></div>"
 			// chlidren element container div
@@ -792,8 +795,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 			// 포커싱 모드로 바꿈.
 			cur_event_manager.show_focusing_mode();
-
-			// wonder.jung11
 
 			var cur_element_jq = cur_event_manager.get_element_jq();
 
@@ -1194,12 +1195,85 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_table_column_text_container_jq = cur_list_row_jq.parent();
 			element_event_manager.set_parent_container_jq(cur_table_column_text_container_jq);
 			// ROW TITLE INPUT CONTAINER
-			var cur_input_text_container_jq = cur_input_group_jq.find("div#row_input_text").first();
+			// REMOVE ME
+			// var cur_input_text_container_jq = cur_input_group_jq.find("div#row_input_text").first();
+			var cur_input_text_container_jq = cur_list_row_jq.find("div#row_input_text").first();
 			element_event_manager.set_title_input_container_jq(cur_input_text_container_jq);
 
+
+			// wonder.jung11 - 여기서 view mode 변경시의 뷰 제어 코드 추가
+			var delegate_show_view_mode_view_control = 
+			_obj.get_delegate(function(cur_event_manager){
+
+				console.log("HERE / cur_event_manager ::: ",cur_event_manager);
+
+				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_view_mode / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_element_jq = cur_event_manager.get_element_jq();
+				if(cur_element_jq != undefined) {
+					cur_element_jq.css("height", "");	
+				}
+
+				var cur_time_jq = cur_event_manager.get_time_jq();
+				if(cur_time_jq != undefined) {
+					cur_time_jq.css("margin-top", "");	
+				}
+
+			},this);	
+			element_event_manager.set_delegate_show_view_mode_view_control(delegate_show_view_mode_view_control);			
+
+			// wonder.jung11 - 여기서 input field와 title field가 번갈아가며 나타나는 경우의 뷰 제어 코드 추가
+			var delegate_show_input_mode_default_view_control = 
+			_obj.get_delegate(function(cur_event_manager){
+
+				console.log("cur_event_manager ::: ",cur_event_manager);
+
+				var cur_title_input_container_jq = cur_event_manager.get_title_input_container_jq();
+				var height_title_input_container = cur_title_input_container_jq.outerHeight();
+				var top_title_input_container = cur_title_input_container_jq.position().top;
+
+				
+
+				var height_element_jq =  height_title_input_container + (top_title_input_container * 2) + 2;
+
+				var cur_element_jq = cur_event_manager.get_element_jq();
+				cur_element_jq.css("height", height_element_jq + "px");
+
+				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / delegate_show_input_mode_default_view_control / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+
+					cur_event_manager.show_time_jq();
+					// 입력칸 표시로 time jq의 위치를 변경합니다.
+					var cur_time_jq = cur_event_manager.get_time_jq();
+					var height_time_jq = cur_time_jq.outerHeight();
+					var top_time_jq = cur_time_jq.position().top;
+
+					var new_top_time_jq = Math.round((height_title_input_container - height_time_jq) / 2);
+					cur_time_jq.css("margin-top", new_top_time_jq + "px");
+
+					var padding_left_element_jq = cur_element_jq.css("padding-left");
+					console.log("padding_left_element_jq ::: ",padding_left_element_jq);
+					cur_title_input_container_jq.css("margin-left", padding_left_element_jq);
+
+				}
+
+			},this);	
+			element_event_manager.set_delegate_show_input_mode_default_view_control(delegate_show_input_mode_default_view_control);		
+
 			// ROW TITLE INPUT (수정,편집이 가능한 input 엘리먼트)
-			var cur_input_title_jq = cur_input_group_jq.find("input#common_input").first();
+			// var cur_input_title_jq = cur_input_group_jq.find("input#common_input").first();
+			var cur_input_title_jq = cur_input_text_container_jq.find("input#common_input").first();
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
+
+			console.log("cur_input_title_jq ::: ",cur_input_title_jq);
 
 			var search_output_list_jq = cur_input_group_jq.find("div#search_output_list").first();
 			element_event_manager.set_search_output_list_jq(search_output_list_jq);

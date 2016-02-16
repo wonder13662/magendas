@@ -475,6 +475,7 @@ airborne.bootstrap.obj = {
 		cur_list_row_jq.css("border-top-left-radius",cur_radius_str);
 		cur_list_row_jq.css("border-bottom-right-radius",cur_radius_str);
 		cur_list_row_jq.css("border-bottom-left-radius",cur_radius_str);
+		
 	}
 	// @ public
 	// @ Desc : 리스트에 오직 1개의 열만 있을 경우, 상,하,좌,우의 모든 모서리를 ridius 4px로 둥글게 만들어 줍니다.
