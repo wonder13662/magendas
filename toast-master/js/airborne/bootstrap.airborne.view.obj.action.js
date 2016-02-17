@@ -2792,6 +2792,8 @@ airborne.bootstrap.obj.__action = {
 			,off_title_input_btn_ok_jq:function(){
 				if(this.title_input_btn_ok_jq == null) return;
 				this.title_input_btn_ok_jq.off();
+
+				console.log("HERE / off_title_input_btn_ok_jq");
 			}
 			,title_input_btn_cancel_jq:null
 			,set_title_input_btn_cancel_jq:function(title_input_btn_cancel_jq){
@@ -4316,6 +4318,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			,off_all_events:function(){
 
+				console.log("HERE / CHECK / 002");
 				this.off_title_input_btn_ok_jq();
 				this.off_title_input_btn_cancel_jq();
 				this.off_title_input_btn_search_jq();
@@ -5124,7 +5127,8 @@ airborne.bootstrap.obj.__action = {
 				
 				var cur_title_input_btn_ok_jq = this.get_title_input_btn_ok_jq();
 				if(cur_title_input_btn_ok_jq != undefined) {
-					cur_title_input_btn_ok_jq.off();	
+					console.log("HERE / CHECK / 003");
+					this.off_title_input_btn_ok_jq();
 				}
 
 			}
@@ -5193,7 +5197,8 @@ airborne.bootstrap.obj.__action = {
 					}
 				});
 
-				cur_title_input_btn_ok_jq.off();
+				console.log("HERE / CHECK / 001");
+				this.off_title_input_btn_ok_jq();
 				cur_title_input_btn_ok_jq.click(function(e){
 					do_on_event(e);
 				});
@@ -5534,8 +5539,10 @@ airborne.bootstrap.obj.__action = {
 				this.show_input_mode();
 
 				// set input group events
-				this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
-				this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
+
+				// REMOVE ME
+				// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
+				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
 				
 				// time input event
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
