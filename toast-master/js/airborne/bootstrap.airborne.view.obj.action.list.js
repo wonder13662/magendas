@@ -653,9 +653,23 @@ airborne.bootstrap.view.obj.__action_list = {
 				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
 
+			// + "<button id=\"btn_search\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-search\"></span>&nbsp;</button>"
+			// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
+			// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
+
+			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:10px;left:10px;\"></span>"
+			+ "</div>"
+
+			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
+			+ "</div>"
+
 			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
 			+ "</div>"
+
+			// wonder.jung11
 
 			// chlidren element container div
 			+ "<div id=\"chlid_shy_element_container\"></div>"
@@ -1273,19 +1287,30 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_input_title_jq = cur_input_text_container_jq.find("input#common_input").first();
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
 
-			console.log("cur_input_title_jq ::: ",cur_input_title_jq);
-
 			var search_output_list_jq = cur_input_group_jq.find("div#search_output_list").first();
 			element_event_manager.set_search_output_list_jq(search_output_list_jq);
 
 			var searchable_combo_box_jq = cur_input_group_jq.find("select").first();
 			element_event_manager.set_searchable_combo_box_jq(searchable_combo_box_jq);
 
-			var cur_title_input_btn_ok_jq = cur_input_group_jq.find("button#btn_ok").first();
+			// var cur_title_input_btn_ok_jq = cur_input_group_jq.find("button#btn_ok").first();
+			var cur_title_input_btn_ok_jq = cur_list_row_jq.find("div#btn_ok").first();
+
+			console.log("cur_input_text_container_jq ::: ",cur_input_text_container_jq);
+			console.log("cur_title_input_btn_ok_jq ::: ",cur_title_input_btn_ok_jq);
+
 			element_event_manager.set_title_input_btn_ok_jq(cur_title_input_btn_ok_jq);
 
-			var cur_title_input_btn_cancel_jq = cur_input_group_jq.find("button#btn_cancel").first();
+			
+
+			// var cur_title_input_btn_cancel_jq = cur_input_group_jq.find("button#btn_cancel").first();
+			var cur_title_input_btn_cancel_jq = cur_list_row_jq.find("div#btn_cancel").first();
+
+			console.log("cur_title_input_btn_cancel_jq ::: ",cur_title_input_btn_cancel_jq);
+
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
+
+			
 
 			//var cur_list_row_btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
 			var cur_list_row_btn_add_jq = cur_list_row_jq.find("div#btn_add").first();

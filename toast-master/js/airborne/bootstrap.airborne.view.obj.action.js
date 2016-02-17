@@ -4015,27 +4015,7 @@ airborne.bootstrap.obj.__action = {
 				var delegate_show_view_mode_view_control = this.get_delegate_show_view_mode_view_control();
 				if(_obj.is_valid_delegate(delegate_show_view_mode_view_control)) {
 					delegate_show_view_mode_view_control._apply([this]);
-				}
-
-
-				// wonder.jung11
-				/*
-				var cur_action_item_obj = this.get_action_item_obj();
-				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / show_view_mode / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
-					return;
-				}
-
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-
-					var cur_element_jq = this.get_element_jq();
-					cur_element_jq.css("height", "");
-
-					var cur_time_jq = this.get_time_jq();
-					cur_time_jq.css("margin-top", "");
-
-				}
-				*/				
+				}			
 
 				this.is_view_mode = true;
 				this.is_focusing_mode = false;
@@ -4185,6 +4165,29 @@ airborne.bootstrap.obj.__action = {
 
 				}
 
+				// set event on input buttons
+				var cur_title_input_btn_ok_jq = this.get_title_input_btn_ok_jq();
+				console.log("HERE / cur_title_input_btn_ok_jq ::: ",cur_title_input_btn_ok_jq);
+				if(cur_title_input_btn_ok_jq != undefined){
+
+					this.off_title_input_btn_ok_jq();
+					this.set_btn_event_color(cur_title_input_btn_ok_jq);
+
+					console.log("HERE / 002");
+
+					cur_title_input_btn_ok_jq.click(function(e){
+
+						e.stopPropagation();
+						// Do something.
+
+						// wonder.jung11
+
+						console.log("HERE / cur_title_input_btn_ok_jq.click");
+					});
+				}
+
+
+
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
 				this.is_child_focusing_mode = false;
@@ -4250,6 +4253,9 @@ airborne.bootstrap.obj.__action = {
 				this.hide_all();
 				this.show_title_input_container_jq();
 				this.rollback_row_title_input(event_mode);
+
+				this.show_title_input_btn_ok_jq();
+				this.show_title_input_btn_cancel_jq();
 
 				// 1. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
 				this.hide_shy_sibling_element_set();
@@ -4564,14 +4570,18 @@ airborne.bootstrap.obj.__action = {
 				return this.event_hierarchy_manager.get_all_event_manager_arr();
 			}
 			,set_btn_event_color:function(target_jq){
-				if(target_jq == null) return;
+				if(target_jq == undefined) return;
 
 				var _self = this;
+				// wonder.jung11
+				console.log("set_btn_event_color / 000 / target_jq ::: ",target_jq);
 
 				target_jq.mouseenter(function(e){
+					console.log("set_btn_event_color / mouseenter / 001");
 					_self.set_btn_color_focus(target_jq);
 				});
 				target_jq.mouseleave(function(e){
+					console.log("set_btn_event_color / mouseenter / 002");
 					_self.set_btn_color_back(target_jq);
 				});
 			}
@@ -4612,6 +4622,8 @@ airborne.bootstrap.obj.__action = {
 				return this.was_hover;
 			}
 			,on_mouse_over:function(){
+
+				console.log("on_mouse_over / 000");
 
 				if(this.is_lock()) return;
 
@@ -4676,10 +4688,9 @@ airborne.bootstrap.obj.__action = {
 				}
 				
 				var cur_btn_add_element_jq = this.get_btn_add_element_jq();
+				if(cur_btn_add_element_jq != undefined){
 
-				if(cur_btn_add_element_jq != null){
-
-					cur_btn_add_element_jq.off();
+					this.off_btn_add_element_jq();
 					this.set_btn_event_color(cur_btn_add_element_jq);
 
 					cur_btn_add_element_jq.click(function(e){
@@ -6086,7 +6097,6 @@ airborne.bootstrap.obj.__action = {
 			if(was_hover === is_hover) return;
 
 			// 검사중인 엘리먼트가 shy mode인지 확인합니다.
-
 
 			// get_children_element_set_arr
 			consoler.say("mmc / 1 / ",title_for_test);
