@@ -657,11 +657,11 @@ airborne.bootstrap.view.obj.__action_list = {
 			// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
 			// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
 
-			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:10px;left:10px;\"></span>"
+			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
 

@@ -4167,28 +4167,47 @@ airborne.bootstrap.obj.__action = {
 
 				}
 
+				// btn ok, btn cancel의 동작 참조.
+				// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+
+				// wonder.jung11
 				// set event on input buttons
 				var cur_title_input_btn_ok_jq = this.get_title_input_btn_ok_jq();
-				console.log("HERE / cur_title_input_btn_ok_jq ::: ",cur_title_input_btn_ok_jq);
 				if(cur_title_input_btn_ok_jq != undefined){
 
 					this.off_title_input_btn_ok_jq();
-					this.set_btn_event_color(cur_title_input_btn_ok_jq);
 
-					console.log("HERE / 002");
-
+					var is_force_change = true;
+					this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
 					cur_title_input_btn_ok_jq.click(function(e){
 
 						e.stopPropagation();
+
 						// Do something.
-
-						// wonder.jung11
-
 						console.log("HERE / cur_title_input_btn_ok_jq.click");
 					});
 				}
 
+				var cur_title_input_btn_cancel_jq = this.get_title_input_btn_cancel_jq();
+				console.log("show_input_mode / cur_title_input_btn_cancel_jq ::: ",cur_title_input_btn_cancel_jq);
+				if(cur_title_input_btn_cancel_jq != undefined){
 
+					this.off_title_input_btn_cancel_jq();
+
+					var is_force_change = true;
+					console.log("HERE / 001");
+					this.set_btn_event_color(cur_title_input_btn_cancel_jq, is_force_change);
+					console.log("HERE / 002");
+
+					cur_title_input_btn_cancel_jq.click(function(e){
+
+						e.stopPropagation();
+
+						// Do something.
+						console.log("HERE / cur_title_input_btn_cancel_jq.click");
+					});
+				}
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
@@ -4259,6 +4278,8 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_input_btn_ok_jq();
 				this.show_title_input_btn_cancel_jq();
 
+				this.focus_title_input_jq();
+
 				// 1. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
 				this.hide_shy_sibling_element_set();
 
@@ -4318,7 +4339,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			,off_all_events:function(){
 
-				console.log("HERE / CHECK / 002");
+				console.log("HERE / OFF - CHECK / 002");
 				this.off_title_input_btn_ok_jq();
 				this.off_title_input_btn_cancel_jq();
 				this.off_title_input_btn_search_jq();
@@ -4572,26 +4593,25 @@ airborne.bootstrap.obj.__action = {
 			,get_all_event_manager_arr:function(){
 				return this.event_hierarchy_manager.get_all_event_manager_arr();
 			}
-			,set_btn_event_color:function(target_jq){
+			,set_btn_event_color:function(target_jq, is_force_change){
 				if(target_jq == undefined) return;
 
 				var _self = this;
-				// wonder.jung11
-				console.log("set_btn_event_color / 000 / target_jq ::: ",target_jq);
-
 				target_jq.mouseenter(function(e){
-					console.log("set_btn_event_color / mouseenter / 001");
-					_self.set_btn_color_focus(target_jq);
+					_self.set_btn_color_focus(target_jq, is_force_change);
 				});
 				target_jq.mouseleave(function(e){
-					console.log("set_btn_event_color / mouseenter / 002");
 					_self.set_btn_color_back(target_jq);
 				});
 			}
-			,set_btn_color_focus:function(target_jq){
+			,set_btn_color_focus:function(target_jq, is_force_change){
 
-				if(target_jq == null) return;
-				if(this.is_lock()) return;
+				if(is_force_change == undefined) {
+					is_force_change = false;
+				}
+
+				if(target_jq == undefined) return;
+				if(!is_force_change && this.is_lock()) return;
 
 				var item_focus_color = _action.COLOR_FOCUS_YELLOW;
 				var cur_background_color = target_jq.css("background-color");
@@ -5102,6 +5122,7 @@ airborne.bootstrap.obj.__action = {
 					_self.shape_sibling_element();
 				}
 
+				console.log("HERE / OFF - CHECK / 003");
 				this.off_title_input_btn_cancel_jq();
 				cur_title_input_btn_cancel_jq.click(function(e){
 					do_on_event(e);
@@ -5478,7 +5499,7 @@ airborne.bootstrap.obj.__action = {
 
 				},this));
 
-				this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
 			}
 			,on_add_btn_click:function(){
 
@@ -5511,8 +5532,8 @@ airborne.bootstrap.obj.__action = {
 					this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
 
 					// set input group events
-					this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
-					this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+					// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+					// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
 				}
 
 				
