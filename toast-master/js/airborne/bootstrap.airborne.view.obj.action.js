@@ -4022,6 +4022,8 @@ airborne.bootstrap.obj.__action = {
 
 				if(this.is_view_mode) return;
 
+				console.log("HERE / show_view_mode / 001");
+
 				this.hide_all();
 				
 				this.show_element_jq();
@@ -4043,7 +4045,7 @@ airborne.bootstrap.obj.__action = {
 				this.is_focusing_mode = false;
 				this.is_child_focusing_mode = false;
 
-				console.log("HERE / show_view_mode / 001");
+				console.log("HERE / show_view_mode / 002");
 			}
 			,show_parent_view_mode:function(){
 				var cur_element_set = this.get_element_set();
@@ -4186,6 +4188,11 @@ airborne.bootstrap.obj.__action = {
 
 					this.show_input_mode_search_n_select();
 
+				} else if(_action.EVENT_TYPE_ADD_ROW === event_mode){	
+
+					// 새로운 리스트 열을 추가하는 경우
+					this.show_input_mode_add_row(event_mode);
+
 				} else {
 
 					consoler.say("em_sim / 2 /",cur_title);
@@ -4195,33 +4202,9 @@ airborne.bootstrap.obj.__action = {
 
 				}
 
-				// btn ok, btn cancel의 동작 참조.
-				// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
-				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
-
 				// set event on input buttons
 				this.set_event_btn_ok_on_input_group(event_mode);
-
-				// wonder.jung11
-				var cur_title_input_btn_cancel_jq = this.get_title_input_btn_cancel_jq();
-				console.log("show_input_mode / cur_title_input_btn_cancel_jq ::: ",cur_title_input_btn_cancel_jq);
-				if(cur_title_input_btn_cancel_jq != undefined){
-
-					this.off_title_input_btn_cancel_jq();
-
-					var is_force_change = true;
-					console.log("HERE / 001");
-					this.set_btn_event_color(cur_title_input_btn_cancel_jq, is_force_change);
-					console.log("HERE / 002");
-
-					cur_title_input_btn_cancel_jq.click(function(e){
-
-						e.stopPropagation();
-
-						// Do something.
-						console.log("HERE / cur_title_input_btn_cancel_jq.click");
-					});
-				}
+				this.set_event_btn_cancel_on_input_group(event_mode);
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
@@ -4246,7 +4229,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_input_group_jq();
 
 				// 4. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
-				this.hide_shy_sibling_element_set();
+				this.hide_shy_child();
 			}
 			,show_input_mode_shy_list:function(){
 
@@ -4267,7 +4250,7 @@ airborne.bootstrap.obj.__action = {
 				this.hide_shy_child_element_set();
 
 				// 4. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
-				this.hide_shy_sibling_element_set();
+				this.hide_shy_child();
 
 				// 5. 선택한 엘리먼트(자기 자신)의 아래로 input group을 옮깁니다.
 				this.move_title_input_group_jq_under_me();
@@ -4342,8 +4325,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_input_mode_default:function(event_mode){
 
-				console.log("show_input_mode_default / 001");
-
 				this.hide_all();
 				this.show_title_input_container_jq();
 				this.rollback_row_title_input(event_mode);
@@ -4353,40 +4334,23 @@ airborne.bootstrap.obj.__action = {
 
 				this.focus_title_input_jq();
 
-				// 1. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
-				this.hide_shy_sibling_element_set();
+				// 1. shy 자식 객체를 가려줍니다.
+				this.hide_shy_child();
 
-				// 2. 자식 객체가 있다면 가려줍니다. / wonder.jung11
+				// 2. 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
-
-				
-
-
-
-				// REMOVE ME
-				/*
-				for(var idx = 0; idx < cur_children.length; idx++) {
-					var cur_child_obj = cur_children[idx];
-					if(_action.is_not_valid_action_obj(cur_child_obj)) {
-						console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_obj(cur_child_obj)");
-						return;
-					}
-
-					var cur_child_children = cur_child_obj.get_children();
-					for(var inner_idx = 0; inner_idx < cur_child_children.length; inner_idx++) {
-						var cur_child_child_obj = cur_child_children[inner_idx];
-						if(_action.is_not_valid_action_obj(cur_child_child_obj)) {
-							console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_obj(cur_child_obj)");
-							return;
-						}
-
-						console.log("cur_child_child_obj ::: ",cur_child_child_obj.get_coordinate());
-					}
-				}
-				*/
 
 				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
 				this.call_delegate_show_input_mode_default_view_control(this);
+			}
+			,show_input_mode_add_row:function(event_mode){
+
+				console.log("HERE / show_input_mode_add_row");
+
+				this.hide_all();
+
+				this.show_view_mode();
+
 			}
 			,show_input_mode_time:function(){
 
@@ -4815,6 +4779,8 @@ airborne.bootstrap.obj.__action = {
 
 					cur_btn_add_element_jq.click(function(e){
 
+						// wonder.jung11
+
 						e.stopPropagation();
 						_self.show_view_mode();
 						_self.on_add_btn_click();
@@ -5184,46 +5150,60 @@ airborne.bootstrap.obj.__action = {
 				});
 			}
 			,set_event_btn_cancel_on_input_group:function(cur_event_type){
+				
+				// TODO _obj.EVENT_TYPE_INSERT_ITEM 나 _action.EVENT_TYPE_ADD_ROW이 1개로 통합되어야 할 듯.
+				if( _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type && 
+					_obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type && 
+					_action.EVENT_TYPE_ADD_ROW !== cur_event_type ){
 
-				var _obj = airborne.bootstrap.obj;
+					console.log("!Error! / set_event_btn_cancel_on_input_group / _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type || _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type || _action.EVENT_TYPE_ADD_ROW !== cur_event_type");
+					return;
+				}
+
 				var _self = this;
-				var cur_title_input_btn_cancel_jq = this.get_title_input_btn_cancel_jq();
-
-				if( _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type && _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type ){
-					console.log("!Error! / set_event_btn_ok_on_input_group / _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type || _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type");
-					return;
-				}
-
-				if(cur_title_input_btn_cancel_jq == null){
-					return;
-				}
-
-
 				var do_on_event = function(e) {
 					e.stopPropagation();
 
-					_self.clear_title_input_jq_watch_dog_interval();
 					_self.clear_title_input_jq_value();
 					_self.rollback_title_jq_text();
 
 					// 입력 모드 이전인 수정 모드로 돌아간다.
+					console.log("HERE / set_event_btn_cancel_on_input_group / 001");
 					_self.show_edit_mode();
 
-					_self.set_btn_color_back(_self.get_title_jq());
+					// REMOVE ME
+					// _self.set_btn_color_back(_self.get_title_jq());
 
 					_self.remove_all_element_of_search_output_list_jq();
 
 					_self.release();
 
-					console.log("HERE / do_on_event");
 					_self.shape_sibling_element();
+
+					// 뷰단의 엘리먼트들의 모양을 view mode일 경우의 모습으로 바꾸어 줍니다.
+					_self.call_delegate_show_view_mode_view_control(_self);
 				}
 
-				console.log("HERE / OFF - CHECK / 003");
+				var cur_title_input_btn_cancel_jq = this.get_title_input_btn_cancel_jq();
+				if(cur_title_input_btn_cancel_jq == null){
+					return;
+				}
+
 				this.off_title_input_btn_cancel_jq();
 				cur_title_input_btn_cancel_jq.click(function(e){
 					do_on_event(e);
 				});
+
+				// set button event
+				this.off_title_input_btn_cancel_jq();
+				var is_force_change = true;
+				this.set_btn_event_color(cur_title_input_btn_cancel_jq, is_force_change);
+
+				cur_title_input_btn_cancel_jq.click(function(e){
+					e.stopPropagation();
+					do_on_event(e);
+				});
+
 
 				var cur_title_input_jq = this.get_title_input_jq();
 				cur_title_input_jq.focus();
@@ -5252,8 +5232,14 @@ airborne.bootstrap.obj.__action = {
 			}
 			,set_event_btn_ok_on_input_group:function(cur_event_type){
 
-				if( _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type && _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type ){
-					console.log("!Error! / set_event_btn_ok_on_input_group / _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type || _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type");
+				console.log("HERE / set_event_btn_ok_on_input_group / cur_event_type ::: ",cur_event_type);
+
+				// TODO _obj.EVENT_TYPE_INSERT_ITEM 나 _action.EVENT_TYPE_ADD_ROW이 1개로 통합되어야 할 듯.
+				if( _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type && 
+					_obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type && 
+					_action.EVENT_TYPE_ADD_ROW !== cur_event_type ){
+
+					console.log("!Error! / set_event_btn_ok_on_input_group / _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type || _obj.EVENT_TYPE_UPDATE_ITEM !== cur_event_type || _action.EVENT_TYPE_ADD_ROW !== cur_event_type");
 					return;
 				}
 
@@ -5271,7 +5257,7 @@ airborne.bootstrap.obj.__action = {
 					console.log("set_event_btn_ok_on_input_group / do_on_event / cur_event_type : ",cur_event_type);
 
 
-					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type){
+					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW !== cur_event_type){
 
 						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM");
 
@@ -5871,30 +5857,36 @@ airborne.bootstrap.obj.__action = {
 				}
 				return shy_element_set;
 			}
-			,hide_shy_sibling_element_set:function(){
+			,hide_shy_child:function(){
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / hide_shy_sibling_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					console.log("!Error! / hide_shy_child / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 
+				// 자신의 내부 자식 객체가 있는지 확인. 없다면 중단.
+				if(cur_action_item_obj.has_no_children()) {
+					return;
+				}
+
+				// 자신의 내부 자식 객체들의 shy 엘리먼트를 숨김.
 				var child_action_obj_list = cur_action_item_obj.get_children();
 				if(_v.is_not_valid_array(child_action_obj_list)) {
-					console.log("!Error! / hide_shy_sibling_element_set / _v.is_not_valid_array(child_action_obj_list)");
+					console.log("!Error! / hide_shy_child / _v.is_not_valid_array(child_action_obj_list)");
 					return;
 				}
 
 				for(var idx = 0; idx < child_action_obj_list.length; idx++) {
 					var child_action_list_obj = child_action_obj_list[idx];
 					if(_action.is_not_valid_action_obj(child_action_list_obj)) {
-						console.log("!Error! / hide_shy_sibling_element_set / _action.is_not_valid_action_obj(child_action_list_obj)");
+						console.log("!Error! / hide_shy_child / _action.is_not_valid_action_obj(child_action_list_obj)");
 						return;
 					}
 
 					var child_child_action_obj = child_action_list_obj.get_child(0);
 					if(_action.is_not_valid_action_obj(child_child_action_obj)) {
-						console.log("!Error! / hide_shy_sibling_element_set / _action.is_not_valid_action_item_obj(child_child_action_obj)");
+						console.log("!Error! / hide_shy_child / _action.is_not_valid_action_item_obj(child_child_action_obj)");
 						return;
 					}
 
@@ -5906,7 +5898,7 @@ airborne.bootstrap.obj.__action = {
 				/*
 				var shy_sibling_element_set = this.get_shy_sibling_element_set();
 
-				console.log("hide_shy_sibling_element_set / shy_sibling_element_set ::: ",shy_sibling_element_set);
+				console.log("hide_shy_child / shy_sibling_element_set ::: ",shy_sibling_element_set);
 
 				if(shy_sibling_element_set == undefined){
 					return;
@@ -7418,7 +7410,9 @@ airborne.bootstrap.obj.__action = {
 				this.btn_collection_eject_jq = btn_collection_eject_jq;
 
 				// btn_collection_eject를 설정하면 자동으로 관련 이벤트가 주입됩니다.
-				this.set_jump_event(this.btn_collection_eject_jq);
+				if(this.btn_collection_eject_jq != undefined) {
+					this.set_jump_event(this.btn_collection_eject_jq);	
+				}
 			}
 			,get_btn_collection_eject_jq:function(){
 				return this.btn_collection_eject_jq;
