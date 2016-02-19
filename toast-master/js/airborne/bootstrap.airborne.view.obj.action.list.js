@@ -657,12 +657,12 @@ airborne.bootstrap.view.obj.__action_list = {
 			// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
 			// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
 
-			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
-			+ "</div>"
-
 			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
+			+ "</div>"
+
+			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 			+ "</div>"
 
 			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
@@ -1091,6 +1091,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		var editable_list_jq = parent_jq.children().last();
 		cur_element_collection_set.set_element_collection_container_jq(editable_list_jq);
 
+		cur_action_list.set_list_element_collection_set(cur_element_collection_set);
+
 		// wonder.jung
 		// 리스트의 자식 열들을 만듭니다.
 		var editable_list_row_arr_jq = editable_list_jq.children();
@@ -1219,22 +1221,21 @@ airborne.bootstrap.view.obj.__action_list = {
 			var delegate_show_view_mode_view_control = 
 			_obj.get_delegate(function(cur_event_manager){
 
-				console.log("HERE / cur_event_manager ::: ",cur_event_manager);
-
 				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 					console.log("!Error! / show_view_mode / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 
-				var cur_element_jq = cur_event_manager.get_element_jq();
-				if(cur_element_jq != undefined) {
-					cur_element_jq.css("height", "");	
-				}
-
 				var cur_time_jq = cur_event_manager.get_time_jq();
 				if(cur_time_jq != undefined) {
 					cur_time_jq.css("margin-top", "");	
+				}
+
+				var cur_element_jq = cur_event_manager.get_element_jq();
+				if(cur_element_jq != undefined) {
+					// wonder.jung11
+					cur_element_jq.css("height", "");
 				}
 
 			},this);	
@@ -1244,13 +1245,9 @@ airborne.bootstrap.view.obj.__action_list = {
 			var delegate_show_input_mode_default_view_control = 
 			_obj.get_delegate(function(cur_event_manager){
 
-				console.log("cur_event_manager ::: ",cur_event_manager);
-
 				var cur_title_input_container_jq = cur_event_manager.get_title_input_container_jq();
 				var height_title_input_container = cur_title_input_container_jq.outerHeight();
 				var top_title_input_container = cur_title_input_container_jq.position().top;
-
-				
 
 				var height_element_jq =  height_title_input_container + (top_title_input_container * 2) + 2;
 
@@ -1283,7 +1280,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			element_event_manager.set_delegate_show_input_mode_default_view_control(delegate_show_input_mode_default_view_control);		
 
 			// ROW TITLE INPUT (수정,편집이 가능한 input 엘리먼트)
-			// var cur_input_title_jq = cur_input_group_jq.find("input#common_input").first();
 			var cur_input_title_jq = cur_input_text_container_jq.find("input#common_input").first();
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
 
@@ -1293,26 +1289,12 @@ airborne.bootstrap.view.obj.__action_list = {
 			var searchable_combo_box_jq = cur_input_group_jq.find("select").first();
 			element_event_manager.set_searchable_combo_box_jq(searchable_combo_box_jq);
 
-			// var cur_title_input_btn_ok_jq = cur_input_group_jq.find("button#btn_ok").first();
 			var cur_title_input_btn_ok_jq = cur_list_row_jq.find("div#btn_ok").first();
-
-			console.log("cur_input_text_container_jq ::: ",cur_input_text_container_jq);
-			console.log("cur_title_input_btn_ok_jq ::: ",cur_title_input_btn_ok_jq);
-
 			element_event_manager.set_title_input_btn_ok_jq(cur_title_input_btn_ok_jq);
 
-			
-
-			// var cur_title_input_btn_cancel_jq = cur_input_group_jq.find("button#btn_cancel").first();
 			var cur_title_input_btn_cancel_jq = cur_list_row_jq.find("div#btn_cancel").first();
-
-			console.log("cur_title_input_btn_cancel_jq ::: ",cur_title_input_btn_cancel_jq);
-
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
 
-			
-
-			//var cur_list_row_btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
 			var cur_list_row_btn_add_jq = cur_list_row_jq.find("div#btn_add").first();
 			if(cur_list_row_btn_add_jq.length > 0){
 				element_event_manager.set_btn_add_element_jq(cur_list_row_btn_add_jq);	

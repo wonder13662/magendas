@@ -266,18 +266,10 @@ airborne.bootstrap.obj = {
 			, _apply:function(param_arr){
 
 				if(_v.is_valid_array(param_arr) && _v.is_valid_array(this._param_obj_arr)) {
-					console.log("_apply / 001 / param_arr ::: ",param_arr);
-					console.log("_apply / 001 / this._param_obj_arr :: ",this._param_obj_arr);
 					param_arr = param_arr.concat(this._param_obj_arr);
-
 				} else if(_v.is_not_valid_array(param_arr) && _v.is_valid_array(this._param_obj_arr)) {
-					console.log("_apply / 002 / param_arr ::: ",param_arr);
-					console.log("_apply / 002 / this._param_obj_arr ::: ",this._param_obj_arr);
 					param_arr = this._param_obj_arr;
-
 				}
-
-				console.log("_apply / param_arr ::: ",param_arr);
 
 				this._func.apply(this._scope,param_arr);
 			}
