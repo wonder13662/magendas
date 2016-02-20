@@ -3998,6 +3998,12 @@ airborne.bootstrap.obj.__action = {
 				this.hide_btn_eject_element_jq();
 				this.hide_time_input_group_jq();
 
+				// 1. shy 자식 객체를 가려줍니다.
+				this.hide_shy_child();
+
+				// 2. 자식 객체가 있다면 가려줍니다.
+				this.hide_child();
+
 			}
 			// @ Public
 			// @ Scope 	: Event Manager
@@ -4022,6 +4028,12 @@ airborne.bootstrap.obj.__action = {
 
 				if(this.is_view_mode) return;
 
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("_action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
 				console.log("HERE / show_view_mode / 001");
 
 				this.hide_all();
@@ -4032,8 +4044,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_child();
 				this.set_colors_back();
 				
-				if( this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT || 
-					this.get_element_type() == _obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT ){
+				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
 
 					this.show_time_jq();
 				}
@@ -4315,12 +4326,10 @@ airborne.bootstrap.obj.__action = {
 					cur_list_element_collection_set.show_element_collection_container_jq();
 
 					// shy 객체가 있다면 보여줍니다.
-					// wonder.jung11
 					var cur_first_child_action_item_obj = cur_children_action_obj.get_first_child();
 					if(cur_first_child_action_item_obj.get_action_is_shy()) {
 						cur_first_child_action_item_obj.get_event_manager().show_element_jq();
 					}
-					console.log("cur_first_child_action_item_obj ::: ",cur_first_child_action_item_obj);
 				}
 			}
 			,show_input_mode_default:function(event_mode){
@@ -4334,12 +4343,6 @@ airborne.bootstrap.obj.__action = {
 
 				this.focus_title_input_jq();
 
-				// 1. shy 자식 객체를 가려줍니다.
-				this.hide_shy_child();
-
-				// 2. 자식 객체가 있다면 가려줍니다.
-				this.hide_child();
-
 				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
 				this.call_delegate_show_input_mode_default_view_control(this);
 			}
@@ -4347,9 +4350,60 @@ airborne.bootstrap.obj.__action = {
 
 				console.log("HERE / show_input_mode_add_row");
 
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("_action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				// DEBUG
+				console.log("HERE / show_input_mode_add_row / get_action_is_shy :: ",cur_action_item_obj.get_action_is_shy());
+
 				this.hide_all();
 
-				this.show_view_mode();
+				this.show_element_jq();
+				this.show_parent_container_jq();
+				this.show_title_jq();
+				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
+					this.show_time_jq();
+				}
+				this.set_colors_back();
+
+				if(cur_action_item_obj.get_action_is_shy()) {
+
+					// 처음으로 자식 엘리먼트를 추가
+					console.log("처음으로 자식 엘리먼트를 추가");
+
+				} else {
+
+					// 자신의 엘리먼트 밑으로 새로운 형제 엘리먼트를 추가.
+					// 아래 열을 추가합니다.
+					var cur_element_set = this.get_element_set();
+					var cur_element_collection_set = cur_element_set.get_element_collection_set();
+					cur_element_collection_set.add_element(this);
+
+					// 추가한 뒤에 사용자가 기본값인 "New Item"을 수정할 수 있도록 수정 창을 보여줍니다.
+					var cur_sibling_action_obj_after = cur_action_item_obj.get_sibling_action_obj_after();
+					if(_action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)) {
+						console.log("!Error! / show_input_mode_add_row / _action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)");
+						return;
+					}
+					var event_manager_after = cur_sibling_action_obj_after.get_event_manager();
+					if(event_manager_after == undefined) {
+						console.log("!Error! / show_input_mode_add_row / event_manager_after == undefined");
+						return;
+					}
+					event_manager_after.show_focusing_mode();
+					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
+					event_manager_after.show_input_mode(event_mode);
+					event_manager_after.lock();
+
+				}
+
+
+				this.is_view_mode = false;
+				this.is_focusing_mode = false;
+				this.is_child_focusing_mode = false;
 
 			}
 			,show_input_mode_time:function(){
@@ -4779,11 +4833,10 @@ airborne.bootstrap.obj.__action = {
 
 					cur_btn_add_element_jq.click(function(e){
 
-						// wonder.jung11
-
 						e.stopPropagation();
 						_self.show_view_mode();
 						_self.on_add_btn_click();
+
 					});
 				}
 
@@ -4911,7 +4964,7 @@ airborne.bootstrap.obj.__action = {
 			,shape_sibling_element:function(){
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				var cur_element_collection_set = this.get_element_set().get_element_collection_set();
@@ -5254,12 +5307,12 @@ airborne.bootstrap.obj.__action = {
 					// 이벤트 전파를 막습니다.
 					e.stopPropagation();
 
-					console.log("set_event_btn_ok_on_input_group / do_on_event / cur_event_type : ",cur_event_type);
+					console.log("XXX / set_event_btn_ok_on_input_group / do_on_event / cur_event_type : ",cur_event_type);
 
 
-					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW !== cur_event_type){
+					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW === cur_event_type){
 
-						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM");
+						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM / 000");
 
 						// 입력 창을 가립니다.
 						_self.hide_title_input_group_jq();
@@ -5269,6 +5322,8 @@ airborne.bootstrap.obj.__action = {
 						var cur_element_set = _self.get_element_set();
 						var cur_element_collection_set = cur_element_set.get_element_collection_set();
 						cur_element_collection_set.add_element(_self);
+
+						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM / 001");
 
 					} else if(_obj.EVENT_TYPE_UPDATE_ITEM === cur_event_type){
 
@@ -5296,7 +5351,6 @@ airborne.bootstrap.obj.__action = {
 
 					_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_INPUT_TEXT, cur_event_type);
 
-					// wonder.jung11
 					_self.call_delegate_show_view_mode_view_control(_self);
 				}
 
@@ -5318,6 +5372,7 @@ airborne.bootstrap.obj.__action = {
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
 
 				cur_title_input_btn_ok_jq.click(function(e){
+					console.log("XXX / do_on_event / 222");
 					do_on_event(e);
 				});
 
@@ -5598,6 +5653,7 @@ airborne.bootstrap.obj.__action = {
 
 				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
 			}
+			// @ Scope : Event manager
 			,on_add_btn_click:function(){
 
 				var cur_action_item_obj = this.get_action_item_obj();
@@ -5624,13 +5680,32 @@ airborne.bootstrap.obj.__action = {
 					this.release();
 
 				} else {
-					// 2. LIST ACTION ITEM
-					// 입력 패턴을 새로운 열을 추가하는 형식으로 보여줍니다.
-					this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
 
-					// set input group events
-					// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
-					// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
+					console.log("HERE / on_add_btn_click / 002 / action_name ::: ",cur_action_item_obj.get_action_name());
+
+					// 2. LIST ACTION ITEM
+					if(cur_action_item_obj.get_action_is_shy()) {
+						// 첫번째 엘리먼트가 추가되는 경우
+						
+
+						// wonder.jung11
+						var cur_element_collection_set = this.get_element_set().get_element_collection_set();
+						if(cur_element_collection_set == undefined) {
+							console.log("!Error! / on_add_btn_click / cur_element_collection_set == undefined");
+							return;
+						}
+						// 2-1. 엘리먼트를 shy --> not shy로 바꿉니다.
+						cur_element_collection_set.add_element(this);
+
+						// 2-2. 입력창을 보여줍니다.
+						var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
+						this.show_input_mode(event_mode);
+
+					} else {
+						// 이미 보이는 엘리먼트에서 추가되는 경우
+						this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
+					}
+
 				}
 
 				
@@ -6778,8 +6853,9 @@ airborne.bootstrap.obj.__action = {
 
 				var new_action_name = sibling_element_event_manager.get_title_input_jq_value();
 				if(_v.is_not_valid_str(new_action_name)) {
-					console.log("!Error! / add_element / _v.is_not_valid_str(new_action_name)");
-					return;
+					new_action_name = "New Item";
+					// console.log("!Error! / add_element / _v.is_not_valid_str(new_action_name)");
+					// return;
 				}
 
 				consoler.say("add_element / 0 / 추가되는 엘리먼트 이름 : " + new_action_name);
