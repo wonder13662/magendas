@@ -142,9 +142,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			if(cur_action_item_obj.has_children()) {
 
 				// 4-2-1. 일반적인 자식 객체를 가지고 있는 경우, 화면에 표시
-
-				console.log(cur_action_item_name + " / has_children :: " + cur_action_item_obj.has_children());
-
 				var inner_idx;
 				var inner_length = cur_action_list_list.length;
 				for(inner_idx = 0; inner_idx < inner_length; inner_idx++){
@@ -615,7 +612,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			.replace(/\<inner_table_selector_id\>/gi, editable_list_row_inner_table_selector)
 			.replace(/\<color_type\>/gi, color_type)
 			.replace(/\<is_shy\>/gi, action_item_obj.get_action_is_shy())
-			.replace(/\<style\>/gi, (action_item_obj.get_action_is_shy())?"display:none;":"")
+			// .replace(/\<style\>/gi, (action_item_obj.get_action_is_shy())?"display:none;":"")
 			.replace(/\<element_type\>/gi, action_item_obj.get_element_type())
 			// 시간을 나타냄. 초기값은 display:none;
 			+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
@@ -653,10 +650,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
 
-			// + "<button id=\"btn_search\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-search\"></span>&nbsp;</button>"
-			// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
-			// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
-
 			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
@@ -668,8 +661,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
 			+ "</div>"
-
-			// wonder.jung11
 
 			// chlidren element container div
 			+ "<div id=\"chlid_shy_element_container\"></div>"

@@ -2063,6 +2063,16 @@ airborne.bootstrap.obj.__action = {
 			,get_child_shy_element_container_jq:function(){
 				return this.child_shy_element_container_jq;
 			}
+			,hide_child_shy_element_container_jq:function() {
+				if(this.child_shy_element_container_jq != undefined) {
+					this.child_shy_element_container_jq.hide();
+				}	
+			}
+			,show_child_shy_element_container_jq:function() {
+				if(this.child_shy_element_container_jq != undefined) {
+					this.child_shy_element_container_jq.show();
+				}	
+			}
 			// @ private
 			// @ Desc : 자신의 하위에 속한 엘리먼트 컨테이너의 참조. 자식 엘리먼트 추가시 이 컨테이너에 넣습니다.
 			,children_element_container_jq:null
@@ -2714,29 +2724,6 @@ airborne.bootstrap.obj.__action = {
 
 				return cur_prev_value;
 			}
-			// REMOVE ME
-			/*
-			,set_title_input_jq_watch_dog_interval:function(){
-				var _self = this;
-				if(this.input_onchange_interval == null){
-
-					var cur_title_jq_value = this.get_title_jq_value();
-					this.clear_title_input_jq_prev_value();
-
-					var cur_title_jq_value = this.get_title_jq_value();
-					var cur_title_jq_attr_tossed_value = this.get_title_jq_attr_tossed_value();
-
-					this.set_title_input_jq_prev_value(this.get_title_jq_value());
-
-					this.input_onchange_interval = setInterval(function(){
-						// update title text
-						var cur_search_keyword = _self.get_title_input_jq_value();
-						_self.set_title_jq_text(cur_search_keyword, true);
-
-					},300);
-				}				
-			}
-			*/
 			,set_title_input_jq_search_list_watch_dog_interval:function(){
 				var _self = this;
 				if(this.input_onchange_interval == null){
@@ -3998,12 +3985,8 @@ airborne.bootstrap.obj.__action = {
 				this.hide_btn_eject_element_jq();
 				this.hide_time_input_group_jq();
 
-				// 1. shy 자식 객체를 가려줍니다.
-				this.hide_shy_child();
-
-				// 2. 자식 객체가 있다면 가려줍니다.
+				// 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
-
 			}
 			// @ Public
 			// @ Scope 	: Event Manager
@@ -4034,8 +4017,6 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				console.log("HERE / show_view_mode / 001");
-
 				this.hide_all();
 				
 				this.show_element_jq();
@@ -4045,18 +4026,12 @@ airborne.bootstrap.obj.__action = {
 				this.set_colors_back();
 				
 				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
-
 					this.show_time_jq();
 				}
-
-				// 2. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
-				// this.call_delegate_show_view_mode_view_control(this);
 
 				this.is_view_mode = true;
 				this.is_focusing_mode = false;
 				this.is_child_focusing_mode = false;
-
-				console.log("HERE / show_view_mode / 002");
 			}
 			,show_parent_view_mode:function(){
 				var cur_element_set = this.get_element_set();
@@ -4084,6 +4059,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_child();
+				this.show_shy_child();
 
 				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
 
@@ -4112,8 +4088,6 @@ airborne.bootstrap.obj.__action = {
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
 				this.is_child_focusing_mode = false;
-
-				console.log("HERE / show_edit_mode / 001");
 			}
 			,is_focusing_mode:false
 			,get_is_focusing_mode:function() {
@@ -4139,6 +4113,8 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.hide_title_jq_text_head();
 				this.show_title_jq();
+				this.show_child();
+				this.show_shy_child();
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
 					this.show_time_jq();
@@ -4310,26 +4286,9 @@ airborne.bootstrap.obj.__action = {
 				var cur_child_action_obj_list = cur_action_item_obj.get_children();
 				var cur_children_action_obj = cur_child_action_obj_list[0];
 
-				// shy 객체만 가지고 있다면 중단합니다.
-				/*
-				var cur_first_child_action_item_obj = undefined;
-				if(cur_children_action_obj != undefined) {
-					cur_first_child_action_item_obj = cur_children_action_obj.get_first_child();
-				}
-				if(_action.is_valid_action_item_obj(cur_first_child_action_item_obj) && cur_first_child_action_item_obj.get_action_is_shy()) {
-					return;
-				}
-				*/
-
 				if(cur_children_action_obj != undefined && cur_children_action_obj.is_list()) {
 					var cur_list_element_collection_set = cur_children_action_obj.get_list_element_collection_set();
 					cur_list_element_collection_set.show_element_collection_container_jq();
-
-					// shy 객체가 있다면 보여줍니다.
-					var cur_first_child_action_item_obj = cur_children_action_obj.get_first_child();
-					if(cur_first_child_action_item_obj.get_action_is_shy()) {
-						cur_first_child_action_item_obj.get_event_manager().show_element_jq();
-					}
 				}
 			}
 			,show_input_mode_default:function(event_mode){
@@ -4393,7 +4352,10 @@ airborne.bootstrap.obj.__action = {
 						console.log("!Error! / show_input_mode_add_row / event_manager_after == undefined");
 						return;
 					}
+
+					console.log("HERE / show_focusing_mode / 006");
 					event_manager_after.show_focusing_mode();
+
 					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 					event_manager_after.show_input_mode(event_mode);
 					event_manager_after.lock();
@@ -4683,10 +4645,8 @@ airborne.bootstrap.obj.__action = {
 				if(!is_only_one) {
 					// shy mode로 변경된 경우가 아니고 뒤나 앞에 형제 엘리먼트가 있는 경우, 형제 엘리먼트의 모양을 변경해줍니다.
 					if(sibling_action_obj_before != undefined) {
-						console.log("REMOVE / 001");
 						sibling_action_obj_before.get_event_manager().shape_sibling_element();
 					} else if(sibling_action_obj_after != undefined) {
-						console.log("REMOVE / 002");
 						sibling_action_obj_after.get_event_manager().shape_sibling_element();
 					}
 				}
@@ -4773,8 +4733,6 @@ airborne.bootstrap.obj.__action = {
 				return this.was_hover;
 			}
 			,on_mouse_over:function(){
-
-				console.log("on_mouse_over / 000");
 
 				if(this.is_lock()) return;
 
@@ -4960,10 +4918,21 @@ airborne.bootstrap.obj.__action = {
 
 				}
 			}
-			,on_mouse_leave:function(){
+			,on_mouse_leave:function(is_child_mouse_over){
 				if(this.is_lock()) return;
 
+				if(is_child_mouse_over == undefined) {
+					is_child_mouse_over = false;
+				}
+
 				this.show_view_mode();
+
+				// wonder.jung11 - 
+				console.log("HERE / on_mouse_leave / is_child_mouse_over ::: ",is_child_mouse_over);
+				if(is_child_mouse_over === true) {
+					console.log("HERE / on_mouse_leave / hide_shy_child");
+					this.hide_shy_child();
+				}
 				this.set_btn_color_back();
 				this.off_all_events();
 
@@ -4983,14 +4952,10 @@ airborne.bootstrap.obj.__action = {
 				var cur_element_collection_set = this.get_element_set().get_element_collection_set();
 				var cur_element_jq = this.get_element_jq();
 
-				console.log("HERE / shape_sibling_element / 001");
-
 				// 테이블 형일 경우는 엘리먼트 형태를 바꾸지 않습니다.
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
 					return;
 				}
-
-				console.log("HERE / shape_sibling_element / 002");
 
 				// 모든 엘리먼트의 eject btn을 숨깁니다.
 				var cur_first_sibling_action_obj = cur_action_item_obj.get_first_sibling_action_obj();
@@ -5008,9 +4973,6 @@ airborne.bootstrap.obj.__action = {
 						console.log("!Error! / shape_sibling_element / next_element_event_manager == undefined");
 						return;
 					}
-
-					// REMOVE ME
-					// next_element_event_manager.hide_btn_eject_collection_element_jq();
 
 					if(next_sibling_action_obj.is_last()) {
 						break;
@@ -5237,9 +5199,6 @@ airborne.bootstrap.obj.__action = {
 					console.log("HERE / set_event_btn_cancel_on_input_group / 001");
 					_self.show_edit_mode();
 
-					// REMOVE ME
-					// _self.set_btn_color_back(_self.get_title_jq());
-
 					_self.remove_all_element_of_search_output_list_jq();
 
 					_self.release();
@@ -5320,12 +5279,7 @@ airborne.bootstrap.obj.__action = {
 					// 이벤트 전파를 막습니다.
 					e.stopPropagation();
 
-					console.log("XXX / set_event_btn_ok_on_input_group / do_on_event / cur_event_type : ",cur_event_type);
-
-
 					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW === cur_event_type){
-
-						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM / 000");
 
 						// 입력 창을 가립니다.
 						_self.hide_title_input_group_jq();
@@ -5336,13 +5290,10 @@ airborne.bootstrap.obj.__action = {
 						var cur_element_collection_set = cur_element_set.get_element_collection_set();
 						cur_element_collection_set.add_element(_self);
 
-						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_INSERT_ITEM / 001");
-
 					} else if(_obj.EVENT_TYPE_UPDATE_ITEM === cur_event_type){
 
-						console.log("HERE / set_event_btn_ok_on_input_group / EVENT_TYPE_UPDATE_ITEM");
-
-						_self.show_edit_mode();
+						_self.show_view_mode();
+						_self.hide_shy_child();
 						_self.update_row_title();
 
 						var cur_action_item_obj = _self.get_action_item_obj();
@@ -5746,12 +5697,6 @@ airborne.bootstrap.obj.__action = {
 				var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 				this.show_input_mode(event_mode);
 
-				// set input group events
-
-				// REMOVE ME
-				// this.set_event_btn_ok_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
-				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_UPDATE_ITEM);
-				
 				// time input event
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 					this.set_event_time_editor_on_input_group();
@@ -5945,55 +5890,28 @@ airborne.bootstrap.obj.__action = {
 				}
 				return shy_element_set;
 			}
-			,hide_shy_child:function(){
+			,show_shy_child:function(){
+
+				this.show_child_shy_element_container_jq();
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / hide_shy_child / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
+				var cur_child_action_obj_list = cur_action_item_obj.get_children();
+				var cur_children_action_obj = cur_child_action_obj_list[0];
 
-				// 자신의 내부 자식 객체가 있는지 확인. 없다면 중단.
-				if(cur_action_item_obj.has_no_children()) {
-					return;
+				var cur_first_child_action_item_obj = undefined;
+				if(_action.is_valid_action_obj(cur_children_action_obj)) {
+					cur_first_child_action_item_obj = cur_children_action_obj.get_first_child();
 				}
-
-				// 자신의 내부 자식 객체들의 shy 엘리먼트를 숨김.
-				var child_action_obj_list = cur_action_item_obj.get_children();
-				if(_v.is_not_valid_array(child_action_obj_list)) {
-					console.log("!Error! / hide_shy_child / _v.is_not_valid_array(child_action_obj_list)");
-					return;
+				if(_action.is_valid_action_item_obj(cur_first_child_action_item_obj) && cur_first_child_action_item_obj.get_action_is_shy()) {
+					cur_first_child_action_item_obj.get_event_manager().show_element_jq();
 				}
-
-				for(var idx = 0; idx < child_action_obj_list.length; idx++) {
-					var child_action_list_obj = child_action_obj_list[idx];
-					if(_action.is_not_valid_action_obj(child_action_list_obj)) {
-						console.log("!Error! / hide_shy_child / _action.is_not_valid_action_obj(child_action_list_obj)");
-						return;
-					}
-
-					var child_child_action_obj = child_action_list_obj.get_child(0);
-					if(_action.is_not_valid_action_obj(child_child_action_obj)) {
-						console.log("!Error! / hide_shy_child / _action.is_not_valid_action_item_obj(child_child_action_obj)");
-						return;
-					}
-
-					if(child_child_action_obj.get_action_is_shy()) {
-						child_child_action_obj.get_event_manager().hide_element_jq();
-					}
-				}
-
-				/*
-				var shy_sibling_element_set = this.get_shy_sibling_element_set();
-
-				console.log("hide_shy_child / shy_sibling_element_set ::: ",shy_sibling_element_set);
-
-				if(shy_sibling_element_set == undefined){
-					return;
-				}
-
-				shy_sibling_element_set.get_event_manager().hide_element_jq();
-				*/
+			}
+			,hide_shy_child:function(){
+				this.hide_child_shy_element_container_jq();
 			}
 			// @ private
 			// @ 자신의 형제 객체 중의 shy element set를 자신의 element set 바로 위로 이동시킴
@@ -6426,11 +6344,12 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("mmc / 2 / ",title_for_test);
 				consoler.say("mmc / 2 / 커서가 엘리먼트 바깥에 있다면 mouse leave로 바꿉니다.");
 
-				event_manager_on_mousemove.on_mouse_leave();
-
+				var is_child_mouse_over = false;
 				if(!has_children && has_shy_child) {
 					consoler.say("mmc / 2-1 / ",title_for_test);
 					consoler.say("mmc / 2-1 / 자식 객체가 없고, shy element가 화면에 보인다면 화면에서 숨깁니다.");
+
+					is_child_mouse_over = true;
 
 					for(var beta_idx = 0; beta_idx < cur_child_shy_element_set_arr.length; beta_idx++){
 						var cur_child_shy_element_set = cur_child_shy_element_set_arr[beta_idx];
@@ -6454,6 +6373,8 @@ airborne.bootstrap.obj.__action = {
 
 					} // for end	
 				}
+
+				event_manager_on_mousemove.on_mouse_leave(is_child_mouse_over);
 
 			} else if(!is_hover && cur_action_item_obj.get_action_is_shy()) {
 
@@ -6581,6 +6502,7 @@ airborne.bootstrap.obj.__action = {
 
 								cur_child_element_set.get_event_manager().show_element_container_jq();
 								cur_child_element_set.get_event_manager().show_element_jq();
+
 								cur_child_element_set.get_event_manager().on_mouse_leave();
 							}
 							
@@ -7623,6 +7545,7 @@ airborne.bootstrap.obj.__action = {
 					// 변경되었다면 엘리먼트 상태를 다르게 나타내어 준다.
 					if(target_element_set.get_is_hover_top() || target_element_set.get_is_hover_bottom()){
 						// show focusing
+						console.log("HERE / show_focusing_mode / 001");
 						target_element_set.get_event_manager().show_focusing_mode();
 					} else if(!target_element_set.get_is_hover_top() && !target_element_set.get_is_hover_bottom()){
 						// hide focusing, show view mode
@@ -7682,6 +7605,7 @@ airborne.bootstrap.obj.__action = {
 					if((target_element_set.get_is_hover_top() || target_element_set.get_is_hover_bottom())){
 						// show focusing
 						console.log("show focusing / " + cur_action_item_obj.get_action_name() + " / " + cur_action_item_obj.get_coordinate());
+						console.log("HERE / show_focusing_mode / 002");
 						target_element_set.get_event_manager().show_focusing_mode();
 					} else if(!target_element_set.get_is_hover_top() && !target_element_set.get_is_hover_bottom()){
 						// hide focusing, show view mode
@@ -7799,25 +7723,30 @@ airborne.bootstrap.obj.__action = {
 					target_offset.top = parseInt(target_offset.top) - parseInt(src_offset.top);
 					target_offset.left = parseInt(target_offset.left) - parseInt(src_offset.left);
 
-					// 새로운 target element의 action obj
-					var new_parent_add_on = cur_element_set_on_mouse_over.get_event_manager().get_action_item_obj();
-					
-					if(_action.is_valid_action_obj(new_parent_add_on)) {
+					var cur_action_item_obj_mouse_over = undefined;
+					if(cur_element_set_on_mouse_over != undefined) {
+						cur_action_item_obj_mouse_over = cur_element_set_on_mouse_over.get_event_manager().get_action_item_obj();
+					}
+					if(_action.is_valid_action_item_obj(cur_action_item_obj_mouse_over)) {
+						var cur_table_action_obj = undefined;
+						if(hovering_element_collection_set != undefined) {
+							cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+						}
+						if(_action.is_valid_action_obj(cur_table_action_obj)) {
 
-						console.log("HERE / hovering_element_collection_set ::: ",hovering_element_collection_set);
+							// add on table을 옮겼을 때의 처리.
+							var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
 
-						// 1. TABLE
-						var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+							// 이전 부모 자식 관계를 제거.
+							var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
+							prev_parent_add_on.remove_from_add_on_list(cur_table_action_obj);
 
-						// 이전 부모 자식 관계를 제거.
-						var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
-						prev_parent_add_on.remove_from_add_on_list(cur_table_action_obj);
+							// 새로운 부모 자식 관계를 추가.
+							cur_action_item_obj_mouse_over.push_add_on(cur_table_action_obj);
 
-						// 새로운 부모 자식 관계를 추가.
-						new_parent_add_on.push_add_on(cur_table_action_obj);
-
-						// jump spot update
-						cur_table_action_obj.update_table_jump_spot();
+							// jump spot update
+							cur_table_action_obj.update_table_jump_spot();
+						}
 					}
 
 					cur_clone_jq.css("box-shadow","");
@@ -8118,12 +8047,16 @@ airborne.bootstrap.obj.__action = {
 					// 충돌 --> 충돌하지 않음 혹은 충돌하지 않음 --> 충돌 로 상태 변경 시
 					target_element_set.set_is_hover(is_hover);
 
-
 					if(target_element_set.get_is_hover()){
 						consoler.say("3. get_mouse_over_element / show focusing / cur_element_title :: ",cur_element_title);
+						console.log("HERE / show_focusing_mode / 003");
 						target_element_set.get_event_manager().show_focusing_mode();
-						// wonder.jung11 - 자식 객체를 보여줘야 함. 
+
+						// 자식 객체를 보여줘야 함. 
 						target_element_set.get_event_manager().show_child();
+
+						// shy 자식 객체는 가림.
+						target_element_set.get_event_manager().hide_shy_child();
 					} else {
 						consoler.say("4. get_mouse_over_element / hide focusing, show view mode / cur_element_title :: ",cur_element_title);
 						target_element_set.get_event_manager().show_view_mode();
@@ -8234,6 +8167,7 @@ airborne.bootstrap.obj.__action = {
 
 							// 충돌했다면 포커싱 등의 처리.
 							if(is_hover_top || is_hover_bottom){
+								console.log("HERE / show_focusing_mode / 004");
 								cur_event_manager.show_focusing_mode();
 							} else if(!is_hover_top && !is_hover_bottom) {
 								cur_event_manager.show_view_mode();
@@ -8305,6 +8239,7 @@ airborne.bootstrap.obj.__action = {
 					var cur_element_jq = cur_element_set.get_event_manager().get_element_jq();
 					var is_hover = _obj.is_hover(mousemove_event, cur_element_jq);
 					if(is_hover) {
+						console.log("HERE / show_focusing_mode / 005");
 						cur_element_set.get_event_manager().show_focusing_mode();
 						element_set_on_mouse_over = cur_element_set;
 					} else {
