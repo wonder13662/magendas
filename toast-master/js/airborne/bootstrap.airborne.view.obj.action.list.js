@@ -831,6 +831,10 @@ airborne.bootstrap.view.obj.__action_list = {
 				// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
 				// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
 
+				// DEBUG
+				// wonder.jung11
+				var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
+
 				// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
 				cur_event_manager.get_element_set().get_element_collection_set().get_mouse_over_element(mousemove_event, event_manager_on_mousemove.get_all_sibling_element_set_arr());
 
