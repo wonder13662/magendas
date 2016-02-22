@@ -3853,14 +3853,15 @@ airborne.bootstrap.obj.__action = {
 					this.time_input_group_jq_input_jq.attr("tossed_value",time_value);
 				}
 			}
-			// @ Desc : 시간 입력 그룹의 시간 추가 버튼
+			// @ Scope 	: Event Manager
+			// @ Desc 	: 시간 입력 그룹의 시간 추가 버튼
 			,time_input_group_jq_btn_time_plus_jq:null
 			,off_time_input_group_jq_btn_time_plus_jq:function(){
-				if(this.time_input_group_jq_btn_time_plus_jq==null) return;
+				if( this.time_input_group_jq_btn_time_plus_jq == undefined ) return;
 				this.time_input_group_jq_btn_time_plus_jq.off();
 			}
 			,get_time_input_group_jq_btn_time_plus_jq:function(){
-				if(this.time_input_group_jq_btn_time_plus_jq==null) return null;
+				if( this.time_input_group_jq_btn_time_plus_jq == undefined ) return;
 				return this.time_input_group_jq_btn_time_plus_jq;
 			}
 			,set_time_input_group_jq_btn_time_plus_jq:function(time_input_group_jq_btn_time_plus_jq){
@@ -3870,6 +3871,15 @@ airborne.bootstrap.obj.__action = {
 				}
 				this.time_input_group_jq_btn_time_plus_jq = time_input_group_jq_btn_time_plus_jq;
 			}
+			,show_btn_time_plus:function() {
+				if( this.time_input_group_jq_btn_time_plus_jq == undefined ) return;
+				this.time_input_group_jq_btn_time_plus_jq.show();
+			}
+			,hide_btn_time_plus:function() {
+				if( this.time_input_group_jq_btn_time_plus_jq == undefined ) return;
+				this.time_input_group_jq_btn_time_plus_jq.hide();
+			}
+			// @ Scope 	: Event Manager
 			// @ Desc : 시간 입력 그룹의 시간 감소 버튼
 			,time_input_group_jq_btn_time_minus_jq:null
 			,off_time_input_group_jq_btn_time_minus_jq:function(){
@@ -3886,6 +3896,14 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 				this.time_input_group_jq_btn_time_minus_jq = time_input_group_jq_btn_time_minus_jq;
+			}
+			,show_btn_time_minus:function() {
+				if( this.time_input_group_jq_btn_time_minus_jq == undefined ) return;
+				this.time_input_group_jq_btn_time_minus_jq.show();
+			}
+			,hide_btn_time_minus:function() {
+				if( this.time_input_group_jq_btn_time_minus_jq == undefined ) return;
+				this.time_input_group_jq_btn_time_minus_jq.hide();
 			}
 			// @ Desc : 시간 입력 그룹의 수정된 시간 확인 버튼
 			,time_input_group_jq_btn_time_ok_jq:null
@@ -3984,6 +4002,9 @@ airborne.bootstrap.obj.__action = {
 
 				this.hide_btn_eject_element_jq();
 				this.hide_time_input_group_jq();
+
+				this.hide_btn_time_plus();
+				this.hide_btn_time_minus();
 
 				// 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
@@ -4193,6 +4214,15 @@ airborne.bootstrap.obj.__action = {
 				this.set_event_btn_ok_on_input_group(event_mode);
 				this.set_event_btn_cancel_on_input_group(event_mode);
 
+				// wonder.jung11
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+					console.log("시간 관련 버튼이벤트를 추가합니다.");
+
+					// this.set_event_btn_time_plus(event_mode);
+					// this.set_event_btn_time_minus(event_mode);
+
+				}
+
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
 				this.is_child_focusing_mode = false;
@@ -4280,7 +4310,7 @@ airborne.bootstrap.obj.__action = {
 			,show_child:function() {
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					console.log("!Error! / show_child / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
 				var cur_child_action_obj_list = cur_action_item_obj.get_children();
@@ -4293,30 +4323,43 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_input_mode_default:function(event_mode){
 
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_input_mode_default / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}				
+
 				this.hide_all();
-				this.show_title_input_container_jq();
-				this.rollback_row_title_input(event_mode);
+
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+
+					this.show_time_jq();
+					this.show_title_jq();
+					this.show_btn_time_plus();
+					this.show_btn_time_minus();
+
+				} else {
+
+					this.show_title_input_container_jq();
+					this.rollback_row_title_input(event_mode);
+					this.focus_title_input_jq();
+
+					// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
+					this.call_delegate_show_input_mode_default_view_control(this);
+
+				}
 
 				this.show_title_input_btn_ok_jq();
 				this.show_title_input_btn_cancel_jq();
 
-				this.focus_title_input_jq();
-
-				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
-				this.call_delegate_show_input_mode_default_view_control(this);
 			}
 			,show_input_mode_add_row:function(event_mode){
 
-				console.log("HERE / show_input_mode_add_row");
-
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("_action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					console.log("!Eror! / show_input_mode_add_row / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
-
-				// DEBUG
-				console.log("HERE / show_input_mode_add_row / get_action_is_shy :: ",cur_action_item_obj.get_action_is_shy());
 
 				this.hide_all();
 
@@ -4331,7 +4374,7 @@ airborne.bootstrap.obj.__action = {
 				if(cur_action_item_obj.get_action_is_shy()) {
 
 					// 처음으로 자식 엘리먼트를 추가
-					console.log("처음으로 자식 엘리먼트를 추가");
+					// console.log("처음으로 자식 엘리먼트를 추가");
 
 				} else {
 
@@ -4353,7 +4396,6 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 
-					console.log("HERE / show_focusing_mode / 006");
 					event_manager_after.show_focusing_mode();
 
 					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
@@ -4370,13 +4412,34 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_input_mode_time:function(){
 
+				// wonder.jung11
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_input_mode_time / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
 				this.hide_all();
 
 				this.show_parent_container_jq();
 				this.show_title_jq();
 
-				this.move_title_input_group_jq();
+				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
+					// time plus, minus 버튼을 화면에 보여줍니다.
+					this.show_btn_time_plus();
+					this.show_btn_time_minus();
+					
+				} else {
+					console.log("!Error! / show_input_mode_time / cur_action_item_obj.is_not_item_title_n_time_hh_mm()");
+					return;
+				}
+
+				console.log("HERE / show_input_mode_time / 001");
+
+				// REMOVE ME
+				// this.move_title_input_group_jq();
+				/*
 				this.show_title_input_group_jq();
 				var cur_element_type = this.get_element_type();
 
@@ -4395,6 +4458,7 @@ airborne.bootstrap.obj.__action = {
 					this.show_title_input_container_jq();
 
 				}
+				*/
 			}
 			,show_input_mode_search_n_select:function(){
 
@@ -4897,7 +4961,11 @@ airborne.bootstrap.obj.__action = {
 					this.off_time_jq();
 					this.set_btn_event_color(cur_time_jq);
 
+					// wonder.jung11
 					cur_time_jq.click(function(e){
+
+						console.log("cur_time_jq.click / 001");
+						return;
 
 						e.stopPropagation();
 
@@ -4927,10 +4995,7 @@ airborne.bootstrap.obj.__action = {
 
 				this.show_view_mode();
 
-				// wonder.jung11 - 
-				console.log("HERE / on_mouse_leave / is_child_mouse_over ::: ",is_child_mouse_over);
 				if(is_child_mouse_over === true) {
-					console.log("HERE / on_mouse_leave / hide_shy_child");
 					this.hide_shy_child();
 				}
 				this.set_btn_color_back();
@@ -5336,14 +5401,18 @@ airborne.bootstrap.obj.__action = {
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
 
 				cur_title_input_btn_ok_jq.click(function(e){
-					console.log("XXX / do_on_event / 222");
 					do_on_event(e);
 				});
 
 			}
 			,set_event_time_editor_on_input_group:function(){
 
+				// wonder.jung11
+
 				var _self = this;
+
+				// REMOVE ME
+				/*
 				var cur_time_input_group_jq = this.get_time_input_group_jq();
 				if(cur_time_input_group_jq == undefined){
 					console.log("!Error! / set_event_time_editor_on_input_group / cur_time_input_group_jq == undefined");
@@ -5358,6 +5427,9 @@ airborne.bootstrap.obj.__action = {
 					console.log("!Error! / set_event_time_editor_on_input_group / cur_time_input_group_jq_input_jq == undefined");
 					return;
 				}
+				*/
+
+				var cur_time_jq = this.get_time_jq();
 
 				var cur_btn_time_plus_jq = this.get_time_input_group_jq_btn_time_plus_jq();
 				if(cur_btn_time_plus_jq == undefined){
@@ -5371,13 +5443,13 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				var cur_btn_time_ok_jq = this.get_time_input_group_jq_btn_time_ok_jq();
+				var cur_btn_time_ok_jq = this.get_title_input_btn_ok_jq();
 				if(cur_btn_time_ok_jq == undefined){
 					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_ok_jq == undefined");
 					return;
 				}
 
-				var cur_btn_time_cancel_jq = this.get_time_input_group_jq_btn_time_cancel_jq();
+				var cur_btn_time_cancel_jq = this.get_title_input_btn_cancel_jq();
 				if(cur_btn_time_cancel_jq == undefined){
 					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_cancel_jq == undefined");
 					return;
@@ -5395,6 +5467,8 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var cur_element_type = cur_action_item_obj.get_element_type();
+				// REMOVE ME
+				/*
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
 
 					// 사용자 입력 시간 정보를 시간 입력 엘리먼트에 지정합니다.
@@ -5408,41 +5482,77 @@ airborne.bootstrap.obj.__action = {
 					return;
 
 				}
+				*/
 
 
 				// remove all events
-				this.off_time_input_group_jq_input_jq();
+				// this.off_time_input_group_jq_input_jq();
 				this.off_time_input_group_jq_btn_time_plus_jq();
 				this.off_time_input_group_jq_btn_time_minus_jq();
 				this.off_time_input_group_jq_btn_time_ok_jq();
 				this.off_time_input_group_jq_btn_time_cancel_jq();
 
-				var set_minutes_offset = function(offset_minutes){
-					var hour_n_minutes_str = cur_time_input_group_jq_input_jq.val();
+				var set_minutes_offset = function(offset_minutes, target_action_item_obj){
+
+					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
+						console.log("set_event_time_editor_on_input_group / set_minutes_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						return;
+					}
+
+					// REMOVE ME
+					// var hour_n_minutes_str = cur_time_input_group_jq_input_jq.val();
+					var hour_n_minutes_str = target_action_item_obj.get_event_manager().get_value_time_jq();
+
 					var new_offset_moment = _dates.get_moment_minutes_offset_from_hour_n_minutes_str(hour_n_minutes_str, offset_minutes);
 					var new_hour_n_minutes_str = _dates.get_hour_n_minutes_str_from_moment_obj(new_offset_moment);
-					cur_time_input_group_jq_input_jq.val(new_hour_n_minutes_str);
+
+					target_action_item_obj.get_event_manager().set_value_time_jq(new_hour_n_minutes_str);
+
+					console.log("TODO 새로 변경된 시간을 입력해줍니다. / set_minutes_offset");
 				}
 
-				var set_seconds_offset = function(offset_seconds){
-					var minutes_n_seconds_str = cur_time_input_group_jq_input_jq.val();
+				var set_seconds_offset = function(offset_seconds, target_action_item_obj){
+
+					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
+						console.log("set_event_time_editor_on_input_group / set_seconds_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						return;
+					}
+
+					// REMOVE ME
+					// var minutes_n_seconds_str = cur_time_input_group_jq_input_jq.val();
+					var minutes_n_seconds_str = target_action_item_obj.get_event_manager().get_value_time_jq();
+
 					var new_offset_moment = _dates.get_moment_seconds_offset_from_minutes_n_seconds_str(minutes_n_seconds_str, offset_seconds);
 					var new_minutes_n_seconds_str = _dates.get_minutes_n_seconds_str_from_moment_obj(new_offset_moment);
-					cur_time_input_group_jq_input_jq.val(new_minutes_n_seconds_str);
+
+					target_action_item_obj.get_event_manager().set_value_time_jq(new_minutes_n_seconds_str);
+
+					console.log("TODO 새로 변경된 시간을 입력해줍니다. / set_seconds_offset");
 				}
 
-				var check_time_format_valid = function(){
+				var check_time_format_valid = function(target_action_item_obj){
+
+					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
+						console.log("set_event_time_editor_on_input_group / check_time_format_valid / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						return;
+					}
+
 					var cur_time_double_digit_str = cur_time_input_group_jq_input_jq.val();
 					var prev_time_double_digit_str = cur_time_input_group_jq_input_jq.attr("prev_value");
 
 					var is_valid_time_format_str = false;
+
+
+					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+						is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_HH_MM);
+					}
+
+					// REMOVE ME
+					/*
 					if( _obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
 						_obj.ELEMENT_TYPE_TABLE_TIME_HH_MM == cur_element_type || 
 						_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type
 						){
-						
-						is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_HH_MM);
-
 					} else if( 	_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
 								_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
 								_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
@@ -5450,32 +5560,54 @@ airborne.bootstrap.obj.__action = {
 						
 						is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_MM_SS);
 					}
+					*/
 
 					if(is_valid_time_format_str){
+
 						// No prob! update prev_value
-						cur_time_input_group_jq_input_jq.attr("prev_value", cur_time_double_digit_str);
+						target_action_item_obj.get_event_manager().get_time_jq().attr("prev_value", cur_time_double_digit_str);
+
+						// REMOVE ME
+						// cur_time_input_group_jq_input_jq.attr("prev_value", cur_time_double_digit_str);
+
 						return true;
 					} else {
 						// Oops! Something goes wrong. roll back your time str.
 						if(!confirm("Please check your time format.\nExample : 17:30")){
-							cur_time_input_group_jq_input_jq.val(prev_time_double_digit_str);
+
+							target_action_item_obj.get_event_manager().set_value_time_jq(prev_time_double_digit_str);
+
+							// REMOVE ME
+							// cur_time_input_group_jq_input_jq.val(prev_time_double_digit_str);
+
 						}
 						return false;
 					}
 				}
 
+				// REMOVE ME
+				/*
 				cur_time_input_group_jq_input_jq.click(function(e){
 					e.stopPropagation();
-					check_time_format_valid();
+					check_time_format_valid(cur_action_item_obj);
 				});
 				cur_time_input_group_jq_input_jq.change(function(e){
 					e.stopPropagation();
-					check_time_format_valid();
+					check_time_format_valid(cur_action_item_obj);
 				});
+				*/
 
 				var do_on_event_btn_time_plus = function(e) {
 					e.stopPropagation();
-					if(!check_time_format_valid()) return;
+					if(!check_time_format_valid(cur_action_item_obj)) return;
+
+
+					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+						set_minutes_offset(5, cur_action_item_obj);	// plus time (+ 5 minutes per click)	
+					}
+					
+					// REMOVE ME
+					/*
 					if( _obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
 						_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
 						_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
@@ -5491,6 +5623,7 @@ airborne.bootstrap.obj.__action = {
 						set_minutes_offset(5);	// plus time (+ 5 minutes per click)	
 
 					}
+					*/
 				}
 
 				cur_btn_time_plus_jq.click(function(e){
@@ -5502,6 +5635,12 @@ airborne.bootstrap.obj.__action = {
 					e.stopPropagation();
 					if(!check_time_format_valid()) return;
 
+					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+						set_minutes_offset(-5, cur_action_item_obj);
+					}
+
+					// REMOVE ME
+					/*
 					if(	_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
 						_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
 						_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
@@ -5513,6 +5652,7 @@ airborne.bootstrap.obj.__action = {
 								){
 						set_minutes_offset(-5);	// minus time (- 5 minutes per click)
 					}
+					*/
 				}
 
 				cur_btn_time_minus_jq.click(function(e){
@@ -5537,7 +5677,7 @@ airborne.bootstrap.obj.__action = {
 					}
 
 					// update time
-					var cur_time_str = cur_time_input_group_jq_input_jq.val();
+					var cur_time_str = _self.get_value_time_jq();
 					var cur_time_arr = cur_time_str.split(":");
 
 					if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
@@ -5556,7 +5696,7 @@ airborne.bootstrap.obj.__action = {
 						var seconds_total = (cur_hours * 3600) + (cur_minutes * 60);
 						cur_action_item_obj.update_time_hh_mm(seconds_total);
 
-						_self.set_value_time_jq(cur_time_str);
+						// _self.set_value_time_jq(cur_time_str);
 
 					} else {
 
@@ -5564,6 +5704,8 @@ airborne.bootstrap.obj.__action = {
 						return;
 
 					}
+
+					// TODO 시간 정보를 action obj에도 업데이트함.
 
 					_self.call_delegate_save_n_reload(cur_element_type, _obj.EVENT_TYPE_UPDATE_ITEM);
 					_self.release();

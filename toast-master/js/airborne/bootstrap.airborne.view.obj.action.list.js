@@ -612,7 +612,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			.replace(/\<inner_table_selector_id\>/gi, editable_list_row_inner_table_selector)
 			.replace(/\<color_type\>/gi, color_type)
 			.replace(/\<is_shy\>/gi, action_item_obj.get_action_is_shy())
-			// .replace(/\<style\>/gi, (action_item_obj.get_action_is_shy())?"display:none;":"")
 			.replace(/\<element_type\>/gi, action_item_obj.get_element_type())
 			// 시간을 나타냄. 초기값은 display:none;
 			+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
@@ -626,8 +625,6 @@ airborne.bootstrap.view.obj.__action_list = {
 		}
 		editable_list_tag += ""
 		// 사용자가 타이틀을 수정할 때 노출되는 input field
-		// wonder.jung11
-			// + "<div id=\"row_input_text\" class=\"form-group col-lg-9\" style=\"padding-left:0px;padding-right:7px;width:80%;float:left;margin-bottom:0px;margin-top:-3px;margin-left:14px;display:none;\">"
 			+ "<div id=\"row_input_text\" class=\"form-group col-lg-9\" style=\"padding-left:0px;padding-right:7px;width:80%;float:left;display:none;\">"
 				+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Keyword\">"
 			+ "</div>"
@@ -650,16 +647,25 @@ airborne.bootstrap.view.obj.__action_list = {
 				+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "</div>"
+
+			// INPUT MODE
+			+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:10px;left:10px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+			+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
 				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "<div id=\"btn_time_plus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_time_plus\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "</div>"
+
+			+ "<div id=\"btn_time_minus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_time_minus\" class=\"glyphicon glyphicon-minus\" style=\"position:relative;top:9px;left:11px;\"></span>"
 			+ "</div>"
 
 			// chlidren element container div
@@ -823,7 +829,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
 
 				// DEBUG
-				// wonder.jung11
 				var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
 
 				// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
@@ -1158,12 +1163,16 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
+					// wonder.jung11 - 시간 제어 관련 코드.
+
 					// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
 					time_jq = cur_list_row_jq.find("span#time").first();
 					element_event_manager.set_time_jq(time_jq);
 					element_event_manager.show_time_jq();
 
 					// 시간 정보 입력 엘리먼트 그룹
+					// REMOVE ME
+					/*
 					var time_input_group_jq = cur_list_row_jq.parent().parent().find("div#input_group_time").first();
 					if(time_input_group_jq != undefined && time_input_group_jq.length > 1) {
 						time_input_group_jq = $(time_input_group_jq[0]);
@@ -1173,22 +1182,26 @@ airborne.bootstrap.view.obj.__action_list = {
 					// 시간 정보 입력 엘리먼트 그룹의 시간 표시 엘리먼트
 					var time_input_group_jq_input_jq = time_input_group_jq.find("input#input_time").first();
 					element_event_manager.set_time_input_group_jq_input_jq(time_input_group_jq_input_jq);
+					*/
 
 					// @ Desc : 시간 입력 그룹의 시간 추가 버튼
-					var time_input_group_jq_btn_time_plus_jq = time_input_group_jq.find("button#btn_plus").first();
+					var time_input_group_jq_btn_time_plus_jq = cur_list_row_jq.find("div#btn_time_plus").first();
 					element_event_manager.set_time_input_group_jq_btn_time_plus_jq(time_input_group_jq_btn_time_plus_jq);
 
 					// @ Desc : 시간 입력 그룹의 시간 감소 버튼
-					var time_input_group_jq_btn_time_minus_jq = time_input_group_jq.find("button#btn_minus").first();
+					var time_input_group_jq_btn_time_minus_jq = cur_list_row_jq.find("div#btn_time_minus").first();
 					element_event_manager.set_time_input_group_jq_btn_time_minus_jq(time_input_group_jq_btn_time_minus_jq);
 
 					// @ Desc : 시간 입력 그룹의 수정된 시간 확인 버튼
+					// REMOVE ME
+					/*
 					var time_input_group_jq_btn_time_ok_jq = time_input_group_jq.find("button#btn_ok_time").first();
 					element_event_manager.set_time_input_group_jq_btn_time_ok_jq(time_input_group_jq_btn_time_ok_jq);
 
 					// @ Desc : 시간 입력 그룹의 수정된 시간 취소 버튼
 					var time_input_group_jq_btn_time_cancel_jq = time_input_group_jq.find("button#btn_cancel_time").first();
 					element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);					
+					*/
 					
 				}
 
