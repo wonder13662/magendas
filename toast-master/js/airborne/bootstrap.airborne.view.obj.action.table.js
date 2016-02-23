@@ -2231,6 +2231,11 @@ airborne.bootstrap.view.obj.__action_table = {
 
 			// field cell control buttons.
 			table_row_tag += ""
+
+				+ "<div id=\"input_group_column_text\" class=\"form-group col-lg-9\" style=\"margin:0px;padding:0px;width:60%;float:left;display:none;\">"
+					+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Search Keyword\">"
+				+ "</div>"
+
 				+ "<div id=\"btn_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;display:none;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
 					+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
 				+ "</div>"
@@ -2241,6 +2246,15 @@ airborne.bootstrap.view.obj.__action_table = {
 
 				+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;margin-left:4px;border-radius:4px;display:none;margin-bottom:-10px;\">"
 					+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:absolute;top:9px;left:9px;\">&nbsp;</span>"
+				+ "</div>"
+
+				// INPUT MODE
+				+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+					+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:9px;left:8px;\"></span>"
+				+ "</div>"
+
+				+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+					+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 				+ "</div>"
 
 			+ "</td>"
@@ -2362,12 +2376,11 @@ airborne.bootstrap.view.obj.__action_table = {
 			var btn_remove_jq = cur_table_column_set_jq.find("div#btn_remove");
 			element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
 
-			var btn_remove_jq = cur_table_column_set_jq.find("div#btn_remove");
-			element_event_manager.set_btn_remove_element_jq(btn_remove_jq);
-
 			var btn_eject_jq = cur_table_column_set_jq.find("div#btn_eject");
 			element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
 
+			// REMOVE ME
+			/*
 			if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
 				// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
@@ -2400,6 +2413,7 @@ airborne.bootstrap.view.obj.__action_table = {
 				element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);					
 
 			}
+			*/
 
 			var cur_table_column_text_jq = cur_table_column_set_jq.find("span#column_text");
 			element_event_manager.set_title_jq(cur_table_column_text_jq);
@@ -2407,10 +2421,10 @@ airborne.bootstrap.view.obj.__action_table = {
 			var cur_table_column_text_container_jq = cur_table_column_set_jq.parent();
 			element_event_manager.set_parent_container_jq(cur_table_column_text_container_jq);
 
-			var cur_input_parent_container_jq = cur_input_group_jq.find("div#input_group_column_text");
+			var cur_input_parent_container_jq = cur_table_column_set_jq.find("div#input_group_column_text");
 			element_event_manager.set_title_input_container_jq(cur_input_parent_container_jq);
 
-			var cur_input_title_jq = cur_input_group_jq.find("input#common_input");
+			var cur_input_title_jq = cur_table_column_set_jq.find("input#common_input");
 			element_event_manager.set_title_input_jq(cur_input_title_jq);
 
 			var search_output_list_jq = cur_input_group_jq.find("div#search_output_list");
@@ -2419,10 +2433,10 @@ airborne.bootstrap.view.obj.__action_table = {
 			var searchable_combo_box_jq = cur_input_group_jq.find("select");
 			element_event_manager.set_searchable_combo_box_jq(searchable_combo_box_jq);
 
-			var cur_title_input_btn_ok_jq = cur_input_group_jq.find("button#btn_ok");
+			var cur_title_input_btn_ok_jq = cur_table_column_set_jq.find("div#btn_ok");
 			element_event_manager.set_title_input_btn_ok_jq(cur_title_input_btn_ok_jq);
 
-			var cur_title_input_btn_cancel_jq = cur_input_group_jq.find("button#btn_cancel");
+			var cur_title_input_btn_cancel_jq = cur_table_column_set_jq.find("div#btn_cancel");
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
 
 			var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search");
@@ -2972,12 +2986,14 @@ airborne.bootstrap.view.obj.__action_table = {
 		}
 		table_tag += ""
 		+ "<tr id=\"input_group_column_text\" style=\"display:none;\">"
-			+ "<td style=\"background-color:#FFFFFF;padding-left:0px;\" colspan=\"<colspan_cnt>\">".replace(/\<colspan_cnt\>/gi, colspan_cnt)
+			+ "<td style=\"background-color:#F5F5F5;\" colspan=\"<colspan_cnt>\">".replace(/\<colspan_cnt\>/gi, colspan_cnt)
 
 				// common input.
+				/*
 				+ "<div id=\"input_group_column_text\" class=\"form-group col-lg-9\" style=\"margin:0px;padding-left:7px;padding-right:7px;width:60%;float:left;\">"
 					+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Search Keyword\">"
 				+ "</div>"
+				*/
 
 				// time input / 테이블 형태를 위한 태그(다른 엘리먼트 형태에서의 지원여부는 확인되지 않음.)
 				+ "<div id=\"input_group_time\" class=\"form-group col-lg-8\" style=\"margin-top:0px;margin-bottom:0px;padding-left:7px;padding-right:7px;display:none;\">"
@@ -3007,13 +3023,14 @@ airborne.bootstrap.view.obj.__action_table = {
 					
 				+ "</div>"
 
+				// REMOVE ME
 				// buttons
-				+ "<button id=\"btn_search\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-search\"></span>&nbsp;</button>"
-				+ "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
-				+ "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
+				// + "<button id=\"btn_search\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-search\"></span>&nbsp;</button>"
+				// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
+				// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
 
 				// search output list
-				+ "<div id=\"search_output_list\" class=\"list-group col-lg-9\" style=\"display:none;margin:8px 7px 0px;float:left;width:100%\">"
+				+ "<div id=\"search_output_list\" class=\"list-group col-lg-9\" style=\"display:none;margin:0px;padding:0px;float:left;width:100%\">"
 					// + "<a href=\"#\" class=\"list-group-item active\" style=\"padding-top:6px;padding-bottom:6px;font-size:14px;\">Cras justo odio</a>"
 				+ "</div>"
 
@@ -3102,6 +3119,10 @@ airborne.bootstrap.view.obj.__action_table = {
 				// field cell control buttons.
 				table_tag += ""
 
+					+ "<div id=\"input_group_column_text\" class=\"form-group col-lg-9\" style=\"margin:0px;padding:0px;width:60%;float:left;display:none;\">"
+						+ "<input id=\"common_input\" class=\"form-control\" placeholder=\"Enter Search Keyword\">"
+					+ "</div>"
+
 					+ "<div id=\"btn_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;display:none;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
 						+ "<span id=\"btn_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
 					+ "</div>"
@@ -3112,6 +3133,15 @@ airborne.bootstrap.view.obj.__action_table = {
 
 					+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;margin-left:4px;border-radius:4px;display:none;margin-bottom:-10px;\">"
 						+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:absolute;top:9px;left:9px;\">&nbsp;</span>"
+					+ "</div>"
+
+					// INPUT MODE
+					+ "<div id=\"btn_cancel\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+						+ "<span id=\"btn_cancel\" class=\"glyphicon glyphicon-remove\" style=\"position:relative;top:9px;left:8px;\"></span>"
+					+ "</div>"
+
+					+ "<div id=\"btn_ok\" style=\"float:right;height:32px;width:32px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+						+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 					+ "</div>"
 						
 				+ "</td>"

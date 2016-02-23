@@ -52,6 +52,10 @@ airborne.bootstrap.obj.__action = {
 
 		return false;
 	}
+	,INPUT_TYPE_DEFAULT:"INPUT_TYPE_DEFAULT"
+	,INPUT_TYPE_TITLE:"INPUT_TYPE_TITLE"
+	,INPUT_TYPE_TIME:"INPUT_TYPE_TIME"
+
 	,ACTION_COLLECTION_TYPE_LIST:1
 	,ACTION_COLLECTION_TYPE_TABLE:2
 	,ACTION_ITEM_TYPE_TITLE_ONLY:1
@@ -2676,16 +2680,20 @@ airborne.bootstrap.obj.__action = {
 				return this.title_input_jq;
 			}
 			,show_title_input_jq:function(){
-				if(this.title_input_jq == null) return;
+				if(this.title_input_jq == undefined) return;
 				this.title_input_jq.show();
 			}
 			,hide_title_input_jq:function(){
-				if(this.title_input_jq == null) return;
+				if(this.title_input_jq == undefined) return;
 				this.title_input_jq.hide();
 			}
 			,focus_title_input_jq:function(){
-				if(this.title_input_jq == null) return;
+				if(this.title_input_jq == undefined) return;
 				this.title_input_jq.focus();
+			}
+			,off_title_input_jq:function() {
+				if(this.title_input_jq == undefined) return;
+				this.title_input_jq.off();
 			}
 			,clear_title_input_jq_value:function(){
 				if(this.title_input_jq == null) return;
@@ -2724,6 +2732,41 @@ airborne.bootstrap.obj.__action = {
 
 				return cur_prev_value;
 			}
+			// @ Scope 	: Event Manager
+			// @ Desc 	: 입력 필드가 최대 글자수를 넘었는지 확인합니다.
+			,set_title_input_jq_watch_dog_interval:function(){
+				var _self = this;
+				if(this.input_onchange_interval == null){
+
+					_self.clear_title_input_jq_prev_value();
+
+					this.input_onchange_interval = setInterval(function(){
+
+						// check input text every 300 millisec
+						// 사용자가 입력한 검색 키워드를 0.3초마다 가져와서 리스트에 표시합니다.
+						var prev_search_keyword = _self.get_title_input_jq_prev_value();
+						var cur_search_keyword = _self.get_title_input_jq_value();
+
+						if( cur_search_keyword != null && 
+							prev_search_keyword != cur_search_keyword){
+
+							// 최대 입력 글자수를 넘었는지 확인.
+							var max_length = 128;
+							var is_over_max_length = false;
+							if(_v.is_valid_str(cur_search_keyword) && max_length < cur_search_keyword.length) {
+								is_over_max_length = true;
+							}
+
+							if(is_over_max_length && confirm("Please check your text.\nIt's a little bit longer.")) {
+								_self.set_title_input_jq_value(cur_search_keyword.slice(0,max_length));
+								_self.focus_title_input_jq();
+								return;
+							}
+						}
+
+					},300);
+				}			
+			}
 			,set_title_input_jq_search_list_watch_dog_interval:function(){
 				var _self = this;
 				if(this.input_onchange_interval == null){
@@ -2746,6 +2789,7 @@ airborne.bootstrap.obj.__action = {
 							// search kerword
 							_self.search_keyword_in_search_output_list_jq(cur_search_keyword);
 						}
+
 					},300);
 				}			
 			}
@@ -4008,6 +4052,7 @@ airborne.bootstrap.obj.__action = {
 
 				// 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
+
 			}
 			// @ Public
 			// @ Scope 	: Event Manager
@@ -4178,7 +4223,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var cur_title = "";
 				if(cur_action_item_obj.get_action_is_not_shy()){
@@ -4195,11 +4240,17 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("em_sim / 1 / ELEMENT_TYPE_SEARCH_LIST | ELEMENT_TYPE_TABLE_SEARCH_LIST");
 
 					this.show_input_mode_search_n_select();
+					this.set_title_input_jq_search_list_watch_dog_interval();
+					this.set_event_btn_cancel_on_input_group(event_mode);
 
 				} else if(_action.EVENT_TYPE_ADD_ROW === event_mode){	
 
 					// 새로운 리스트 열을 추가하는 경우
 					this.show_input_mode_add_row(event_mode);
+
+					// set event on input buttons	
+					this.set_event_btn_ok_on_input_group(event_mode);
+					this.set_event_btn_cancel_on_input_group(event_mode);
 
 				} else {
 
@@ -4208,18 +4259,9 @@ airborne.bootstrap.obj.__action = {
 
 					this.show_input_mode_default(event_mode);
 
-				}
-
-				// set event on input buttons
-				this.set_event_btn_ok_on_input_group(event_mode);
-				this.set_event_btn_cancel_on_input_group(event_mode);
-
-				// wonder.jung11
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-					console.log("시간 관련 버튼이벤트를 추가합니다.");
-
-					// this.set_event_btn_time_plus(event_mode);
-					// this.set_event_btn_time_minus(event_mode);
+					// set event on input buttons	
+					this.set_event_btn_ok_on_input_group(event_mode);
+					this.set_event_btn_cancel_on_input_group(event_mode);
 
 				}
 
@@ -4283,9 +4325,9 @@ airborne.bootstrap.obj.__action = {
 			,get_delegate_show_input_mode_default_view_control:function() {
 				return this.delegate_show_input_mode_default_view_control;	
 			}
-			,call_delegate_show_input_mode_default_view_control:function(param_obj) {
+			,call_delegate_show_input_mode_default_view_control:function(param_obj, input_type) {
 				if(this.delegate_show_input_mode_default_view_control != undefined) {
-					this.delegate_show_input_mode_default_view_control._apply([param_obj]);
+					this.delegate_show_input_mode_default_view_control._apply([param_obj, input_type]);
 				}
 			}
 			// @ Private
@@ -4331,26 +4373,17 @@ airborne.bootstrap.obj.__action = {
 
 				this.hide_all();
 
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-
-					this.show_time_jq();
-					this.show_title_jq();
-					this.show_btn_time_plus();
-					this.show_btn_time_minus();
-
-				} else {
-
-					this.show_title_input_container_jq();
-					this.rollback_row_title_input(event_mode);
-					this.focus_title_input_jq();
-
-					// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
-					this.call_delegate_show_input_mode_default_view_control(this);
-
-				}
+				this.show_title_input_container_jq();
+				this.rollback_row_title_input(event_mode);
+				this.focus_title_input_jq();
 
 				this.show_title_input_btn_ok_jq();
 				this.show_title_input_btn_cancel_jq();
+
+				this.set_title_input_jq_watch_dog_interval();
+
+				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
+				this.call_delegate_show_input_mode_default_view_control(this, _action.INPUT_TYPE_DEFAULT);
 
 			}
 			,show_input_mode_add_row:function(event_mode){
@@ -4412,7 +4445,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_input_mode_time:function(){
 
-				// wonder.jung11
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 					console.log("!Error! / show_input_mode_time / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
@@ -4423,56 +4455,39 @@ airborne.bootstrap.obj.__action = {
 
 				this.show_parent_container_jq();
 				this.show_title_jq();
+				this.show_time_jq();
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
 					// time plus, minus 버튼을 화면에 보여줍니다.
 					this.show_btn_time_plus();
 					this.show_btn_time_minus();
+					this.show_title_input_btn_ok_jq();
+
+					// SET EVENT
+					this.set_event_time_btns();
 					
 				} else {
 					console.log("!Error! / show_input_mode_time / cur_action_item_obj.is_not_item_title_n_time_hh_mm()");
 					return;
 				}
 
-				console.log("HERE / show_input_mode_time / 001");
+				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
+				this.call_delegate_show_input_mode_default_view_control(this, _action.INPUT_TYPE_TIME);				
 
-				// REMOVE ME
-				// this.move_title_input_group_jq();
-				/*
-				this.show_title_input_group_jq();
-				var cur_element_type = this.get_element_type();
-
-				if( cur_element_type == _obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT || 
-					cur_element_type == _obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT ||
-					cur_element_type == _obj.ELEMENT_TYPE_TABLE_TIME_HH_MM ||
-					cur_element_type == _obj.ELEMENT_TYPE_TABLE_TIME_MM_SS ||
-					cur_element_type == _obj.ELEMENT_TYPE_TIME_HH_MM ||
-					cur_element_type == _obj.ELEMENT_TYPE_TIME_MM_SS 
-					){
-
-					this.show_time_input_group_jq();
-
-				} else {
-
-					this.show_title_input_container_jq();
-
-				}
-				*/
 			}
 			,show_input_mode_search_n_select:function(){
 
 				this.hide_all();
+				this.off_all_events();
 
 				this.show_parent_container_jq();
-				this.show_title_jq();
 
 				this.move_title_input_group_jq();
 
 				this.show_title_input_group_jq();
 				this.show_title_input_container_jq();
 				this.show_title_input_jq();
-
 				this.show_title_input_btn_cancel_jq();
 
 				this.show_search_output_list_jq();
@@ -4485,9 +4500,15 @@ airborne.bootstrap.obj.__action = {
 				this.off_title_input_btn_cancel_jq();
 				this.off_title_input_btn_search_jq();
 
+				this.off_title_input_jq();
+
 				this.off_btn_edit_element_jq();
 				this.off_btn_remove_element_jq();
 				this.off_btn_add_element_jq();
+
+				this.clear_title_input_jq_watch_dog_interval();
+
+				this.event_hierarchy_manager.clear_delegate_keyup_on_document();
 			}
 			,set_colors_back:function(){
 
@@ -4755,6 +4776,7 @@ airborne.bootstrap.obj.__action = {
 				target_jq.mouseleave(function(e){
 					_self.set_btn_color_back(target_jq);
 				});
+
 			}
 			,set_btn_color_focus:function(target_jq, is_force_change){
 
@@ -4889,7 +4911,7 @@ airborne.bootstrap.obj.__action = {
 					var _self_toss = this;
 					cur_element_jq.click(function(e){
 
-						// console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
+						console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
 
 						e.stopPropagation();
 						if(_self.is_lock()) return;
@@ -4961,18 +4983,17 @@ airborne.bootstrap.obj.__action = {
 					this.off_time_jq();
 					this.set_btn_event_color(cur_time_jq);
 
-					// wonder.jung11
 					cur_time_jq.click(function(e){
-
-						console.log("cur_time_jq.click / 001");
-						return;
 
 						e.stopPropagation();
 
-						// 시간 입력 그룹을 보여줍니다.
-						_self.on_edit_btn_click();
-						_self.show_input_mode_time();
+						if(_self.is_lock()) {
+							return;
+						}
 						_self.lock();
+
+						// 시간 입력 그룹을 보여줍니다.
+						_self.show_input_mode_time();
 
 					});
 
@@ -5227,6 +5248,8 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				console.log("XXX / this.title_input_btn_search_jq ::: ",this.title_input_btn_search_jq);
+
 				// search btn event
 				this.title_input_btn_search_jq.off();
 				this.title_input_btn_search_jq.click(function(){
@@ -5257,21 +5280,21 @@ airborne.bootstrap.obj.__action = {
 				var do_on_event = function(e) {
 					e.stopPropagation();
 
-					_self.clear_title_input_jq_value();
+					// REMOVE ME
+					// _self.clear_title_input_jq_value();
 					_self.rollback_title_jq_text();
 
 					// 입력 모드 이전인 수정 모드로 돌아간다.
-					console.log("HERE / set_event_btn_cancel_on_input_group / 001");
 					_self.show_edit_mode();
 
 					_self.remove_all_element_of_search_output_list_jq();
-
-					_self.release();
 
 					_self.shape_sibling_element();
 
 					// 뷰단의 엘리먼트들의 모양을 view mode일 경우의 모습으로 바꾸어 줍니다.
 					_self.call_delegate_show_view_mode_view_control(_self);
+
+					_self.release();
 				}
 
 				var cur_title_input_btn_cancel_jq = this.get_title_input_btn_cancel_jq();
@@ -5339,10 +5362,25 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / set_event_btn_ok_on_input_group / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
 				var _self = this;
 				var do_on_event = function(e) {
 					// 이벤트 전파를 막습니다.
 					e.stopPropagation();
+
+					console.log("set_event_btn_ok_on_input_group / do_on_event /cur_action_item_obj ::: ",cur_action_item_obj);
+
+					// 입력된 텍스트 내용을 검사합니다.
+					var cur_title_input_jq_value = _self.get_title_input_jq_value();
+					if(_v.is_not_valid_str(cur_title_input_jq_value) && confirm("Please check your text.\nIt cannot be empty!")) {
+						_self.focus_title_input_jq();
+						return;
+					}
 
 					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW === cur_event_type){
 
@@ -5376,7 +5414,9 @@ airborne.bootstrap.obj.__action = {
 
 					// 뷰 모습을 view mode로 변경해줍니다.
 					var cur_delegate_show_view_mode_view_control = _self.get_delegate_show_view_mode_view_control();
-					cur_delegate_show_view_mode_view_control._apply([_self]);
+					if(cur_delegate_show_view_mode_view_control != undefined) {
+						cur_delegate_show_view_mode_view_control._apply([_self]);	
+					}
 
 					_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_INPUT_TEXT, cur_event_type);
 
@@ -5405,97 +5445,59 @@ airborne.bootstrap.obj.__action = {
 				});
 
 			}
-			,set_event_time_editor_on_input_group:function(){
-
-				// wonder.jung11
+			,set_event_time_btns:function(){	
 
 				var _self = this;
-
-				// REMOVE ME
-				/*
-				var cur_time_input_group_jq = this.get_time_input_group_jq();
-				if(cur_time_input_group_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_time_input_group_jq == undefined");
-					return;
-				}
-
-
-				this.off_time_input_group_jq();
-
-				var cur_time_input_group_jq_input_jq = this.get_time_input_group_jq_input_jq();
-				if(cur_time_input_group_jq_input_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_time_input_group_jq_input_jq == undefined");
-					return;
-				}
-				*/
-
 				var cur_time_jq = this.get_time_jq();
+				var is_force_change = true;
 
 				var cur_btn_time_plus_jq = this.get_time_input_group_jq_btn_time_plus_jq();
 				if(cur_btn_time_plus_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_plus_jq == undefined");
+					console.log("!Error! / set_event_time_btns / cur_btn_time_plus_jq == undefined");
 					return;
 				}
 
 				var cur_btn_time_minus_jq = this.get_time_input_group_jq_btn_time_minus_jq();
 				if(cur_btn_time_minus_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_minus_jq == undefined");
+					console.log("!Error! / set_event_time_btns / cur_btn_time_minus_jq == undefined");
 					return;
 				}
 
 				var cur_btn_time_ok_jq = this.get_title_input_btn_ok_jq();
 				if(cur_btn_time_ok_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_ok_jq == undefined");
+					console.log("!Error! / set_event_time_btns / cur_btn_time_ok_jq == undefined");
 					return;
 				}
 
 				var cur_btn_time_cancel_jq = this.get_title_input_btn_cancel_jq();
 				if(cur_btn_time_cancel_jq == undefined){
-					console.log("!Error! / set_event_time_editor_on_input_group / cur_btn_time_cancel_jq == undefined");
+					console.log("!Error! / set_event_time_btns / cur_btn_time_cancel_jq == undefined");
 					return;
 				}
 
+				// remove prev btn events
+				this.off_time_input_group_jq_btn_time_plus_jq();
+				this.off_time_input_group_jq_btn_time_minus_jq();
+				this.off_time_input_group_jq_btn_time_ok_jq();
 
-
-
+				// mouse enter, leave 이벤트 발생시의 모양을 바꿔줍니다.
+				this.set_btn_event_color(cur_btn_time_plus_jq, is_force_change);
+				this.set_btn_event_color(cur_btn_time_minus_jq, is_force_change);
+				this.set_btn_event_color(cur_btn_time_ok_jq, is_force_change);
 
 				// assign time. check time mode.
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / set_event_time_editor_on_input_group / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					console.log("!Error! / set_event_time_btns / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
 				}
-
 				var cur_element_type = cur_action_item_obj.get_element_type();
-				// REMOVE ME
-				/*
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
 
-					// 사용자 입력 시간 정보를 시간 입력 엘리먼트에 지정합니다.
-					var cur_time_jq = this.get_time_jq();
-					var cur_time = cur_time_jq.html();
-					this.set_value_time_input_group_jq_input_jq(cur_time);
-
-				} else {
-					
-					console.log("!Error! / Not supported element type / " + cur_element_type);
-					return;
-
-				}
-				*/
-
-
-				// remove all events
-				// this.off_time_input_group_jq_input_jq();
-				this.off_time_input_group_jq_btn_time_plus_jq();
-				this.off_time_input_group_jq_btn_time_minus_jq();
-				this.off_time_input_group_jq_btn_time_ok_jq();
-				this.off_time_input_group_jq_btn_time_cancel_jq();
 
 				var set_minutes_offset = function(offset_minutes, target_action_item_obj){
 
 					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
-						console.log("set_event_time_editor_on_input_group / set_minutes_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						console.log("set_event_time_btns / set_minutes_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
 						return;
 					}
 
@@ -5514,7 +5516,7 @@ airborne.bootstrap.obj.__action = {
 				var set_seconds_offset = function(offset_seconds, target_action_item_obj){
 
 					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
-						console.log("set_event_time_editor_on_input_group / set_seconds_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						console.log("set_event_time_btns / set_seconds_offset / _action.is_not_valid_action_item_obj(target_action_item_obj)");
 						return;
 					}
 
@@ -5533,42 +5535,23 @@ airborne.bootstrap.obj.__action = {
 				var check_time_format_valid = function(target_action_item_obj){
 
 					if(_action.is_not_valid_action_item_obj(target_action_item_obj)) {
-						console.log("set_event_time_editor_on_input_group / check_time_format_valid / _action.is_not_valid_action_item_obj(target_action_item_obj)");
+						console.log("!Error! / set_event_time_btns / check_time_format_valid / _action.is_not_valid_action_item_obj(target_action_item_obj)");
 						return;
 					}
 
-					var cur_time_double_digit_str = cur_time_input_group_jq_input_jq.val();
-					var prev_time_double_digit_str = cur_time_input_group_jq_input_jq.attr("prev_value");
+					var cur_time_double_digit_str = target_action_item_obj.get_event_manager().get_value_time_jq();
+					var prev_time_double_digit_str = target_action_item_obj.get_event_manager().get_element_jq().attr("prev_value");
 
 					var is_valid_time_format_str = false;
-
 
 					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 						is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_HH_MM);
 					}
 
-					// REMOVE ME
-					/*
-					if( _obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
-						_obj.ELEMENT_TYPE_TABLE_TIME_HH_MM == cur_element_type || 
-						_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type
-						){
-					} else if( 	_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
-								_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
-								_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
-								){
-						
-						is_valid_time_format_str = _dates.is_valid_time_format_str(cur_time_double_digit_str, _dates.DATE_TYPE_MM_SS);
-					}
-					*/
-
 					if(is_valid_time_format_str){
 
 						// No prob! update prev_value
 						target_action_item_obj.get_event_manager().get_time_jq().attr("prev_value", cur_time_double_digit_str);
-
-						// REMOVE ME
-						// cur_time_input_group_jq_input_jq.attr("prev_value", cur_time_double_digit_str);
 
 						return true;
 					} else {
@@ -5577,91 +5560,51 @@ airborne.bootstrap.obj.__action = {
 
 							target_action_item_obj.get_event_manager().set_value_time_jq(prev_time_double_digit_str);
 
-							// REMOVE ME
-							// cur_time_input_group_jq_input_jq.val(prev_time_double_digit_str);
-
 						}
 						return false;
 					}
 				}
 
-				// REMOVE ME
-				/*
-				cur_time_input_group_jq_input_jq.click(function(e){
+				var do_on_event_btn_time_plus = function(e, target_action_item_obj) {
 					e.stopPropagation();
-					check_time_format_valid(cur_action_item_obj);
-				});
-				cur_time_input_group_jq_input_jq.change(function(e){
-					e.stopPropagation();
-					check_time_format_valid(cur_action_item_obj);
-				});
-				*/
 
-				var do_on_event_btn_time_plus = function(e) {
-					e.stopPropagation();
-					if(!check_time_format_valid(cur_action_item_obj)) return;
+					console.log("XXX / do_on_event_btn_time_plus");
+
+					if(!check_time_format_valid(target_action_item_obj)) return;
 
 
-					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-						set_minutes_offset(5, cur_action_item_obj);	// plus time (+ 5 minutes per click)	
+					if(target_action_item_obj.is_item_title_n_time_hh_mm()) {
+						set_minutes_offset(5, target_action_item_obj);	// plus time (+ 5 minutes per click)	
 					}
-					
-					// REMOVE ME
-					/*
-					if( _obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
-						_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
-						_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
-						){
-
-						set_seconds_offset(5);	// plus time (+ 5 seconds per click)
-
-					} else if(	_obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
-								_obj.ELEMENT_TYPE_TABLE_TIME_HH_MM == cur_element_type || 
-								_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type
-								){
-
-						set_minutes_offset(5);	// plus time (+ 5 minutes per click)	
-
-					}
-					*/
 				}
 
 				cur_btn_time_plus_jq.click(function(e){
-					do_on_event_btn_time_plus(e);
+					do_on_event_btn_time_plus(e, cur_action_item_obj);
 				});
 
 
-				var do_on_event_btn_time_minus = function(e) {
+				var do_on_event_btn_time_minus = function(e, target_action_item_obj) {
 					e.stopPropagation();
-					if(!check_time_format_valid()) return;
+
+					console.log("XXX / do_on_event_btn_time_minus");
+
+					if(!check_time_format_valid(target_action_item_obj)) return;
 
 					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 						set_minutes_offset(-5, cur_action_item_obj);
 					}
-
-					// REMOVE ME
-					/*
-					if(	_obj.ELEMENT_TYPE_TIME_MM_SS == cur_element_type || 
-						_obj.ELEMENT_TYPE_TABLE_TIME_MM_SS == cur_element_type || 
-						_obj.ELEMENT_TYPE_LIST_ROW_TIME_MM_SS_N_INPUT_TEXT == cur_element_type
-						){
-						set_seconds_offset(-5);	// minus time (- 5 seconds per click)	
-					} else if(	_obj.ELEMENT_TYPE_TIME_HH_MM == cur_element_type || 
-								_obj.ELEMENT_TYPE_TABLE_TIME_HH_MM == cur_element_type || 
-								_obj.ELEMENT_TYPE_LIST_ROW_TIME_HH_MM_N_INPUT_TEXT == cur_element_type
-								){
-						set_minutes_offset(-5);	// minus time (- 5 minutes per click)
-					}
-					*/
 				}
 
 				cur_btn_time_minus_jq.click(function(e){
-					do_on_event_btn_time_minus(e);
+					do_on_event_btn_time_minus(e, cur_action_item_obj);
 				});
 
-				var do_on_event_btn_time_ok = function(e) {
+				var do_on_event_btn_time_ok = function(e, target_action_item_obj) {
+					e.stopPropagation();
 
-					if(!check_time_format_valid()){
+					console.log("XXX / do_on_event_btn_time_ok / target_action_item_obj ::: ",target_action_item_obj);
+
+					if(!check_time_format_valid(target_action_item_obj)){
 						console.log("!Error! / do_on_event_btn_time_ok / !check_time_format_valid()");
 						return;
 					}
@@ -5711,12 +5654,13 @@ airborne.bootstrap.obj.__action = {
 					_self.release();
 
 				}
-				
-
 
 				cur_btn_time_ok_jq.click(function(e){
 					e.stopPropagation();
-					do_on_event_btn_time_ok(e);
+
+					console.log("cur_btn_time_ok_jq.click / cur_action_item_obj ::: ",cur_action_item_obj);
+
+					do_on_event_btn_time_ok(e, cur_action_item_obj);
 
 					// DEBUG
 					//var cur_sibling_element_event_manager_arr = _self.get_sibling_element_event_manager_arr(true);
@@ -5726,6 +5670,7 @@ airborne.bootstrap.obj.__action = {
 
 				var do_on_event_btn_time_cancel = function(e) {
 					e.stopPropagation();
+
 					_self.hide_all();
 					_self.show_view_mode();
 					_self.release();
@@ -5746,18 +5691,17 @@ airborne.bootstrap.obj.__action = {
 					// console.log("code : ",code);
 					// Enter : 13 / ESC : 27 / + : 187 / - : 189
 					if(code === 13) {
-						do_on_event_btn_time_ok(e);
+						do_on_event_btn_time_ok(e, cur_action_item_obj);
 					} else if(code === 27) {
-						do_on_event_btn_time_cancel(e);
+						do_on_event_btn_time_cancel(e, cur_action_item_obj);
 					} else if(code === 187) {
-						do_on_event_btn_time_plus(e);
+						do_on_event_btn_time_plus(e, cur_action_item_obj);
 					} else if(code === 189) {
-						do_on_event_btn_time_minus(e);
+						do_on_event_btn_time_minus(e, cur_action_item_obj);
 					}
 
 				},this));
 
-				// this.set_event_btn_cancel_on_input_group(_obj.EVENT_TYPE_INSERT_ITEM);
 			}
 			// @ Scope : Event manager
 			,on_add_btn_click:function(){
@@ -5787,14 +5731,10 @@ airborne.bootstrap.obj.__action = {
 
 				} else {
 
-					console.log("HERE / on_add_btn_click / 002 / action_name ::: ",cur_action_item_obj.get_action_name());
-
 					// 2. LIST ACTION ITEM
 					if(cur_action_item_obj.get_action_is_shy()) {
 						// 첫번째 엘리먼트가 추가되는 경우
-						
 
-						// wonder.jung11
 						var cur_element_collection_set = this.get_element_set().get_element_collection_set();
 						if(cur_element_collection_set == undefined) {
 							console.log("!Error! / on_add_btn_click / cur_element_collection_set == undefined");
@@ -5824,6 +5764,9 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				if(this.is_lock()){
+					return;
+				}
 				// 더 이상 이벤트를 받지 않도록 잠급니다.
 				this.lock();
 
@@ -5833,16 +5776,15 @@ airborne.bootstrap.obj.__action = {
 
 				// set search list data
 				if(cur_action_item_obj.is_item_select_box() || cur_action_item_obj.is_item_select_box_addable()) {
+
 					this.set_search_list_data_on_input_group();	
+
 				}
 
 				var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 				this.show_input_mode(event_mode);
 
-				// time input event
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-					this.set_event_time_editor_on_input_group();
-				}
+
 			}
 			,get_element_area:function(){
 				var cur_element_jq = this.get_element_jq();
@@ -6346,6 +6288,7 @@ airborne.bootstrap.obj.__action = {
 
 						// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
 						// 부모 item의 버튼은 모두 가립니다.
+						// wonder.jung11
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
 						cur_parent_action_object_add_on_event_manager.show_child_focusing_mode(event_manager_on_mousemove.get_element_color());
 

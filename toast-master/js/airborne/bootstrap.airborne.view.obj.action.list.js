@@ -614,7 +614,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			.replace(/\<is_shy\>/gi, action_item_obj.get_action_is_shy())
 			.replace(/\<element_type\>/gi, action_item_obj.get_element_type())
 			// 시간을 나타냄. 초기값은 display:none;
-			+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
+			+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;position:relative;display:none;\" tossed_time=\"<tossed_time>\">".replace(/\<tossed_time\>/gi, time_xx_yy)
 			+ time_xx_yy
 			+ "</span>"
 		;
@@ -648,7 +648,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "</div>"
 
 			+ "<div id=\"btn_add\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+				+ "<span id=\"btn_add\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:9px;\"></span>"
 			+ "</div>"
 
 			// INPUT MODE
@@ -660,12 +660,12 @@ airborne.bootstrap.view.obj.__action_list = {
 				+ "<span id=\"btn_ok\" class=\"glyphicon glyphicon-ok\" style=\"position:relative;top:8px;left:9px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_time_plus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_time_plus\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "<div id=\"btn_time_minus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_time_minus\" class=\"glyphicon glyphicon-minus\" style=\"position:relative;top:9px;left:8px;\"></span>"
 			+ "</div>"
 
-			+ "<div id=\"btn_time_minus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
-				+ "<span id=\"btn_time_minus\" class=\"glyphicon glyphicon-minus\" style=\"position:relative;top:9px;left:11px;\"></span>"
+			+ "<div id=\"btn_time_plus\" style=\"float:right;height:32px;width:32px;top:-6px;position:relative;margin-left:4px;border-radius:4px;display:none;\">"
+				+ "<span id=\"btn_time_plus\" class=\"glyphicon glyphicon-plus\" style=\"position:relative;top:9px;left:9px;\"></span>"
 			+ "</div>"
 
 			// chlidren element container div
@@ -674,6 +674,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			+ "<div id=\"chlidren_element_container\"></div>"
 			// add on element container div
 			+ "<div id=\"add_on_element_container\"></div>"
+
 		+ "</li>"
 		;
 		// 태그 그리기 완료
@@ -1225,7 +1226,7 @@ airborne.bootstrap.view.obj.__action_list = {
 			element_event_manager.set_title_input_container_jq(cur_input_text_container_jq);
 
 
-			// wonder.jung11 - 여기서 view mode 변경시의 뷰 제어 코드 추가
+			// 여기서 view mode 변경시의 뷰 제어 코드 추가
 			var delegate_show_view_mode_view_control = 
 			_obj.get_delegate(function(cur_event_manager){
 
@@ -1235,29 +1236,79 @@ airborne.bootstrap.view.obj.__action_list = {
 					return;
 				}
 
+				console.log("TEST 11-1 / ",cur_event_manager.get_element_jq().height());
 				var cur_time_jq = cur_event_manager.get_time_jq();
 				if(cur_time_jq != undefined) {
-					cur_time_jq.css("margin-top", "");	
+					cur_time_jq.css("top", "");	
 				}
 
+				// wonder.jung11 - 높이가 예상보다 커져버린다.
 				var cur_element_jq = cur_event_manager.get_element_jq();
 				if(cur_element_jq != undefined) {
-					// wonder.jung11
+					console.log("TEST 11-2 / ",cur_event_manager.get_element_jq().height());
 					cur_element_jq.css("height", "");
+					console.log("TEST 11-3 / ",cur_event_manager.get_element_jq().height());
 				}
+
+				var top_offset = 0;
+				var cur_btn_ok_jq = cur_event_manager.get_title_input_btn_ok_jq();
+				if(cur_btn_ok_jq != undefined) {
+					top_offset = _obj.get_top_offset_child_centered_vertical(cur_element_jq, cur_btn_ok_jq);
+					cur_btn_ok_jq.css("top", top_offset + "px");
+				}
+
+				console.log("TEST 11-4 / ",cur_event_manager.get_element_jq().height());
+
+				var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
+				if(cur_btn_cancel_jq != undefined) {
+					cur_btn_cancel_jq.css("top", "");
+				}
+
+				console.log("TEST 11-5 / ",cur_event_manager.get_element_jq().height());
 
 			},this);	
 			element_event_manager.set_delegate_show_view_mode_view_control(delegate_show_view_mode_view_control);			
 
+			// XXX
 			// wonder.jung11 - 여기서 input field와 title field가 번갈아가며 나타나는 경우의 뷰 제어 코드 추가
 			var delegate_show_input_mode_default_view_control = 
-			_obj.get_delegate(function(cur_event_manager){
+			_obj.get_delegate(function(cur_event_manager, input_type){
 
+				console.log("input_type ::: ",input_type);
+
+				var height_element_jq = 0;
 				var cur_title_input_container_jq = cur_event_manager.get_title_input_container_jq();
-				var height_title_input_container = cur_title_input_container_jq.outerHeight();
-				var top_title_input_container = cur_title_input_container_jq.position().top;
 
-				var height_element_jq =  height_title_input_container + (top_title_input_container * 2) + 2;
+				if(_action.INPUT_TYPE_DEFAULT === input_type) {
+					
+					var height_title_input_container = cur_title_input_container_jq.outerHeight();
+					var top_title_input_container = cur_title_input_container_jq.position().top;
+					height_element_jq = height_title_input_container + (top_title_input_container * 2) + 2;
+
+					console.log("HERE / 001");
+
+					var cur_btn_ok_jq = cur_event_manager.get_title_input_btn_ok_jq();
+					cur_btn_ok_jq.css("top", "");
+
+					var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
+					cur_btn_cancel_jq.css("top", "");
+
+				} else if(_action.INPUT_TYPE_TIME === input_type) {
+
+					var cur_title_jq = cur_event_manager.get_title_jq();
+					var height_title_jq = cur_title_jq.outerHeight();
+					var top_title_jq = cur_title_jq.position().top;
+					height_element_jq = height_title_jq + (top_title_jq * 2) + 2;
+
+					var cur_btn_ok_jq = cur_event_manager.get_title_input_btn_ok_jq();
+					cur_btn_ok_jq.css("top", "-6px");
+
+					var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
+					cur_btn_cancel_jq.css("top", "-6px");
+
+					console.log("HERE / 002");
+
+				}
 
 				var cur_element_jq = cur_event_manager.get_element_jq();
 				cur_element_jq.css("height", height_element_jq + "px");
@@ -1270,14 +1321,13 @@ airborne.bootstrap.view.obj.__action_list = {
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
 					cur_event_manager.show_time_jq();
+
 					// 입력칸 표시로 time jq의 위치를 변경합니다.
 					var cur_time_jq = cur_event_manager.get_time_jq();
-					var height_time_jq = cur_time_jq.outerHeight();
-					var top_time_jq = cur_time_jq.position().top;
+					top_offset = _obj.get_top_offset_child_centered_vertical(cur_element_jq, cur_time_jq);
+					cur_time_jq.css("top", top_offset + "px");
 
-					var new_top_time_jq = Math.round((height_title_input_container - height_time_jq) / 2);
-					cur_time_jq.css("margin-top", new_top_time_jq + "px");
-
+					// 텍스트 입력 창을 시간 span의 옆으로 띄워줍니다.
 					var padding_left_element_jq = cur_element_jq.css("padding-left");
 					console.log("padding_left_element_jq ::: ",padding_left_element_jq);
 					cur_title_input_container_jq.css("margin-left", padding_left_element_jq);

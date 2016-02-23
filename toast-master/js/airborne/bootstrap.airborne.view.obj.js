@@ -361,6 +361,37 @@ airborne.bootstrap.obj = {
 
         return comparePositions( pos1[0], pos2[0] ) && comparePositions( pos1[1], pos2[1] );
 	}
+	// @ Desc : 자식 객체를 수직 방향의 중간으로 배치할 경우의 top offset값을 가져옵니다.
+	,get_top_offset_child_centered_vertical:function(parent_jq, child_jq) {
+
+		if(parent_jq == undefined) {
+			console.log("!Error! / get_top_offset_child_centered_vertical / parent_jq == undefined");
+			return;
+		}
+		if(child_jq == undefined) {
+			console.log("!Error! / get_top_offset_child_centered_vertical / child_jq == undefined");
+			return;
+		}
+
+		var parent_jq_height = parent_jq.outerHeight();
+		var parent_jq_padding_top = parseInt(parent_jq.css("padding-top").replace(/px/gi, ""));
+		var child_jq_height = child_jq.outerHeight();
+
+		console.log("XX / parent_jq ::: ",parent_jq);
+		console.log("XX / parent_jq_height-1 ::: ",parent_jq_height);
+		console.log("XX / parent_jq_height-2 ::: ",parent_jq.height());
+		console.log("XX / parent_jq_padding_top ::: ",parent_jq_padding_top);
+		console.log("XX / child_jq_height ::: ",child_jq_height);
+
+		if(parent_jq_height < child_jq_height) {
+			console.log("!Error! / get_top_offset_child_centered_vertical / parent_jq_height < child_jq_height");
+			return;
+		}
+
+		var new_top_offset = Math.round((parent_jq_height - child_jq_height) / 2) - parent_jq_padding_top;
+
+		return new_top_offset;
+	}
 	// @ Section : LIST TAG (LEGACY)
 	,COLOR_TYPE_LIST_ROW_WHITE:"list-group-item-default"
 	,COLOR_TYPE_LIST_ROW_GREEN:"list-group-item-success"
