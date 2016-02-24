@@ -7453,4 +7453,52 @@ airborne.bootstrap.obj = {
 		return cur_linked_element_arr;
 
 	}
+	// @ Desc : 텍스트와 텍스트 컨테이너 참조를 받아 최대 입력 글자수를 구합니다.
+	, get_max_char_cnt:function(text_jq, element_jq_subtract_arr) {
+
+		if(text_jq == undefined) {
+			console.log("!Error! / get_max_char_cnt / text_jq == undefined");
+			return;
+		}
+
+		var text_container_jq = text_jq.parent();
+		if(text_container_jq == undefined) {
+			console.log("!Error! / get_max_char_cnt / text_container_jq == undefined");
+			return;
+		}
+
+		var max_char_cnt = -1;
+		var cur_text = text_jq.html();
+		if(_v.is_not_valid_str(cur_text)) {
+			console.log("!Error! / get_max_char_cnt / _v.is_not_valid_str(cur_text)");
+			return;
+		}
+
+		var cur_text_width = text_jq.outerWidth();
+		if(!(0 < cur_text_width)) {
+			console.log("!Error! / get_max_char_cnt / !(0 < cur_text_width)");
+			return;
+		}
+
+		var width_per_char = Math.round(cur_text_width/cur_text.length);
+		var cur_text_container_width = text_container_jq.outerWidth();
+
+		// 텍스트 영역을 제외한 나머지 엘리먼트들의 너비를 구합니다.
+		if(_v.is_valid_array(element_jq_subtract_arr)) {
+			for(var idx = 0; idx < element_jq_subtract_arr.length; idx++) {
+				var cur_element_jq_subtract = element_jq_subtract_arr[idx];
+				var cur_element_jq_subtract_width = cur_element_jq_subtract.outerWidth();
+				if(!(0 < cur_element_jq_subtract_width)) {
+					console.log("!Error! / get_max_char_cnt / !(0 < cur_element_jq_subtract_width)");
+					return;
+				}
+
+				cur_text_container_width -= cur_element_jq_subtract_width;
+			}
+		}
+
+		max_char_cnt = Math.floor(cur_text_container_width/width_per_char);
+
+		return max_char_cnt;
+	}
 }

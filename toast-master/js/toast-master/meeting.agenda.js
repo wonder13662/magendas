@@ -165,6 +165,9 @@ wonglish.meeting_agenda_manager = {
 
 				var cur_root_action_obj = action_item_obj.get_root_action_obj();
 
+				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
+				console.log("HERE / obj_tree :: ",obj_tree);
+
 				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
 				console.log(">>> action_item_obj :: ",action_item_obj);
 				console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);

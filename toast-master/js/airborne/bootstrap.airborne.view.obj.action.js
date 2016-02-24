@@ -20,6 +20,8 @@ airborne.bootstrap.obj.__action = {
 		}
 		return true;
 	}
+	// PLACE HOLDER
+	,PLACE_HOLDER_NOT_ASSIGNED:"NOT ASSIGNED"
 	// EVENT TYPE
 	,EVENT_TYPE_INSERT_ITEM:"EVENT_TYPE_INSERT_ITEM"
 	,EVENT_TYPE_UPDATE_ITEM:"EVENT_TYPE_UPDATE_ITEM"
@@ -1805,6 +1807,85 @@ airborne.bootstrap.obj.__action = {
 				}				
 
 			}
+			// @ Public
+			// @ Scope 	: action obj
+			// @ Desc 	: action 부모 / 자식 구조를 obj 구조 형태로 보여준다. 디버깅용.
+			,convert_action_hierarchy_to_obj_tree:function() {
+				// 1. root obj를 가져옵니다.
+				var root_action_obj = this.get_root_action_obj();
+				if(_action.is_not_valid_action_obj(root_action_obj)) {
+					console.log("!Error! / convert_action_hierarchy_to_obj_tree / _action.is_not_valid_action_obj(root_action_obj)");
+					return;
+				}
+
+				return this.convert_action_hierarchy_to_obj_tree_recursive(root_action_obj);
+			}
+			// @ Private
+			// @ Scope 	: action obj
+			// @ Desc 	: action 부모 / 자식 구조를 obj 구조 형태로 보여준다. 디버깅용. 외부에서 직접 호출하지 않습니다.
+			,convert_action_hierarchy_to_obj_tree_recursive:function(action_obj, obj_tree) {
+				if(_action.is_not_valid_action_obj(action_obj)) {
+					console.log("!Error! / convert_action_hierarchy_to_obj_tree_recursive / _action.is_not_valid_action_obj(action_obj)");
+					return;
+				}
+
+				if(obj_tree == undefined) {
+					obj_tree = {};
+				}
+
+				// DEBUG
+				// console.log("");
+				// action_obj.show_info();
+				// console.log("action_obj ::: ",action_obj);
+
+				if(action_obj.has_children()){
+
+					var cur_children_action_arr = action_obj.get_children();
+					for(var idx = 0; idx < cur_children_action_arr.length; idx++) {
+						var cur_child_action_obj = cur_children_action_arr[idx];
+
+						if(_action.is_not_valid_action_obj(cur_child_action_obj)) {
+							console.log("!Error! / convert_action_hierarchy_to_obj_tree_recursive / _action.is_not_valid_action_obj(cur_child_action_obj)");
+							return;
+						}
+
+						var cur_action_name = cur_child_action_obj.get_action_name();
+						var cur_action_name_formatted = _html.get_num_id_auto_increase(cur_action_name);
+
+						obj_tree[cur_action_name_formatted] = {};
+						var obj_tree_next = obj_tree[cur_action_name_formatted];
+
+						this.convert_action_hierarchy_to_obj_tree_recursive(cur_child_action_obj, obj_tree_next);
+					}
+					
+				}
+
+				if(action_obj.has_add_on_list()) {
+
+					var cur_children_add_on_action_arr = action_obj.get_add_on_list();
+
+					for(var idx = 0; idx < cur_children_add_on_action_arr.length; idx++) {
+						var cur_child_add_on_action_obj = cur_children_add_on_action_arr[idx];
+
+						if(_action.is_not_valid_action_obj(cur_child_add_on_action_obj)) {
+							console.log("!Error! / convert_action_hierarchy_to_obj_tree_recursive / _action.is_not_valid_action_obj(cur_child_add_on_action_obj)");
+							return;
+						}
+
+						var cur_action_name = cur_child_add_on_action_obj.get_action_name();
+						var cur_action_name_formatted = _html.get_num_id_auto_increase(cur_action_name);
+
+						obj_tree[cur_action_name_formatted] = {};
+						var obj_tree_next = obj_tree[cur_action_name_formatted];
+
+						this.convert_action_hierarchy_to_obj_tree_recursive(cur_child_add_on_action_obj, obj_tree_next);
+						
+					}
+
+				}
+
+				return obj_tree;
+			}
 
 
 		}
@@ -2701,7 +2782,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,set_title_input_jq_value:function(new_title){
 				if(this.title_input_jq == null) return;
-				if(_v.isNotValidStr(new_title)) return;
 
 				this.title_input_jq.val(new_title);
 			}
@@ -2763,6 +2843,8 @@ airborne.bootstrap.obj.__action = {
 								return;
 							}
 						}
+
+						_self.set_title_input_jq_prev_value(cur_search_keyword);
 
 					},300);
 				}			
@@ -3048,6 +3130,8 @@ airborne.bootstrap.obj.__action = {
 
 
 			// @ optional
+			// REMOVE ME - 더 이상 사용하지 않음.
+			/*
 			,title_input_btn_search_jq:null
 			,set_title_input_btn_search_jq:function(title_input_btn_search_jq){
 				if(_v.isNotJQueryObj(title_input_btn_search_jq)){
@@ -3071,6 +3155,7 @@ airborne.bootstrap.obj.__action = {
 				if(this.title_input_btn_search_jq == null) return;
 				this.title_input_btn_search_jq.off();
 			}
+			*/
 			,btn_add_element_jq:null
 			,set_btn_add_element_jq:function(btn_add_element_jq){
 				if(_v.isNotJQueryObj(btn_add_element_jq)){
@@ -3658,6 +3743,9 @@ airborne.bootstrap.obj.__action = {
 						// 4. 이벤트 제거
 						_self.remove_event_to_search_output_list_jq();
 
+						// 5. 사용자가 보던 위치로 이동합니다. - wonder.jung11
+						_self.rollback_scroll_top();
+
 						_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_SEARCH_LIST, _obj.EVENT_TYPE_UPDATE_ITEM, selected_search_option_obj);
 					});
 				}
@@ -4033,7 +4121,8 @@ airborne.bootstrap.obj.__action = {
 				this.hide_title_input_group_jq();
 				this.hide_title_input_container_jq();
 
-				this.hide_title_input_btn_search_jq();
+				// REMOVE ME
+				// this.hide_title_input_btn_search_jq();
 				this.hide_title_input_btn_ok_jq();
 				this.hide_title_input_btn_cancel_jq();
 
@@ -4137,8 +4226,13 @@ airborne.bootstrap.obj.__action = {
 
 					this.show_btn_edit_element_jq();
 					this.show_btn_remove_element_jq();
-					this.show_btn_eject_element_jq();
+					// this.show_btn_eject_element_jq();
 					this.show_btn_add_element_jq();
+
+					// wonder.jung11
+					if(!cur_action_item_obj.is_only_one()) {
+						this.show_btn_eject_element_jq();	
+					}
 
 				}
 
@@ -4228,6 +4322,10 @@ airborne.bootstrap.obj.__action = {
 				var cur_title = "";
 				if(cur_action_item_obj.get_action_is_not_shy()){
 					cur_title = this.get_title_jq_value();
+				}
+
+				if(cur_title === _action.PLACE_HOLDER_NOT_ASSIGNED) {
+					this.set_title_input_jq_value("");
 				}
 
 				consoler.say("Event Manager / show_input_mode / em_sim");
@@ -4493,12 +4591,17 @@ airborne.bootstrap.obj.__action = {
 				this.show_search_output_list_jq();
 
 				this.hide_title_input_btn_ok_jq();
-				this.hide_title_input_btn_search_jq();
+
+				this.set_scroll_top();
+
+				// REMOVE ME
+				// this.hide_title_input_btn_search_jq();
 			}
 			,off_all_events:function(){
 				this.off_title_input_btn_ok_jq();
 				this.off_title_input_btn_cancel_jq();
-				this.off_title_input_btn_search_jq();
+				// REMOVE ME
+				// this.off_title_input_btn_search_jq();
 
 				this.off_title_input_jq();
 
@@ -4574,12 +4677,16 @@ airborne.bootstrap.obj.__action = {
 			,rollback_row_title_input:function(event_mode){
 				if(this.title_jq == null || this.title_input_jq == null) return;
 
-				var decoded_title = _html.get_decode_text(this.title_jq.html());
-
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 					console.log("!Error! / rollback_row_title_input / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
 					return;
+				}
+
+				var decoded_title = _html.get_decode_text(this.title_jq.html());
+
+				if(_action.PLACE_HOLDER_NOT_ASSIGNED === decoded_title) {
+					decoded_title = "";
 				}
 
 				if(_action.EVENT_TYPE_ADD_ROW === event_mode) {
@@ -4829,17 +4936,39 @@ airborne.bootstrap.obj.__action = {
 				}
 				if(cur_action_item_obj.is_item_title_only_fixed()) return;
 
-
 				this.show_edit_mode();
+
+				// 최대 표시 글자수를 구합니다.
+				var cur_max_char_cnt = 
+				_obj.get_max_char_cnt(
+					// text_jq
+					this.get_title_jq()
+					// element_jq_subtract_arr
+					, [
+						this.get_btn_add_element_jq()
+						, this.get_btn_remove_element_jq()
+						, this.get_btn_eject_element_jq()
+						, this.get_btn_eject_element_jq()
+						, this.get_btn_eject_element_jq()
+					]
+				);
 				
 				// 일반적인 리스트 형태의 이벤트 처리
 				// 포커싱 시에 노출되는 타이틀 길이를 줄여줍니다.
 				var is_table_child_column_list_field_item = cur_action_item_obj.is_table_child_column_list_field_item();
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
-					// 테이블 컬럼일 경우, 5 글자만 노출
-					this.show_title_jq_text_head(5);	
+					if(0 < cur_max_char_cnt) {
+						this.show_title_jq_text_head(cur_max_char_cnt);
+					} else {
+						// 테이블 컬럼 기본값일 경우, 5 글자만 노출
+						this.show_title_jq_text_head(5);	
+					}
 				} else {
-					this.show_title_jq_text_head();	
+					if(0 < cur_max_char_cnt) {
+						this.show_title_jq_text_head(cur_max_char_cnt);
+					} else {
+						this.show_title_jq_text_head();	
+					}
 				}
 
 				var _self = this;
@@ -4911,8 +5040,6 @@ airborne.bootstrap.obj.__action = {
 					var _self_toss = this;
 					cur_element_jq.click(function(e){
 
-						console.log("HERE / XXX / cur_element_jq.click / 001 / ",cur_action_name);
-
 						e.stopPropagation();
 						if(_self.is_lock()) return;
 
@@ -4950,10 +5077,8 @@ airborne.bootstrap.obj.__action = {
 						}
 
 						if(cur_action_item_obj.get_action_is_shy()){
-							console.log("edit btn - shy element일 경우는 입력");
 							_self.on_add_btn_click();
 						} else {
-							console.log("edit btn - 일반 element일 경우는 수정");
 							_self.on_edit_btn_click();
 						}
 						
@@ -5241,7 +5366,9 @@ airborne.bootstrap.obj.__action = {
 				// 사용자가 입력한 검색 키워드를 0.3초마다 가져와서 리스트에 표시합니다.
 				this.set_title_input_jq_search_list_watch_dog_interval();
 
+				// REMOVE ME
 				// search btn event
+				/*
 				var _self = this;
 				var cur_title_input_btn_search_jq = this.get_title_input_btn_search_jq();
 				if(cur_title_input_btn_search_jq == undefined){
@@ -5264,6 +5391,7 @@ airborne.bootstrap.obj.__action = {
 					_self.hide_title_input_btn_search_jq();
 
 				});
+				*/
 			}
 			,set_event_btn_cancel_on_input_group:function(cur_event_type){
 				
@@ -6139,9 +6267,23 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_input_btn_cancel_jq();
 
 				// set text from shy element set
-				this.set_title_input_jq_value("New Action");
+				this.set_title_input_jq_value("New Item");
 				this.focus_title_input_jq();
 			}
+			// @ Public
+			// @ Desc 	: 현재 스크롤 y 위치
+			,scroll_top:0
+			,set_scroll_top:function() {
+				var body = $("html, body");
+				this.scroll_top = body.scrollTop();
+			}
+			,rollback_scroll_top:function() {
+				var body = $("html, body");
+				body.stop().animate({scrollTop:this.scroll_top}, '300', 'swing', function() { 
+					// To do something.
+				});				
+			}
+			
 
 		};
 
@@ -6288,7 +6430,6 @@ airborne.bootstrap.obj.__action = {
 
 						// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
 						// 부모 item의 버튼은 모두 가립니다.
-						// wonder.jung11
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
 						cur_parent_action_object_add_on_event_manager.show_child_focusing_mode(event_manager_on_mousemove.get_element_color());
 

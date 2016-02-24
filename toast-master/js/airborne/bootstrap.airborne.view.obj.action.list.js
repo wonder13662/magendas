@@ -1358,8 +1358,9 @@ airborne.bootstrap.view.obj.__action_list = {
 				element_event_manager.set_btn_add_element_jq(cur_list_row_btn_add_jq);	
 			}
 
-			var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search").first();
-			element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
+			// REMOVE ME
+			// var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search").first();
+			// element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
 
 			element_event_manager.set_delegate_save_n_reload(delegate_on_event);
 

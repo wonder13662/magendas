@@ -533,6 +533,8 @@ airborne.html = {
 
 		if(!isNaN(raw_id)) return raw_id;
 
+		raw_id = raw_id.replace(/ /gi, "_");
+
 	    var patt1 = /[a-z_0-9\-]/gi; 
 	    var result = raw_id.toLowerCase().match(patt1);
 
@@ -558,6 +560,10 @@ airborne.html = {
 	,get_id_auto_increase:function(raw_id){
 		this.auto_increase_num += 1;
 		return this.getId(raw_id) + "_" + this.auto_increase_num;
+	}
+	,get_num_id_auto_increase:function(raw_id){
+		this.auto_increase_num += 1;
+		return this.auto_increase_num + "_" + this.getId(raw_id);
 	}
 	,restoreText:function(safe_text){ // TODO wdjung
 

@@ -2439,8 +2439,9 @@ airborne.bootstrap.view.obj.__action_table = {
 			var cur_title_input_btn_cancel_jq = cur_table_column_set_jq.find("div#btn_cancel");
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
 
-			var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search");
-			element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
+			// REMOVE ME
+			// var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search");
+			// element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
 
 			element_event_manager.set_delegate_save_n_reload(delegate_on_event);
 
