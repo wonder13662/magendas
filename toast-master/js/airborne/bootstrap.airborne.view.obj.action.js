@@ -3743,7 +3743,7 @@ airborne.bootstrap.obj.__action = {
 						// 4. 이벤트 제거
 						_self.remove_event_to_search_output_list_jq();
 
-						// 5. 사용자가 보던 위치로 이동합니다. - wonder.jung11
+						// 5. 사용자가 보던 위치로 이동합니다.
 						_self.rollback_scroll_top();
 
 						_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_SEARCH_LIST, _obj.EVENT_TYPE_UPDATE_ITEM, selected_search_option_obj);
@@ -4229,7 +4229,6 @@ airborne.bootstrap.obj.__action = {
 					// this.show_btn_eject_element_jq();
 					this.show_btn_add_element_jq();
 
-					// wonder.jung11
 					if(!cur_action_item_obj.is_only_one()) {
 						this.show_btn_eject_element_jq();	
 					}
@@ -5131,6 +5130,36 @@ airborne.bootstrap.obj.__action = {
 
 
 				}
+
+				// element collection set 위에서 클릭 발생시 부모에게 클릭이벤트가 발생하지 않도록 방어. 이벤트 가로챔 및 이벤트 중단.
+				if(cur_action_item_obj.has_add_on_list()) {
+
+					var cur_add_on_list = cur_action_item_obj.get_add_on_list();
+					for(var idx = 0; idx < cur_add_on_list.length; idx++) {
+						var cur_add_on_action_obj = cur_add_on_list[idx];
+						if(_action.is_not_valid_action_obj(cur_add_on_action_obj)) {
+							console.log("!Error! / on_mouse_over / _action.is_not_valid_action_obj(cur_add_on_action_obj)");
+							return;
+						}
+
+						var cur_table_element_collection_set = cur_add_on_action_obj.get_table_element_collection_set();
+						if(cur_table_element_collection_set == undefined) {
+							console.log("!Error! / on_mouse_over / cur_table_element_collection_set == undefined");
+							return;
+						}
+
+						var cur_element_collection_container_jq = cur_table_element_collection_set.get_element_collection_container_jq()
+
+						cur_element_collection_container_jq.off();
+						cur_element_collection_container_jq.click(function(e){
+							// 클릭 이벤트가 부모에게 전달되어 처리되지 않도록 막습니다.
+							e.stopPropagation();
+						}); // end inner if
+
+					} // end for
+
+				} // end outer if
+				
 			}
 			,on_mouse_leave:function(is_child_mouse_over){
 				if(this.is_lock()) return;
