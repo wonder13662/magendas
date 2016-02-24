@@ -403,12 +403,6 @@ airborne.bootstrap.obj.__action = {
 					is_shy = false;
 				}
 
-				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
-				if(_action.is_not_valid_action_obj(src_action_obj)) {
-					console.log("!Error! / copy / _action.is_not_valid_action_obj(src_action_obj)");
-					return;
-				}
-
 				var consoler = airborne.console.get();
 				consoler.off();
 
@@ -494,6 +488,12 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("copy / 001-2 / after action : ",action_obj_copy.get_action_name());
 
 				// 다음 객체가 있었다면 앞 뒤 형제 관계를 만들어줍니다.
+				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
+				if(_action.is_not_valid_action_obj(src_action_obj)) {
+					console.log("!Error! / copy / _action.is_not_valid_action_obj(src_action_obj)");
+					return;
+				}
+
 				var cur_sibling_action_obj_after_after = undefined;
 				if(cur_sibling_action_obj_after != undefined) {
 
@@ -511,19 +511,28 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var max_loop_cnt = 50;
-				for(var idx=0;idx < max_loop_cnt; idx++) {
+				if(_action.is_valid_action_obj(cur_sibling_action_obj_after_after)) {
 
-					console.log("XXX / cur_sibling_action_obj_after_after ::: ",cur_sibling_action_obj_after_after);
-					
-					var cur_sibling_action_obj_after_after = cur_sibling_action_obj_after_after.get_sibling_action_obj_before();
-					if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after_after)) {
-						break;
-					}
-					cur_sibling_action_obj_after_after.set_changed(true);
+					for(var idx=0;idx < max_loop_cnt; idx++) {
 
-					consoler.say("copy / 003-1 / set_changed : ",cur_sibling_action_obj_after_after.get_action_name());
+						console.log("XXX / cur_sibling_action_obj_after_after ::: ",cur_sibling_action_obj_after_after);
+						
+						var cur_sibling_action_obj_after_after = cur_sibling_action_obj_after_after.get_sibling_action_obj_before();
+						if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after_after)) {
+							break;
+						}
+						cur_sibling_action_obj_after_after.set_changed(true);
 
-				} // for end
+						consoler.say("copy / 003-1 / set_changed : ",cur_sibling_action_obj_after_after.get_action_name());
+
+						if(max_loop_cnt < (idx - 1)) {
+							console.log("!Error! / copy / max_loop_cnt is over!");
+							return;
+						}
+
+					} // end for
+
+				} // end if
 
 				this.reset_root_coordinate();
 
