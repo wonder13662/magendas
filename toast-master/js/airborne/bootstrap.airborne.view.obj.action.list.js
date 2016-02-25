@@ -172,7 +172,6 @@ airborne.bootstrap.view.obj.__action_list = {
 					;
 					consoler.say(msg, cur_action_list);
 
-					// wonder.jung
 					this.add_editable_action_list(
 						// action_list
 						cur_action_list
@@ -562,9 +561,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			console.log("!Error! / add_editable_list_element / target_element_collection_set == undefined");
 			return;
 		}
-
-		console.log("HERE / add_editable_list_element / action_item_obj ::: ",action_item_obj);
-
 		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
 			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;
@@ -719,8 +715,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_item_obj(cur_sibling_action_obj_before)");
 				return;
 			}
-
-			console.log("YYY / cur_sibling_action_obj_before ::: ",cur_sibling_action_obj_before);
 
 			var cur_sibling_element_event_manager_before = cur_sibling_action_obj_before.get_event_manager();
 			if(cur_sibling_element_event_manager_before == undefined) {
@@ -1099,7 +1093,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 		cur_action_list.set_list_element_collection_set(cur_element_collection_set);
 
-		// wonder.jung
 		// 리스트의 자식 열들을 만듭니다.
 		var editable_list_row_arr_jq = editable_list_jq.children();
 
@@ -1158,8 +1151,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			element_event_manager.set_title_input_group_jq(cur_input_group_jq);
 
 			if(cur_action_item_obj.is_item_title_only() || cur_action_item_obj.is_item_title_n_time_hh_mm()){
-				// REMOVE ME
-				//var btn_add_jq = cur_list_row_jq.find("span#btn_add").first();
 				var btn_add_jq = cur_list_row_jq.find("div#btn_add").first();
 				element_event_manager.set_btn_add_element_jq(btn_add_jq);
 			}
@@ -1169,7 +1160,7 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
 
-					// wonder.jung11 - 시간 제어 관련 코드.
+					// 시간 제어 관련 코드.
 
 					// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
 					time_jq = cur_list_row_jq.find("span#time").first();
@@ -1177,18 +1168,6 @@ airborne.bootstrap.view.obj.__action_list = {
 					element_event_manager.show_time_jq();
 
 					// 시간 정보 입력 엘리먼트 그룹
-					// REMOVE ME
-					/*
-					var time_input_group_jq = cur_list_row_jq.parent().parent().find("div#input_group_time").first();
-					if(time_input_group_jq != undefined && time_input_group_jq.length > 1) {
-						time_input_group_jq = $(time_input_group_jq[0]);
-					}
-					element_event_manager.set_time_input_group_jq(time_input_group_jq);
-
-					// 시간 정보 입력 엘리먼트 그룹의 시간 표시 엘리먼트
-					var time_input_group_jq_input_jq = time_input_group_jq.find("input#input_time").first();
-					element_event_manager.set_time_input_group_jq_input_jq(time_input_group_jq_input_jq);
-					*/
 
 					// @ Desc : 시간 입력 그룹의 시간 추가 버튼
 					var time_input_group_jq_btn_time_plus_jq = cur_list_row_jq.find("div#btn_time_plus").first();
@@ -1199,15 +1178,6 @@ airborne.bootstrap.view.obj.__action_list = {
 					element_event_manager.set_time_input_group_jq_btn_time_minus_jq(time_input_group_jq_btn_time_minus_jq);
 
 					// @ Desc : 시간 입력 그룹의 수정된 시간 확인 버튼
-					// REMOVE ME
-					/*
-					var time_input_group_jq_btn_time_ok_jq = time_input_group_jq.find("button#btn_ok_time").first();
-					element_event_manager.set_time_input_group_jq_btn_time_ok_jq(time_input_group_jq_btn_time_ok_jq);
-
-					// @ Desc : 시간 입력 그룹의 수정된 시간 취소 버튼
-					var time_input_group_jq_btn_time_cancel_jq = time_input_group_jq.find("button#btn_cancel_time").first();
-					element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);					
-					*/
 					
 				}
 
@@ -1225,8 +1195,6 @@ airborne.bootstrap.view.obj.__action_list = {
 			var cur_table_column_text_container_jq = cur_list_row_jq.parent();
 			element_event_manager.set_parent_container_jq(cur_table_column_text_container_jq);
 			// ROW TITLE INPUT CONTAINER
-			// REMOVE ME
-			// var cur_input_text_container_jq = cur_input_group_jq.find("div#row_input_text").first();
 			var cur_input_text_container_jq = cur_list_row_jq.find("div#row_input_text").first();
 			element_event_manager.set_title_input_container_jq(cur_input_text_container_jq);
 
@@ -1241,18 +1209,15 @@ airborne.bootstrap.view.obj.__action_list = {
 					return;
 				}
 
-				console.log("TEST 11-1 / ",cur_event_manager.get_element_jq().height());
 				var cur_time_jq = cur_event_manager.get_time_jq();
 				if(cur_time_jq != undefined) {
 					cur_time_jq.css("top", "");	
 				}
 
-				// wonder.jung11 - 높이가 예상보다 커져버린다.
+				// 높이가 예상보다 커져버린다.
 				var cur_element_jq = cur_event_manager.get_element_jq();
 				if(cur_element_jq != undefined) {
-					console.log("TEST 11-2 / ",cur_event_manager.get_element_jq().height());
 					cur_element_jq.css("height", "");
-					console.log("TEST 11-3 / ",cur_event_manager.get_element_jq().height());
 				}
 
 				var top_offset = 0;
@@ -1262,24 +1227,17 @@ airborne.bootstrap.view.obj.__action_list = {
 					cur_btn_ok_jq.css("top", top_offset + "px");
 				}
 
-				console.log("TEST 11-4 / ",cur_event_manager.get_element_jq().height());
-
 				var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
 				if(cur_btn_cancel_jq != undefined) {
 					cur_btn_cancel_jq.css("top", "");
 				}
 
-				console.log("TEST 11-5 / ",cur_event_manager.get_element_jq().height());
-
 			},this);	
 			element_event_manager.set_delegate_show_view_mode_view_control(delegate_show_view_mode_view_control);			
 
-			// XXX
-			// wonder.jung11 - 여기서 input field와 title field가 번갈아가며 나타나는 경우의 뷰 제어 코드 추가
+			// 여기서 input field와 title field가 번갈아가며 나타나는 경우의 뷰 제어 코드 추가
 			var delegate_show_input_mode_default_view_control = 
 			_obj.get_delegate(function(cur_event_manager, input_type){
-
-				console.log("input_type ::: ",input_type);
 
 				var height_element_jq = 0;
 				var cur_title_input_container_jq = cur_event_manager.get_title_input_container_jq();
@@ -1289,8 +1247,6 @@ airborne.bootstrap.view.obj.__action_list = {
 					var height_title_input_container = cur_title_input_container_jq.outerHeight();
 					var top_title_input_container = cur_title_input_container_jq.position().top;
 					height_element_jq = height_title_input_container + (top_title_input_container * 2) + 2;
-
-					console.log("HERE / 001");
 
 					var cur_btn_ok_jq = cur_event_manager.get_title_input_btn_ok_jq();
 					cur_btn_ok_jq.css("top", "");
@@ -1310,8 +1266,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 					var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
 					cur_btn_cancel_jq.css("top", "-6px");
-
-					console.log("HERE / 002");
 
 				}
 
@@ -1363,12 +1317,7 @@ airborne.bootstrap.view.obj.__action_list = {
 				element_event_manager.set_btn_add_element_jq(cur_list_row_btn_add_jq);	
 			}
 
-			// REMOVE ME
-			// var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search").first();
-			// element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
-
 			element_event_manager.set_delegate_save_n_reload(delegate_on_event);
-
 			element_event_manager.set_delegate_add_searchable_element(_obj.get_delegate_add_searchable_element());
 
 			// 리스트 내부의 추가 동작을 하기 위한 숨김 자식(shy child) 리스트를 내부에 포함하고자 할 때, 사용하는 컨테이너입니다.
@@ -1497,8 +1446,6 @@ airborne.bootstrap.view.obj.__action_list = {
 						consoler.say("중간의 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
 					}	
-					// REMOVE ME
-					// cur_sibling_element_event_manager.hide_btn_eject_collection_element_jq();
 				}
 
 				// action item obj의 순서 바꾸기.
@@ -1530,6 +1477,9 @@ airborne.bootstrap.view.obj.__action_list = {
 				console.log("형제 엘리먼트의 디자인 - collection eject btn, corner round - 을 다시 그립니다.");
 				var has_myself = true;
 				cur_event_manager_on_mouse_over.shape_sibling_element(has_myself);
+
+				// edit mode로 전환
+				cur_event_manager_on_mouse_over.show_edit_mode();
 
 				// Save n Reload
 				if(cur_event_manager_on_mouse_over != undefined){

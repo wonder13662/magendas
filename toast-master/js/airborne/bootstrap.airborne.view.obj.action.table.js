@@ -2379,42 +2379,6 @@ airborne.bootstrap.view.obj.__action_table = {
 			var btn_eject_jq = cur_table_column_set_jq.find("div#btn_eject");
 			element_event_manager.set_btn_eject_element_jq(btn_eject_jq);
 
-			// REMOVE ME
-			/*
-			if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-
-				// 엘리먼트 내부의 시간 정보 표시 엘리먼트 참조를 저장
-				var time_jq = cur_table_column_set_jq.find("span#column_text");
-				element_event_manager.set_time_jq(time_jq);
-				element_event_manager.show_time_jq();
-
-				// 시간 정보 입력 엘리먼트 그룹
-				var time_input_group_jq = cur_table_column_set_jq.parent().parent().find("div#input_group_time");
-				element_event_manager.set_time_input_group_jq(time_input_group_jq);
-
-				// 시간 정보 입력 엘리먼트 그룹의 시간 표시 엘리먼트
-				var time_input_group_jq_input_jq = time_input_group_jq.find("input#input_time");
-				element_event_manager.set_time_input_group_jq_input_jq(time_input_group_jq_input_jq);
-
-				// @ Desc : 시간 입력 그룹의 시간 추가 버튼
-				var time_input_group_jq_btn_time_plus_jq = time_input_group_jq.find("button#btn_plus");
-				element_event_manager.set_time_input_group_jq_btn_time_plus_jq(time_input_group_jq_btn_time_plus_jq);
-
-				// @ Desc : 시간 입력 그룹의 시간 감소 버튼
-				var time_input_group_jq_btn_time_minus_jq = time_input_group_jq.find("button#btn_minus");
-				element_event_manager.set_time_input_group_jq_btn_time_minus_jq(time_input_group_jq_btn_time_minus_jq);
-
-				// @ Desc : 시간 입력 그룹의 수정된 시간 확인 버튼
-				var time_input_group_jq_btn_time_ok_jq = time_input_group_jq.find("button#btn_ok_time");
-				element_event_manager.set_time_input_group_jq_btn_time_ok_jq(time_input_group_jq_btn_time_ok_jq);
-
-				// @ Desc : 시간 입력 그룹의 수정된 시간 취소 버튼
-				var time_input_group_jq_btn_time_cancel_jq = time_input_group_jq.find("button#btn_cancel_time");
-				element_event_manager.set_time_input_group_jq_btn_time_cancel_jq(time_input_group_jq_btn_time_cancel_jq);					
-
-			}
-			*/
-
 			var cur_table_column_text_jq = cur_table_column_set_jq.find("span#column_text");
 			element_event_manager.set_title_jq(cur_table_column_text_jq);
 
@@ -2438,10 +2402,6 @@ airborne.bootstrap.view.obj.__action_table = {
 
 			var cur_title_input_btn_cancel_jq = cur_table_column_set_jq.find("div#btn_cancel");
 			element_event_manager.set_title_input_btn_cancel_jq(cur_title_input_btn_cancel_jq);
-
-			// REMOVE ME
-			// var cur_title_input_btn_search_jq = cur_input_group_jq.find("button#btn_search");
-			// element_event_manager.set_title_input_btn_search_jq(cur_title_input_btn_search_jq);
 
 			element_event_manager.set_delegate_save_n_reload(delegate_on_event);
 
@@ -2900,8 +2860,8 @@ airborne.bootstrap.view.obj.__action_table = {
 			// 엘리먼트가 사용자 수정에 의해 새로운 위치로 이동 완료한 뒤에 호출되는 콜백 델리게이트
 			event_manager_table_column_text.set_delegate_callback_after_landing_element(_obj.get_delegate(function(cur_event_manager_on_mouse_over){
 
-				// wonder.jung11
-				console.log("XXX / cur_event_manager_on_mouse_over ::: ",cur_event_manager_on_mouse_over);
+				// edit mode로 전환
+				cur_event_manager_on_mouse_over.show_edit_mode();
 
 				// Save n Reload
 				if(cur_event_manager_on_mouse_over != undefined){
@@ -2915,9 +2875,6 @@ airborne.bootstrap.view.obj.__action_table = {
 	// @ public
 	// @ Desc : 화면에 테이블을 추가합니다. 테이블을 구성하는 정보는 모두 action table 객체에서 가져옵니다.
 	,add_editable_table_from_action_table:function(parent_jq, action_table_obj, delegate_on_event){
-
-		// REMOVE ME - old params
-		// received_editable_table_meta_info_obj
 
 		if(parent_jq == null){
 			console.log("!Error! / add_editable_table_from_action_table / parent_jq == null");
@@ -3023,12 +2980,6 @@ airborne.bootstrap.view.obj.__action_table = {
 					+ "</div>"	
 					
 				+ "</div>"
-
-				// REMOVE ME
-				// buttons
-				// + "<button id=\"btn_search\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-search\"></span>&nbsp;</button>"
-				// + "<button id=\"btn_ok\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-ok\"></span>&nbsp;</button>"
-				// + "<button id=\"btn_cancel\" class=\"btn btn-default\" style=\"padding-left:20px;padding-right:20px;margin-right:8px;float:left;\">&nbsp;<span class=\"glyphicon glyphicon-remove\"></span>&nbsp;</button>"
 
 				// search output list
 				+ "<div id=\"search_output_list\" class=\"list-group col-lg-9\" style=\"display:none;margin:0px;padding:0px;float:left;width:100%\">"

@@ -7456,28 +7456,28 @@ airborne.bootstrap.obj = {
 	// @ Desc : 텍스트와 텍스트 컨테이너 참조를 받아 최대 입력 글자수를 구합니다.
 	, get_max_char_cnt:function(text_jq, element_jq_subtract_arr) {
 
+		var max_char_cnt = -1;
 		if(text_jq == undefined) {
 			console.log("!Error! / get_max_char_cnt / text_jq == undefined");
-			return;
+			return max_char_cnt;
 		}
 
 		var text_container_jq = text_jq.parent();
 		if(text_container_jq == undefined) {
 			console.log("!Error! / get_max_char_cnt / text_container_jq == undefined");
-			return;
+			return max_char_cnt;
 		}
-
-		var max_char_cnt = -1;
+		
 		var cur_text = text_jq.html();
 		if(_v.is_not_valid_str(cur_text)) {
 			console.log("!Error! / get_max_char_cnt / _v.is_not_valid_str(cur_text)");
-			return;
+			return max_char_cnt;
 		}
 
 		var cur_text_width = text_jq.outerWidth();
 		if(!(0 < cur_text_width)) {
 			console.log("!Error! / get_max_char_cnt / !(0 < cur_text_width)");
-			return;
+			return max_char_cnt;
 		}
 
 		var width_per_char = Math.round(cur_text_width/cur_text.length);
@@ -7490,7 +7490,7 @@ airborne.bootstrap.obj = {
 				var cur_element_jq_subtract_width = cur_element_jq_subtract.outerWidth();
 				if(!(0 < cur_element_jq_subtract_width)) {
 					console.log("!Error! / get_max_char_cnt / !(0 < cur_element_jq_subtract_width)");
-					return;
+					return max_char_cnt;
 				}
 
 				cur_text_container_width -= cur_element_jq_subtract_width;

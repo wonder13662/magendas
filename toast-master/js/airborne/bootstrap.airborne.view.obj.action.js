@@ -310,7 +310,14 @@ airborne.bootstrap.obj.__action = {
 				} else if(action_depth_arr.length == depth){
 					action_depth_arr.push([this]);
 				} else {
-					action_depth_arr[depth].push(this);
+					// 현재 객체를 기존에 있던 depth에 추가합니다.
+					var action_depth_arr_element_arr = action_depth_arr[depth];
+					if(_v.is_not_valid_array(action_depth_arr_element_arr)) {
+						console.log("!Error! / push_action_obj_depth_arr / _v.is_not_valid_array(action_depth_arr_element_arr)");
+						return;
+					}
+					action_depth_arr_element_arr.push(this);
+					action_depth_arr[depth] = action_depth_arr_element_arr;
 				}
 				this.set_action_depth_arr_from_root(action_depth_arr);
 
@@ -469,7 +476,6 @@ airborne.bootstrap.obj.__action = {
 					is_shy = false;
 				}
 
-				// wonder.jung11
 				// 모든 파라미터가 설정되었으므로 검사를 진행합니다.
 				if(_action.is_not_valid_action_obj(parent_action_obj)) {
 					console.log("!Error! / copy / _action.is_not_valid_action_obj(parent_action_obj)");
@@ -1127,7 +1133,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,set_sibling_action_obj_before:function(sibling_action_obj_before) {
 
-				// wonder.jung11
 				if(sibling_action_obj_before != undefined) {
 					// CHECK 무한 루프가 만들어지는지 검사합니다.
 					var has_infinite_loop = _action.has_infinite_loop(sibling_action_obj_before);
@@ -3292,32 +3297,6 @@ airborne.bootstrap.obj.__action = {
 
 
 			// @ optional
-			// REMOVE ME - 더 이상 사용하지 않음.
-			/*
-			,title_input_btn_search_jq:null
-			,set_title_input_btn_search_jq:function(title_input_btn_search_jq){
-				if(_v.isNotJQueryObj(title_input_btn_search_jq)){
-					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_title_input_btn_search_jq / _v.isNotJQueryObj(title_input_btn_cancel_jq)");
-					return;
-				}
-				this.title_input_btn_search_jq = title_input_btn_search_jq;
-			}
-			,get_title_input_btn_search_jq:function(){
-				return this.title_input_btn_search_jq;
-			}
-			,show_title_input_btn_search_jq:function(){
-				if(this.title_input_btn_search_jq == null) return;
-				this.title_input_btn_search_jq.show();
-			}
-			,hide_title_input_btn_search_jq:function(){
-				if(this.title_input_btn_search_jq == null) return;
-				this.title_input_btn_search_jq.hide();
-			}
-			,off_title_input_btn_search_jq:function(){
-				if(this.title_input_btn_search_jq == null) return;
-				this.title_input_btn_search_jq.off();
-			}
-			*/
 			,btn_add_element_jq:null
 			,set_btn_add_element_jq:function(btn_add_element_jq){
 				if(_v.isNotJQueryObj(btn_add_element_jq)){
@@ -4283,8 +4262,6 @@ airborne.bootstrap.obj.__action = {
 				this.hide_title_input_group_jq();
 				this.hide_title_input_container_jq();
 
-				// REMOVE ME
-				// this.hide_title_input_btn_search_jq();
 				this.hide_title_input_btn_ok_jq();
 				this.hide_title_input_btn_cancel_jq();
 
@@ -4324,9 +4301,13 @@ airborne.bootstrap.obj.__action = {
 			,get_is_view_mode:function() {
 				return this.is_view_mode;
 			}
-			,show_view_mode:function(){
+			,show_view_mode:function(is_force_change){
 
-				if(this.is_view_mode) return;
+				if(is_force_change == undefined) {
+					is_force_change = false;
+				}
+
+				if(!is_force_change && this.is_view_mode) return;
 
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
@@ -4695,8 +4676,11 @@ airborne.bootstrap.obj.__action = {
 					event_manager_after.show_input_mode(event_mode);
 					event_manager_after.lock();
 
-				}
+					// 이전 엘리먼트는 view mode로 변경합니다.
+					var is_force_change = true;
+					this.show_view_mode(is_force_change);
 
+				}
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
@@ -4756,14 +4740,10 @@ airborne.bootstrap.obj.__action = {
 
 				this.set_scroll_top();
 
-				// REMOVE ME
-				// this.hide_title_input_btn_search_jq();
 			}
 			,off_all_events:function(){
 				this.off_title_input_btn_ok_jq();
 				this.off_title_input_btn_cancel_jq();
-				// REMOVE ME
-				// this.off_title_input_btn_search_jq();
 
 				this.off_title_input_jq();
 
@@ -5558,32 +5538,6 @@ airborne.bootstrap.obj.__action = {
 				// 사용자가 입력한 검색 키워드를 0.3초마다 가져와서 리스트에 표시합니다.
 				this.set_title_input_jq_search_list_watch_dog_interval();
 
-				// REMOVE ME
-				// search btn event
-				/*
-				var _self = this;
-				var cur_title_input_btn_search_jq = this.get_title_input_btn_search_jq();
-				if(cur_title_input_btn_search_jq == undefined){
-					return;
-				}
-
-				console.log("XXX / this.title_input_btn_search_jq ::: ",this.title_input_btn_search_jq);
-
-				// search btn event
-				this.title_input_btn_search_jq.off();
-				this.title_input_btn_search_jq.click(function(){
-
-					_self.hide_searchable_combo_box_jq();
-					_self.show_title_input_group_jq();
-					_self.show_title_input_container_jq();
-					_self.show_title_input_jq();
-					_self.show_search_output_list_jq();
-
-					_self.hide_title_input_btn_ok_jq();
-					_self.hide_title_input_btn_search_jq();
-
-				});
-				*/
 			}
 			,set_event_btn_cancel_on_input_group:function(cur_event_type){
 				
@@ -5600,8 +5554,6 @@ airborne.bootstrap.obj.__action = {
 				var do_on_event = function(e) {
 					e.stopPropagation();
 
-					// REMOVE ME
-					// _self.clear_title_input_jq_value();
 					_self.rollback_title_jq_text();
 
 					// 입력 모드 이전인 수정 모드로 돌아간다.
@@ -5821,8 +5773,6 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 
-					// REMOVE ME
-					// var hour_n_minutes_str = cur_time_input_group_jq_input_jq.val();
 					var hour_n_minutes_str = target_action_item_obj.get_event_manager().get_value_time_jq();
 
 					var new_offset_moment = _dates.get_moment_minutes_offset_from_hour_n_minutes_str(hour_n_minutes_str, offset_minutes);
@@ -5840,8 +5790,6 @@ airborne.bootstrap.obj.__action = {
 						return;
 					}
 
-					// REMOVE ME
-					// var minutes_n_seconds_str = cur_time_input_group_jq_input_jq.val();
 					var minutes_n_seconds_str = target_action_item_obj.get_event_manager().get_value_time_jq();
 
 					var new_offset_moment = _dates.get_moment_seconds_offset_from_minutes_n_seconds_str(minutes_n_seconds_str, offset_seconds);
@@ -6466,14 +6414,21 @@ airborne.bootstrap.obj.__action = {
 			// @ Desc 	: 현재 스크롤 y 위치
 			,scroll_top:0
 			,set_scroll_top:function() {
-				var body = $("html, body");
+
+				var body = $(document);
 				this.scroll_top = body.scrollTop();
+
+				console.log("set_scroll_top / this.scroll_top ::: ",this.scroll_top);
 			}
 			,rollback_scroll_top:function() {
+
 				var body = $("html, body");
+				console.log("rollback_scroll_top / this.scroll_top ::: ",this.scroll_top);
+
 				body.stop().animate({scrollTop:this.scroll_top}, '300', 'swing', function() { 
 					// To do something.
-				});				
+				});
+
 			}
 			
 
@@ -7141,7 +7096,6 @@ airborne.bootstrap.obj.__action = {
 				// 사용자가 열을 삭제하였을 때의 처리
 
 			}
-			// REMOVE ME
 			/*
 				@ public 
 				@ Scope : Element collection set
@@ -7265,12 +7219,6 @@ airborne.bootstrap.obj.__action = {
 						console.log("!Error! / add_element / cur_element_collection_set == undefined");
 						return;
 					}
-
-					console.log("XXX / sibling_action_item_obj_copy :: ",sibling_action_item_obj_copy);
-
-					console.log("TEST / HERE / 002");
-
-					// wonder.jung11
 
 					// 낱개의 엘리먼트만 그립니다.
 					cur_element_collection_set = 
@@ -7774,10 +7722,7 @@ airborne.bootstrap.obj.__action = {
 				} 
 
 				var cur_ecs_id = child_element_collection_set.get_element_collection_id();
-				console.log("ecs_push_child_element_collection_set / ",cur_ecs_id );
-
 				this.children_element_collection_set_arr.push(child_element_collection_set);
-
 				child_element_collection_set.ecs_set_parent_element_collection_set(this);
 			}
 			,get_children_element_collection_set_arr:function(){
@@ -7807,30 +7752,6 @@ airborne.bootstrap.obj.__action = {
 			,get_table_guide_row_jq:function() {
 				return this.table_guide_row_jq;
 			}
-			// REMOVE ME
-			/*
-			,is_outside:undefined
-			,set_is_outside:function(is_outside) {
-				this.is_outside = is_outside;
-			}
-			,get_is_outside:function() {
-				return this.is_outside;
-			}
-			,is_hover_top:undefined
-			,set_is_hover_top:function(is_hover_top) {
-				this.is_hover_top = is_hover_top;
-			}
-			,get_is_hover_top:function() {
-				return this.is_hover_top;
-			}
-			,is_hover_bottom:undefined
-			,set_is_hover_bottom:function(is_hover_bottom) {
-				this.is_hover_bottom = is_hover_bottom;
-			}
-			,get_is_hover_bottom:function() {
-				return this.is_hover_bottom;
-			}
-			*/
 			// 리스트 혹은 테이블 전체의 이벤트를 받는 버튼
 			,btn_collection_eject_jq:undefined
 			/*
@@ -7925,8 +7846,18 @@ airborne.bootstrap.obj.__action = {
 					}
 					clone_jq.offset(target_offset);
 					clone_jq.show();
-					clone_jq.animate({opacity:0.5}, 200);
-					target_jq.animate({opacity:0.5}, 200);
+					clone_jq.animate(
+						{
+							opacity:0.5
+						}
+						, 200
+					);
+					target_jq.animate(
+						{
+							opacity:0.5
+						}
+						, 200
+					);		
 
 					return clone_jq;
 
@@ -8209,10 +8140,6 @@ airborne.bootstrap.obj.__action = {
 
 							}
 
-							// show eject btn
-							eject_btn_jq.show();
-							eject_btn_jq.css("opacity",".3");
-
 						}
 					); // end animation - cur_clone_jq
 
@@ -8264,27 +8191,7 @@ airborne.bootstrap.obj.__action = {
 				// mouse over시 색상 변경 이벤트 설정.
 				var _self = this;
 				cur_btn_collection_eject_jq.off();
-				cur_btn_collection_eject_jq.css("opacity","0.3");
-				cur_btn_collection_eject_jq.mouseout(function(){
 
-					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
-					if(cur_event_hierarchy_manager.is_lock()) {
-						return;
-					}
-
-					var _self_jq = $(this);
-					_self_jq.animate({opacity:0.3}, 500);
-				});
-				cur_btn_collection_eject_jq.mouseover(function(){
-
-					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
-					if(cur_event_hierarchy_manager.is_lock()) {
-						return;
-					}
-
-					var _self_jq = $(this);
-					_self_jq.animate({opacity:1}, 500);
-				});
 				cur_btn_collection_eject_jq.click(function(event_click){
 
 					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
@@ -8445,7 +8352,7 @@ airborne.bootstrap.obj.__action = {
 			,get_mouse_over_element:function(mouse_event, target_element_set_arr){
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var element_set_on_mouse_over_arr = [];
 				for (var idx = 0; idx < target_element_set_arr.length; idx++) {
