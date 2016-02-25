@@ -717,6 +717,8 @@ airborne.bootstrap.view.obj.__action_list = {
 				return;
 			}
 
+			console.log("YYY / cur_sibling_action_obj_before ::: ",cur_sibling_action_obj_before);
+
 			var cur_sibling_element_event_manager_before = cur_sibling_action_obj_before.get_event_manager();
 			if(cur_sibling_element_event_manager_before == undefined) {
 				console.log("!Error! / add_editable_list_element / cur_sibling_element_event_manager_before == undefined");

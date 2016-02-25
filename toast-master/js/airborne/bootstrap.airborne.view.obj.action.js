@@ -403,8 +403,10 @@ airborne.bootstrap.obj.__action = {
 					is_shy = false;
 				}
 
+				console.log("copy / src_action_obj :: ",src_action_obj.get_coordinate());
+
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var action_obj_copy = _action.get_action_obj_empty();
 				if(_v.is_valid_str(new_action_name)) {
@@ -414,8 +416,9 @@ airborne.bootstrap.obj.__action = {
 				}
 				action_obj_copy.set_action_hierarchy_search_map(src_action_obj.get_action_hierarchy_search_map());
 
-				consoler.say("copy / 000 / action_name_copy : ",action_obj_copy.get_action_name());
-				consoler.say("copy / 000 / action copy : ",action_obj_copy);
+				consoler.say("copy / 000 / action copy : ",action_obj_copy.get_coordinate());
+				consoler.say("copy / 000 / action copy.has_before() : ",action_obj_copy.has_before());
+				consoler.say("copy / 000 / action copy.has_after() : ",action_obj_copy.has_after());
 
 				if(src_action_obj.is_list() || src_action_obj.is_table()) {
 
@@ -427,23 +430,20 @@ airborne.bootstrap.obj.__action = {
 					action_obj_copy.set_action_item_type(src_action_obj.get_action_item_type());
 					action_obj_copy.set_action_item_type_name(src_action_obj.get_action_item_type_name());
 
-					if(src_action_obj.is_item_title_n_time_hh_mm()){
-
-						var cur_action_context = src_action_obj.get_action_context();
-						action_obj_copy.set_action_context(cur_action_context);
-
-					} // end inner if
-
 				} // end outer if
+
+				var cur_action_context = src_action_obj.get_action_context();
+				action_obj_copy.set_action_context(cur_action_context);
 
 				action_obj_copy.set_parent(parent_action_obj);
 				action_obj_copy.set_action_is_shy(is_shy);
 				action_obj_copy.set_changed(true);
 
 
-				// shy 객체를 하나 추가합니다.
+				// 자식 shy 객체를 하나 추가합니다. 새로 복사한 
 				// 조건 
-				// 1.자신의 자식이 있다면 첫번재 객체만 복사합니다.
+				// 1.복사 대상에 자식이 있어야 합니다.
+				// 2.있다면 복사 대상의 첫번재 객체만 복사합니다.
 				// 2.action name은 무조건 기본값으로 재설정됩니다. List -> ${parent_action_name} Sublist, Table -> ${parent_action_name} Subtable, Item -> New item
 				var cur_first_child_obj = src_action_obj.get_first_child();
 				if(_action.is_valid_action_obj(cur_first_child_obj)) {
@@ -467,6 +467,7 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("copy / 000-1 / cur_first_child_obj_copy : ",cur_first_child_obj_copy.get_action_name());
 					
 				}
+
 				if(parent_action_obj.has_no_children()) {
 					// 새로 생긴 자식과 부모 객체의 연결.
 					parent_action_obj.set_first_child_action_obj(action_obj_copy);
@@ -476,16 +477,35 @@ airborne.bootstrap.obj.__action = {
 				if(is_shy === true) {
 					// shy 모드일 경우는 복사하는 객체가 자식 객체를 가지고 있는 엘리먼트인 경우, 
 					// 초기값으로 1개의 자식 객체만 세팅해서 연결해줍니다.
+					console.log("HERE / COPY / STOP");
 					this.reset_root_coordinate();
 					return action_obj_copy;
 				}
 
 				// 복사를 하면 자신의 다음 객체로 만듭니다.
+
+				consoler.say("copy / 001-0-0 / src_action_obj.has_after() : ",src_action_obj.has_after());
+				consoler.say("copy / 001-0-0 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
+
 				src_action_obj.set_sibling_action_obj_after(action_obj_copy);
 				action_obj_copy.set_sibling_action_obj_before(src_action_obj);
 
-				consoler.say("copy / 001-1 / before action : ",src_action_obj.get_action_name());
-				consoler.say("copy / 001-2 / after action : ",action_obj_copy.get_action_name());
+				if(src_action_obj.has_no_after()) {
+					console.log("!Error! / copy / src_action_obj.has_no_after()");
+					return;
+				} else if(action_obj_copy.has_no_before()) {
+					console.log("!Error! / copy / action_obj_copy.has_no_before()");
+					return;
+				}
+
+				consoler.say("copy / 001-0-1 / src_action_obj.has_after() : ",src_action_obj.has_after());
+				consoler.say("copy / 001-0-1 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
+
+
+				consoler.say("copy / 001-1 / before action : ",src_action_obj);
+				consoler.say("copy / 001-1 / before action : ",src_action_obj.get_coordinate());
+				consoler.say("copy / 001-2 / after action : ",action_obj_copy);
+				consoler.say("copy / 001-2 / after action : ",action_obj_copy.get_coordinate());
 
 				// 다음 객체가 있었다면 앞 뒤 형제 관계를 만들어줍니다.
 				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
@@ -497,7 +517,9 @@ airborne.bootstrap.obj.__action = {
 				var cur_sibling_action_obj_after_after = undefined;
 				if(cur_sibling_action_obj_after != undefined) {
 
+					consoler.say("copy / 002-1 / after action : ",action_obj_copy);
 					consoler.say("copy / 002-1 / after action : ",action_obj_copy.get_action_name());
+					consoler.say("copy / 002-2 / after-after action : ",cur_sibling_action_obj_after);
 					consoler.say("copy / 002-2 / after-after action : ",cur_sibling_action_obj_after.get_action_name());
 
 					action_obj_copy.set_sibling_action_obj_after(cur_sibling_action_obj_after);	
@@ -515,7 +537,7 @@ airborne.bootstrap.obj.__action = {
 
 					for(var idx=0;idx < max_loop_cnt; idx++) {
 
-						console.log("XXX / cur_sibling_action_obj_after_after ::: ",cur_sibling_action_obj_after_after);
+						console.log("XXX / cur_sibling_action_obj_after_after ::: ",cur_sibling_action_obj_after_after.get_coordinate());
 						
 						var cur_sibling_action_obj_after_after = cur_sibling_action_obj_after_after.get_sibling_action_obj_before();
 						if(_action.is_not_valid_action_obj(cur_sibling_action_obj_after_after)) {
@@ -1019,10 +1041,31 @@ airborne.bootstrap.obj.__action = {
 				return (_v.is_valid_array(children_action_object_list))?true:false;
 			}
 			,set_sibling_action_obj_before:function(sibling_action_obj_before) {
+
+				// wonder.jung11
+				if(_action.is_valid_action_obj(sibling_action_obj_before)) {
+					// CHECK 무한 루프가 만들어지는지 검사합니다.
+					var is_infinite_loop = this.is_infinite_loop(sibling_action_obj_before);
+					if(is_infinite_loop) {
+						console.log("!Error! / set_sibling_action_obj_after / is_infinite_loop");
+						return;
+					}
+				}
+
 				this.sibling_action_obj_before = sibling_action_obj_before;
 			}
 			,get_sibling_action_obj_before:function() {
 				return this.sibling_action_obj_before;
+			}
+			,has_no_before:function() {
+				return !this.has_before();
+			}
+			,has_before:function() {
+				var cur_sibling_action_obj_before = this.get_sibling_action_obj_before();
+				if(_action.is_valid_action_obj(cur_sibling_action_obj_before)) {
+					return true;
+				}
+				return false;
 			}
 			,is_not_first:function() {
 				return !this.is_first();
@@ -1103,10 +1146,73 @@ airborne.bootstrap.obj.__action = {
 				return cur_sibling_action_obj_before.get_first_sibling_action_obj(repeat_cnt);
 			}
 			,set_sibling_action_obj_after:function(sibling_action_obj_after) {
+
+				if(_action.is_valid_action_obj(sibling_action_obj_after)) {
+					// CHECK 무한 루프가 만들어지는지 검사합니다. - 형제 객체 연결을 끊는 방법으로 undefined 지정할 수 있는 경우를 고려 
+					var is_infinite_loop = this.is_infinite_loop(sibling_action_obj_after);
+					if(is_infinite_loop) {
+						console.log("!Error! / set_sibling_action_obj_after / is_infinite_loop");
+						return;
+					}
+				}
+
 				this.sibling_action_obj_after = sibling_action_obj_after;
 			}
 			,get_sibling_action_obj_after:function() {
 				return this.sibling_action_obj_after;
+			}
+			,has_no_after:function() {
+				return !this.has_after();
+			}
+			,has_after:function() {
+				var cur_sibling_action_obj_after = this.get_sibling_action_obj_after();
+				if(_action.is_valid_action_obj(cur_sibling_action_obj_after)) {
+					return true;
+				}
+				return false;
+			}
+			,is_infinite_loop:function(target_action_obj) {
+
+				// wonder.jung11
+				if(_action.is_not_valid_action_obj(target_action_obj)) {
+					console.log("!Error! / is_infinite_loop / _action.is_not_valid_action_obj(target_action_obj)");
+					return;
+				}
+				// check backward
+				var max_loop_cnt = 100;
+				var is_over_max_loop_cnt = true;
+				var action_obj_after = target_action_obj;
+				for(var idx = 0; idx < max_loop_cnt; idx++) {
+					action_obj_after = action_obj_after.get_sibling_action_obj_after();
+					if(action_obj_after == undefined) {
+						is_over_max_loop_cnt = false;
+						break;
+					}
+				}
+
+				if(is_over_max_loop_cnt) {
+					return true;
+				}
+
+				// check forward
+				is_over_max_loop_cnt = true;
+				var action_obj_before = target_action_obj;
+				for(var idx = 0; idx < max_loop_cnt; idx++) {
+					action_obj_before = action_obj_before.get_sibling_action_obj_before();
+					if(action_obj_before == undefined) {
+						is_over_max_loop_cnt = false;
+						break;
+					}
+				}
+				if(is_over_max_loop_cnt) {
+					console.log("!Error! / is_infinite_loop / is_over_max_loop_cnt");
+					return;
+				}
+
+				if(is_over_max_loop_cnt) {
+					return true;
+				}
+				return false;
 			}
 			,get_sibling_action_obj_list:function() {
 				var parent_action_obj = this.get_parent();
@@ -4524,6 +4630,7 @@ airborne.bootstrap.obj.__action = {
 					cur_element_collection_set.add_element(this);
 
 					// 추가한 뒤에 사용자가 기본값인 "New Item"을 수정할 수 있도록 수정 창을 보여줍니다.
+					console.log("HERE / show_input_mode_add_row / cur_action_item_obj ::: ",cur_action_item_obj);
 					var cur_sibling_action_obj_after = cur_action_item_obj.get_sibling_action_obj_after();
 					if(_action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)) {
 						console.log("!Error! / show_input_mode_add_row / _action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)");
