@@ -823,6 +823,8 @@ airborne.bootstrap.view.obj.__action_list = {
 		        var cur_top = mousemove_event.pageY - jsm.gap;
 		        var cur_left = mousemove_event.pageX - jsm.gap;
 
+		        clone_element_jq.show();
+
 				clone_element_jq.offset({top:cur_top,left:cur_left});
 
 				// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사

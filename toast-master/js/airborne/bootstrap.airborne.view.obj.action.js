@@ -4488,6 +4488,8 @@ airborne.bootstrap.obj.__action = {
 					// 새로운 리스트 열을 추가하는 경우
 					this.show_input_mode_add_row(event_mode);
 
+					this.hide_shy_child();
+
 					// set event on input buttons	
 					this.set_event_btn_ok_on_input_group(event_mode);
 					this.set_event_btn_cancel_on_input_group(event_mode);
@@ -5027,6 +5029,7 @@ airborne.bootstrap.obj.__action = {
 				});
 
 			}
+			// @ Private
 			,set_btn_color_focus:function(target_jq, is_force_change){
 
 				if(is_force_change == undefined) {
@@ -5042,6 +5045,7 @@ airborne.bootstrap.obj.__action = {
 				target_jq.css("color", this.element_color);
 				target_jq.css("background-color", item_focus_color);
 			}
+			// @ Private
 			,set_btn_color_back:function(target_jq){
 				if(target_jq == null) return;
 
@@ -7829,35 +7833,30 @@ airborne.bootstrap.obj.__action = {
 				gap:20
 				, boost_clone_element_jq:function(target_jq, target_offset) {
 
+					// wonder.jung11
+
 					// 시각적으로 엘리먼트를 떠있도록 보이게 합니다.
 					// 마우스 커서의 움직임을 따라 다닐 클론 객체를 만들어 원본 아래에 붙입니다.
 					var clone_jq = target_jq.clone();
 					target_jq.after(clone_jq);
 					clone_jq.hide();
+					var target_width = target_jq.outerWidth();
+					target_jq.hide();
 
 					// 1-2. position:absolute로 속성 변경. 이제부터 화면에서 떨어집니다.
-					// 1-3. 화면에 그림자 표시를 해서 오브젝트가 떨어졌다는 느낌이 들도록 합니다.
-					
-					var target_width = target_jq.outerWidth();
+					// 1-3. 화면에 그림자 표시를 해서 오브젝트가 떨어졌다는 느낌이 들도록 합니다.					
 					var src_offset = target_jq.offset();
-					clone_jq.css("width",target_width).css("position","absolute").css("z-index","1000").css("box-shadow","20px 20px 10px rgba(128,128,128,0.5)");
-					if(target_offset == null){
+					clone_jq.css("width",target_width).css("position","absolute").css("z-index","1000").css("border-color","#F0F").css("box-shadow","20px 20px 10px rgba(128,128,128,0.5)");
+					if(target_offset == undefined){
 						target_offset = src_offset;
 					}
+
 					clone_jq.offset(target_offset);
-					clone_jq.show();
-					clone_jq.animate(
-						{
-							opacity:0.5
-						}
-						, 200
-					);
-					target_jq.animate(
-						{
-							opacity:0.5
-						}
-						, 200
-					);		
+
+					target_jq.show();
+
+					clone_jq.css("opacity", "0.5");
+					target_jq.css("opacity", "0.5");
 
 					return clone_jq;
 
@@ -8192,6 +8191,8 @@ airborne.bootstrap.obj.__action = {
 				var _self = this;
 				cur_btn_collection_eject_jq.off();
 
+				cur_btn_collection_eject_jq.css("opacity", "0.3");
+
 				cur_btn_collection_eject_jq.click(function(event_click){
 
 					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
@@ -8212,6 +8213,7 @@ airborne.bootstrap.obj.__action = {
 					var _self_eject_btn_jq = $(this);
 					_self_eject_btn_jq.hide();
 
+					// wonder.jung11
 					// @ element collection settings
 					var clone_element_collection_container_jq = jsm.boost_clone_element_jq(cur_element_collection_container_jq);
 
@@ -8246,6 +8248,8 @@ airborne.bootstrap.obj.__action = {
 						var cur_element_collection_container_width = cur_element_collection_container_jq.outerWidth();
 				        var cur_top = mousemove_event.pageY - gap;
 				        var cur_left = mousemove_event.pageX - (cur_element_collection_container_width - gap);
+
+				        clone_element_collection_container_jq.show();
 
 						clone_element_collection_container_jq.offset({top:cur_top,left:cur_left});
 
@@ -8314,6 +8318,8 @@ airborne.bootstrap.obj.__action = {
 
 							var event_manager_on_mouse_over = cur_element_set_on_mouse_over.get_event_manager();
 						}
+
+						_self_eject_btn_jq.show();
 
 						// 이동 완료후의 save n reload의 델리게이트 호출은 첫번째 element set에게 맡깁니다.
 						jsm.land_element(

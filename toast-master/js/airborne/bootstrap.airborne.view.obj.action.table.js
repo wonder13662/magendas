@@ -2535,6 +2535,8 @@ airborne.bootstrap.view.obj.__action_table = {
 				// 사용자가 선택한 엘리먼트가 포함된 table row가 떠오릅니다.
 				var clone_element_container_jq = jsm.boost_clone_element_jq(cur_element_container_jq, event_click_offset);
 
+				console.log("XXX / clone_element_container_jq ::: ",clone_element_container_jq);
+
 				// set round
 				_obj.set_list_single_row_round(clone_element_container_jq, _obj.LIST_ROW_RADIUS_NORMAL);
 				var clone_element_offset = clone_element_container_jq.offset();
@@ -2546,6 +2548,8 @@ airborne.bootstrap.view.obj.__action_table = {
 					// 사용자가 선택한 윈도우의 이동
 			        var cur_top = mousemove_event.pageY - jsm.gap;
 			        var cur_left = mousemove_event.pageX - jsm.gap;
+
+			        clone_element_container_jq.show();
 
 					clone_element_container_jq.offset({top:cur_top,left:cur_left});
 
@@ -2724,7 +2728,6 @@ airborne.bootstrap.view.obj.__action_table = {
 									// 여기서 옮길 특정 row idx의 action item을 가져옵니다.
 									var target_moving_action_item_obj = cur_column_child_action_list_obj.get_child(clicked_action_item_obj_idx);
 									// 옮길 특정 row의 앞뒤의 엘리먼트 참조를 가져와 순서를 변경해줍니다.
-									consoler.say("1111 / COOL");
 									target_moving_action_item_obj.dive_into_indixes(
 										// idx_before_action_item_obj
 										idx_cur_sibling_action_item_obj_mouse_over_before
@@ -2920,12 +2923,8 @@ airborne.bootstrap.view.obj.__action_table = {
 					.replace(/\<_v\>/gi, table_title)
 					.replace(/\<id\>/gi, table_id)
 
-				// 삭제 버튼을 사용할 일이 있을까?
 
-				// + "<div id=\"btn_remove\" style=\"height:20px;width:20px;float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-left:4px;padding-left:10px;margin-bottom:-10px;\">"
-				// 	+ "<span id=\"btn_remove\" class=\"glyphicon glyphicon-remove\" style=\"position:absolute;top:9px;left:8px;\">&nbsp;</span>"
-				// + "</div>"
-					
+					// wonder.jung11
 				+ "<div id=\"btn_collection_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
 					+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
 				+ "</div>"
@@ -3124,8 +3123,6 @@ airborne.bootstrap.view.obj.__action_table = {
 		var cur_btn_collection_eject_jq = cur_table_title_set_jq.find("span#btn_collection_eject");
 		cur_table_element_collection_set.ecs_set_btn_collection_eject_jq(cur_btn_collection_eject_jq);
 
-
-		
 		var cur_table_row_arr = cur_table_jq.find("tr#column_text_container");
 		for (var idx_row = 0; idx_row < cur_table_row_arr.length; idx_row++) {
 
