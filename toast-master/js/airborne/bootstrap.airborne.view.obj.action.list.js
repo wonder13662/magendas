@@ -562,6 +562,9 @@ airborne.bootstrap.view.obj.__action_list = {
 			console.log("!Error! / add_editable_list_element / target_element_collection_set == undefined");
 			return;
 		}
+
+		console.log("HERE / add_editable_list_element / action_item_obj ::: ",action_item_obj);
+
 		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
 			console.log("!Error! / add_editable_list_element / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;

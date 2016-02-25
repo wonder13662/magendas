@@ -229,6 +229,9 @@ var param_manager = {
 	, FONT_SIZE_LARGE:"FONT_SIZE_LARGE"
 	, FONT_SIZE_SMALL:"FONT_SIZE_SMALL"
 
+	// PLACE HOLDERS
+	, PLACE_HOLDER_NEW_ITEM:"NEW ITEM"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {
