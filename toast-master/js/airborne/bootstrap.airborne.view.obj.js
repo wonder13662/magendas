@@ -1160,15 +1160,6 @@ airborne.bootstrap.obj = {
 					this.set_title_jq_text(cur_tossed_value, true);
 				}				
 
-				// REMOVE ME - 이전에 입력한 값을 덮어씌우는 에러가 있음.
-				/*
-				if(_v.is_valid_str(cur_input_value)) {
-					this.set_title_jq_text(cur_input_value, true);
-				} else if(_v.is_valid_str(cur_tossed_value)){
-					this.set_title_jq_text(cur_tossed_value, true);
-				}
-				*/
-
 				// 사용자 입력 값을 초기화합니다.
 				this.clear_title_input_jq_value();
 
@@ -2685,7 +2676,7 @@ airborne.bootstrap.obj = {
 				var cur_element_type = cur_element_meta_info.get_element_type();
 
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var cur_title = this.get_title_jq_value();
 
@@ -2752,10 +2743,7 @@ airborne.bootstrap.obj = {
 			}
 			,show_input_mode_shy_list:function(){
 
-				console.log("Event Manager / show_input_mode_shy_list   ");
-
-				var _v = airborne.validator;
-				var _obj = airborne.bootstrap.obj;
+				console.log("Event Manager / show_input_mode_shy_list / 0001");
 
 				// element set에서 추가 버튼을 눌렀을 때의 작동.
 				this.hide_all();
@@ -2776,6 +2764,8 @@ airborne.bootstrap.obj = {
 
 				// 5. 선택한 엘리먼트(자기 자신)의 아래로 input group을 옮깁니다.
 				this.move_title_input_group_jq_under_me();
+
+				console.log("Event Manager / show_input_mode_shy_list / 0002");
 
 			}
 			,show_input_mode_default:function(){

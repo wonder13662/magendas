@@ -3003,8 +3003,9 @@ airborne.bootstrap.obj.__action = {
 							if(_v.is_valid_str(cur_search_keyword) && max_length < cur_search_keyword.length) {
 								is_over_max_length = true;
 							}
-
-							if(is_over_max_length && confirm("Please check your text.\nIt's a little bit longer.")) {
+							
+							if(is_over_max_length) {
+								alert("Please check your text.\nIt's a little bit longer.")
 								_self.set_title_input_jq_value(cur_search_keyword.slice(0,max_length));
 								_self.focus_title_input_jq();
 								return;
@@ -3043,12 +3044,12 @@ airborne.bootstrap.obj.__action = {
 				}			
 			}
 			,clear_title_input_jq_watch_dog_interval:function(){
-				if(this.input_onchange_interval != null){
+				if(this.input_onchange_interval != undefined){
 					window.clearInterval(this.input_onchange_interval);
-					this.input_onchange_interval = null;
+					this.input_onchange_interval = undefined;
 				}
 			}
-			,title_input_container_jq:null 
+			,title_input_container_jq:undefined 
 			,set_title_input_container_jq:function(title_input_container_jq){
 				if(_v.isNotJQueryObj(title_input_container_jq)){
 					console.log("!Error! / airborne.bootstrap.obj / element_event_manager / set_title_input_container_jq / _v.isNotJQueryObj(title_input_container_jq)");
@@ -4622,6 +4623,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_input_btn_ok_jq();
 				this.show_title_input_btn_cancel_jq();
 
+				this.clear_title_input_jq_watch_dog_interval();
 				this.set_title_input_jq_watch_dog_interval();
 
 				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
@@ -4676,6 +4678,8 @@ airborne.bootstrap.obj.__action = {
 
 					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 					event_manager_after.show_input_mode(event_mode);
+					// 새로 추가된 열은 빈 텍스트로 시작합니다.
+					event_manager_after.clear_title_input_jq_value();
 					event_manager_after.lock();
 
 					// 이전 엘리먼트는 view mode로 변경합니다.
@@ -5653,10 +5657,27 @@ airborne.bootstrap.obj.__action = {
 
 					// 입력된 텍스트 내용을 검사합니다.
 					var cur_title_input_jq_value = _self.get_title_input_jq_value();
-					if(_v.is_not_valid_str(cur_title_input_jq_value) && confirm("Please check your text.\nIt cannot be empty!")) {
+					if(_v.is_not_valid_str(cur_title_input_jq_value)) {
+						alert("Please check your text.\nIt cannot be empty!")
 						_self.focus_title_input_jq();
 						return;
 					}
+
+					// 공백만으로 이루어져 있다면 허용하지 않습니다.
+					var cur_title_input_jq_value_no_empty_space = cur_title_input_jq_value.replace(/ /gi, "");
+					var is_empty_space = false;
+					if(cur_title_input_jq_value_no_empty_space.length == 0) {
+						is_empty_space = true;
+					}
+					
+					if(is_empty_space) {
+						alert("Please check your text.\nIt cannot be empty!")
+						_self.focus_title_input_jq();
+						return;
+					}
+
+					// Mysql Query Safe Check.
+
 
 					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW === cur_event_type){
 
@@ -5840,10 +5861,7 @@ airborne.bootstrap.obj.__action = {
 				var do_on_event_btn_time_plus = function(e, target_action_item_obj) {
 					e.stopPropagation();
 
-					console.log("XXX / do_on_event_btn_time_plus");
-
 					if(!check_time_format_valid(target_action_item_obj)) return;
-
 
 					if(target_action_item_obj.is_item_title_n_time_hh_mm()) {
 						set_minutes_offset(5, target_action_item_obj);	// plus time (+ 5 minutes per click)	
@@ -5858,8 +5876,6 @@ airborne.bootstrap.obj.__action = {
 				var do_on_event_btn_time_minus = function(e, target_action_item_obj) {
 					e.stopPropagation();
 
-					console.log("XXX / do_on_event_btn_time_minus");
-
 					if(!check_time_format_valid(target_action_item_obj)) return;
 
 					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
@@ -5873,8 +5889,6 @@ airborne.bootstrap.obj.__action = {
 
 				var do_on_event_btn_time_ok = function(e, target_action_item_obj) {
 					e.stopPropagation();
-
-					console.log("XXX / do_on_event_btn_time_ok / target_action_item_obj ::: ",target_action_item_obj);
 
 					if(!check_time_format_valid(target_action_item_obj)){
 						console.log("!Error! / do_on_event_btn_time_ok / !check_time_format_valid()");
@@ -6012,15 +6026,15 @@ airborne.bootstrap.obj.__action = {
 							console.log("!Error! / on_add_btn_click / cur_element_collection_set == undefined");
 							return;
 						}
-						// 2-1. 엘리먼트를 shy --> not shy로 바꿉니다.
+						// 2-1-1. 엘리먼트를 shy --> not shy로 바꿉니다.
 						cur_element_collection_set.add_element(this);
 
-						// 2-2. 입력창을 보여줍니다.
+						// 2-1-2. 입력창을 보여줍니다.
 						var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 						this.show_input_mode(event_mode);
 
 					} else {
-						// 이미 보이는 엘리먼트에서 추가되는 경우
+						// 2-2. 이미 보이는 엘리먼트에서 추가되는 경우
 						this.show_input_mode(_action.EVENT_TYPE_ADD_ROW);
 					}
 
@@ -6512,7 +6526,7 @@ airborne.bootstrap.obj.__action = {
 		event_hierarchy_manager.add_mousemove_callback_set(_obj.get_delegate(function(mousemove_event, event_manager_on_mousemove){
 
 			var consoler = airborne.console.get();
-			// consoler.off();
+			consoler.off();
 
 			var id_for_test = event_manager_on_mousemove.get_id();
 			var title_for_test = event_manager_on_mousemove.get_title_jq_value();
