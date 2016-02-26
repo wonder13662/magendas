@@ -488,7 +488,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var action_obj_copy = _action.get_action_obj_empty();
 				if(_action.is_not_valid_action_obj(action_obj_copy)) {
@@ -497,7 +497,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				if(_v.is_valid_str(new_action_name)) {
-					action_obj_copy.set_action_name(new_action_name);	
+					action_obj_copy.set_action_name(new_action_name);
 				} else {
 					action_obj_copy.set_action_name(src_action_obj.get_action_name());	
 				}
@@ -6512,7 +6512,7 @@ airborne.bootstrap.obj.__action = {
 		event_hierarchy_manager.add_mousemove_callback_set(_obj.get_delegate(function(mousemove_event, event_manager_on_mousemove){
 
 			var consoler = airborne.console.get();
-			consoler.off();
+			// consoler.off();
 
 			var id_for_test = event_manager_on_mousemove.get_id();
 			var title_for_test = event_manager_on_mousemove.get_title_jq_value();
@@ -6589,8 +6589,8 @@ airborne.bootstrap.obj.__action = {
 						// 자신의 테두리 색은 원래대로 되돌려 놓습니다.
 						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
 
-						// 자신 말고 다른 자식 객체에 마우스 커서가 올라가 있어 부모 item이 색상이 이미 변한경우의 처리
 						if(cur_parent_action_object_add_on_event_manager.get_is_child_focusing_mode()) {
+							console.log("자신 말고 다른 자식 객체에 마우스 커서가 올라가 있어 부모 item이 색상이 이미 변한경우의 처리");
 							return;
 						}
 
