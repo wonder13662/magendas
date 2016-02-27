@@ -545,7 +545,7 @@ airborne.bootstrap.obj.__action = {
 						new_child_action_name = action_obj_copy.get_action_name() + " - Subtable";
 					} else if(cur_first_child_obj.is_item()) {
 						consoler.say("copy / 000-1-3 / cur_first_child_obj");
-						new_child_action_name = "New Item";
+						new_child_action_name = _param.PLACE_HOLDER_NEW_ITEM;
 					} else {
 						console.log("!Error! / copy / Not implemented!");
 					}
@@ -4629,6 +4629,11 @@ airborne.bootstrap.obj.__action = {
 				// 3. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
 				this.call_delegate_show_input_mode_default_view_control(this, _action.INPUT_TYPE_DEFAULT);
 
+				// 4. 기본 텍스트라면 입력 창의 내용을 지웁니다.
+				if(_param.PLACE_HOLDER_NEW_ITEM === this.get_title_input_jq_value()) {
+					this.clear_title_input_jq_value();	
+				}
+
 			}
 			,show_input_mode_add_row:function(event_mode){
 
@@ -4651,7 +4656,7 @@ airborne.bootstrap.obj.__action = {
 				if(cur_action_item_obj.get_action_is_shy()) {
 
 					// 처음으로 자식 엘리먼트를 추가
-					// console.log("처음으로 자식 엘리먼트를 추가");
+					console.log("처음으로 자식 엘리먼트를 추가");
 
 				} else {
 
@@ -4875,6 +4880,7 @@ airborne.bootstrap.obj.__action = {
 				if(is_only_one) {
 					consoler.say("rr / 1-1 / 마지막 1개열이 삭제될 경우, shy row로 바꿉니다. / " + debug_msg);
 					cur_action_item_obj.set_action_is_shy(true);
+					console.log("HERE / XXX / 001");
 
 					var cur_parent_event_manager = this.get_parent_event_manager();
 					if(cur_parent_event_manager == undefined) {
@@ -6425,7 +6431,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_title_input_btn_cancel_jq();
 
 				// set text from shy element set
-				this.set_title_input_jq_value("New Item");
+				this.set_title_input_jq_value(_param.PLACE_HOLDER_NEW_ITEM);
 				this.focus_title_input_jq();
 			}
 			// @ Public
@@ -7174,13 +7180,11 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var new_action_name = sibling_element_event_manager.get_title_input_jq_value();
 				if(_v.is_not_valid_str(new_action_name)) {
-					new_action_name = "New Item";
-					// console.log("!Error! / add_element / _v.is_not_valid_str(new_action_name)");
-					// return;
+					new_action_name = _param.PLACE_HOLDER_NEW_ITEM;
 				}
 
 				consoler.say("add_element / 0 / 추가되는 엘리먼트 이름 : " + new_action_name);
