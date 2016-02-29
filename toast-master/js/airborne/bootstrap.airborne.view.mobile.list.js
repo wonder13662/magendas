@@ -832,13 +832,22 @@ airborne.bootstrap.view.mobile.list = {
 				icon_arrow_clickable_mask_jq = row_tag_jq.find("div#icon_arrow_clickable_mask");
 			}
 
+			console.log("001 / header_arr : ",header_arr);
+
 			// 첫번째 버튼을 제외한 나머지 버튼에만 이벤트 적용
 			if(idx > 0 && header_arr.length > 1){
+
+				console.log("002");
+
+				console.log("header_arr :: ",header_arr);
+
 				this.setTableRowEvent(
 					// row_jq
 					row_tag_jq
 					// delegate_obj_row
 					, _obj.getDelegate(function(delegate_data){
+
+						console.log("1 / delegate_data : ",delegate_data);
 
 						if(_param.EVENT_MOUSE_DOWN === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
@@ -871,6 +880,7 @@ airborne.bootstrap.view.mobile.list = {
 
 		// 첫번째 버튼에 적용할 이벤트 
 		// 첫번째 버튼에는 '이전화면으로 이동' 기능이 있으므로 독립적인 이벤트 구현 로직이 필요하다.
+		
 		if(_v.isValidArray(row_jq_arr) && header_arr.length > 1){
 			var cur_row_tag_jq = row_jq_arr[0];
 			var _self_obj = this;
@@ -901,13 +911,24 @@ airborne.bootstrap.view.mobile.list = {
 
 							var _event = delegate_data._event;
 							var is_hover = _obj.is_hover(_event, icon_arrow_clickable_mask_jq);
+
+							console.log("is_hover : ",is_hover);
+
 							if(is_hover === true) {
+
+								
 
 								// console.log("이전 페이지로 돌아갑니다.");
 								var __call_url = header_arr[1].__call_url;
-								location.href = __call_url;
+
+
+								//location.href = __call_url;
+
+								
 
 							} else {
+
+								console.log("is_hover / 002");
 
 								// console.log("이전 페이지 목록을 보여줍니다.");
 								var self_tag_jq = delegate_data.target_jq;
@@ -936,10 +957,258 @@ airborne.bootstrap.view.mobile.list = {
 				// color_text
 				, bg_color_vmouse_down
 			);
+			
 
 		} // for end
+		
 
 	}
+
+	,addTableHeaderNavRowOnlyTopShow:function(header_arr, color_rgb_max_bright_arr, color_rgb_min_darker_arr, after_row_jq, color_text, bg_color_vmouse_down){
+
+		var _v = airborne.validator;
+		var _obj = airborne.bootstrap.obj;
+		var _html = airborne.html;
+		if(_v.is_not_valid_array(header_arr)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableHeaderNavRow / _v.isNotValidArray(header_arr)");
+			return;
+		}
+		if(_v.is_not_valid_array(color_rgb_max_bright_arr) || color_rgb_max_bright_arr.length != 3) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableHeaderNavRow / _v.is_not_valid_arr(color_rgb_max_bright_arr)");
+			return;
+		}
+		if(_v.is_not_valid_array(color_rgb_min_darker_arr) || color_rgb_min_darker_arr.length != 3) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableHeaderNavRow / _v.is_not_valid_arr(color_rgb_min_darker_arr)");
+			return;
+		}
+		if(after_row_jq == undefined){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / addTableHeaderNavRow / after_row_jq==null");
+			return;
+		}
+		if(bg_color_vmouse_down == undefined){
+			bg_color_vmouse_down = "#FFF";
+		}
+
+		var color_max = 255;
+		var color_rgb_offset_arr = [];
+		var max_depth = 5;
+		for(var idx = 0; idx < color_rgb_max_bright_arr.length; idx++) {
+			var color_rgb_max_bright = color_rgb_max_bright_arr[idx];
+			var color_rgb_min_darker = color_rgb_min_darker_arr[idx];
+
+			var color_range = color_rgb_max_bright - color_rgb_min_darker;
+			var color_offset = color_range;
+
+			if(header_arr.length > 1) {
+				color_offset = parseInt(color_range/max_depth);
+			}
+
+			color_rgb_offset_arr.push(color_offset);
+		}
+
+		var row_jq_arr = [];
+		var icon_arrow_clickable_mask_jq;
+		var text_shadow_style = "2px 2px 2px <COLOR>".replace(/\<COLOR\>/gi, _color.COLOR_DARK_GRAY);
+		for (var idx = 0; idx < header_arr.length; idx++) {
+
+			var header_obj = header_arr[idx];
+
+			var cur_color_min_dark_red = color_rgb_min_darker_arr[0];
+			var cur_color_min_dark_green = color_rgb_min_darker_arr[1];
+			var cur_color_min_dark_blue = color_rgb_min_darker_arr[2];
+
+			var cur_color_offset_red = color_rgb_offset_arr[0];
+			var cur_color_offset_green = color_rgb_offset_arr[1];
+			var cur_color_offset_blue = color_rgb_offset_arr[2];
+
+			var reversed_idx = (header_arr.length - 1) - idx;
+			var cur_color_bg_red = cur_color_min_dark_red + (cur_color_offset_red * reversed_idx);
+			var cur_color_bg_green = cur_color_min_dark_green + (cur_color_offset_green * reversed_idx);
+			var cur_color_bg_blue = cur_color_min_dark_blue + (cur_color_offset_blue * reversed_idx);
+
+			var cur_bg_color_tag = 
+			"background-color:rgb(<COLOR_RED>,<COLOR_GREEN>,<COLOR_BLUE>);"
+			.replace(/\<COLOR_RED\>/gi, cur_color_bg_red)
+			.replace(/\<COLOR_GREEN\>/gi, cur_color_bg_green)
+			.replace(/\<COLOR_BLUE\>/gi, cur_color_bg_blue)
+			;
+
+			var cur_color_max_darker_red = color_rgb_max_bright_arr[0];
+			var cur_color_max_darker_green = color_rgb_max_bright_arr[1];
+			var cur_color_max_darker_blue = color_rgb_max_bright_arr[2];
+
+			var cur_text_color_tag = "color:<COLOR>;".replace(/\<COLOR\>/gi, color_text);
+			var cur_td_style = "border:0px;";
+			var cur_bg_style = "";
+
+			var header_id = _html.getIdRandomTail(header_obj.__title + "_" + idx);
+			
+			var header_url = header_obj.__call_url;
+			var header_title = header_obj.__title;
+
+			var row_tag = ""
+			+ "<tr id=\"<ID>\"  status=\"close\">"
+				.replace(/\<ID\>/gi, header_id)
+				+ "<td class=\"text-center\" __call_url=\"<CALL_URL>\" style=\"<_v><COLOR>\">"
+					.replace(/\<_v\>/gi, cur_td_style)
+					.replace(/\<COLOR\>/gi, cur_text_color_tag + cur_bg_color_tag + cur_bg_style)
+					.replace(/\<CALL_URL\>/gi, header_url)
+			;
+
+			// 타이틀을 한가운데 보여줍니다.
+			row_tag += "<div id=\"folder_clickable_mask\"style=\"width:100%;height:100%;\">"
+					+ "<h4><span class=\"no_selection\" style=\"text-shadow:<TEXT_SHADOW>;\"><TITLE></span>"
+						.replace(/\<TITLE\>/gi, header_title)
+						.replace(/\<TEXT_SHADOW\>/gi, text_shadow_style)
+			;
+
+			row_tag += "</div>"
+				+ "</h4></td>"
+			+ "</tr>"
+			;
+
+			after_row_jq.after(row_tag);
+
+			var row_tag_jq = after_row_jq.parent().find("tr#" + header_id).find("td");
+			row_jq_arr.push(row_tag_jq);
+
+			if(idx == 0 && header_arr.length > 1){
+				icon_arrow_clickable_mask_jq = row_tag_jq.find("div#icon_arrow_clickable_mask");
+			}
+
+			console.log("001 / header_arr : ",header_arr);
+
+			// 첫번째 버튼을 제외한 나머지 버튼에만 이벤트 적용
+			if(/*idx > 0 && */header_arr.length > 0){
+
+				console.log("002");
+
+				console.log("header_arr :: ",header_arr);
+
+				this.setTableRowEvent(
+					// row_jq
+					row_tag_jq
+					// delegate_obj_row
+					, _obj.getDelegate(function(delegate_data){
+
+						console.log("1 / delegate_data : ",delegate_data);
+
+						if(_param.EVENT_MOUSE_DOWN === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+							// 사용자가 첫번째 열을 터치. 누른 상태입니다.
+							// 타이틀의 그림자를 지워줍니다.
+							if(delegate_data.target_jq != undefined) {
+								console.log("타이틀의 그림자를 지워줍니다. / delegate_data :: ",delegate_data);
+								delegate_data.target_jq.find("span").css("text-shadow", "");
+							}
+
+						} else if (_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+							// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
+							// 타이틀의 그림자를 다시 보여줍니다.
+							console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
+							delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
+
+							var __call_url = delegate_data.target_jq.attr("__call_url");
+							location.href = __call_url;
+
+						}
+
+					}, this)
+					// bg_color_vmouse_down
+					// delegate_data
+					// bg_color_vmouse_down
+				);
+			} // if end
+		}
+
+		// 첫번째 버튼에 적용할 이벤트 
+		// 첫번째 버튼에는 '이전화면으로 이동' 기능이 있으므로 독립적인 이벤트 구현 로직이 필요하다.
+		/*
+		if(_v.isValidArray(row_jq_arr) && header_arr.length > 0){
+			var cur_row_tag_jq = row_jq_arr[0];
+			var _self_obj = this;
+
+			this.setTableRowEvent(
+				// row_jq
+				cur_row_tag_jq
+				// delegate_obj
+				, _obj.getDelegate(function(delegate_data){
+
+					if(delegate_data != undefined && delegate_data.delegate_data != undefined) {
+
+						if(_param.EVENT_MOUSE_DOWN === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+							// 사용자가 첫번째 열을 터치. 누른 상태입니다.
+							// 타이틀의 그림자를 지워줍니다.
+							if(delegate_data.target_jq != undefined) {
+								console.log("타이틀의 그림자를 지워줍니다. / delegate_data :: ",delegate_data);
+								delegate_data.target_jq.find("span").css("text-shadow", "");
+							}
+
+						} else if (_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+
+							// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
+							// 타이틀의 그림자를 다시 보여줍니다.
+							console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
+							delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
+
+							var _event = delegate_data._event;
+							var is_hover = _obj.is_hover(_event, icon_arrow_clickable_mask_jq);
+
+							console.log("is_hover : ",is_hover);
+
+							if(is_hover === true) {
+
+								
+
+								// console.log("이전 페이지로 돌아갑니다.");
+								var __call_url = header_arr[1].__call_url;
+
+
+								//location.href = __call_url;
+
+								
+
+							} else {
+
+								console.log("is_hover / 002");
+
+								// console.log("이전 페이지 목록을 보여줍니다.");
+								var self_tag_jq = delegate_data.target_jq;
+								var row_status = self_tag_jq.parent().attr("status");
+
+								var next_row_status = (row_status == "close")?"open":"close";
+								self_tag_jq.parent().attr("status",next_row_status);
+								if(next_row_status == "close"){
+									closeAll();
+								} else {
+									openAll();
+								}
+
+							}
+
+
+						} // inner if end
+
+					} // outer if end
+
+				}, this)
+				// bg_color_vmouse_down
+				, color_text
+				// delegate_data
+				, null
+				// color_text
+				, bg_color_vmouse_down
+			);
+			
+
+		} // for end
+		*/
+
+	}
+
+
 	,ICON_FOLDER_ARROW_LEFT:"glyphicon-chevron-left"
 	,ICON_FOLDER_CLOSE_CLASS:"glyphicon-folder-close"
 	,ICON_FOLDER_OPEN_CLASS:"glyphicon-folder-open"

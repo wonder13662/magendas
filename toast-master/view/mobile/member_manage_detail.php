@@ -82,9 +82,6 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 
 
 
-
-
-
 <body role="document">
 <table class="table" style="margin-bottom:0px;">
 
@@ -93,6 +90,10 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 	</tbody>
 	
 </table>
+
+
+
+
 <script>
 
 // php to javascript sample

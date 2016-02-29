@@ -43,9 +43,15 @@ include_once("../../common.js.inc");
 $view_render_var_arr = array("[__ROOT_PATH__]"=>$service_root_path);
 ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.template",$view_render_var_arr);
 ?>
+<style>
+#up-button{
+	position: absolute;
+    left: 300px;
+    top: 600px;
+    z-index: 1;
+}
+</style>
 </head>
-
-
 
 
 
@@ -58,6 +64,10 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 	</tbody>
 </table>
 
+<!-- test code -->
+<div id="up-button">
+<a class="btn btn-default" href="#" role="button" onclick="console.log('Up button is clicked')">Up</a>
+</div>
 
 <script>
 
@@ -92,7 +102,7 @@ _tm_m_list.addHeaderRow(
 	, membership_obj
 	// header_arr
 	,[
-		_link.get_header_link(
+	/*	_link.get_header_link(
 			_link.MOBILE_MEETING_AGENDA_DETAIL
 			,_param
 			.get(_param.MEETING_ID, MEETING_ID)
@@ -103,7 +113,7 @@ _tm_m_list.addHeaderRow(
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 		)
-		,_link.get_header_link(
+		,*/_link.get_header_link(
 			_link.MOBILE_TOP
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)

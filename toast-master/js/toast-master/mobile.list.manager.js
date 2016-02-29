@@ -299,7 +299,7 @@ toast_master.mobile_list_manager = {
 		);
 
 
-		_m_list.addTableHeaderNavRow(
+		_m_list.addTableHeaderNavRowOnlyTopShow(
 			// header_arr
 			header_arr
 			// color_rgb_max_bright

@@ -57,12 +57,16 @@ include_once("../../common.js.inc");
 $view_render_var_arr = array("[__ROOT_PATH__]"=>$service_root_path);
 ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.template",$view_render_var_arr);
 ?>
+
+<style>
+#up-button{
+	position: absolute;
+    left: 300px;
+    top: 600px;
+    z-index: 1;
+}
+</style>
 </head>
-
-
-
-
-
 
 <body role="document">
 
@@ -73,6 +77,11 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 	</tbody>
 
 </table>
+
+<!-- test code -->
+<div id="up-button">
+<a class="btn btn-default" href="#" role="button" onclick="console.log('Up button is clicked')">Up</a>
+</div>
 
 
 <script>
@@ -97,16 +106,16 @@ _tm_m_list.addHeaderRow(
 	, membership_obj
 	// header_arr
 	, [ 
-		_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
+		//_link.get_header_link(
+		//	_link.MOBILE_MEETING_AGENDA_LIST
+		//	,_param
+		//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		//)
+		 _link.get_header_link(
+		 	_link.MOBILE_TOP
+		 	,_param
+		 	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		 )
 	]
 	// table_jq
 	, table_jq
@@ -303,7 +312,7 @@ _m_list.setTableHeaderRowEvent(row_back_to_previous_jq, row_back_to_previous_del
 var row_meeting_agenda_jq = table_jq.find("tr#row_meeting_agenda");
 var row_meeting_agenda_delegate_obj = _obj.getDelegate(function(self_obj){
 
-	var selected_meeting_id = $(self_obj).attr("meeting_agenda_id");
+var selected_meeting_id = $(self_obj).attr("meeting_agenda_id");
 
 	// 지정한 링크로 이동합니다.
 	_link.go_there(
@@ -318,6 +327,8 @@ _m_list.setTableRowEvent(row_meeting_agenda_jq, row_meeting_agenda_delegate_obj)
 
 // REMOVE Loading message
 _tm_m_list.doWhenDocumentReady();
+
+
 
 </script>
 </body>
