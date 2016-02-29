@@ -854,6 +854,7 @@ airborne.bootstrap.obj.__action = {
 					new_after_action_item_obj = cur_parent_action_obj.get_child(idx_after_action_item_obj);
 				}
 
+				console.log("HERE / XXX / 002");
 				this.dive_into_them(new_before_action_item_obj, new_after_action_item_obj);
 			}
 
@@ -3771,11 +3772,8 @@ airborne.bootstrap.obj.__action = {
 					action_item_obj_after = new_after_sibling_event_manager.get_action_item_obj();
 				}
 
+				console.log("HERE / XXX / 001");
 				cur_action_item_obj.dive_into_them(action_item_obj_before, action_item_obj_after);
-
-				console.log("HERE / action_item_obj_before ::: ",action_item_obj_before);
-				console.log("HERE / cur_action_item_obj ::: ",cur_action_item_obj);
-				console.log("HERE / action_item_obj_after ::: ",action_item_obj_after);
 
 				// wonder.jung11
 				// em_push_child_element_collection_set
@@ -5362,8 +5360,6 @@ airborne.bootstrap.obj.__action = {
 				if(is_child_mouse_over == undefined) {
 					is_child_mouse_over = false;
 				}
-				// wonder.jung11
-				console.log("show view mode / 017 / is_child_mouse_over ::: ",is_child_mouse_over);
 				this.show_view_mode();
 
 				if(is_child_mouse_over === true) {
@@ -8406,12 +8402,9 @@ airborne.bootstrap.obj.__action = {
 
 							var event_manager_on_mouse_over = cur_element_set_on_mouse_over.get_event_manager();
 						}
-
 						_self_eject_btn_jq.show();
 
 
-
-						// wonder.jung11 - 이 시점에서 action obj의 관계 변경이 필요할 것 같은데?
 
 						var cur_action_item_obj_mouse_over = undefined;
 						if(cur_element_set_on_mouse_over != undefined) {
@@ -8419,37 +8412,16 @@ airborne.bootstrap.obj.__action = {
 						}
 						if(_action.is_valid_action_item_obj(cur_action_item_obj_mouse_over)) {
 
-							// wonder.jung11
-							// list element를 옮겼을 때의 처리.
-							if( cur_action_item_obj_mouse_over.has_parent() && 
-								cur_action_item_obj_mouse_over.get_parent().is_list()) {
-
-								var hovering_action_item_obj = delegate_on_completed_param_event_manager.get_action_item_obj();
-								if(_action.is_not_valid_action_item_obj(hovering_action_item_obj)) {
-									console.log("!Error! / land_element / _action.is_not_valid_action_item_obj(hovering_action_item_obj)");
-									return;
-								}
-								hovering_action_item_obj.remove();
-
-								console.log("HERE / XXX / hovering_action_item_obj ::: ",hovering_action_item_obj);
-
-								//	,dive_into_them:function(new_before_action_item_obj, new_after_action_item_obj) {
-
-								// 객체의 앞뒤 순서를 어떻게 알지?
-
-							}
-
-							
-
 							// add on table을 옮겼을 때의 처리.
 							var cur_table_action_obj = undefined;
-							if(hovering_element_collection_set != undefined) {
-								cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+							if(cur_element_collection_set != undefined) {
+								cur_table_action_obj = cur_element_collection_set.get_table_action_obj();
 							}
+
 							if(_action.is_valid_action_obj(cur_table_action_obj)) {
 
 								// add on table을 옮겼을 때의 처리.
-								var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+								var cur_table_action_obj = cur_element_collection_set.get_table_action_obj();
 
 								// 이전 부모 자식 관계를 제거.
 								var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
@@ -8460,7 +8432,21 @@ airborne.bootstrap.obj.__action = {
 
 								// jump spot update
 								cur_table_action_obj.update_table_jump_spot();
+
+							} else if( cur_table_action_obj == undefined &&
+								cur_action_item_obj_mouse_over.has_parent() && 
+								cur_action_item_obj_mouse_over.get_parent().is_list()) {
+
+								// list element를 옮겼을 때의 처리.
+								var hovering_action_item_obj = cur_event_manager.get_action_item_obj();
+								if(_action.is_not_valid_action_item_obj(hovering_action_item_obj)) {
+									console.log("!Error! / land_element / _action.is_not_valid_action_item_obj(hovering_action_item_obj)");
+									return;
+								}
+
+								hovering_action_item_obj.remove();
 							}
+
 						}						
 
 

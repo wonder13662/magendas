@@ -1419,26 +1419,34 @@ airborne.bootstrap.view.obj.__action_list = {
 				var consoler = airborne.console.get();
 				consoler.off();
 
-				var cur_before_sibling_event_manager = cur_event_manager_on_mouse_over.get_before_sibling_event_manager();
-				var cur_after_sibling_event_manager = cur_event_manager_on_mouse_over.get_after_sibling_event_manager();
+				var cur_action_item_on_mouse_over = cur_event_manager_on_mouse_over.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_on_mouse_over)) {
+					console.log("!Error! / set_delegate_callback_after_landing_element / _action.is_not_valid_action_item_obj(cur_action_item_on_mouse_over)");
+					return;
+				}
 
-				var is_first = (cur_before_sibling_event_manager == undefined)?true:false;
-				var is_last = (cur_after_sibling_event_manager == undefined)?true:false;
+				var cur_sibling_action_obj_before = cur_action_item_on_mouse_over.get_sibling_action_obj_before();
+				var cur_sibling_action_obj_after = cur_action_item_on_mouse_over.get_sibling_action_obj_after();
+				var cur_sibling_action_obj_list = cur_action_item_on_mouse_over.get_sibling_action_obj_list();
+				for(var idx = 0; idx < cur_sibling_action_obj_list.length; idx++) {
+					var cur_sibling_action_obj = cur_sibling_action_obj_list[idx];
+					if(_action.is_not_valid_action_item_obj(cur_sibling_action_obj)) {
+						console.log("!Error! / set_delegate_callback_after_landing_element / _action.is_not_valid_action_item_obj(cur_sibling_action_obj)");
+						return;
+					}
 
-				consoler.say("엘리먼트가 사용자 수정에 의해 새로운 위치로 이동 완료한 뒤에 호출되는 콜백 델리게이트");
-				var cur_sibling_element_event_manager_arr = cur_event_manager_on_mouse_over.get_sibling_element_event_manager_arr(true);
-				var cur_element_set = cur_event_manager_on_mouse_over.get_element_set();
-				var cur_element_collection_set = cur_element_set.get_element_collection_set();
-				var has_input_group = false;
-				var cur_masked_element_set_arr = cur_element_collection_set.ecs_get_masked_element_set_arr(has_input_group);
+					var cur_event_manager = cur_sibling_action_obj.get_event_manager();
+					if(cur_event_manager == undefined) {
+						console.log("!Error! / set_delegate_callback_after_landing_element / cur_event_manager == undefined");
+						return;
+					}
+					var cur_title = cur_event_manager.get_title_jq_value();
 
-				for(var idx = 0; idx < cur_masked_element_set_arr.length; idx++) {
-					var cur_masked_element_set = cur_masked_element_set_arr[idx];
-					if(cur_masked_element_set == undefined) continue;
-
-					var cur_sibling_element_event_manager = cur_masked_element_set.get_event_manager();
-					var cur_title = cur_sibling_element_event_manager.get_title_jq_value();
-					var cur_element_jq = cur_sibling_element_event_manager.get_element_jq();
+					var cur_element_jq = cur_event_manager.get_element_jq();
+					if(cur_element_jq == undefined) {
+						console.log("!Error! / set_delegate_callback_after_landing_element / cur_element_jq == undefined");
+						return;
+					}
 
 					if(cur_element_jq.prev().is(":visible") == false) {
 						consoler.say("첫번째 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
@@ -1451,25 +1459,21 @@ airborne.bootstrap.view.obj.__action_list = {
 					} else {
 						consoler.say("중간의 엘리먼트로 지정되었습니다. / 이벤트와 모양을 지정합니다. / " + cur_title);
 						_obj.remove_list_row_css_radius(cur_element_jq);
-					}	
+					}
+
 				}
 
 				// action item obj의 순서 바꾸기.
-				var cur_before_sibling_action_item_obj = undefined;
-				if(cur_before_sibling_event_manager != undefined) {
-					cur_before_sibling_action_item_obj = cur_before_sibling_event_manager.get_action_item_obj();
+				if(cur_sibling_action_obj_before != undefined || cur_sibling_action_obj_after != undefined) {
+
+					cur_action_item_obj.dive_into_them(
+						// new_before_action_item_obj
+						cur_sibling_action_obj_before
+						// new_after_action_item_obj
+						, cur_sibling_action_obj_after
+					);
+
 				}
-				var cur_action_item_obj = cur_event_manager_on_mouse_over.get_action_item_obj();
-				var cur_after_sibling_action_item_obj = undefined;
-				if(cur_after_sibling_event_manager != undefined) {
-					cur_after_sibling_action_item_obj = cur_after_sibling_event_manager.get_action_item_obj();
-				}
-				cur_action_item_obj.dive_into_them(
-					// new_before_action_item_obj
-					cur_before_sibling_action_item_obj
-					// new_after_action_item_obj
-					, cur_after_sibling_action_item_obj
-				);
 
 				// 시간 위젯이 있다면 바뀐 위치에 따라 시간을 조정해줍니다.
 				var cur_element_type;
