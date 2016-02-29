@@ -885,7 +885,8 @@ airborne.bootstrap.view.obj.__action_list = {
 							var new_after_sibling_event_manager = cur_sibling_element_set_mouse_over.get_event_manager();
 							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
 							var new_before_sibling_event_manager = new_after_sibling_event_manager.get_before_sibling_event_manager();
-							// element set, event manager의 형제 관계를 다시 세팅합니다. 
+							// element set, event manager의 형제 관계를 다시 세팅합니다.
+							console.log("HERE / 001--");
 							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
 
 							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
@@ -904,6 +905,7 @@ airborne.bootstrap.view.obj.__action_list = {
 							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
 							var new_after_sibling_event_manager = new_before_sibling_event_manager.get_after_sibling_event_manager();
 							// element set, event manager의 형제 관계를 다시 세팅합니다.
+							console.log("HERE / 002--");
 							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
 
 							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
@@ -1463,8 +1465,33 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				}
 
-				// action item obj의 순서 바꾸기.
+				// REMOVE ME
+				// action item obj의 순서 바꾸기. - 정말 필요한가?
+				/*
 				if(cur_sibling_action_obj_before != undefined || cur_sibling_action_obj_after != undefined) {
+
+					console.log("HERE / cur_sibling_action_obj_before ::: ",cur_sibling_action_obj_before);
+					console.log("HERE / cur_action_item_obj ::: ",cur_action_item_obj);
+					console.log("HERE / cur_sibling_action_obj_after ::: ",cur_sibling_action_obj_after);
+					console.log("HERE / cur_action_item_on_mouse_over ::: ",cur_action_item_on_mouse_over);
+
+					// CHECK
+					if( cur_sibling_action_obj_before != undefined && 
+						cur_sibling_action_obj_before.get_coordinate() === cur_action_item_obj.get_coordinate()) {
+
+						// 앞의 형제 아이템이 자신과 동일한 좌표값을 가지면 중단합니다.
+						console.log("!Error! / set_delegate_callback_after_landing_element / cur_sibling_action_obj_before.get_coordinate() === cur_action_item_obj.get_coordinate()");
+						return;
+
+					}
+					if( cur_sibling_action_obj_after != undefined && 
+						cur_sibling_action_obj_after.get_coordinate() === cur_action_item_obj.get_coordinate()) {
+
+						// 앞의 형제 아이템이 자신과 동일한 좌표값을 가지면 중단합니다.
+						console.log("!Error! / set_delegate_callback_after_landing_element / cur_sibling_action_obj_after.get_coordinate() === cur_action_item_obj.get_coordinate()");
+						return;
+
+					}
 
 					cur_action_item_obj.dive_into_them(
 						// new_before_action_item_obj
@@ -1474,6 +1501,7 @@ airborne.bootstrap.view.obj.__action_list = {
 					);
 
 				}
+				*/
 
 				// 시간 위젯이 있다면 바뀐 위치에 따라 시간을 조정해줍니다.
 				var cur_element_type;
