@@ -2598,9 +2598,10 @@ airborne.bootstrap.view.obj.__action_table = {
 						var action_item_obj_mouse_over = mouse_over_checksum.action_item_obj_mouse_over;
 						if(_action.is_valid_action_item_obj(action_item_obj_mouse_over)) {
 
+							console.log("HERE / TABLE / 001");
+
 							var consoler = airborne.console.get();
 							consoler.off();
-
 
 							consoler.say("");
 							consoler.say("HERE / action_item_obj_mouse_over ::: ",action_item_obj_mouse_over);
@@ -2792,8 +2793,6 @@ airborne.bootstrap.view.obj.__action_table = {
 									// 여기서 특정 row idx의 action item을 이동시킵니다.
 									var target_moving_action_item_obj = cur_column_child_action_list_obj.get_child(clicked_action_item_obj_idx);
 
-									consoler.say("2222 / COOL");
-
 									// 옮길 특정 row의 앞뒤의 엘리먼트 참조를 가져와 순서를 변경해줍니다.
 									target_moving_action_item_obj.dive_into_indixes(
 										// idx_before_action_item_obj
@@ -2836,6 +2835,41 @@ airborne.bootstrap.view.obj.__action_table = {
 							cur_delegate_callback_after_landing_element = 
 							cur_sibling_element_set_mouse_over.get_event_manager().get_delegate_callback_after_landing_element();
 						}
+
+
+
+
+						// wonder.jung11
+						// cur_element_set_on_mouse_over
+						
+						var cur_action_item_obj_mouse_over = undefined;
+						if(cur_sibling_element_set_mouse_over != undefined) {
+							cur_action_item_obj_mouse_over = cur_sibling_element_set_mouse_over.get_event_manager().get_action_item_obj();
+						}
+						console.log("cur_action_item_obj_mouse_over ::: ",cur_action_item_obj_mouse_over);
+
+						/*
+						// add on table을 옮겼을 때의 처리.
+						var cur_table_action_obj = undefined;
+						if(hovering_element_collection_set != undefined) {
+							cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+						}
+						if(_action.is_valid_action_obj(cur_table_action_obj)) {
+
+							// add on table을 옮겼을 때의 처리.
+							var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
+
+							// 이전 부모 자식 관계를 제거.
+							var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
+							prev_parent_add_on.remove_from_add_on_list(cur_table_action_obj);
+
+							// 새로운 부모 자식 관계를 추가.
+							cur_action_item_obj_mouse_over.push_add_on(cur_table_action_obj);
+
+							// jump spot update
+							cur_table_action_obj.update_table_jump_spot();
+						}
+						*/				
 
 						jsm.land_element(
 							// cur_src_jq

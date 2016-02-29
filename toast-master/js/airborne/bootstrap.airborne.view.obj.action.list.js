@@ -894,6 +894,8 @@ airborne.bootstrap.view.obj.__action_list = {
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(cur_element_jq);
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(_self_clone_jq);
 
+							// wonder.jung11 - action item obj 관계를 변경.
+
 						} else {
 
 							// event manager의 형제 관계를 다시 세팅합니다.
@@ -909,6 +911,8 @@ airborne.bootstrap.view.obj.__action_list = {
 							// console.log("이제 선택한 영역의 아래로 엘리먼트를 추가합니다. / ",cur_sibling_element_set_mouse_over.get_meta_info().get_list_row_text());
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(cur_element_jq);
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(_self_clone_jq);
+
+							// wonder.jung11 - action item obj 관계를 변경.
 							
 						}
 					}
