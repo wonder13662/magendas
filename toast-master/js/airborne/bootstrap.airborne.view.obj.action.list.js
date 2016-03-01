@@ -797,6 +797,21 @@ airborne.bootstrap.view.obj.__action_list = {
 		event_manager_list_row.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
 
 			var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;
+			var src_action_item_obj = cur_event_manager.get_action_item_obj();
+			if(_action.is_not_valid_action_item_obj(src_action_item_obj)) {
+				console.log("!Error! / set_delegate_btn_eject_click / _action.is_not_valid_action_item_obj(src_action_item_obj)");
+				return;
+			}
+			console.log("src_action_item_obj ::: ",src_action_item_obj);
+
+			// wonder.jung
+			// 자신을 제외한 나머지 형제 객체 1개를 가져옵니다. 다른 부모로 옮겨졌을 때, 리스트 형태를 변경하는 대상이 됩니다.
+			var has_myself = false;
+			var src_action_sibling_list = src_action_item_obj.get_sibling_action_obj_list(has_myself);
+			var src_action_sibling_action_obj = undefined;
+			if(_v.is_valid_array(src_action_sibling_list)) {
+				src_action_sibling_action_obj = src_action_sibling_list[0];
+			}
 
 			// @ 기본 동작
 			// 이벤트 전파를 막습니다.
@@ -831,11 +846,44 @@ airborne.bootstrap.view.obj.__action_list = {
 				// 리스트 - 자신의 위, 아래의 형제 엘리먼트에 직접 검사
 				// 테이블 - 자신이 속한 열의 위, 아래의 열에 검사
 
-				// DEBUG
-				var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
+				var cur_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
 
 				// 사용자의 마우스 이동에 mouse over시 검사해서 over 이면 focusing 모드로 보여줍니다.
-				cur_event_manager.get_element_set().get_element_collection_set().get_mouse_over_element(mousemove_event, event_manager_on_mousemove.get_all_sibling_element_set_arr());
+				var cur_action_depth_element_set_arr = cur_action_item_obj.get_action_depth_element_set_arr();
+
+				for(var idx = 0; idx < cur_action_depth_element_set_arr.length; idx++) {
+
+					var target_element_set = cur_action_depth_element_set_arr[idx];
+
+					var cur_element_title = target_element_set.get_event_manager().get_title_jq_value();
+
+					// 충돌 검사를 진행한다.
+					// 충돌했다면 포커싱 등의 처리.
+					var is_hover = _obj.is_hover(mousemove_event, target_element_set.get_event_manager().get_element_jq());
+
+					// 충돌 --> 충돌 혹은 충돌하지 않음 --> 충돌하지 않음 로 상태 변경 없다면 종료.
+					if(target_element_set.get_is_hover() == is_hover) continue;
+
+					// 충돌 --> 충돌하지 않음 혹은 충돌하지 않음 --> 충돌 로 상태 변경 시
+					target_element_set.set_is_hover(is_hover);
+
+					if(target_element_set.get_is_hover()){
+						target_element_set.get_event_manager().show_focusing_mode();
+
+						// 자식 객체를 보여줘야 함. 
+						target_element_set.get_event_manager().show_child();
+
+						// shy 자식 객체는 가림.
+						target_element_set.get_event_manager().hide_shy_child();
+					} else {
+						target_element_set.get_event_manager().show_view_mode();
+					}
+
+				}
 
 				// 드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.
 				clone_element_jq.off();
@@ -950,15 +998,31 @@ airborne.bootstrap.view.obj.__action_list = {
 						, cur_event_manager
 					); // animation end
 
-					// 열 이동이 끝나면, element conllection set의 모든 element set의 
-					// set_is_hover_top
-					// set_is_hover_bottom
-					// set_is_hover
-					// false로 초기화한다.
-					if(	event_manager_on_mousemove.get_element_set() != undefined && 
-						event_manager_on_mousemove.get_element_set().get_element_collection_set() != undefined ) {
-						event_manager_on_mousemove.get_element_set().get_element_collection_set().refresh_all_elemen_set_is_hover();	
+					// 부모를 변경했을 경우의 리스트 모양을 업데이트.
+					if(_action.is_valid_action_obj(src_action_sibling_action_obj)) {
+						src_action_sibling_action_obj.get_event_manager().shape_sibling_element();
 					}
+
+					// 이벤트 초기화
+					for(var inner_idx = 0;inner_idx < cur_action_depth.length;inner_idx++){
+						var cur_action_obj_depth = cur_action_depth[inner_idx];
+						if(_action.is_not_valid_action_obj(cur_action_obj_depth)) {
+							console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_action_obj_depth)");
+							return;
+						}
+
+						// 열 이동이 끝나면, element conllection set의 모든 element set의 
+						// set_is_hover_top
+						// set_is_hover_bottom
+						// set_is_hover
+						// false로 초기화한다.
+						var cur_sibling_element_set = cur_action_obj_depth.get_event_manager().get_element_set();
+						if(cur_sibling_element_set == undefined) {
+							console.log("!Error! / add_mousemove_callback_set / cur_sibling_element_set == undefined");
+							return;
+						}
+						cur_sibling_element_set.refresh_is_hover();
+					}					
 
 				}); // click event end
 

@@ -329,30 +329,49 @@ airborne.bootstrap.obj.__action = {
 			}
 			// @ Public
 			// @ Desc : 자신이 속한 레이어의 액션 객체 배열을 돌려줍니다. 단일 배열을 돌려줍니다.
-			,get_action_depth:function(has_shy) {
+			,get_action_depth:function(has_shy, has_myself) {
 
 				if(has_shy == undefined) {
 					has_shy = false;
 				}
 
+				if(has_myself == undefined) {
+					has_myself = false;
+				}
+
+
+				var cur_action_depth = [];
 				var cur_action_depth_arr = this.get_action_depth_arr();
 				if(_v.is_not_valid_array(cur_action_depth_arr)) {
 					console.log("!Error! / get_action_depth / _v.is_not_valid_array(cur_action_depth_arr)");
-					return;
+					return cur_action_depth;
 				}
 
 				var cur_depth = this.get_depth();
 				if(_v.is_not_unsigned_number(cur_depth)) {
 					console.log("!Error! / get_action_depth / _v.is_not_unsigned_number(cur_depth)");
-					return;
+					return cur_action_depth;
 				}
 
 				if(cur_action_depth_arr.length <= cur_depth) {
 					console.log("!Error! / get_action_depth / cur_action_depth_arr.length <= cur_depth");
-					return;
+					return cur_action_depth;
 				}
 
-				var cur_action_depth = cur_action_depth_arr[cur_depth];
+				cur_action_depth = cur_action_depth_arr[cur_depth];
+				var next_action_depth_arr = [];
+				for(var idx = 0; idx < cur_action_depth.length; idx++) {
+					var cur_action_obj = cur_action_depth[idx];
+					if(!has_myself && cur_action_obj.get_coordinate() === this.get_coordinate()) {
+						// 자기 자신은 제외한다.(has_myself 파라미터 변경으로 가져올 수 있음.)
+						continue;
+					}
+
+					next_action_depth_arr.push(cur_action_obj);
+				}
+
+				cur_action_depth = next_action_depth_arr;
+
 				if(has_shy == false) {
 					// 기본값은 shy element를 포함하지 않습니다.
 					var cur_action_depth_no_shy = [];
@@ -362,6 +381,7 @@ airborne.bootstrap.obj.__action = {
 							continue;
 						}
 
+
 						cur_action_depth_no_shy.push(cur_action_obj);
 					}
 
@@ -370,6 +390,47 @@ airborne.bootstrap.obj.__action = {
 
 				return cur_action_depth;
 			}
+			// @ Public
+			// @ Desc : 자신이 속한 레이어의 액션 객체의 element set배열을 돌려줍니다. 단일 배열을 돌려줍니다.
+			,get_action_depth_element_set_arr:function(has_shy, has_myself) {
+
+				var cur_action_depth_arr = this.get_action_depth(has_shy, has_myself);
+
+				if(has_myself == undefined) {
+					has_myself = false;
+				}
+
+				var cur_element_set_arr = [];
+				for(var idx = 0; idx < cur_action_depth_arr.length; idx++) {
+					var cur_action_obj = cur_action_depth_arr[idx];
+
+					if(!has_myself && cur_action_obj.get_coordinate() === this.get_coordinate()) {
+						// 자기 자신은 제외한다.(has_myself 파라미터 변경으로 가져올 수 있음.)
+						continue;
+					}
+
+					if(_action.is_not_valid_action_obj(cur_action_obj)) {
+						console.log("!Error! / get_action_depth_element_set_arr / _action.is_not_valid_action_obj(cur_action_obj)");
+						return cur_element_set_arr;
+					}
+
+					var cur_event_manager = cur_action_obj.get_event_manager();
+					if(cur_event_manager == undefined) {
+						console.log("!Error! / get_action_depth_element_set_arr / cur_event_manager == undefined");
+						return cur_element_set_arr;
+					}
+
+					var cur_element_set = cur_event_manager.get_element_set();
+					if(cur_element_set == undefined) {
+						console.log("!Error! / get_action_depth_element_set_arr / cur_element_set == undefined");
+						return cur_element_set_arr;
+					}
+
+					cur_element_set_arr.push(cur_element_set);
+				}
+
+				return cur_element_set_arr;
+			}			
 			,external_select_box_option_list:null
 			,event_manager:null
 			,set_action_data:function(action_data_obj, coordinate, action_hierarchy_search_map, action_depth_arr, depth) {
@@ -1036,7 +1097,7 @@ airborne.bootstrap.obj.__action = {
 				var children_action_object_array = this.get_children();
 				return children_action_object_array.length;
 			}
-			,get_children:function() {
+			,get_children:function(action_coordinate_excluded) {
 
 				var first_child_action_obj = this.get_first_child_action_obj();
 				if(_action.is_not_valid_action_obj(first_child_action_obj)) {
@@ -1048,8 +1109,15 @@ airborne.bootstrap.obj.__action = {
 				var cur_children_cnt = 0;
 				var children_action_obj_array = [];
 				for(var idx = 0;idx < max_loop_cnt;idx++) {
+
 					if(_action.is_valid_action_obj(next_child_sibling_action_obj)) {
-						children_action_obj_array.push(next_child_sibling_action_obj);
+
+						if( action_coordinate_excluded != undefined && 
+							action_coordinate_excluded === next_child_sibling_action_obj.get_coordinate()) {
+							// 제외할 액션 객체인 경우
+						} else {
+							children_action_obj_array.push(next_child_sibling_action_obj);	
+						}
 						cur_children_cnt++;
 					} else {
 						break;
@@ -1301,10 +1369,19 @@ airborne.bootstrap.obj.__action = {
 				}
 				return false;
 			}
-			,get_sibling_action_obj_list:function() {
+			,get_sibling_action_obj_list:function(has_myself) {
+
+				if(has_myself == undefined) {
+					has_myself = true;
+				}
+				var my_coordinate = undefined;
+				if(!has_myself) {
+					my_coordinate = this.get_coordinate();
+				}
+
 				var parent_action_obj = this.get_parent();
 				if(_action.is_valid_action_obj(parent_action_obj)) {
-					return parent_action_obj.get_children();
+					return parent_action_obj.get_children(my_coordinate);
 				}
 				return [];
 			}
@@ -1360,6 +1437,35 @@ airborne.bootstrap.obj.__action = {
 				}
 				return false;
 			}
+			,is_only_addable_one:function() {
+
+				// 추가할 수 있는 엘리먼트가 리스트에 1개뿐인지 확인
+				var cur_sibling_action_obj_list = this.get_sibling_action_obj_list();
+				var action_item_addable_arr = [];
+				for(var idx = 0; idx < cur_sibling_action_obj_list.length; idx++) {
+					var cur_sibling_action_obj = cur_sibling_action_obj_list[idx];
+					if(_action.is_not_valid_action_obj(cur_sibling_action_obj)) {
+						console.log("!Error! / is_only_addable_one / _action.is_not_valid_action_obj(cur_sibling_action_obj)");
+						return;
+					}
+
+					if(cur_sibling_action_obj.is_item_addable()) {
+						action_item_addable_arr.push(cur_sibling_action_obj);
+					}
+				}
+
+				if(1 < action_item_addable_arr.length) {
+					// 추가 가능한 엘리먼트가 2개 이상입니다.
+					return false;
+				} else if(action_item_addable_arr.length == 1) {
+					// 추가 가능한 엘리먼트가 1개 뿐이고, 그것이 자신이라면 자신이 유일한 추가 엘리먼트이다.
+					var action_item_addable = action_item_addable_arr[0];
+					return (action_item_addable.get_coordinate() === this.get_coordinate());
+				}
+
+				return false;
+			}
+
 			,push_add_on:function(add_on_action_obj, coordinate, action_hierarchy_search_map) {
 
 				if(_action.is_not_valid_action_obj(add_on_action_obj)) {
@@ -1686,6 +1792,18 @@ airborne.bootstrap.obj.__action = {
 					return true;
 				}
 				return false;
+			}
+			,is_item_addable:function() {
+
+				if(	this.is_item_title_only_addable() || 
+					this.is_item_title_n_time_hh_mm() || 
+					this.is_item_select_box_addable()
+					) {
+
+					return true;
+				}
+				return false;
+
 			}
 			,is_item_title_only:function() {
 				var action_item_type = this.get_action_item_type();
@@ -2403,7 +2521,7 @@ airborne.bootstrap.obj.__action = {
 				cur_children_element_container_jq.append(add_on_element_jq);
 
 				// 자식 엘리먼트 참조를 배열에 저장합니다.
-				this.add_on_element_jq_arr.push(add_on_element_jq);
+				// this.add_on_element_jq_arr.push(add_on_element_jq);
 			}
 			,children_shy_element_collection_set_arr:[]
 			// @ private
@@ -2541,6 +2659,21 @@ airborne.bootstrap.obj.__action = {
 			,get_add_on_element_container_jq:function(){
 				return this.add_on_element_container_jq;
 			}
+			,push_add_on_element_jq:function(add_on_element_jq){
+				if(add_on_element_jq == null) return;
+
+				var cur_add_on_element_container_jq = this.get_add_on_element_container_jq();
+				if(cur_add_on_element_container_jq == null) return;
+
+				// 추가 엘리먼트를 추가 엘리먼트 컨테이너에 넣습니다. 화면에 표시됩니다.
+				cur_add_on_element_container_jq.append(add_on_element_jq);
+
+				console.log("push_add_on_element_jq / cur_add_on_element_container_jq :::: ",cur_add_on_element_container_jq);
+				console.log("push_add_on_element_jq / add_on_element_jq :::: ",add_on_element_jq);
+			}
+
+			// REMOVE ME
+			/*
 			,add_on_element_jq_arr:[]
 			// @ private
 			// @ Desc : 화면에 보여줄 element collection set을 추가할 경우 사용하는 메서드. 메타 인포에서 참조시, 등록될 엘리먼트 콜렉션 셋으로는 보이지 않습니다.
@@ -2559,6 +2692,7 @@ airborne.bootstrap.obj.__action = {
 			,get_add_on_element_jq_arr:function(){
 				return this.add_on_element_jq_arr;
 			}
+			*/
 			,add_on_element_collection_set_arr:[]
 			// @ private
 			// @ Desc : 공식적으로 등록될 element collection set을 추가할 경우 사용하는 메서드
@@ -2586,6 +2720,7 @@ airborne.bootstrap.obj.__action = {
 
 				// 등록된 참조가 없습니다. 새롭게 이 element collection set에 등록해 줍니다.
 				this.add_on_element_collection_set_arr.push(add_on_element_collection_set);
+
 				this.push_add_on_element_jq(add_on_element_collection_set.get_element_collection_container_jq());
 			}
 			// @ private
@@ -3638,6 +3773,8 @@ airborne.bootstrap.obj.__action = {
 
 			// @ Scope : Element Event Manager
 			// @ Desc : 모든 형제 엘리먼트 셋을 가져온다. shy mode 제외. 자신의 부모가 있다면 다른 형제 부모들의 자식 엘리먼트 셋도 가져온다.
+			// REMOVE ME
+			/*
 			,get_all_sibling_element_set_arr:function(){
 
 				var cur_all_sibling_element_set_arr = [];
@@ -3706,6 +3843,7 @@ airborne.bootstrap.obj.__action = {
 
 				return cur_all_sibling_element_set_arr;
 			}
+			*/
 			// @ Desc : 리스트 형의 엘리먼트의 경우, 이전 열에 대한 이벤트 객체 참조를 저장
 			,before_sibling_event_manager:null
 			,set_before_sibling_event_manager:function(before_sibling_event_manager){
@@ -4457,17 +4595,15 @@ airborne.bootstrap.obj.__action = {
 				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
 
 				if(cur_action_item_obj.is_item_select_box()) {
-
 					this.show_btn_edit_element_jq();
 
 				} else if(cur_action_item_obj.get_action_is_not_shy() && is_addable) {
 
 					this.show_btn_edit_element_jq();
-					this.show_btn_remove_element_jq();
-					// this.show_btn_eject_element_jq();
 					this.show_btn_add_element_jq();
 
-					if(!cur_action_item_obj.is_only_one()) {
+					if(!cur_action_item_obj.is_only_addable_one()) {
+						this.show_btn_remove_element_jq();
 						this.show_btn_eject_element_jq();	
 					}
 
@@ -4478,9 +4614,6 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				this.set_colors_reverse();
-
-				// 2. 뷰의 수정은 뷰제어 코드에서 담당, 처리합니다.
-				// this.call_delegate_show_view_mode_view_control(this);
 
 				this.is_view_mode = false;
 				this.is_focusing_mode = false;
@@ -6616,7 +6749,6 @@ airborne.bootstrap.obj.__action = {
 					consoler.say("mmc / 1-1-1 / ",title_for_test);
 					consoler.say("mmc / 1-1-1 / 자신의 자식 엘리먼트가 mouse over인지 확인합니다");
 
-					// wonder.jung11
 					for(var idx = 0; idx < cur_children_element_set_arr.length; idx++){
 						var cur_child_element_set = cur_children_element_set_arr[idx];
 						is_child_hover = _obj.is_hover(mousemove_event, cur_child_element_set.get_event_manager().get_element_jq());
@@ -8013,58 +8145,6 @@ airborne.bootstrap.obj.__action = {
 					target_offset.top = parseInt(target_offset.top) - parseInt(src_offset.top);
 					target_offset.left = parseInt(target_offset.left) - parseInt(src_offset.left);
 
-					/*
-					var cur_action_item_obj_mouse_over = undefined;
-					if(cur_element_set_on_mouse_over != undefined) {
-						cur_action_item_obj_mouse_over = cur_element_set_on_mouse_over.get_event_manager().get_action_item_obj();
-					}
-					if(_action.is_valid_action_item_obj(cur_action_item_obj_mouse_over)) {
-
-						// wonder.jung11
-						// list element를 옮겼을 때의 처리.
-						if( cur_action_item_obj_mouse_over.has_parent() && 
-							cur_action_item_obj_mouse_over.get_parent().is_list()) {
-
-							var hovering_action_item_obj = delegate_on_completed_param_event_manager.get_action_item_obj();
-							if(_action.is_not_valid_action_item_obj(hovering_action_item_obj)) {
-								console.log("!Error! / land_element / _action.is_not_valid_action_item_obj(hovering_action_item_obj)");
-								return;
-							}
-							hovering_action_item_obj.remove();
-
-							console.log("HERE / XXX / hovering_action_item_obj ::: ",hovering_action_item_obj);
-
-							//	,dive_into_them:function(new_before_action_item_obj, new_after_action_item_obj) {
-
-							// 객체의 앞뒤 순서를 어떻게 알지?
-
-						}
-
-						
-
-						// add on table을 옮겼을 때의 처리.
-						var cur_table_action_obj = undefined;
-						if(hovering_element_collection_set != undefined) {
-							cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
-						}
-						if(_action.is_valid_action_obj(cur_table_action_obj)) {
-
-							// add on table을 옮겼을 때의 처리.
-							var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
-
-							// 이전 부모 자식 관계를 제거.
-							var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
-							prev_parent_add_on.remove_from_add_on_list(cur_table_action_obj);
-
-							// 새로운 부모 자식 관계를 추가.
-							cur_action_item_obj_mouse_over.push_add_on(cur_table_action_obj);
-
-							// jump spot update
-							cur_table_action_obj.update_table_jump_spot();
-						}
-					}
-					*/
-
 					cur_clone_jq.css("box-shadow","");
 					cur_clone_jq.animate(
 						{ 	
@@ -8198,8 +8278,12 @@ airborne.bootstrap.obj.__action = {
 
 					// 마우스 커서의 위치를 따라서 창이 움직입니다.
 					var cur_element_set_on_mouse_over = null;
+
 					var cur_parent_element_set_on_mouse_over = null;
+					var cur_parent_action_obj_on_mouse_over = null;
+
 					var cur_additional_element_set_on_mouse_over = null;
+
 					var cur_mousemove_callback_set =
 					cur_event_hierarchy_manager.add_mousemove_callback_set(_obj.get_delegate(function(mousemove_event, event_manager_on_mousemove){
 
@@ -8213,15 +8297,57 @@ airborne.bootstrap.obj.__action = {
 				        var cur_left = mousemove_event.pageX - (cur_element_collection_container_width - gap);
 
 				        clone_element_collection_container_jq.show();
-
 						clone_element_collection_container_jq.offset({top:cur_top,left:cur_left});
+						
+						// _self === element collection set
+						var cur_table_action_obj = _self.get_table_action_obj();
+						var parent_add_on_action_item_obj = undefined;
+						if(_action.is_valid_action_obj(cur_table_action_obj)) {
+							// TABLE일 경우의 처리
+							// 테이블이 이동할 수 있는 모든 부모 action item 영역을 충돌 검사합니다.
+							parent_add_on_action_item_obj = cur_table_action_obj.get_parent_add_on();
+							if(_action.is_not_valid_action_item_obj(parent_add_on_action_item_obj)) {
+								console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(parent_add_on_action_item_obj)");
+								return;
+							}
+
+							var cur_parent_sibling_action_obj_list = parent_add_on_action_item_obj.get_action_depth();
+							// console.log(">>> cur_parent_sibling_action_obj_list ::: ",cur_parent_sibling_action_obj_list);
+
+							for(var idx = 0; idx < cur_parent_sibling_action_obj_list.length;idx++) {
+								var cur_parent_sibling_action_obj = cur_parent_sibling_action_obj_list[idx];
+								if(_action.is_not_valid_action_item_obj(cur_parent_sibling_action_obj)) {
+									console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_parent_sibling_action_obj)");
+									return;
+								}
+
+								// wonder.jung11
+								var is_hover = _obj.is_hover(mousemove_event, cur_parent_sibling_action_obj.get_event_manager().get_element_jq());
+								if(is_hover) {
+
+									cur_parent_action_obj_on_mouse_over = cur_parent_sibling_action_obj;
+									cur_parent_sibling_action_obj.get_event_manager().show_focusing_mode();
+
+								} else {
+
+									cur_parent_sibling_action_obj.get_event_manager().show_view_mode();
+								}
+							}
+
+						} else {
+							// LIST일 경우의 처리
+						}
 
 						// 이벤트 설정 - 아래 2가지 사항을 정의합니다.
 						// 1. 자기 자신 내부에서의 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행. 충돌한 element set을 리턴합니다.
-						cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
+						// cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
+
+
+
+						// wonder.jung11 - 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
 						// 2. 추가된 jump spot에 대한 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행 충돌한 element set을 리턴합니다.
-						cur_additional_element_set_on_mouse_over = _self.get_additional_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
+						// cur_additional_element_set_on_mouse_over = _self.get_additional_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
 					}, this)); // end mouse move call back
 					
@@ -8237,6 +8363,38 @@ airborne.bootstrap.obj.__action = {
 
 						// 테이블에 적용
 						// 리스트에 적용
+						
+						if(_action.is_valid_action_obj(cur_parent_action_obj_on_mouse_over)) {
+
+							// action obj 관계 업데이트
+							var parent_add_on_action_item_obj = cur_table_action_obj.get_parent_add_on();
+							parent_add_on_action_item_obj.remove_from_add_on_list(cur_table_action_obj);
+
+							// REMOVE ME
+							// cur_event_manager.em_push_child_element_collection_set(cur_element_collection_set);
+							// cur_event_manager.push_child_element_jq(_self_clone_jq);
+							// cur_parent_action_obj_on_mouse_over.get_event_manager().em_push_child_element_collection_set(cur_element_collection_set);
+							// cur_parent_action_obj_on_mouse_over.get_event_manager().push_child_element_jq(_self_clone_jq);
+
+							var cur_element_collection_container_jq = cur_table_action_obj.get_table_element_collection_set().get_element_collection_container_jq();
+							if(cur_element_collection_container_jq == undefined) {
+								console.log("!Error! / clone_element_collection_container_jq.click / cur_element_collection_container_jq == undefined")
+								return;
+							}
+							cur_parent_action_obj_on_mouse_over.get_event_manager().push_add_on_element_jq(cur_element_collection_container_jq);
+
+							// 새로운 부모 자식 관계를 추가.
+							cur_parent_action_obj_on_mouse_over.push_add_on(cur_table_action_obj);
+
+							// jump spot update
+							cur_table_action_obj.update_table_jump_spot();
+
+							cur_element_set_on_mouse_over = cur_parent_action_obj_on_mouse_over.get_event_manager().get_element_set();
+
+						}
+
+						// REMOVE ME - 아래 로직을 사용하지 않게 될 것으로 보임. 확인! wonder.jung
+						/*
 						if(cur_parent_element_set_on_mouse_over != undefined){
 							// 1. 자기 자신 내부에서의 이동
 							console.log("set_jump_event / click / 1. 자기 자신의 부모(상위) 내부에서의 이동");
@@ -8248,6 +8406,7 @@ airborne.bootstrap.obj.__action = {
 
 								console.log("set_jump_event / cur_event_manager : ",cur_event_manager);
 
+								// REMOVE ME - 이것 정말 사용되고 있는지 확인.
 								cur_event_manager.em_push_child_element_collection_set(cur_element_collection_set);
 								cur_event_manager.push_child_element_jq(_self_clone_jq);
 							}
@@ -8266,6 +8425,7 @@ airborne.bootstrap.obj.__action = {
 							// 3. 충돌한 객체가 없는 경우.
 							console.log("set_jump_event / click / 3. 충돌한 객체가 없는 경우.");
 						}
+						*/
 
 						// 부모를 옮긴다음, 저장해둔 절대좌표로 설정해줍니다.
 						_self_clone_jq.offset(prev_offset);
@@ -8284,7 +8444,7 @@ airborne.bootstrap.obj.__action = {
 						_self_eject_btn_jq.show();
 
 
-
+						/*
 						var cur_action_item_obj_mouse_over = undefined;
 						if(cur_element_set_on_mouse_over != undefined) {
 							cur_action_item_obj_mouse_over = cur_element_set_on_mouse_over.get_event_manager().get_action_item_obj();
@@ -8326,8 +8486,11 @@ airborne.bootstrap.obj.__action = {
 								hovering_action_item_obj.remove();
 							}
 
-						}						
+						}
+						*/					
 
+
+						console.log("cur_element_set_on_mouse_over ::: ",cur_element_set_on_mouse_over);
 
 
 						// 이동 완료후의 save n reload의 델리게이트 호출은 첫번째 element set에게 맡깁니다.
@@ -9417,6 +9580,11 @@ Event Hierarchy Manager
 	- add_mousemove_callback_set
 		mouse move 시 검사하는 callback set을 추가합니다.
 
+Element Collection Set
+
+	- get_action_item_obj_mouse_over
+		엘리먼트 컬렉션에서 action item 기준으로 mouse over 이벤트에 대한 처리를 해줍니다. 액션 테이블에서만 사용중입니다.
+
 List Row
 
 	- call_delegate_btn_eject_click
@@ -9428,6 +9596,15 @@ List Row
 List Event
 	- cur_event_hierarchy_manager.add_mousemove_callback_set
 		마우스 이동시, 리스트의 포커스등의 이벤트를 처리합니다.
+
+Jump Spot Mananger
+	- show_mouse_over_table_row_element_top_n_bottom
+		마우스 이동시, 테이블 객체의 위, 아래중 어느 부분에 mouse over인지 확인해줍니다.
+	- show_mouse_over_element_set_top_n_bottom
+		마우스 이동시, 리스트 객체의 위, 아래중 어느 부분에 mouse over인지 확인해줍니다.
+
+cur_btn_collection_eject_jq.click
+	- 엘리먼트 컬렉션 셋이 이동할 때 호출
 
 
 */

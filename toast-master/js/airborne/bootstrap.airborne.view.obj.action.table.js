@@ -2598,8 +2598,6 @@ airborne.bootstrap.view.obj.__action_table = {
 						var action_item_obj_mouse_over = mouse_over_checksum.action_item_obj_mouse_over;
 						if(_action.is_valid_action_item_obj(action_item_obj_mouse_over)) {
 
-							console.log("HERE / TABLE / 001");
-
 							var consoler = airborne.console.get();
 							consoler.off();
 
