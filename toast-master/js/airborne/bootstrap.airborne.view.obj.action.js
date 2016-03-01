@@ -4554,7 +4554,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var cur_title = "";
 				if(cur_action_item_obj.get_action_is_not_shy()){
@@ -4627,34 +4627,7 @@ airborne.bootstrap.obj.__action = {
 				// 4. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
 				this.hide_shy_child();
 			}
-			// REMOVE ME
-			/*
-			,show_input_mode_shy_list:function(){
 
-				console.log("Event Manager / show_input_mode_shy_list   ");
-
-				// element set에서 추가 버튼을 눌렀을 때의 작동.
-				this.hide_all();
-
-				// 1. 이벤트가 발생한 element set은 view mode
-				this.show_parent_container_jq();
-				this.show_title_jq();
-				this.show_time_jq();
-
-				// 2. title의 말줄임표를 제거.
-				this.hide_title_jq_text_head();
-
-				// 3. shy 자식 객체를 화면에서 가립니다.
-				this.hide_shy_child_element_set();
-
-				// 4. 형제 shy element / 자기 자신이 shy element 인 경우, 자신을 가립니다.
-				this.hide_shy_child();
-
-				// 5. 선택한 엘리먼트(자기 자신)의 아래로 input group을 옮깁니다.
-				this.move_title_input_group_jq_under_me();
-
-			}
-			*/
 			// @ Public
 			// @ Scope 	: Event Manager
 			// @ Desc 	: input mode를 보여줄때, 뷰의 제어를 담당하는 delegate
@@ -5123,13 +5096,6 @@ airborne.bootstrap.obj.__action = {
 				if(cur_action_item_obj.has_parent() && cur_action_item_obj.get_parent().has_parent()) {
 					cur_parent_event_manager = cur_action_item_obj.get_parent().get_parent().get_event_manager();
 				}
-
-				// REMOVE ME
-				// var cur_parent_element_set = cur_element_set.get_parent_element_set();
-				// if(cur_parent_element_set == null) return;
-
-				// var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
-				// if(cur_parent_event_manager == null) return;
 
 				return cur_parent_event_manager;
 			}
@@ -6397,157 +6363,6 @@ airborne.bootstrap.obj.__action = {
 			,hide_shy_child:function(){
 				this.hide_child_shy_element_container_jq();
 			}
-			// REMOVE ME
-			// @ private
-			// @ 자신의 형제 객체 중의 shy element set를 자신의 element set 바로 위로 이동시킴
-			/*
-			,move_shy_sibling_element_set_above_this:function(){
-
-				var shy_sibling_element_set = this.get_shy_sibling_element_set();
-				if(shy_sibling_element_set == undefined) {
-					return;
-				}
-
-				// shy_element_set을 사용자가 선택한 엘리먼트와 그 다음 엘리먼트 사이에 넣습니다.
-				var next_element_set = this.get_element_set();
-				var prev_element_set = this.get_element_set().get_sibling_prev_element_set();
-				// shy_element_set의 처음 위치는 첫번째 열이다. 
-				// 사용자가 두번째 열에서 열을 추가하면 
-				// prev_element_set도 shy_sibling_element_set을 가리키게 된다.
-				if(this.get_element_set().get_element_collection_set().is_same_element_set(prev_element_set, shy_sibling_element_set)){
-					prev_element_set = undefined;
-				}
-				next_element_set.get_event_manager().get_element_jq().after(shy_sibling_element_set.get_event_manager().get_element_jq());
-
-				var next_element_jq_from_shy = shy_sibling_element_set.get_event_manager().get_element_jq().next();
-				var cur_title_input_group_jq = this.get_title_input_group_jq();
-				if(next_element_jq_from_shy.length == 0) {
-					// 입력창이 맨 마지막 열로 배치되었습니다.
-					var next_element_jq = next_element_set.get_event_manager().get_element_jq();
-					if(next_element_jq == undefined) {
-						console.log("!Error! / move_shy_sibling_element_set_above_this / next_element_jq == undefined");
-						return;
-					}
-
-					_obj.remove_list_row_round(next_element_jq);
-					_obj.set_list_last_row_round(cur_title_input_group_jq);
-				}
-
-				
-				//element_type
-				var cur_action_item_obj = shy_sibling_element_set.get_action_item_obj();
-				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / move_shy_sibling_element_set_above_this / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
-					return;
-				}
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-					// console.log("시간 타입인 경우, 이동한 열에 맞게 시간을 변경해줍니다.");
-
-					// 이전 객체가 있다면 이전 객체의 시간을 가져옵니다.
-					var prev_time_sec = 0;
-					var prev_action_item_obj = prev_element_set.get_action_item_obj();
-					if(_action.is_valid_action_item_obj(prev_action_item_obj)) {
-
-						if(prev_action_item_obj.is_not_item_title_n_time_hh_mm()) {
-							console.log("!Error! / move_shy_sibling_element_set_above_this / prev_action_item_obj.is_not_item_title_n_time_hh_mm()");
-							return;
-						}
-						// console.log("이전 객체가 있다면 이전 객체의 시간을 가져옵니다.");
-
-						prev_time_sec = prev_action_item_obj.get_time_sec();
-
-					} 
-
-					// 이후 객체가 있다면 이후 객체의 시간을 가져옵니다.
-					var next_time_sec = 0;
-					var next_action_item_obj = next_element_set.get_action_item_obj();
-					if(_action.is_valid_action_item_obj(next_action_item_obj)) {
-
-						if(next_action_item_obj.is_not_item_title_n_time_hh_mm()) {
-							console.log("!Error! / move_shy_sibling_element_set_above_this / next_action_item_obj.is_not_item_title_n_time_hh_mm()");
-							return;
-						}
-
-						// console.log("이후 객체가 있다면 이전 객체의 시간을 가져옵니다.");
-						next_time_sec = next_action_item_obj.get_time_sec();
-					}
-
-					var five_minutes_in_secs = 300; // 60 * 5
-					if( prev_time_sec == 0 && next_time_sec > 0 ) {
-						// 첫번째 엘리먼트로 옮겼습니다.
-						// 다음 시간으로부터 5분 전으로 변경합니다.
-						cur_action_item_obj.update_time_hh_mm(next_time_sec - five_minutes_in_secs);
-
-					} else if( prev_time_sec > 0 && next_time_sec == 0 ) {
-						// 마지막 엘리먼트로 옮겼습니다.
-						// 다음 시간으로부터 5분 후로 변경합니다.
-						cur_action_item_obj.update_time_hh_mm(prev_time_sec + five_minutes_in_secs);
-
-					} else if( prev_time_sec > 0 && next_time_sec > 0 ) {
-						// 리스트의 처음과 마지막이 아닌 이전과 이후 엘리먼트가 모두 있습니다.
-						// 이전과 이후 엘리먼트의 사이 값으로 새로운 시간을 지정해 줍니다.
-
-						if( prev_time_sec == next_time_sec ) {
-							// 두 시간이 동일한 경우는 같은 시간으로 넘겨줍니다.
-							cur_action_item_obj.update_time_hh_mm(prev_time_sec);
-
-						} else if( prev_time_sec < next_time_sec ) {
-							// 두 시간이 차이가 있는 경우
-
-							var ten_minutes_in_secs = 600; // 60 * 10
-							var time_diff_in_secs = (next_time_sec - prev_time_sec);
-							if( ten_minutes_in_secs <= time_diff_in_secs ){
-								// 두 시간의 차이가 10분 이상인 경우, 두 시간 사이 값의 중간 값을 설정해줍니다.
-								// 중간값이 5분 단위로 제어되도록 설정합니다.
-								cur_action_item_obj.update_time_hh_mm(prev_time_sec + parseInt(time_diff_in_secs / 2));
-									
-							} else {
-								// 두 시간의 차이가 10분 미만인 경우, 두 시간 사이 값중 작은 값을 설정해줍니다.
-								cur_action_item_obj.update_time_hh_mm(prev_time_sec);
-									
-							} // inner if end
-
-						} // inner if end
-
-					} // outer if end
-
-					// action item의 시간이 업데이트되었습니다. 
-					// 화면에 표시되는 시간을 업데이트 합니다.
-					var new_time_hh_mm = cur_action_item_obj.get_time_sec();
-					if(_v.is_not_unsigned_number(new_time_hh_mm)) {
-						console.log("!Error! / move_shy_sibling_element_set_above_this / _v.is_not_unsigned_number(new_time_hh_mm)");
-						return;
-					}
-
-					if(_dates.is_valid_time_format_double_digit(new_time_hh_mm)){
-						shy_sibling_element_set.get_event_manager().set_value_time_jq(new_time_hh_mm);
-					}
-				}
-			}
-			*/
-			// REMOVE ME
-			// @ private
-			// @ Desc : 선택한 엘리먼트 아래에 input group을 이동시킴.
-			/*
-			,move_title_input_group_jq_under_me:function(){
-
-				var _obj = airborne.bootstrap.obj;
-
-				this.get_element_jq().after(this.get_title_input_group_jq());
-
-				// show input groups
-				this.show_title_input_group_jq();
-				this.show_title_input_container_jq();
-				this.show_title_input_jq();
-
-				this.show_title_input_btn_ok_jq();
-				this.show_title_input_btn_cancel_jq();
-
-				// set text from shy element set
-				this.set_title_input_jq_value(_param.PLACE_HOLDER_NEW_ITEM);
-				this.focus_title_input_jq();
-			}
-			*/
 			// @ Public
 			// @ Desc 	: 현재 스크롤 y 위치
 			,scroll_top:0
@@ -6651,18 +6466,7 @@ airborne.bootstrap.obj.__action = {
 			var id_for_test = event_manager_on_mousemove.get_id();
 			var title_for_test = event_manager_on_mousemove.get_title_jq_value();
 
-			// TEST
-			// if(title_for_test.indexOf("Greeting") > -1) {
-			// 	consoler.on();				
-			// }
-
-			// consoler.say("");
-			// consoler.say("Mouse Move Callback / mmc");
-			// consoler.say("mmc / 0 / ",title_for_test);
-
 			if(event_manager_on_mousemove.is_lock()) {
-				// consoler.say("mmc / 1 / ",title_for_test);
-				// consoler.say("mmc / 1 / is_lock : ",event_manager_on_mousemove.is_lock());
 				return;	
 			}
 
@@ -6764,11 +6568,13 @@ airborne.bootstrap.obj.__action = {
 			var has_shy_child = (_v.is_valid_array(cur_child_shy_element_set_arr))?true:false;
 
 			// 자신의 형제 엘리먼트와 shy 엘리먼트를 가져온다.
-			// wonder.jung11
-			// var cur_parent_element_set = cur_element_set.get_parent_element_set();
-			var cur_parent_element_set = undefined;
+			var cur_parent_event_manager = undefined;
 			if(cur_action_item_obj.has_parent() && cur_action_item_obj.get_parent().has_parent()) {
-				cur_parent_element_set = cur_action_item_obj.get_parent().get_parent().get_event_manager().get_element_set();
+				cur_parent_event_manager = cur_action_item_obj.get_parent().get_parent().get_event_manager();
+			}
+			var cur_parent_element_set = undefined;
+			if(cur_parent_event_manager != undefined) {
+				cur_parent_element_set = cur_parent_event_manager.get_element_set();
 			}
 			var cur_sibling_element_set_arr = [];
 			var cur_sibling_shy_element_set_arr = [];
@@ -8936,13 +8742,6 @@ airborne.bootstrap.obj.__action = {
 					cur_action_item_obj.get_parent().get_parent().get_event_manager();
 				}
 
-				// REMOVE ME
-				// var cur_parent_element_set = this.get_parent_element_set();
-				// if(cur_parent_element_set == null) return null;
-
-				// var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
-				// if(cur_parent_event_manager == null) return null;
-
 				return cur_parent_event_manager;
 			}
 			,get_children_event_manager_arr:function(){
@@ -9127,11 +8926,6 @@ airborne.bootstrap.obj.__action = {
 
 				return cur_parent_element_set;
 
-				// REMOVE ME
-				// var cur_element_collection_set = this.get_element_collection_set();
-				// if(cur_element_collection_set == null) return null;
-
-				// return cur_element_collection_set.get_parent_element_set();
 			}
 			/*
 				@ private

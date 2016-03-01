@@ -1469,44 +1469,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				}
 
-				// REMOVE ME
-				// action item obj의 순서 바꾸기. - 정말 필요한가?
-				/*
-				if(cur_sibling_action_obj_before != undefined || cur_sibling_action_obj_after != undefined) {
-
-					console.log("HERE / cur_sibling_action_obj_before ::: ",cur_sibling_action_obj_before);
-					console.log("HERE / cur_action_item_obj ::: ",cur_action_item_obj);
-					console.log("HERE / cur_sibling_action_obj_after ::: ",cur_sibling_action_obj_after);
-					console.log("HERE / cur_action_item_on_mouse_over ::: ",cur_action_item_on_mouse_over);
-
-					// CHECK
-					if( cur_sibling_action_obj_before != undefined && 
-						cur_sibling_action_obj_before.get_coordinate() === cur_action_item_obj.get_coordinate()) {
-
-						// 앞의 형제 아이템이 자신과 동일한 좌표값을 가지면 중단합니다.
-						console.log("!Error! / set_delegate_callback_after_landing_element / cur_sibling_action_obj_before.get_coordinate() === cur_action_item_obj.get_coordinate()");
-						return;
-
-					}
-					if( cur_sibling_action_obj_after != undefined && 
-						cur_sibling_action_obj_after.get_coordinate() === cur_action_item_obj.get_coordinate()) {
-
-						// 앞의 형제 아이템이 자신과 동일한 좌표값을 가지면 중단합니다.
-						console.log("!Error! / set_delegate_callback_after_landing_element / cur_sibling_action_obj_after.get_coordinate() === cur_action_item_obj.get_coordinate()");
-						return;
-
-					}
-
-					cur_action_item_obj.dive_into_them(
-						// new_before_action_item_obj
-						cur_sibling_action_obj_before
-						// new_after_action_item_obj
-						, cur_sibling_action_obj_after
-					);
-
-				}
-				*/
-
 				// 시간 위젯이 있다면 바뀐 위치에 따라 시간을 조정해줍니다.
 				var cur_element_type;
 				if(cur_event_manager_on_mouse_over != undefined){

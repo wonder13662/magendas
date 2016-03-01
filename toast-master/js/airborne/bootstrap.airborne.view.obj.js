@@ -377,12 +377,6 @@ airborne.bootstrap.obj = {
 		var parent_jq_padding_top = parseInt(parent_jq.css("padding-top").replace(/px/gi, ""));
 		var child_jq_height = child_jq.outerHeight();
 
-		console.log("XX / parent_jq ::: ",parent_jq);
-		console.log("XX / parent_jq_height-1 ::: ",parent_jq_height);
-		console.log("XX / parent_jq_height-2 ::: ",parent_jq.height());
-		console.log("XX / parent_jq_padding_top ::: ",parent_jq_padding_top);
-		console.log("XX / child_jq_height ::: ",child_jq_height);
-
 		if(parent_jq_height < child_jq_height) {
 			console.log("!Error! / get_top_offset_child_centered_vertical / parent_jq_height < child_jq_height");
 			return;
