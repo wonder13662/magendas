@@ -793,6 +793,7 @@ airborne.bootstrap.view.obj.__action_list = {
 		target_element_collection_set.push_new_element_set(action_item_obj, event_manager_list_row);
 
 		// set eject btn event
+		// 리스트 열 점프시 뷰단 구현 로직을 담은 델리게이트. 리스트와 테이블 뷰 로직에서 직접 구현합니다.
 		event_manager_list_row.set_delegate_btn_eject_click(_obj.get_delegate(function(event_click, cur_event_manager){
 
 			var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;
@@ -841,29 +842,33 @@ airborne.bootstrap.view.obj.__action_list = {
 				clone_element_jq.click(function(e){
 
 					// console.log("드래그하던 열을 클릭하면 충돌 검사를 통해 선택된 열 아래로 붙임.");
-
-					var cur_all_sibling_element_set_arr = event_manager_on_mousemove.get_all_sibling_element_set_arr();
+					var cur_action_item_obj = event_manager_on_mousemove.get_action_item_obj();
+					if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+						console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+						return;
+					}
+					
+					var cur_action_depth = cur_action_item_obj.get_action_depth();
 					var cur_sibling_element_set_mouse_over = null;
 					var mouse_over_checksum = null;
-					for(var inner_idx = 0;inner_idx < cur_all_sibling_element_set_arr.length;inner_idx++){
-						var cur_sibling_element_set = cur_all_sibling_element_set_arr[inner_idx];
 
-						// 충돌 검사를 진행한다.
-						mouse_over_checksum = jsm.show_mouse_over_element_set_top_n_bottom(mousemove_event, cur_sibling_element_set);
-
-						// DEBUG
-						// console.log("title for debug : ",cur_sibling_element_set.get_event_manager().get_title_jq_value());
-						if(	cur_sibling_element_set.get_event_manager() != undefined && 
-							"New Last Action" === cur_sibling_element_set.get_event_manager().get_title_jq_value()) {
-
-							// console.log("mouse_over_checksum : ",mouse_over_checksum);
-
+					for(var inner_idx = 0;inner_idx < cur_action_depth.length;inner_idx++){
+						var cur_action_obj_depth = cur_action_depth[inner_idx];
+						if(_action.is_not_valid_action_obj(cur_action_obj_depth)) {
+							console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_action_obj_depth)");
+							return;
 						}
 
-						if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_top){
+						var cur_sibling_element_set = cur_action_obj_depth.get_event_manager().get_element_set();
+
+						// 충돌 검사를 진행한다.
+						mouse_over_checksum = jsm.show_mouse_over_element_set_top_n_bottom(e, cur_sibling_element_set);
+
+						// 마우스 커서가 올라가 있는 객체 위 혹은 아래로 이동시킨다.
+						if(mouse_over_checksum.is_hover_top){
 							cur_sibling_element_set_mouse_over = cur_sibling_element_set;
 							break;
-						} else if(mouse_over_checksum.has_changed && mouse_over_checksum.is_hover_bottom){
+						} else if(mouse_over_checksum.is_hover_bottom){
 							cur_sibling_element_set_mouse_over = cur_sibling_element_set;
 							break;
 						}
@@ -886,7 +891,6 @@ airborne.bootstrap.view.obj.__action_list = {
 							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
 							var new_before_sibling_event_manager = new_after_sibling_event_manager.get_before_sibling_event_manager();
 							// element set, event manager의 형제 관계를 다시 세팅합니다.
-							console.log("HERE / 001--");
 							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
 
 							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.

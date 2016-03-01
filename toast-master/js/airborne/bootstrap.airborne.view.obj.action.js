@@ -322,9 +322,13 @@ airborne.bootstrap.obj.__action = {
 				this.set_action_depth_arr_from_root(action_depth_arr);
 
 			}
+			// @ Public
+			// @ Desc : 레이어별로 정리된 액션 객체 배열을 돌려줍니다. 이중 배열을 돌려줍니다.
 			,get_action_depth_arr:function() {
 				return this.action_depth_arr;
 			}
+			// @ Public
+			// @ Desc : 자신이 속한 레이어의 액션 객체 배열을 돌려줍니다. 단일 배열을 돌려줍니다.
 			,get_action_depth:function(has_shy) {
 
 				if(has_shy == undefined) {
@@ -5109,11 +5113,23 @@ airborne.bootstrap.obj.__action = {
 				var cur_element_set = this.get_element_set();
 				if(cur_element_set == null) return;
 
-				var cur_parent_element_set = cur_element_set.get_parent_element_set();
-				if(cur_parent_element_set == null) return;
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / get_parent_event_manager / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
 
-				var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
-				if(cur_parent_event_manager == null) return;
+				var cur_parent_event_manager = undefined;
+				if(cur_action_item_obj.has_parent() && cur_action_item_obj.get_parent().has_parent()) {
+					cur_parent_event_manager = cur_action_item_obj.get_parent().get_parent().get_event_manager();
+				}
+
+				// REMOVE ME
+				// var cur_parent_element_set = cur_element_set.get_parent_element_set();
+				// if(cur_parent_element_set == null) return;
+
+				// var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
+				// if(cur_parent_event_manager == null) return;
 
 				return cur_parent_event_manager;
 			}
@@ -6762,9 +6778,6 @@ airborne.bootstrap.obj.__action = {
 
 				if(cur_action_item_obj.is_table_child_column_list_field_item()) {
 					// 1. TABLE	- shy 모드를 사용하지 않습니다.
-
-					console.log("HERE / cur_action_item_obj ::: ",cur_action_item_obj);
-					console.log("HERE / cur_parent_element_set ::: ",cur_parent_element_set);
 
 					has_sibling = false;
 					has_shy_sibling = false;
@@ -8905,11 +8918,30 @@ airborne.bootstrap.obj.__action = {
 				return this.event_manager;
 			}
 			,get_parent_event_manager:function(){
-				var cur_parent_element_set = this.get_parent_element_set();
-				if(cur_parent_element_set == null) return null;
 
-				var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
-				if(cur_parent_event_manager == null) return null;
+				var cur_event_manager = this.get_event_manager();
+				if(cur_event_manager == undefined) {
+					console.log("!Error! / get_parent_event_manager / cur_event_manager == undefined");
+					return;
+				}
+
+				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / get_parent_event_manager / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_parent_event_manager = undefined;
+				if(cur_action_item_obj.has_parent() && cur_action_item_obj.get_parent().has_parent()) {
+					cur_action_item_obj.get_parent().get_parent().get_event_manager();
+				}
+
+				// REMOVE ME
+				// var cur_parent_element_set = this.get_parent_element_set();
+				// if(cur_parent_element_set == null) return null;
+
+				// var cur_parent_event_manager = cur_parent_element_set.get_event_manager();
+				// if(cur_parent_event_manager == null) return null;
 
 				return cur_parent_event_manager;
 			}
@@ -9072,11 +9104,34 @@ airborne.bootstrap.obj.__action = {
 				var cur_sibling_next_element_set_arr = this.get_all_sibling_next_element_set_arr();
 				return cur_sibling_prev_element_set_arr.concat(cur_sibling_next_element_set_arr);
 			}
+			// @ Section : element set
+			// @ public
 			,get_parent_element_set:function(){
-				var cur_element_collection_set = this.get_element_collection_set();
-				if(cur_element_collection_set == null) return null;
 
-				return cur_element_collection_set.get_parent_element_set();
+				var cur_event_manager = this.get_event_manager();
+				if(cur_event_manager == undefined) {
+					console.log("!Error! / get_parent_element_set / cur_event_manager == undefined");
+					return;
+				}
+
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / get_parent_element_set / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_parent_element_set = undefined;
+				if(cur_action_item_obj.has_parent() && cur_action_item_obj.get_parent().has_parent()) {
+					cur_action_item_obj.get_parent().get_parent().get_event_manager().get_element_set();
+				}
+
+				return cur_parent_element_set;
+
+				// REMOVE ME
+				// var cur_element_collection_set = this.get_element_collection_set();
+				// if(cur_element_collection_set == null) return null;
+
+				// return cur_element_collection_set.get_parent_element_set();
 			}
 			/*
 				@ private
@@ -9568,6 +9623,17 @@ Event Hierarchy Manager
 	- add_mousemove_callback_set
 		mouse move 시 검사하는 callback set을 추가합니다.
 
+List Row
+
+	- call_delegate_btn_eject_click
+		리스트의 열을 점프 시킬때 호출하는 델리게이트 메서드. 리스트와 테이블 뷰 로직에서 직접 구현합니다.
+		delegate_btn_eject_click
+	- set_delegate_btn_eject_click
+		리스트 열 점프시 뷰단 구현 로직을 담은 델리게이트. 리스트와 테이블 뷰 로직에서 직접 구현합니다.
+
+List Event
+	- cur_event_hierarchy_manager.add_mousemove_callback_set
+		마우스 이동시, 리스트의 포커스등의 이벤트를 처리합니다.
 
 
 */
