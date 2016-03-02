@@ -232,6 +232,12 @@ var param_manager = {
 	// PLACE HOLDERS
 	, PLACE_HOLDER_NEW_ITEM:"NEW ITEM"
 
+	// ACTION OBJ
+	, ACTION_ID:"ACTION_ID"
+	, ACTION_HASH_KEY:"ACTION_HASH_KEY"
+	, ACTION_ITEM_TYPE:"ACTION_ITEM_TYPE"
+	, ACTION_CONTEXT:"ACTION_CONTEXT"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {

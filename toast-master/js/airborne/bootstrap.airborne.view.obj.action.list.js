@@ -802,9 +802,7 @@ airborne.bootstrap.view.obj.__action_list = {
 				console.log("!Error! / set_delegate_btn_eject_click / _action.is_not_valid_action_item_obj(src_action_item_obj)");
 				return;
 			}
-			console.log("src_action_item_obj ::: ",src_action_item_obj);
 
-			// wonder.jung
 			// 자신을 제외한 나머지 형제 객체 1개를 가져옵니다. 다른 부모로 옮겨졌을 때, 리스트 형태를 변경하는 대상이 됩니다.
 			var has_myself = false;
 			var src_action_sibling_list = src_action_item_obj.get_sibling_action_obj_list(has_myself);
@@ -947,8 +945,6 @@ airborne.bootstrap.view.obj.__action_list = {
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(cur_element_jq);
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().before(_self_clone_jq);
 
-							// wonder.jung11 - action item obj 관계를 변경.
-
 						} else {
 
 							// event manager의 형제 관계를 다시 세팅합니다.
@@ -957,7 +953,6 @@ airborne.bootstrap.view.obj.__action_list = {
 							// 사용자가 이동 중인 엘리먼트가 들어갈 위치의 위쪽의 엘리먼트
 							var new_after_sibling_event_manager = new_before_sibling_event_manager.get_after_sibling_event_manager();
 							// element set, event manager의 형제 관계를 다시 세팅합니다.
-							console.log("HERE / 002--");
 							cur_event_manager.set_before_n_after_siblings_event_manager(new_before_sibling_event_manager, new_after_sibling_event_manager);
 
 							// 화면에 보이는 엘리먼트 위치를 실제로 변경합니다.
@@ -966,8 +961,6 @@ airborne.bootstrap.view.obj.__action_list = {
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(cur_element_jq);
 							cur_sibling_element_set_mouse_over.get_event_manager().get_element_jq().after(_self_clone_jq);
 
-							// wonder.jung11 - action item obj 관계를 변경.
-							
 						}
 					}
 
@@ -1542,7 +1535,6 @@ airborne.bootstrap.view.obj.__action_list = {
 				// Do something - 시간바꾸기
 
 				// 형제 엘리먼트의 디자인 - collection eject btn, corner round - 을 다시 그립니다.
-				console.log("형제 엘리먼트의 디자인 - collection eject btn, corner round - 을 다시 그립니다.");
 				var has_myself = true;
 				cur_event_manager_on_mouse_over.shape_sibling_element(has_myself);
 

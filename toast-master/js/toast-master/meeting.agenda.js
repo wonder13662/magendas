@@ -91,8 +91,7 @@ wonglish.meeting_agenda_manager = {
 		if(_v.isValidArray(meeting_agenda_data_obj.member_list)){
 			for (var idx = 0; idx < meeting_agenda_data_obj.member_list.length; idx++) {
 				var cur_member_obj = meeting_agenda_data_obj.member_list[idx];
-
-				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_id);
+				var cur_select_option = _obj.get_select_option(cur_member_obj.__member_name,cur_member_obj.__member_hash_key);
 				search_option_arr_members.push(cur_select_option);
 			}
 
@@ -163,17 +162,53 @@ wonglish.meeting_agenda_manager = {
 					return;
 				}
 
+				// DEBUG
 				var cur_root_action_obj = action_item_obj.get_root_action_obj();
-
 				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
 				console.log("HERE / obj_tree :: ",obj_tree);
 
-				console.log(">>> cur_outcome_obj :: ",cur_outcome_obj);
-				console.log(">>> action_item_obj :: ",action_item_obj);
-				console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
-				console.log(">>> MEETING_ID :: ",MEETING_ID);
-				console.log(">>> cur_element_event_manager :: ",cur_element_event_manager);
+				var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 
+				if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
+					_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
+					_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ) {
+
+					console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+					cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+					_ajax.send_simple_post(
+						// _url
+						_link.get_link(_link.API_ACTION)
+						// _param_obj
+						,cur_action_obj_for_db_update
+						// _delegate_after_job_done
+						,_obj.get_delegate(
+							// delegate_func
+							function(data){
+								console.log(">>> data : ",data);
+
+								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
+
+								// 내용이 다른 경우 알려줍니다.
+
+							},
+							// delegate_scope
+							this
+						)
+					); // ajax done.				
+
+				} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+
+					// SELECT BOX를 선택했을 때의 처리.
+					
+					console.log("Fetch select box data / action_item_obj :: ",action_item_obj);
+					console.log("Fetch select box data / search_option_arr_members :: ",search_option_arr_members);
+
+					return search_option_arr_members;
+				}
+
+
+				/*
 				// 업데이트 상태마다 다르게 처리
 				var request_param_obj = null;
 				if( _action.EVENT_TYPE_INSERT_ITEM == cur_outcome_obj._event ) {
@@ -216,8 +251,6 @@ wonglish.meeting_agenda_manager = {
 
 						// 1. 새로운 아이템을 생성. shy 모드가 아닌 정말 새 아이템을 만든다. shy 모드는 제거.
 
-
-
 						// 1-1. 새로운 아이템을 추가하는 것이 현재는 불가능한 기능. shy 레이어를 복제, 새로운 event manager를 만들어야 함.
 
 						// jquery로 엘리먼트를 복제. 하위 명칭은 모두 변경되어야 함.
@@ -237,16 +270,21 @@ wonglish.meeting_agenda_manager = {
 
 				} else if( _action.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
 					
-					if(action_item_obj.is_item_title_only()) {
+					if(action_item_obj.is_item_title_only_addable()) {
 
-						console.log("Do something / UPDATE / is_item_title_only");
+						console.log("Do something / UPDATE / is_item_title_only_addable");
 
 						var cur_root_action_obj = action_item_obj.get_root_action_obj();
-						var cur_root_context_obj = _json.parseJSON(cur_root_action_obj.get_action_context());
+						var cur_root_context_obj = cur_root_action_obj.get_action_context_obj();
+						var cur_action_context = action_item_obj.get_action_context_obj();
 
 						console.log(">>> cur_root_action_obj :: ",cur_root_action_obj);
 						console.log(">>> cur_root_context_obj :: ",cur_root_context_obj);
+						console.log(">>> cur_action_context :: ",cur_action_context);
 
+						// action 정보외에 다른 context 정보가 있다면, 추가적인 업데이트 작업을 내부적으로 진행합니다.
+						// 시간 정보를 제외한 context 정보는 여기서 제어하지 않습니다.
+						
 
 					} else if(action_item_obj.is_item_title_n_time_hh_mm()) {
 						
@@ -289,9 +327,11 @@ wonglish.meeting_agenda_manager = {
 					console.log("HERE / request_param_obj == undefined / stop");
 					return;
 				}
+				*/
 
-				console.log(">>> request_param_obj :: ",request_param_obj);
+				// console.log(">>> request_param_obj :: ",request_param_obj);
 
+				/*
 				// TEST 
 				console.log("HERE / 001");
 				
@@ -300,7 +340,7 @@ wonglish.meeting_agenda_manager = {
 
 				_ajax.send_simple_post(
 					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+					_link.get_link(_link.API_ACTION)
 					// _param_obj
 					,request_param_obj
 					// _delegate_after_job_done
@@ -324,7 +364,8 @@ wonglish.meeting_agenda_manager = {
 						// delegate_scope
 						this
 					)
-				); // ajax done.				
+				); // ajax done.	
+				*/			
 				
 			},this)	
 		);
@@ -445,7 +486,7 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
+/*
 		//    .dMMMb  dMMMMb  dMMMMMP dMMMMMP .aMMMb  dMP dMP 
 		//   dMP" VP dMP.dMP dMP     dMP     dMP"VMP dMP dMP  
 		//   VMMMb  dMMMMP" dMMMP   dMMMP   dMP     dMMMMMP   
@@ -684,19 +725,6 @@ wonglish.meeting_agenda_manager = {
 							);
 	            		}
 
-	            		// TODO 
-	            		/*
-		            	if( request_param_obj.IS_INSERT_SPEECH == _param.YES ) {
-
-		            		// 통신이 완료되면 새로 추가된 열을 화면에 표시합니다.
-		            		// AJAX 통신 결과에 새로 추가된 열의 정보가 포함되어야 합니다.
-
-		            	} else if( request_param_obj.IS_DELETE_SPEECH == _param.YES ) {
-
-		            		// 삭제된 열을 화면에서 지웁니다.
-
-		            	}
-		            	*/
 
 
 					},this)
@@ -711,6 +739,7 @@ wonglish.meeting_agenda_manager = {
 		// wonder.jung
 		// TEST
 		
+*/
 
 
 
@@ -738,8 +767,7 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
+/*
 
 
 
@@ -929,13 +957,13 @@ wonglish.meeting_agenda_manager = {
 			},this)
 
 		);		
+*/
 
 
 
 
 
-
-
+/*
 		//    dMP dMP dMP .aMMMb  dMMMMb  dMMMMb         dMMMMb        .aMMMb  .aMMMb  dMP dMP dMMMMMMP dMMMMMP 
 		//   dMP dMP dMP dMP"dMP dMP.dMP dMP VMP        dMP dMP       dMP"dMP dMP"dMP dMP dMP    dMP   dMP      
 		//  dMP dMP dMP dMP dMP dMMMMK" dMP dMP        dMP dMP       dMP.dMP dMP dMP dMP dMP    dMP   dMMMP     
@@ -1048,7 +1076,7 @@ wonglish.meeting_agenda_manager = {
 
 			},this)
 		);	
-
+*/
 
 
 
@@ -1058,7 +1086,7 @@ wonglish.meeting_agenda_manager = {
 		//   dMP dMP dMMMP   dMP dMP dMP  VMMMb   
 		//  dMP dMP dMP     dMP.dMP.dMP dP .dMP   
 		// dMP dMP dMMMMMP  VMMMPVMMP"  VMMMP"    
-
+/*
 		var table_row_data_list_today_news = meeting_agenda_data_set.today_news_list;
 
 		// set table row element type
@@ -1219,7 +1247,7 @@ wonglish.meeting_agenda_manager = {
 
 			},this)
 		);	
-
+*/
 
 
 
@@ -1311,7 +1339,7 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
+/*
 		if(new_action_element_collection_set != undefined){
 			
 			_action_list.set_add_on_json_format_on_list(
@@ -1347,7 +1375,7 @@ wonglish.meeting_agenda_manager = {
 		if(window_scroll_y > 0){
 			window.scrollTo(0,window_scroll_y);	
 		}
-
+*/
 
 
 

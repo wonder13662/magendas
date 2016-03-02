@@ -8451,6 +8451,8 @@ class MYSQLInterface{
 	*/
 	public function test_action_list_insert_timeline_BDTM_with_action_obj() {
 
+		$params = new ToastMasterParamManager();
+
 		// 0. Action obj로 리스트를 구성합니다.
 		$root_action_obj_name = "Toastmaster Timeline";
 		$meeting_agenda_id = 134; // 243th Attitude of gratitude
@@ -8463,10 +8465,6 @@ class MYSQLInterface{
 			// $meeting_agenda_id=-1
 			, $meeting_agenda_id
 		);
-
-
-
-
 
 		// 1.Greeting
 		$child_action_item =  
@@ -8696,7 +8694,18 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Toastmaster
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_TOASTMASTER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-2-2. Column List Field - Grammarian
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -8705,7 +8714,17 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Grammarian
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_GRAMMARIAN;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-2-3. Column List Field - Timer
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -8714,7 +8733,17 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Timer
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_TIMER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-2-4. Column List Field - Table Topic Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -8723,6 +8752,15 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Table Topic Master
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_TABLE_TOPIC_MASTER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -8784,7 +8822,7 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
 
-		// 3-1-2-1-4-1. Column List Field - Toastmaster
+		// 3-1-2-1-4-1. Column List Field - General Evaluator
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
@@ -8792,8 +8830,18 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - General Evaluator
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_GENERAL_EVALUATOR;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-4-2. Column List Field - Grammarian
+
+		// 3-1-2-1-4-2. Column List Field - Ah & Vote Counter
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
@@ -8801,8 +8849,19 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Ah & Vote Counter
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_AH_COUNTER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-4-3. Column List Field - Timer
+
+
+		// 3-1-2-1-4-3. Column List Field - Word & Quote Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
@@ -8810,8 +8869,19 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Word & Quote Master
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_WORD_N_QUOTE_MASTER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-4-4. Column List Field - Table Topic Master
+
+
+		// 3-1-2-1-4-4. Column List Field - Mini Debate Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
@@ -8819,6 +8889,15 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX
 		);
+
+		// DB interface prop - Mini Debate Master
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->ROLE_ID} = $params->ROLE_ID_MINI_DEBATE_MASTER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -8876,7 +8955,6 @@ class MYSQLInterface{
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
-		// wonder.jung
 		// 3-1-2-2-2. Column List - Speech Title Column List
 		$child_action_sub_list_child_action_item_sub_table_column_list = 
 		new ActionCollection(
@@ -9070,6 +9148,18 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
+
+		// wonder.jung11
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
+		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->SPEECH_ID} = -1;
+		$context->{$params->SPEECH_PROJECT_ID} = -1;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -9101,6 +9191,17 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
+		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->SPEECH_ID} = -1;
+		$context->{$params->SPEECH_TITLE} = -1;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -9132,6 +9233,17 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
+		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->SPEECH_ID} = -1;
+		$context->{$params->SPEECH_SPEAKER_MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -9163,6 +9275,17 @@ class MYSQLInterface{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
+		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->SPEECH_ID} = -1;
+		$context->{$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
 
@@ -9474,7 +9597,7 @@ class MYSQLInterface{
 
 
 		// add_on inner table
-		// 10-1-1-1. Club News
+		// 10-1-1-1. Club News / 뉴스의 내용은 action obj 형식으로 관리해도 문제 없음.
 		$child_action_sub_list_child_action_item_sub_table = 
 		new ActionCollection(
 			// $action_name=""
