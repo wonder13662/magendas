@@ -2219,9 +2219,17 @@ airborne.bootstrap.obj.__action = {
 				var action_obj_for_db_update = {};
 
 				action_obj_for_db_update[_param.ACTION_ID] = this.get_action_id();
+				action_obj_for_db_update[_param.ACTION_NAME] = this.get_action_name();
 				action_obj_for_db_update[_param.ACTION_HASH_KEY] = this.get_action_hash_key();
 				action_obj_for_db_update[_param.ACTION_ITEM_TYPE] = this.get_action_item_type();
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
+
+				var cur_root_action_obj = this.get_root_action_obj();
+				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
+					console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_root_action_obj)");
+					return;
+				}
+				action_obj_for_db_update[_param.ROOT_ACTION_HASH_KEY] = this.get_root_action_obj().get_action_hash_key();
 
 				return action_obj_for_db_update;
 			}

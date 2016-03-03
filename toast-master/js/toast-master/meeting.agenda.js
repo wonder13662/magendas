@@ -168,6 +168,7 @@ wonglish.meeting_agenda_manager = {
 				console.log("HERE / obj_tree :: ",obj_tree);
 
 				var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
+				cur_action_obj_for_db_update["MEETING_ID"] = MEETING_ID;
 
 				if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 					_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
@@ -190,6 +191,7 @@ wonglish.meeting_agenda_manager = {
 								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
 
 								// 내용이 다른 경우 알려줍니다.
+								// _action.compare_root_action(cur_root_action_obj, new_root_action_obj);
 
 							},
 							// delegate_scope
@@ -206,6 +208,8 @@ wonglish.meeting_agenda_manager = {
 
 					return search_option_arr_members;
 				}
+
+				cur_element_event_manager.release();
 
 
 				/*
