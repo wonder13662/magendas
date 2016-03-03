@@ -162,8 +162,14 @@ wonglish.meeting_agenda_manager = {
 					return;
 				}
 
+
 				// DEBUG
 				var cur_root_action_obj = action_item_obj.get_root_action_obj();
+				var cur_root_action_context_obj = action_item_obj.get_action_context_obj();
+				if(cur_root_action_context_obj != undefined && cur_root_action_context_obj.meeting_id != undefined) {
+					MEETING_ID = cur_root_action_context_obj.meeting_id;
+				}
+				console.log("HERE / cur_root_action_obj :: ",cur_root_action_obj);
 				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
 				console.log("HERE / obj_tree :: ",obj_tree);
 
@@ -186,6 +192,7 @@ wonglish.meeting_agenda_manager = {
 						,_obj.get_delegate(
 							// delegate_func
 							function(data){
+								
 								console.log(">>> data : ",data);
 
 								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
@@ -197,7 +204,7 @@ wonglish.meeting_agenda_manager = {
 							// delegate_scope
 							this
 						)
-					); // ajax done.				
+					); // ajax done.
 
 				} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 

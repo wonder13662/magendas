@@ -239,6 +239,7 @@ var param_manager = {
 	, ROOT_ACTION_HASH_KEY:"ROOT_ACTION_HASH_KEY"
 	, ACTION_ITEM_TYPE:"ACTION_ITEM_TYPE"
 	, ACTION_CONTEXT:"ACTION_CONTEXT"
+	, ACTION_COORDINATE:"ACTION_COORDINATE"
 
 	,get:function(param_name, param_value){
 		var param_obj = {

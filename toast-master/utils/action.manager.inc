@@ -324,8 +324,13 @@ class ActionObject implements Action{
 		$cur_coordinate = $this->get_coordinate();
 		if(!is_null($cur_coordinate) && !empty($cur_coordinate)) {
 			// echo "$cur_name / set_search_map / \$cur_coordinate :: $cur_coordinate<br/>";
-			$search_map->{$this->coordinate} = $this;
+			$search_map->{$cur_coordinate} = $this;
 		}
+		$cur_hash_key = $this->get_hash_key();
+		if(!is_null($cur_hash_key) && !empty($cur_hash_key)) {
+			// echo "$cur_name / set_search_map / \$cur_hash_key :: $cur_hash_key<br/>";
+			$search_map->{$cur_hash_key} = $this;
+		}		
 
 		$this->search_map = $search_map;
 	}
@@ -475,21 +480,56 @@ class ActionObject implements Action{
 		return $this->context;
 	}
 
+	// @ Desc : 자신과 파라미터로 넘어온 action obj가 동일한지 id, hash_key값을 비교해 알려줍니다.
+	public function is_equal($target_action_obj=null) {
+
+		$cur_action_id = $this->get_id();
+		if(is_null($cur_action_id) || $cur_action_id < 1) {
+			return false;
+		}
+
+		$cur_action_hash_key = $this->get_hash_key();
+		if(empty($cur_action_hash_key)) {
+			return false;
+		}
+
+		if(ActionObject::is_not_action_obj($target_action_obj)) {
+			return false;
+		}
+
+		$cur_action_id_target = $target_action_obj->get_id();
+		if(is_null($cur_action_id_target) || $cur_action_id_target < 1) {
+			return false;
+		}
+
+		$cur_action_hash_key_target = $target_action_obj->get_hash_key();
+		if(empty($cur_action_hash_key_target)) {
+			return false;
+		}
+
+		if($cur_action_id == $cur_action_id_target) {
+			return true;
+		}
+
+		if(strcmp($cur_action_hash_key, $cur_action_hash_key_target) == 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 }
 
 class ActionCollection extends ActionObject{
-
-	/*
-		@ Public
-		@ Usage : ActionCollection::is_not_instance($target)
-	*/
+	
+	// @ Public
+	// @ Usage : ActionCollection::is_not_instance($target)	
 	public static function is_not_instance($target) {
 		return !ActionCollection::is_instance($target);
 	}
-	/*
-		@ Public
-		@ Usage : ActionCollection::is_instance($target)
-	*/
+	
+	// @ Public
+	// @ Usage : ActionCollection::is_instance($target)
 	public static function is_instance($target) {
 		if(!is_null($target) && is_a($target,'ActionCollection')) {
 			return true;
@@ -620,6 +660,30 @@ class ActionCollection extends ActionObject{
 			return true;
 		}
 		return false;
+	}
+
+	public function search_hash_key($hash_key) {
+
+		if(empty($hash_key)) {
+			return null;
+		}
+
+		if(strcmp($hash_key, $this->get_hash_key()) == 0) {
+			return $this;
+		}
+
+		// wonder.jung11
+		$children_action_list = $this->get_children();
+		for($idx = 0; $idx < count($children_action_list); $idx++) {
+			$child_action_object = $children_action_list[$idx];
+			$search_result = $child_action_object->search_hash_key($hash_key);
+
+			if(!is_null($search_result)) {
+				return $search_result;
+			}
+		}
+
+		return null;
 	}
 
 	// @ Override
@@ -768,6 +832,41 @@ class ActionItem extends ActionObject{
 	public function set_add_on_list($add_on_action_object_list) {
 		$this->add_on_action_object_list = $add_on_action_object_list;
 	}
+
+	public function search_hash_key($hash_key) {
+
+		if(empty($hash_key)) {
+			return null;
+		}
+
+		if(strcmp($hash_key, $this->get_hash_key()) == 0) {
+			return $this;
+		}
+
+		// search in child list
+		$children_action_list = $this->get_children();
+		for($idx = 0; $idx < count($children_action_list); $idx++) {
+			$child_action_object = $children_action_list[$idx];
+			$search_result = $child_action_object->search_hash_key($hash_key);
+
+			if(!is_null($search_result)) {
+				return $search_result;
+			}
+		}
+
+		// wonder.jung11
+		$children_add_on_action_list = $this->get_add_on_list();
+		for($idx = 0; $idx < count($children_add_on_action_list); $idx++) {
+			$child_add_on_action_object = $children_add_on_action_list[$idx];
+			$search_result = $child_add_on_action_object->search_hash_key($hash_key);
+
+			if(!is_null($search_result)) {
+				return $search_result;
+			}
+		}
+
+		return null;
+	}	
 
 	// 아이템 타입별로 context 내용을 구성하는 방식이 다르다.
 	public static $TITLE_ONLY=1;			// ActionItem::$TITLE_ONLY

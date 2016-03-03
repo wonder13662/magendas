@@ -5370,11 +5370,236 @@ class MYSQLInterface{
 		return $__action_collection_id;
 	}
 	
+
+	/*
+		@ Public
+		@ Desc : action object 자신이 포함된 action parent를 복사합니다.
+	*/
+	public function copy_action_obj($target_action_obj=null) {
+
+		if($this->is_not_action_obj(__FUNCTION__, $target_action_obj, "target_action_obj")){
+			return;
+		}
+			
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+
+
+		// 어떤 타입인지 구분한다.
+		$action_obj_copy = null;
+		if(ActionCollection::is_instance($target_action_obj)) {
+
+			// 1. COLLECTION
+			if($target_action_obj->is_list()) {
+
+				// 1-1. LIST
+				$action_obj_copy = $this->copy_action_list($target_action_obj);
+
+			} else if($target_action_obj->is_table()) {
+
+				// 1-2. TABLE
+				$action_obj_copy = $this->copy_action_table($target_action_obj);
+
+			}
+
+		} else if(ActionItem::is_instance($target_action_obj)) {
+
+			// 2. ITEM
+			$action_obj_copy = $this->copy_action_item($target_action_obj);
+
+		}
+		if($this->is_not_action_obj(__FUNCTION__, $action_obj_copy, "action_obj_copy")){
+			return;
+		}
+
+		return $action_obj_copy;                                             
+	}
+	/*
+		@ Private
+		@ Desc : 자신이 포함된 상위 부모 컬렉션(TABLE)을 복제합니다.
+	*/	
+	private function copy_action_table($target_action_table=null) {
+
+		if($this->is_null_object(__FUNCTION__, $target_action_table, "target_action_table")){
+			return;
+		}
+		if($this->is_not_action_table(__FUNCTION__, $target_action_table, "target_action_table")){
+			return;
+		}
+
+		// 새로운 액션 컬렉션을 추가합니다. 부모, 자식의 관계 정보는 없습니다.
+		$action_table_id_copy = $this->insert_action_collection_table($table_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_table_id_copy, "action_table_id_copy")){
+			return;
+		}
+
+		// 복사한 액션을 가져옵니다.
+		$action_table_obj_copy = $this->get_action_table_object($action_table_id_copy);
+
+		// 원본과 복사본의 값을 비교합니다.
+		if($action_table_obj_copy->is_equal($target_action_table)) {
+			echo "!Error! / copy_action_table / \$action_table_obj_copy->is_equal(\$target_action_table)<br/>";
+			return;
+		}
+
+		// wonder.jung11
+		// UPDATE MYSELF - ACTION LIST ID
+		$target_action_table->set_id($action_table_id_copy);
+
+		// MEETING AGENDA
+		$meeting_agenda_id = -1;
+		if($target_action_table->is_root_collection()) {
+			$meeting_agenda_id = $target_action_table->get_meeting_agenda_id();
+		}
+		if(0 < $meeting_agenda_id) {
+			$this->insert_action_collection_n_meeting_agenda(
+				// $action_collection_id
+				$action_table_id_copy
+				// $meeting_agenda_id
+				, $meeting_agenda_id
+			);
+		}
+
+		// COPY CHILD RELATION - COLUMN LIST
+		$child_column_action_list_list = $target_action_table->get_children();
+		for($idx=0;$idx < count($child_column_action_list_list);$idx++) {
+			$child_column_action_list = $child_column_action_list_list[$idx];
+			if($this->is_not_action_list(__FUNCTION__, $child_column_action_list, "child_column_action_list")){
+				return;
+			}
+			$child_column_action_list_id = $child_column_action_list.get_id();
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_column_action_list_id, "child_column_action_list_id")){
+				return;
+			}
+
+			insert_parent_action_table_n_child_action_list(
+				// $parent_action_table_id=-1
+				$action_table_id_copy
+				// $child_column_action_list_id=-1
+				, $child_column_action_list_id
+			);
+		}
+
+		// COPY PARENT
+		if($target_action_list->is_root_collection()) {
+			return;
+		}
+		$parent_action_obj = $target_action_table->get_parent();
+		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+			return;
+		}
+		$this->copy_action_obj($parent_action_obj);
+
+		return $target_action_table;                                                                                                                     
+	}
+	/*
+		@ Private
+		@ Desc : action object 자신이 포함된 action parent를 복사합니다.
+	*/	
+	private function copy_action_list($target_action_list=null) {
+
+		if($this->is_null_object(__FUNCTION__, $target_action_list, "target_action_list")) {
+			return;
+		}
+
+		// REMOVE ME?
+		// if($this->is_not_instance(__FUNCTION__, $target_action_list, "target_action_list")) {
+		// 	return;
+		// }
+
+		if($this->is_not_action_list(__FUNCTION__, $target_action_list, "target_action_list")) {
+			return;
+		}
+
+		// COPY MYSELF - ACTION LIST
+		$__list_name = $target_action_list->get_name();
+		if($this->is_empty(__FUNCTION__, $__list_name, "__list_name")) {
+			return;
+		}
+		$action_list_id_copy = $this->insert_action_collection_list($__list_name);
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_list_id_copy, "__action_list_id_copy")){
+			return;
+		}
+
+		// 복사한 액션을 가져옵니다.
+		$action_list_obj_copy = $this->get_action_list_object($action_list_id_copy);
+
+		// 원본과 복사본의 값을 비교합니다.
+		if($action_list_obj_copy->is_equal($target_action_list)) {
+			echo "!Error! / copy_action_list / \$action_list_obj_copy->is_equal(\$target_action_list)<br/>";
+			return;
+		}
+
+		// UPDATE MYSELF - ACTION LIST ID
+		$target_action_list->set_id($action_list_id_copy);
+
+		// COPY MEETING AGENDA
+		$meeting_agenda_id = -1;
+		if($target_action_list->is_root_collection()) {
+			$meeting_agenda_id = $target_action_list->get_meeting_agenda_id();
+		}
+		if(0 < $meeting_agenda_id) {
+			$this->insert_action_collection_n_meeting_agenda(
+				// $action_collection_id
+				$action_list_id_copy
+				// $meeting_agenda_id
+				, $meeting_agenda_id
+			);
+		}
+
+		// COPY CHILD RELATION
+		$child_action_item_list = $target_action_list->get_children();
+		for($idx=0;$idx < count($child_action_item_list);$idx++) {
+
+			$child_action_item = $child_action_item_list[$idx];
+			$child_action_item_id = $child_action_item->get_id();
+			$child_action_item_order = $child_action_item->get_order();
+			$child_action_item_is_shy = $child_action_item->get_is_shy();
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+				return;
+			}
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_order, "child_action_item_order")){
+				return;
+			}
+			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_is_shy, "child_action_item_is_shy")){
+				return;
+			}
+
+			// 1. CHILD ITEM (PARENT LIST -> CHILD ITEM)
+			$this->push_item_into_list(
+				// $parent_action_list_id=-1
+				$action_list_id_copy
+				// $child_action_item_id=-1
+				, $child_action_item_id
+				// $is_shy_child=-1
+				, $child_action_item_is_shy
+			);
+		}
+	
+		// wonder.jung11
+
+		//public function get_action_list_object($list_id, $order=0, $is_shy=0, $meeting_id=-1) {		
+		// $this->get_action_list_object();
+
+		// list 타입은 add on child 가 없습니다. add on child는 action item에서만 사용 가능합니다.
+
+		if($target_action_list->is_root_collection()) {
+			return $target_action_list;
+		}
+
+		// COPY PARENT
+		$parent_action_obj = $target_action_list->get_parent();
+		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+			return;
+		}
+		$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj);
+
+		return $target_action_list;
+	}
 	/*
 		@ Private
 		@ Desc : ACTION ITEM 을 복제합니다.
 	*/	
-	public function copy_action_item($target_action_item=null) {
+	private function copy_action_item($target_action_item=null) {
 
 		if($this->is_null_object(__FUNCTION__, $target_action_item, "target_action_item")) {
 			return;
@@ -5398,43 +5623,153 @@ class MYSQLInterface{
 			return;
 		}
 
+		// DEBUG
+		$__action_item_id_src = $target_action_item->get_id();
+		$__action_item_hash_key_src = $target_action_item->get_hash_key();
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_id_src, "__action_item_id_src")) {
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $__action_item_hash_key_src, "__action_item_hash_key_src")) {
+			return;
+		}
+
 		// 2. 가져온 아이템의 정보를 복사해서 새로운 아이템으로 업데이트!
 		$__action_item_id_copy = $this->insert_action_item($__item_type, $__item_name, $__item_context);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_id_copy, "__action_item_id_copy")) {
+			return;
+		}
+
+		$action_item_obj_copy = $this->get_action_item_object($__action_item_id_copy);
+		$__action_item_hash_key_copy = $action_item_obj_copy->get_hash_key();
+		if($this->is_empty(__FUNCTION__, $__action_item_hash_key_copy, "__action_item_hash_key_copy")) {
+			return;
+		}
+
+		// wonder.jung11
+		// 4. 원본 아이템과 새로운 아이템의 데이터 비교. 
+		if($action_item_obj_copy->is_equal($target_action_table)) {
+			echo "!Error! / copy_action_table / \$action_table_obj_copy->is_equal(\$target_action_table)<br/>";
+			return;
+		}
+
+		// REMOVE ME
 		$target_action_item->set_id($__action_item_id_copy);
 
-		// COPY CHILD RELATION
-		$child_action_obj_list = $target_action_item->get_children();
-		for($idx=0;$idx < count($child_action_obj_list);$idx++) {
+		// 자식 객체에 대한 복사. 실제로는 자식 객체를 새로 만들지 않습니다. 복사본과 자식 객체에 대한 관계가 새로 추가됩니다.
+		if($target_action_item->has_children()) {
 
-			$child_action_obj = $child_action_obj_list[$idx];
-			if($this->is_not_instance(__FUNCTION__, $child_action_obj, "child_action_obj")) {
+			// COPY CHILD RELATION
+			// 자식 객체와 새로운 복사본을 연결합니다.
+			$child_action_obj_list_src = $target_action_item->get_children();
+			for($idx=0;$idx < count($child_action_obj_list_src);$idx++) {
+
+				$child_action_obj_src = $child_action_obj_list_src[$idx];
+				if($this->is_not_instance(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
+					return;
+				}
+				$child_action_obj_id_src = $child_action_obj_src.get_id();
+
+				if($this->is_not_unsigned_number(__FUNCTION__, $child_action_obj_id_src, "child_action_obj_id_src")){
+					return;
+				}
+				$this->insert_parent_action_item_n_child_collection(
+					// $parent_action_item_id
+					$__action_item_id_copy
+					// $child_action_collection_id
+					, $child_action_obj_id_src
+					// $order=-1
+					, $idx
+				);
+			}
+
+			// COPY ADD-ON CHILD RELATION
+			// add on 자식 객체와 새로운 복사본을 연결합니다.
+			$child_add_on_action_obj_list_src = $target_action_item->get_add_on_list();
+			for($idx=0;$idx < count($child_add_on_action_obj_list_src);$idx++) {
+
+				$child_add_on_action_obj_src = $child_add_on_action_obj_list_src[$idx];
+				if($this->is_not_instance(__FUNCTION__, $child_add_on_action_obj_src, "child_add_on_action_obj_src")) {
+					return;
+				}
+				$child_add_on_action_obj_id_src = $child_add_on_action_obj_src.get_id();
+
+				if($this->is_not_unsigned_number(__FUNCTION__, $child_add_on_action_obj_id_src, "child_add_on_action_obj_id_src")){
+					return;
+				}
+				$this->insert_parent_action_item_n_add_on_collection(
+					// $parent_action_item_id
+					$__action_item_id_copy
+					// $add_on_action_collection_id
+					, $child_add_on_action_obj_id_src
+					// $order=-1
+					, $idx
+				);
+			}
+
+			// 새로운 복사본과 연결된 모든 자식 객체들을 가져옵니다. 새로 등록된 자식 객체들을 포함해야 합니다.
+			$action_item_obj_copy = $this->get_action_item_object($__action_item_id_copy);
+			$__action_item_hash_key_copy = $action_item_obj_copy->get_hash_key();
+			if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_hash_key_copy, "__action_item_hash_key_copy")) {
 				return;
 			}
-			$child_action_obj_id = $child_action_obj.get_id();
 
-			if($this->is_not_unsigned_number(__FUNCTION__, $child_action_obj_id, "child_action_obj_id")){
+			$child_action_obj_list_copy = $action_item_obj_copy->get_children();
+			$child_add_on_action_obj_list_copy = $action_item_obj_copy->get_add_on_list();
+
+			// CHECK - 모든 자식 객체 정보는 동일해야 합니다.
+			// CHECK - CHILD ACTION OBJ
+			if(count($child_action_obj_list_src) != count($child_action_obj_list_copy)) {
+				echo "!Error! / copy_action_item / count(\$child_action_obj_list_src) != count(\$child_action_obj_list_copy)<br/>";
 				return;
 			}
-			$this->insert_parent_action_item_n_child_collection(
-				// $parent_action_item_id
-				$__action_item_id_copy
-				// $child_action_collection_id
-				, $child_action_obj_id
-				// $order=-1
-				, $idx
-			);
+			for($idx=0;$idx < count($child_action_obj_list_src);$idx++) {
+
+				$child_action_obj_src = $child_action_obj_list_src[$idx];
+				if($this->is_not_instance(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
+					return;
+				}
+				$child_action_obj_id_src = $child_action_obj_src.get_id();
+				$child_action_obj_hash_key_src = $child_action_obj_src.get_hash_key();
+
+				$child_action_obj_copy = $child_action_obj_list_copy[$idx];
+				if($this->is_not_instance(__FUNCTION__, $child_action_obj_copy, "child_action_obj_copy")) {
+					return;
+				}
+				$child_action_obj_id_copy = $child_action_obj_copy.get_id();
+				$child_action_obj_hash_key_copy = $child_action_obj_copy.get_hash_key();
+
+				if($child_action_obj_id_src != $child_action_obj_id_copy){
+					echo "!Error! / copy_action_item / \$child_action_obj_id_src != \$child_action_obj_id_copy<br/>";
+					return;
+				}
+
+				if(strcmp($child_action_obj_hash_key_src, $child_action_obj_hash_key_copy) == 0){
+					echo "!Error! / copy_action_item / strcmp(\$child_action_obj_hash_key_src, \$child_action_obj_hash_key_copy) == 0<br/>";
+					return;
+				}
+
+			} // end for
+
 		}
 
 		// COPY PARENT
-		$parent_action_obj = $target_action_item->get_parent();
+		$parent_action_obj_src = $target_action_item->get_parent();
+		$parent_action_id_src = $parent_action_obj_src->get_id();
+		$parent_action_hash_key_src = $parent_action_obj_src->get_hash_key();
+
 		// ACTION ITEM은 최상위 객체가 될 수 없습니다.
-		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+		if($this->is_null_object(__FUNCTION__, $parent_action_obj_src, "parent_action_obj_src")) {
 			return;
 		}
-		$this->copy_action_obj($parent_action_obj);
+		$parent_action_obj_copied = $this->copy_action_obj($parent_action_obj_src);
+
+		// REMOVE ME
+		$target_action_item->set_parent($parent_action_obj_copied);
+
+		// 새로 복사한 부모 객체와 새로 만든 자신을 연결하는 과정은 어디에? / wonder.jung11		
 
 		return $target_action_item;
-	}
+	}	
 
 
 
@@ -5749,44 +6084,11 @@ class MYSQLInterface{
 				return;
 			}
 		}
-
-	}	
-	// REMOVE ME
-	/*
-		@ Private
-		@ Desc : 아이템을 리스트와 아이템의 관계 리스트에서 지웁니다.
-	*/	
-	/*
-	private function remove_item_from_list($parent_action_list_id=-1, $child_action_item_id_delete=-1) {
-
-		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
-			return;
-		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id_delete, "child_action_item_id_delete")){
-			return;
-		}
-
-		// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
-		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-		$query_manager->addQueryLineArr(
-			array(
-				"DELETE FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
-				,"WHERE `parent_action_list_id` = $parent_action_list_id"
-				,"AND `child_action_item_id` = $child_action_item_id_delete"
-			)
-		);
-
-		$query_manager->modify();
-		if($query_manager->is_failed()) {
-			return;
-		}
 	}
-	*/
 	/*
 		@ Private
 		@ Desc : 아이템을 리스트에 넣습니다. 아이템은 오직 리스트에만 넣을수 있습니다.
 	*/	
-		/*
 	private function push_item_into_list($parent_action_list_id=-1, $child_action_item_id=-1, $is_shy_child=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
@@ -5825,7 +6127,6 @@ class MYSQLInterface{
 		$this->reorder_child_item_in_parent_list($parent_action_list_id);
 
 	}
-	*/
 	private function sel_child_item_cnt_on_list($parent_action_list_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
@@ -6085,8 +6386,10 @@ class MYSQLInterface{
 		$cur_context->meeting_id = $meeting_id;
 		$cur_context_json_str = json_encode($cur_context);
 
-		$root_action_collection->set_context($cur_context_json_str);
-		$root_action_collection->set_coordinate();
+		if($this->is_action_collection(null, $root_action_collection, null)) {
+			$root_action_collection->set_context($cur_context_json_str);
+			$root_action_collection->set_coordinate();
+		}
 
 		return $root_action_collection;
 	}
@@ -6120,7 +6423,8 @@ class MYSQLInterface{
 		}
 
 		// 리스트를 조회합니다.
-		$list_n_child_item_list = $this->sel_action_list_n_child_item($list_id, $meeting_id);
+		// $list_n_child_item_list = $this->sel_action_list_n_child_item($list_id, $meeting_id);
+		$list_n_child_item_list = $this->sel_action_list_n_child_item($list_id);
 		if($this->is_empty(__FUNCTION__, $list_n_child_item_list, "list_n_child_item_list")) {
 			return;
 		}
@@ -6601,7 +6905,7 @@ class MYSQLInterface{
 		@ private
 		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 부모, 자식 관계를 오브젝트, 프로퍼티 형태로 변환하여 전달합니다.
 	*/
-	public function get_action_item_object($item_id, $order=0, $is_shy=0) {
+	private function get_action_item_object($item_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $item_id, "item_id")){
 			return;

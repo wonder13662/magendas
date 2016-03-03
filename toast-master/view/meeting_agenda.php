@@ -96,9 +96,28 @@
 
 	// test action list
 	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(5883, 134); 	// 용인
-	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
+	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(5883, 134); 	// 용인
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
 	$new_action_list_std = $new_action_list->get_std_obj();
+
+	// TEST
+	// action item id :: 15206
+	// $updated_action_item_obj = $wdj_mysql_interface->copy_action_obj(15206);
+	// $updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
+
+	// root id : 6377
+	// action id : 15206
+	// meeting id : 145
+	$root_action_collection_obj = $wdj_mysql_interface->get_root_action_collection(6377, 145);
+	$root_action_collection_obj_std = $root_action_collection_obj->get_std_obj();
+
+	$cur_action_item_obj = $root_action_collection_obj->search_hash_key("5a339f387a1a7e1b724303e382259c7b");
+	$cur_action_item_obj_std = $cur_action_item_obj->get_std_obj();
+	$updated_action_item_obj = $wdj_mysql_interface->copy_action_obj($cur_action_item_obj);
+	$updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
+
+	$updated_root_action_obj = $updated_action_item_obj->get_root_action_obj();
+	$updated_root_action_obj_std = $updated_root_action_obj->get_std_obj();
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -282,40 +301,23 @@ var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
 var is_update_timeline_after_job = <?php echo json_encode($is_update_timeline_after_job);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
-console.log(">>> meeting_agenda_list : ",meeting_agenda_list);
-console.log(">>> meeting_agenda_obj : ",meeting_agenda_obj);
-console.log(">>> member_role_cnt_list : ",member_role_cnt_list);
-console.log(">>> meeting_membership_id : ",meeting_membership_id);
-console.log(">>> executive_member_list : ",executive_member_list);
+//cur_action_item_obj_std
 
+var cur_action_item_obj_std = <?php echo json_encode($cur_action_item_obj_std);?>;
+console.log(">>> cur_action_item_obj_std ::: ",cur_action_item_obj_std);
 
-// TEST
-var action_list_src = <?php echo json_encode($action_list_src);?>;
-var action_list_copy = <?php echo json_encode($action_list_copy);?>;
-var action_list_delete = <?php echo json_encode($action_list_delete);?>;
-var action_list_update = <?php echo json_encode($action_list_update);?>;
-//$action_list
-console.log(">>> action_list_src : ",action_list_src);
-console.log(">>> action_list_copy : ",action_list_copy);
-console.log(">>> action_list_delete : ",action_list_delete);
-console.log(">>> action_list_update : ",action_list_update);
+var updated_action_item_obj_std = <?php echo json_encode($updated_action_item_obj_std);?>;
+console.log(">>> updated_action_item_obj_std ::: ",updated_action_item_obj_std);
+
+var root_action_collection_obj_std = <?php echo json_encode($root_action_collection_obj_std);?>;
+console.log(">>> root_action_collection_obj_std ::: ",root_action_collection_obj_std);
+
+var updated_root_action_obj_std = <?php echo json_encode($updated_root_action_obj_std);?>;
+console.log(">>> updated_root_action_obj_std ::: ",updated_root_action_obj_std);
+
 
 var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
-// var new_action_list_std_v2 = <?php echo json_encode($new_action_list_std_v2);?>;
-
-console.log("new_action_list_std :: ",new_action_list_std);
-// console.log("new_action_list_std_v2 :: ",new_action_list_std_v2);
-
-console.log("_action :: ",_action);
-//airborne.bootstrap.obj.__action
-console.log("airborne.bootstrap.obj.__action :: ",airborne.bootstrap.obj.__action);
-
 var new_action_list = _action.get_action_obj(new_action_list_std);
-
-console.log("new_action_list :: ",new_action_list);
-
-var action_obj_search_result_std = <?php echo json_encode($action_obj_search_result_std);?>;
-console.log("action_obj_search_result_std :: ",action_obj_search_result_std);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

@@ -1617,11 +1617,26 @@ airborne.bootstrap.obj.__action = {
 
 			}
 			,get_root_action_obj:function() {
-				if(this.parent_action_object == undefined) {
+
+				var cur_parent_action_obj = this.get_parent();
+				var cur_parent_add_on_action_obj = this.get_parent_add_on();
+				if(cur_parent_action_obj == undefined && cur_parent_add_on_action_obj == undefined) {
 					return this;	
 				}
 
-				return this.parent_action_object.get_root_action_obj();
+				if(_action.is_valid_action_obj(cur_parent_action_obj)) {
+
+					return cur_parent_action_obj.get_root_action_obj();
+
+				} else if(_action.is_valid_action_obj(cur_parent_add_on_action_obj)) {
+
+					return cur_parent_add_on_action_obj.get_root_action_obj();
+
+				} else {
+					console.log("!Error! / get_root_action_obj / Unknown");
+					return;
+				}
+
 			}
 			// @ Private
 			// @ Desc : 관계 정보를 root action item을 시작으로 업데이트 합니다.
@@ -2223,6 +2238,7 @@ airborne.bootstrap.obj.__action = {
 				action_obj_for_db_update[_param.ACTION_HASH_KEY] = this.get_action_hash_key();
 				action_obj_for_db_update[_param.ACTION_ITEM_TYPE] = this.get_action_item_type();
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
+				action_obj_for_db_update[_param.ACTION_COORDINATE] = this.get_coordinate();
 
 				var cur_root_action_obj = this.get_root_action_obj();
 				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
@@ -6435,13 +6451,10 @@ airborne.bootstrap.obj.__action = {
 				var body = $(document);
 				this.scroll_top = body.scrollTop();
 
-				console.log("set_scroll_top / this.scroll_top ::: ",this.scroll_top);
 			}
 			,rollback_scroll_top:function() {
 
 				var body = $("html, body");
-				console.log("rollback_scroll_top / this.scroll_top ::: ",this.scroll_top);
-
 				body.stop().animate({scrollTop:this.scroll_top}, '300', 'swing', function() { 
 					// To do something.
 				});

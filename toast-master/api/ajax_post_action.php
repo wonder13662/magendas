@@ -49,6 +49,7 @@
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_ITEM_TYPE = $params->getParamNumber($params->ACTION_ITEM_TYPE);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
+	$ACTION_COORDINATE = $params->getParamString($params->ACTION_COORDINATE);
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 
 	// DEBUG
@@ -58,6 +59,7 @@
 	$result->ROOT_ACTION_HASH_KEY = $ROOT_ACTION_HASH_KEY;
 	$result->ACTION_ITEM_TYPE = $ACTION_ITEM_TYPE;
 	$result->ACTION_CONTEXT = $ACTION_CONTEXT;
+	$result->ACTION_COORDINATE = $ACTION_COORDINATE;
 	$result->EVENT_PARAM_EVENT_TYPE = $EVENT_PARAM_EVENT_TYPE;
 
 	$ACTION_CONTEXT_OBJ = null;
@@ -114,9 +116,51 @@
 			if( (!is_null($root_action_collection_id)) && 
 				(!is_null($cur_action_item_id)) && 
 				(0 < $root_action_collection_id) && 
-				(0 < $cur_action_item_id) 	) {
+				(0 < $cur_action_item_id) &&
+				(!empty($ACTION_COORDINATE)) ) {
 
-				$result->flag = "002d";
+				// public function get_action_collection($action_collection_id=-1, $order=0, $is_shy=0, $meeting_id=-1) {
+
+				$root_action_collection_obj = $wdj_mysql_interface->get_root_action_collection($root_action_collection_id, $MEETING_ID);
+				$root_action_collection_obj_std = null;
+
+				if(!is_null($root_action_collection_obj)) {
+					// DEBUG
+					$root_action_collection_obj_std = $root_action_collection_obj->get_std_obj();
+					$result->root_action_collection_obj_std = $root_action_collection_obj_std;
+				}
+
+				$cur_action_item_obj = $root_action_collection_obj->search_hash_key($ACTION_HASH_KEY);
+				if(!is_null($cur_action_item_obj)) {
+					// DEBUG
+					$cur_action_item_obj_std = $cur_action_item_obj->get_std_obj();
+					$result->cur_action_item_obj_std = $cur_action_item_obj_std;
+
+					// 업데이트를 시작합니다.
+					$cur_action_item_obj->set_name($ACTION_NAME);
+					$cur_action_item_obj->set_context($ACTION_CONTEXT);
+
+					$updated_action_item_obj = $wdj_mysql_interface->copy_action_obj($cur_action_item_obj);
+					$updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
+					$result->updated_action_item_obj_std = $updated_action_item_obj_std;
+
+					// $updated_action_item_obj = $wdj_mysql_interface->copy_action_item($cur_action_item_obj);
+					// root까지 업데이트 되었는지 확인. wonder.jung11
+					// $updated_root_action_obj = $updated_action_item_obj->get_root_action_obj();
+
+					// DEBUG
+					// $updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
+					// $result->updated_action_item_obj_std = $updated_action_item_obj_std;
+					// $updated_root_action_obj_std = $updated_root_action_obj->get_std_obj();
+					// $result->updated_root_action_obj_std = $updated_root_action_obj_std;
+				}
+
+
+				// $target_action_obj = $root_action_collection_obj->search($ACTION_COORDINATE);
+				// $target_action_obj_std = $target_action_obj->get_std_obj();
+
+				// DEBUG
+				// $result->target_action_obj_std = $target_action_obj_std;
 
 				// $root_action_obj = $wdj_mysql_interface->get_action_item_object($root_action_collection_id);
 
@@ -126,9 +170,6 @@
 				// root action에서 업데이트하려는 action obj를 찾습니다.
 
 
-				// UPDATE ACTION ITEM
-				// $cur_action_item->set_name($ACTION_NAME);
-				// $cur_action_item->set_context($ACTION_CONTEXT);
 
 				// $updated_action_item = $wdj_mysql_interface->copy_action_item($cur_action_item);
 				// $updated_root_action_obj = $updated_action_item->get_root_action_obj();
