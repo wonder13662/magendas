@@ -188,9 +188,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 				// 4-2-2. 사용자에 의해 주입된 엘리먼트. add on인 경우의 화면 표시.
 
-				console.log(cur_action_item_name + " / has_add_on_list :: " + cur_action_item_obj.has_add_on_list());
-				console.log("cur_action_add_on_list :: ",cur_action_add_on_list);
-
 				var inner_idx;
 				var inner_length = cur_action_add_on_list.length;
 				for(inner_idx = 0; inner_idx < inner_length; inner_idx++){
@@ -199,11 +196,10 @@ airborne.bootstrap.view.obj.__action_list = {
 
 					if(cur_action_add_on_obj.is_list()) {
 						// 1. add on list
-						console.log("1. add on list / " + cur_action_add_on_obj_name + " / Not Implemented!");
+						// Not implemented.
 
 					} else if(cur_action_add_on_obj.is_table()) {
 						// 2. add on table
-						console.log("2. add on table / " + cur_action_add_on_obj_name);
 
 						var cur_element_jq = cur_action_item_obj.get_event_manager().get_element_jq();
 
@@ -235,8 +231,6 @@ airborne.bootstrap.view.obj.__action_list = {
 		// root 객체라면 후처리 작업을 진행합니다.
 		// 1. 그려진 리스트를 대상으로 jump spot 대상 확인.
 		if(action_list.has_no_parent() && action_list.has_no_parent_add_on()) {
-			console.log("root 객체라면 후처리 작업을 진행합니다.");
-			console.log("1. 그려진 리스트를 대상으로 jump spot 대상 확인.");
 
 			var cur_action_name = action_list.get_action_name();
 			var cur_coordinate = action_list.get_coordinate();

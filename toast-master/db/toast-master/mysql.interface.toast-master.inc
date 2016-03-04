@@ -5591,7 +5591,22 @@ class MYSQLInterface{
 		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
 			return;
 		}
+
+		// CHECK - copy_action_item
+		echo "copy_action_list \$parent_action_id_src :: $parent_action_id_src<br/>";
+		echo "copy_action_list \$parent_action_hash_key_src :: $parent_action_hash_key_src<br/>";
+		echo "copy_action_list \$parent_action_id_copy :: $parent_action_id_copy<br/>";
+		echo "copy_action_list \$parent_action_hash_key_copy :: $parent_action_hash_key_copy<br/>";
+
 		$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj);
+
+		// COPY PARENT ADD ON
+		
+		// public function get_add_on_action_parent_obj() {
+		// 	return $this->add_on_action_parent_obj;
+		// }
+		// public function has_add_on_parent(){
+
 
 		return $target_action_list;
 	}
@@ -5652,7 +5667,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// REMOVE ME
 		$target_action_item->set_id($__action_item_id_copy);
 
 		// 자식 객체에 대한 복사. 실제로는 자식 객체를 새로 만들지 않습니다. 복사본과 자식 객체에 대한 관계가 새로 추가됩니다.
@@ -5761,10 +5775,19 @@ class MYSQLInterface{
 		if($this->is_null_object(__FUNCTION__, $parent_action_obj_src, "parent_action_obj_src")) {
 			return;
 		}
-		$parent_action_obj_copied = $this->copy_action_obj($parent_action_obj_src);
+		$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj_src);
+
+		$parent_action_id_copy = $parent_action_obj_copy->get_id();
+		$parent_action_hash_key_copy = $parent_action_obj_copy->get_hash_key();
+
+		// CHECK - copy_action_item
+		echo "copy_action_item \$parent_action_id_src :: $parent_action_id_src<br/>";
+		echo "copy_action_item \$parent_action_hash_key_src :: $parent_action_hash_key_src<br/>";
+		echo "copy_action_item \$parent_action_id_copy :: $parent_action_id_copy<br/>";
+		echo "copy_action_item \$parent_action_hash_key_copy :: $parent_action_hash_key_copy<br/>";
 
 		// REMOVE ME
-		$target_action_item->set_parent($parent_action_obj_copied);
+		$target_action_item->set_parent($parent_action_obj_copy);
 
 		// 새로 복사한 부모 객체와 새로 만든 자신을 연결하는 과정은 어디에? / wonder.jung11		
 
