@@ -933,7 +933,7 @@ toast_master.mobile_list_manager = {
 			, set_timer_maker:function(timer_maker) {
 				this.timer_maker = timer_maker;
 			}
-			, get_timer_record_obj:function(is_qualified, meeting_id, member_hash_key, member_name, time_record_millisec, timer_record_id, timer_type_id, time_arr) {
+			, get_timer_record_obj:function(is_qualified, meeting_id, member_hash_key, member_name, time_record_millisec, timer_record_id, timer_type_id, time_arr, speaker_speech_project) {
 
 				// 타이머가 이해할 수 있는 타이머 정보 타입 형식을 가지고 있는 객체를 돌려줍니다.
 				if(_v.isNumberStr(is_qualified)) {
@@ -981,6 +981,12 @@ toast_master.mobile_list_manager = {
 					return;
 				}
 
+				console.log("JJJJ speaker_speech_project //// ",speaker_speech_project);
+
+				if(_v.is_not_valid_str(speaker_speech_project)){
+					speaker_speech_project = _param.NOT_ASSIGNED;
+				}
+
 				var timer_record_obj = 
 				_param
 				.get(_param.IS_QUALIFIED,is_qualified)
@@ -991,13 +997,16 @@ toast_master.mobile_list_manager = {
 				.get(_param.TIMER_RECORD_ID,timer_record_id)
 				.get(_param.TIMER_TYPE_ID,timer_type_id)
 				.get(_param.TIMER_TIME_ARR,time_arr)
+				.get(_param.SPEAKER_SPEECH_PROJECT,speaker_speech_project)
 				.get(_param.IS_DATA_FROM_DB,true)
 				;
+
+				console.log("timer_record_obj / 001 ::: ",timer_record_obj);
 
 				return timer_record_obj;
 
 			}
-			, add_timer:function(timer_obj) {
+			, add_timer:function(timer_obj) { // Jihyun
 
 				if(this.timer_maker == undefined) {
 					return;
@@ -1064,6 +1073,10 @@ toast_master.mobile_list_manager = {
 				, _obj.getDelegate(function(delegate_data){
 
 					console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
+					console.log(">>> delegate_obj_click_row / meta_data :: ",meta_data);
+
+					console.log(">>> [add_timer] speaker_sppech_project ::", meta_data.SPEAKER_SPEECH_PROJECT);
+
 
 					// EVENT TYPE을 받는 것이 나을것 같은데?
 					var target_controller = delegate_data.target_controller;
@@ -1128,6 +1141,7 @@ toast_master.mobile_list_manager = {
 			timer_controller.disable_title_btn();
 			timer_controller.off_title_btn();
 
+
 			event_toggle_controller.push(timer_controller);
 
 			// 다음에 추가될 타이머의 위의 테이블 열의 참조.
@@ -1156,6 +1170,9 @@ toast_master.mobile_list_manager = {
 				var param_obj = undefined;
 				if(delegate_data.IS_DATA_FROM_DB === true) {
 
+					console.log("<<< Jihyun Test delegat_data::" , delegate_data);
+
+
 					param_obj = 
 					_param
 					.get(_param.IS_DATA_FROM_DB, delegate_data.IS_DATA_FROM_DB)
@@ -1167,6 +1184,7 @@ toast_master.mobile_list_manager = {
 					.get(_param.TIMER_TYPE_ID, delegate_data.TIMER_TYPE_ID)
 					.get(_param.TIME_RECORD_MILLISEC, delegate_data.TIME_RECORD_MILLISEC)
 					.get(_param.ACCESSOR, accessor)
+					.get(_param.SPEECH_MANUAL_PROJECT, delegate_data.SPEECH_MANUAL_PROJECT)
 					;
 					
 				} else {
@@ -1239,6 +1257,9 @@ toast_master.mobile_list_manager = {
 			}
 			, get_timer_record_obj:function(is_qualified, meeting_id, member_hash_key, member_name, time_record_millisec, timer_record_id, timer_type_id) {
 				// 타이머가 이해할 수 있는 타이머 정보 타입 형식을 가지고 있는 객체를 돌려줍니다.
+
+
+
 
 				if(_v.isNumberStr(is_qualified)) {
 					is_qualified = parseInt(is_qualified);

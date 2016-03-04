@@ -469,7 +469,9 @@ _tm_m_list.add_member_timer_table_fixed(
 	.get(_param.MEETING_ID, upcoming_meeting_id)
 );
 for(var idx = 0;idx < speaker_timer_list.length;idx++) {
-	var speech_speaker_obj = speaker_timer_list[idx];	
+	var speech_speaker_obj = speaker_timer_list[idx];
+
+	console.log("JJJJ / speech_speaker_obj.__speaker_speech_project :: ",speech_speaker_obj.__speaker_speech_project);
 
 	var timer_record_obj_formatted = 
 	timer_controller_prepared_speech.get_timer_record_obj(
@@ -493,6 +495,9 @@ for(var idx = 0;idx < speaker_timer_list.length;idx++) {
 			, parseInt(speech_speaker_obj.__speech_timer_sec_yellow)
 			, parseInt(speech_speaker_obj.__speech_timer_sec_red)
 		]
+		// speaker_speech_project
+		, speech_speaker_obj.__speaker_speech_project
+		
 	);
 
 	timer_controller_prepared_speech.add_timer(timer_record_obj_formatted);
