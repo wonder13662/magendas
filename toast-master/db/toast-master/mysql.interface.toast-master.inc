@@ -238,7 +238,7 @@ class MYSQLInterface{
 		}
 
 		$is_action_table = $target->is_table();
-		if(!is_null($is_action_table) && $is_action_table == true) {
+		if(!is_null($is_action_table) && $is_action_table == false) {
 			return true;
 		}
 		return false;
@@ -5369,7 +5369,7 @@ class MYSQLInterface{
 
 		return $__action_collection_id;
 	}
-	
+
 
 	/*
 		@ Public
@@ -5383,6 +5383,9 @@ class MYSQLInterface{
 			
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 
+		// CHECK
+		echo "<br/>copy_action_obj / src<br/>";
+		$target_action_obj->show_info();
 
 		// 어떤 타입인지 구분한다.
 		$action_obj_copy = null;
@@ -5391,10 +5394,14 @@ class MYSQLInterface{
 			// 1. COLLECTION
 			if($target_action_obj->is_list()) {
 
+				echo "copy_action_obj - LIST <br/>";
+
 				// 1-1. LIST
 				$action_obj_copy = $this->copy_action_list($target_action_obj);
 
 			} else if($target_action_obj->is_table()) {
+
+				echo "copy_action_obj - TABLE <br/>";
 
 				// 1-2. TABLE
 				$action_obj_copy = $this->copy_action_table($target_action_obj);
@@ -5403,6 +5410,8 @@ class MYSQLInterface{
 
 		} else if(ActionItem::is_instance($target_action_obj)) {
 
+			echo "copy_action_obj - ITEM <br/>";
+
 			// 2. ITEM
 			$action_obj_copy = $this->copy_action_item($target_action_obj);
 
@@ -5410,6 +5419,10 @@ class MYSQLInterface{
 		if($this->is_not_action_obj(__FUNCTION__, $action_obj_copy, "action_obj_copy")){
 			return;
 		}
+
+		// CHECK
+		echo "<br/>copy_action_obj / copy<br/>";
+		$action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
 	}
@@ -5422,7 +5435,13 @@ class MYSQLInterface{
 		if($this->is_null_object(__FUNCTION__, $target_action_table, "target_action_table")){
 			return;
 		}
+
 		if($this->is_not_action_table(__FUNCTION__, $target_action_table, "target_action_table")){
+			return;
+		}
+
+		$table_name = $target_action_table->get_name();
+		if($this->is_empty(__FUNCTION__, $table_name, "table_name")){
 			return;
 		}
 
@@ -5431,6 +5450,7 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_table_id_copy, "action_table_id_copy")){
 			return;
 		}
+		echo "TEST - 0001-3<br/>";
 
 		// 복사한 액션을 가져옵니다.
 		$action_table_obj_copy = $this->get_action_table_object($action_table_id_copy);
@@ -5441,9 +5461,13 @@ class MYSQLInterface{
 			return;
 		}
 
+		echo "TEST - 0002<br/>";
+
 		// wonder.jung11
 		// UPDATE MYSELF - ACTION LIST ID
+		$action_table_obj_copy_hash_key = $action_table_obj_copy->get_hash_key();
 		$target_action_table->set_id($action_table_id_copy);
+		$target_action_table->set_hash_key($action_table_obj_copy_hash_key);
 
 		// MEETING AGENDA
 		$meeting_agenda_id = -1;
@@ -5466,12 +5490,12 @@ class MYSQLInterface{
 			if($this->is_not_action_list(__FUNCTION__, $child_column_action_list, "child_column_action_list")){
 				return;
 			}
-			$child_column_action_list_id = $child_column_action_list.get_id();
+			$child_column_action_list_id = $child_column_action_list->get_id();
 			if($this->is_not_unsigned_number(__FUNCTION__, $child_column_action_list_id, "child_column_action_list_id")){
 				return;
 			}
 
-			insert_parent_action_table_n_child_action_list(
+			$this->insert_parent_action_table_n_child_action_list(
 				// $parent_action_table_id=-1
 				$action_table_id_copy
 				// $child_column_action_list_id=-1
@@ -5479,15 +5503,36 @@ class MYSQLInterface{
 			);
 		}
 
-		// COPY PARENT
-		if($target_action_list->is_root_collection()) {
-			return;
+		echo "TEST - 0003<br/>";
+
+		// CHECK 
+		if($target_action_table->is_root_collection()) {
+			echo "copy_action_table - is_root_collection<br/>";
+			return $target_action_table;
 		}
+		/*
 		$parent_action_obj = $target_action_table->get_parent();
 		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
 			return;
 		}
 		$this->copy_action_obj($parent_action_obj);
+		*/
+
+		// COPY PARENT
+		$parent_action_obj = $target_action_table->get_parent();
+		$parent_action_obj_copy = null;
+		if(!is_null($parent_action_obj)) {
+			$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj);
+		}
+
+		// COPY PARENT ADD ON
+		$parent_add_on_action_obj = $target_action_table->get_add_on_action_parent_obj();
+		$parent_add_on_action_obj_copy = null;
+		if(!is_null($parent_add_on_action_obj)) {
+			$parent_add_on_action_obj_copy = $this->copy_action_obj($parent_add_on_action_obj);
+		}
+
+		echo "TEST - 0004<br/>";
 
 		return $target_action_table;                                                                                                                     
 	}
@@ -5522,6 +5567,7 @@ class MYSQLInterface{
 
 		// 복사한 액션을 가져옵니다.
 		$action_list_obj_copy = $this->get_action_list_object($action_list_id_copy);
+		$action_list_obj_copy_hash_key = $action_list_obj_copy->get_hash_key();
 
 		// 원본과 복사본의 값을 비교합니다.
 		if($action_list_obj_copy->is_equal($target_action_list)) {
@@ -5531,6 +5577,7 @@ class MYSQLInterface{
 
 		// UPDATE MYSELF - ACTION LIST ID
 		$target_action_list->set_id($action_list_id_copy);
+		$target_action_list->set_hash_key($action_list_obj_copy_hash_key);
 
 		// COPY MEETING AGENDA
 		$meeting_agenda_id = -1;
@@ -5579,34 +5626,28 @@ class MYSQLInterface{
 
 		//public function get_action_list_object($list_id, $order=0, $is_shy=0, $meeting_id=-1) {		
 		// $this->get_action_list_object();
-
 		// list 타입은 add on child 가 없습니다. add on child는 action item에서만 사용 가능합니다.
 
 		if($target_action_list->is_root_collection()) {
+			echo "copy_action_list - is_root_collection<br/>";
 			return $target_action_list;
 		}
 
 		// COPY PARENT
 		$parent_action_obj = $target_action_list->get_parent();
-		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
-			return;
+		$parent_action_obj_copy = null;
+		if(!is_null($parent_action_obj)) {
+			echo "copy_action_list - COPY PARENT<br/>";
+			$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj);
 		}
 
-		// CHECK - copy_action_item
-		echo "copy_action_list \$parent_action_id_src :: $parent_action_id_src<br/>";
-		echo "copy_action_list \$parent_action_hash_key_src :: $parent_action_hash_key_src<br/>";
-		echo "copy_action_list \$parent_action_id_copy :: $parent_action_id_copy<br/>";
-		echo "copy_action_list \$parent_action_hash_key_copy :: $parent_action_hash_key_copy<br/>";
-
-		$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj);
-
 		// COPY PARENT ADD ON
-		
-		// public function get_add_on_action_parent_obj() {
-		// 	return $this->add_on_action_parent_obj;
-		// }
-		// public function has_add_on_parent(){
-
+		$parent_add_on_action_obj = $target_action_list->get_add_on_action_parent_obj();
+		$parent_add_on_action_obj_copy = null;
+		if(!is_null($parent_add_on_action_obj)) {
+			echo "copy_action_list - COPY PARENT ADD ON<br/>";
+			$parent_add_on_action_obj_copy = $this->copy_action_obj($parent_add_on_action_obj);
+		}
 
 		return $target_action_list;
 	}
@@ -5668,6 +5709,7 @@ class MYSQLInterface{
 		}
 
 		$target_action_item->set_id($__action_item_id_copy);
+		$target_action_item->set_hash_key($__action_item_hash_key_copy);
 
 		// 자식 객체에 대한 복사. 실제로는 자식 객체를 새로 만들지 않습니다. 복사본과 자식 객체에 대한 관계가 새로 추가됩니다.
 		if($target_action_item->has_children()) {
@@ -5678,10 +5720,15 @@ class MYSQLInterface{
 			for($idx=0;$idx < count($child_action_obj_list_src);$idx++) {
 
 				$child_action_obj_src = $child_action_obj_list_src[$idx];
-				if($this->is_not_instance(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
+				// if($this->is_not_instance(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
+				// 	return;
+				// }
+
+				if($this->is_null_object(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
 					return;
 				}
-				$child_action_obj_id_src = $child_action_obj_src.get_id();
+
+				$child_action_obj_id_src = $child_action_obj_src->get_id();
 
 				if($this->is_not_unsigned_number(__FUNCTION__, $child_action_obj_id_src, "child_action_obj_id_src")){
 					return;
@@ -5705,7 +5752,7 @@ class MYSQLInterface{
 				if($this->is_not_instance(__FUNCTION__, $child_add_on_action_obj_src, "child_add_on_action_obj_src")) {
 					return;
 				}
-				$child_add_on_action_obj_id_src = $child_add_on_action_obj_src.get_id();
+				$child_add_on_action_obj_id_src = $child_add_on_action_obj_src->get_id();
 
 				if($this->is_not_unsigned_number(__FUNCTION__, $child_add_on_action_obj_id_src, "child_add_on_action_obj_id_src")){
 					return;
@@ -5720,50 +5767,6 @@ class MYSQLInterface{
 				);
 			}
 
-			// 새로운 복사본과 연결된 모든 자식 객체들을 가져옵니다. 새로 등록된 자식 객체들을 포함해야 합니다.
-			$action_item_obj_copy = $this->get_action_item_object($__action_item_id_copy);
-			$__action_item_hash_key_copy = $action_item_obj_copy->get_hash_key();
-			if($this->is_not_unsigned_number(__FUNCTION__, $__action_item_hash_key_copy, "__action_item_hash_key_copy")) {
-				return;
-			}
-
-			$child_action_obj_list_copy = $action_item_obj_copy->get_children();
-			$child_add_on_action_obj_list_copy = $action_item_obj_copy->get_add_on_list();
-
-			// CHECK - 모든 자식 객체 정보는 동일해야 합니다.
-			// CHECK - CHILD ACTION OBJ
-			if(count($child_action_obj_list_src) != count($child_action_obj_list_copy)) {
-				echo "!Error! / copy_action_item / count(\$child_action_obj_list_src) != count(\$child_action_obj_list_copy)<br/>";
-				return;
-			}
-			for($idx=0;$idx < count($child_action_obj_list_src);$idx++) {
-
-				$child_action_obj_src = $child_action_obj_list_src[$idx];
-				if($this->is_not_instance(__FUNCTION__, $child_action_obj_src, "child_action_obj_src")) {
-					return;
-				}
-				$child_action_obj_id_src = $child_action_obj_src.get_id();
-				$child_action_obj_hash_key_src = $child_action_obj_src.get_hash_key();
-
-				$child_action_obj_copy = $child_action_obj_list_copy[$idx];
-				if($this->is_not_instance(__FUNCTION__, $child_action_obj_copy, "child_action_obj_copy")) {
-					return;
-				}
-				$child_action_obj_id_copy = $child_action_obj_copy.get_id();
-				$child_action_obj_hash_key_copy = $child_action_obj_copy.get_hash_key();
-
-				if($child_action_obj_id_src != $child_action_obj_id_copy){
-					echo "!Error! / copy_action_item / \$child_action_obj_id_src != \$child_action_obj_id_copy<br/>";
-					return;
-				}
-
-				if(strcmp($child_action_obj_hash_key_src, $child_action_obj_hash_key_copy) == 0){
-					echo "!Error! / copy_action_item / strcmp(\$child_action_obj_hash_key_src, \$child_action_obj_hash_key_copy) == 0<br/>";
-					return;
-				}
-
-			} // end for
-
 		}
 
 		// COPY PARENT
@@ -5777,16 +5780,6 @@ class MYSQLInterface{
 		}
 		$parent_action_obj_copy = $this->copy_action_obj($parent_action_obj_src);
 
-		$parent_action_id_copy = $parent_action_obj_copy->get_id();
-		$parent_action_hash_key_copy = $parent_action_obj_copy->get_hash_key();
-
-		// CHECK - copy_action_item
-		echo "copy_action_item \$parent_action_id_src :: $parent_action_id_src<br/>";
-		echo "copy_action_item \$parent_action_hash_key_src :: $parent_action_hash_key_src<br/>";
-		echo "copy_action_item \$parent_action_id_copy :: $parent_action_id_copy<br/>";
-		echo "copy_action_item \$parent_action_hash_key_copy :: $parent_action_hash_key_copy<br/>";
-
-		// REMOVE ME
 		$target_action_item->set_parent($parent_action_obj_copy);
 
 		// 새로 복사한 부모 객체와 새로 만든 자신을 연결하는 과정은 어디에? / wonder.jung11		

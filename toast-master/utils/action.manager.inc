@@ -518,6 +518,34 @@ class ActionObject implements Action{
 		return false;
 	}
 
+	public function show_info() {
+
+		$cur_id = $this->get_id();
+		$cur_hash_key = $this->get_hash_key();
+		$cur_name = $this->get_name();
+		$cur_collection_type_name = $this->get_collection_type_name();
+		$cur_item_type_name = $this->get_item_type_name();
+		$has_parent = $this->has_parent();
+
+		$cur_collection_type = $this->get_collection_type();
+
+		// $is_table = $this->is_table();
+		// $is_list = $this->is_list();
+
+		echo "\$cur_id :: $cur_id<br/>";
+		echo "\$cur_hash_key :: $cur_hash_key<br/>";
+		echo "\$cur_name :: $cur_name<br/>";
+		echo "\$cur_collection_type_name :: $cur_collection_type_name<br/>";
+		echo "\$cur_item_type_name :: $cur_item_type_name<br/>";
+		echo "\$has_parent :: $has_parent<br/>";
+
+		echo "\$cur_collection_type :: $cur_collection_type<br/>";
+
+		// echo "\$is_table :: $is_table<br/>";
+		// echo "\$is_list :: $is_list<br/>";
+
+	}
+
 }
 
 class ActionCollection extends ActionObject{
@@ -606,9 +634,9 @@ class ActionCollection extends ActionObject{
 
 		$action_collection_type = parent::get_collection_type();
 
-		if(is_null($action_collection_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_TABLE != $this->action_collection_type)) {
+		if(is_null($action_collection_type) || (ActionCollection::$ACTION_COLLECTION_TYPE_TABLE != $action_collection_type)) {
 			return false;
-		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $this->action_collection_type) {
+		} else if(ActionCollection::$ACTION_COLLECTION_TYPE_TABLE == $action_collection_type) {
 			return true;
 		}
 		return false;
@@ -640,12 +668,18 @@ class ActionCollection extends ActionObject{
 	}
 
 	public function is_root_collection() {
-		$has_no_parent = false;
-		if(is_null($this->parent_action_obj)) {
-			$has_no_parent = true;
-		}
 
-		return $has_no_parent;
+		// wonder.jung11
+		return ($this->has_no_parent() && $this->has_no_add_on_parent());
+
+		// REMOVE ME
+
+		// $has_no_parent = false;
+		// if(is_null($this->parent_action_obj)) {
+		// 	$has_no_parent = true;
+		// }
+
+		// return $has_no_parent;
 	}
 
 	private $add_on_action_parent_obj;
@@ -654,6 +688,9 @@ class ActionCollection extends ActionObject{
 	}
 	public function get_add_on_action_parent_obj() {
 		return $this->add_on_action_parent_obj;
+	}
+	public function has_no_add_on_parent(){
+		return !$this->has_add_on_parent();
 	}
 	public function has_add_on_parent(){
 		if(!is_null($this->add_on_action_parent_obj)) {
@@ -719,6 +756,28 @@ class ActionCollection extends ActionObject{
 	public function get_name() {
 		return parent::get_name();
 	}
+
+	// @ Override
+	public function show_info() {
+
+		parent::show_info();
+
+		$is_table = $this->is_table();
+		$is_list = $this->is_list();
+		
+		if($is_table) {
+			echo "\$is_table :: true<br/>";	
+		} else {
+			echo "\$is_table :: false<br/>";	
+		}
+
+		if($is_list) {
+			echo "\$is_list :: true<br/>";	
+		} else {
+			echo "\$is_list :: false<br/>";	
+		}
+
+	}	
 
 }
 
