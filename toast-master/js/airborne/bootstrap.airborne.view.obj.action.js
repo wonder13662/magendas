@@ -2240,6 +2240,17 @@ airborne.bootstrap.obj.__action = {
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
 				action_obj_for_db_update[_param.ACTION_COORDINATE] = this.get_coordinate();
 
+				if(this.has_parent()) {
+					action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = this.get_parent().get_action_hash_key();					
+				}
+				if(this.has_before()) {
+					action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = this.get_sibling_action_obj_before().get_action_hash_key();
+				}
+				if(this.has_after()) {
+					action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = this.get_sibling_action_obj_after().get_action_hash_key();
+				}
+
+				// REMOVE ME
 				var cur_root_action_obj = this.get_root_action_obj();
 				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
 					console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_root_action_obj)");
@@ -4665,6 +4676,8 @@ airborne.bootstrap.obj.__action = {
 
 					this.hide_shy_child();
 
+					console.log("새로운 리스트 열을 추가하는 경우 / event_mode ::: ",event_mode);
+
 					// set event on input buttons	
 					this.set_event_btn_ok_on_input_group(event_mode);
 					this.set_event_btn_cancel_on_input_group(event_mode);
@@ -4832,6 +4845,7 @@ airborne.bootstrap.obj.__action = {
 					event_manager_after.show_focusing_mode();
 
 					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
+
 					event_manager_after.show_input_mode(event_mode);
 					// 새로 추가된 열은 빈 텍스트로 시작합니다.
 					event_manager_after.clear_title_input_jq_value();
@@ -5809,7 +5823,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var _self = this;
-				var do_on_event = function(e) {
+				var do_on_event = function(e, event_type) {
 					// 이벤트 전파를 막습니다.
 					e.stopPropagation();
 
@@ -5839,7 +5853,7 @@ airborne.bootstrap.obj.__action = {
 					// Mysql Query Safe Check.
 
 
-					if(_obj.EVENT_TYPE_INSERT_ITEM === cur_event_type || _action.EVENT_TYPE_ADD_ROW === cur_event_type){
+					if(_obj.EVENT_TYPE_INSERT_ITEM === event_type || _action.EVENT_TYPE_ADD_ROW === event_type){
 
 						// 입력 창을 가립니다.
 						_self.hide_title_input_group_jq();
@@ -5850,7 +5864,7 @@ airborne.bootstrap.obj.__action = {
 						var cur_element_collection_set = cur_element_set.get_element_collection_set();
 						cur_element_collection_set.add_element(_self);
 
-					} else if(_obj.EVENT_TYPE_UPDATE_ITEM === cur_event_type){
+					} else if(_obj.EVENT_TYPE_UPDATE_ITEM === event_type){
 
 						_self.show_view_mode();
 						_self.hide_shy_child();
@@ -5875,7 +5889,8 @@ airborne.bootstrap.obj.__action = {
 						cur_delegate_show_view_mode_view_control._apply([_self]);	
 					}
 
-					_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_INPUT_TEXT, cur_event_type);
+					console.log("TEST / call_delegate_save_n_reload / event_type ::: ",event_type);
+					_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_INPUT_TEXT, event_type);
 
 					_self.call_delegate_show_view_mode_view_control(_self);
 				}
@@ -5887,7 +5902,7 @@ airborne.bootstrap.obj.__action = {
 					// Enter : 13 / ESC : 27
 					if(code === 13) {
 						// pressing ok btn
-						do_on_event(e);
+						do_on_event(e, cur_event_type);
 					}
 				});
 
@@ -5897,8 +5912,9 @@ airborne.bootstrap.obj.__action = {
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
 
+				cur_title_input_btn_ok_jq.off();
 				cur_title_input_btn_ok_jq.click(function(e){
-					do_on_event(e);
+					do_on_event(e, cur_event_type);
 				});
 
 			}

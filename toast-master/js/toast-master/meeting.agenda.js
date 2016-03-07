@@ -149,7 +149,10 @@ wonglish.meeting_agenda_manager = {
 					return;
 				}
 
+				console.log("HERE / cur_outcome_obj :: ",cur_outcome_obj);
+
 				var action_item_obj = cur_outcome_obj._action_item_obj;
+				console.log("HERE / action_item_obj :: ",action_item_obj);
 
 				var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 				if(_v.is_not_unsigned_number(MEETING_ID)) {
@@ -161,7 +164,6 @@ wonglish.meeting_agenda_manager = {
 					console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
 					return;
 				}
-
 
 				// DEBUG
 				var cur_root_action_obj = action_item_obj.get_root_action_obj();
@@ -175,6 +177,23 @@ wonglish.meeting_agenda_manager = {
 
 				var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 				cur_action_obj_for_db_update["MEETING_ID"] = MEETING_ID;
+
+				if(_v.is_not_unsigned_number(action_item_obj.get_action_id())) {
+					// 전달 파라미터 내용 중에 자신의 앞,뒤의 형제 정보를 추가한다.
+					var cur_sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
+					if(_action.is_valid_action_item_obj(cur_sibling_action_obj_before)) {
+						cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = cur_sibling_action_obj_before.get_action_hash_key();
+						// cur_action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = cur_sibling_action_obj_before.get_parent();
+					}
+
+					var cur_sibling_action_obj_after = action_item_obj.get_sibling_action_obj_after();
+					if(_action.is_valid_action_item_obj(cur_sibling_action_obj_after)) {
+						cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = cur_sibling_action_obj_after.get_action_hash_key();
+					}
+
+					// id가 없는 엘리먼트는 새로 만들어진 엘리먼트.
+					cur_outcome_obj._event = _action.EVENT_TYPE_INSERT_ITEM;
+				}
 
 				if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 					_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 

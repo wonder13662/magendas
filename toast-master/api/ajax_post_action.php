@@ -46,6 +46,9 @@
 	// $ACTION_ID = $params->getParamNumber($params->ACTION_ID);
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
+	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
+	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
+	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_ITEM_TYPE = $params->getParamNumber($params->ACTION_ITEM_TYPE);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
@@ -56,6 +59,9 @@
 	// $result->ACTION_ID = $ACTION_ID;
 	$result->ACTION_NAME = $ACTION_NAME;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
+	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
+	$result->ACTION_HASH_KEY_AFTER = $ACTION_HASH_KEY_AFTER;
+	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
 	$result->ROOT_ACTION_HASH_KEY = $ROOT_ACTION_HASH_KEY;
 	$result->ACTION_ITEM_TYPE = $ACTION_ITEM_TYPE;
 	$result->ACTION_CONTEXT = $ACTION_CONTEXT;
@@ -92,95 +98,75 @@
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
-		// 새로운 아이템 추가시에는 복제 대상의 정보가 필요합니다.
+		// 새로운 아이템 추가
+		$new_action_item_id = $wdj_mysql_interface->insert_action_item($ACTION_ITEM_TYPE, $ACTION_NAME, $ACTION_CONTEXT);
+
+		// DEBUG
+		$action_item_id_before = -1;
+		if(!empty($ACTION_HASH_KEY_BEFORE)) {
+			$action_item_id_before = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_BEFORE);	
+		}
+		$result->action_item_id_before = $action_item_id_before;
+
+		$action_item_id_after = -1;
+		if(!empty($ACTION_HASH_KEY_BEFORE)) {
+			$action_item_id_after = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_AFTER);	
+		}
+		$result->action_item_id_after = $action_item_id_after;
+
+		$parent_action_list_id = -1;
+		if(!empty($PARENT_ACTION_HASH_KEY)) {
+			$parent_action_list_id = $wdj_mysql_interface->get_action_collection_id($PARENT_ACTION_HASH_KEY);	
+		}
+		// DEBUG
+		$result->parent_action_list_id = $parent_action_list_id;
+		if(0 < $parent_action_list_id) {
+			$wdj_mysql_interface->insert_parent_list_n_child_item($parent_action_list_id, $new_action_item_id);
+		}
+		// 자식 객체 복제 작업도 필요!
+
+		// wonder.jung11
+		// 특정 객체를 복사, 자식 객체들은 모두 shy 처리되는 플래그값을 넘겨준다면?
+
+		// 부모가 가진 자식 객체들의 순서 정렬 이슈.
+		// 넣으려는 객체 사이에 추가 뒤에 재정렬.
+
+		// $this->reorder_child_item_in_parent_list($parent_action_list_id);
+
+
+
+		
+
+		//public function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
+		// $this->insert_parent_list_n_child_item();
+
+		
+
+		// DEBUG
+		$result->new_action_item_id = $new_action_item_id;
+
+		// 완성된 객체 가져오기.
+		// public function get_action_item_object($item_id, $order=0, $is_shy=0) {
+
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
 		$is_valid_action_obj = (!empty($ACTION_HASH_KEY));
-		$result->flag = "001";
 		// 아이템의 내용을 변경합니다.
-		if( (!empty($ROOT_ACTION_HASH_KEY)) && 
-			(!empty($ACTION_HASH_KEY)) && 
-			(0 < $ACTION_ITEM_TYPE)) {
+		if(!empty($ACTION_HASH_KEY)) {
 
-			// root action을 같이 알려주어야 함.
-			//get_root_action_collection
-
-			// 해시키로 액션을 불러온다.
-			// public function get_action_item_object($item_id, $order=0, $is_shy=0) {
-			$root_action_collection_id = $wdj_mysql_interface->get_action_collection_id($ROOT_ACTION_HASH_KEY);
 			$cur_action_item_id = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY);
 			// DEBUG
-			$result->root_action_collection_id = $root_action_collection_id;
 			$result->cur_action_item_id = $cur_action_item_id;
-			if( (!is_null($root_action_collection_id)) && 
-				(!is_null($cur_action_item_id)) && 
-				(0 < $root_action_collection_id) && 
-				(0 < $cur_action_item_id) &&
-				(!empty($ACTION_COORDINATE)) ) {
 
-				// public function get_action_collection($action_collection_id=-1, $order=0, $is_shy=0, $meeting_id=-1) {
+			// 선택된 액션의 내용만 업데이트합니다.
+			// update_action_item($action_item_id=-1, $action_name="", $action_item_context="")
+			$wdj_mysql_interface->update_action_item($cur_action_item_id, $ACTION_NAME, $ACTION_CONTEXT);
 
-				$root_action_collection_obj = $wdj_mysql_interface->get_root_action_collection($root_action_collection_id, $MEETING_ID);
-				$root_action_collection_obj_std = null;
-
-				if(!is_null($root_action_collection_obj)) {
-					// DEBUG
-					$root_action_collection_obj_std = $root_action_collection_obj->get_std_obj();
-					$result->root_action_collection_obj_std = $root_action_collection_obj_std;
-				}
-
-				$cur_action_item_obj = $root_action_collection_obj->search_hash_key($ACTION_HASH_KEY);
-				if(!is_null($cur_action_item_obj)) {
-					// DEBUG
-					$cur_action_item_obj_std = $cur_action_item_obj->get_std_obj();
-					$result->cur_action_item_obj_std = $cur_action_item_obj_std;
-
-					// 업데이트를 시작합니다.
-					$cur_action_item_obj->set_name($ACTION_NAME);
-					$cur_action_item_obj->set_context($ACTION_CONTEXT);
-
-					$updated_action_item_obj = $wdj_mysql_interface->copy_action_obj($cur_action_item_obj);
-					$updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
-					$result->updated_action_item_obj_std = $updated_action_item_obj_std;
-
-					// $updated_action_item_obj = $wdj_mysql_interface->copy_action_item($cur_action_item_obj);
-					// root까지 업데이트 되었는지 확인. wonder.jung11
-					// $updated_root_action_obj = $updated_action_item_obj->get_root_action_obj();
-
-					// DEBUG
-					// $updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
-					// $result->updated_action_item_obj_std = $updated_action_item_obj_std;
-					// $updated_root_action_obj_std = $updated_root_action_obj->get_std_obj();
-					// $result->updated_root_action_obj_std = $updated_root_action_obj_std;
-				}
-
-
-				// $target_action_obj = $root_action_collection_obj->search($ACTION_COORDINATE);
-				// $target_action_obj_std = $target_action_obj->get_std_obj();
-
-				// DEBUG
-				// $result->target_action_obj_std = $target_action_obj_std;
-
-				// $root_action_obj = $wdj_mysql_interface->get_action_item_object($root_action_collection_id);
-
-				// $root_action_obj_std = $root_action_obj->get_std_obj();
-				// $result->root_action_obj_std = $root_action_obj_std;
-
-				// root action에서 업데이트하려는 action obj를 찾습니다.
-
-
-
-				// $updated_action_item = $wdj_mysql_interface->copy_action_item($cur_action_item);
-				// $updated_root_action_obj = $updated_action_item->get_root_action_obj();
-				// $updated_root_action_obj_std = $cur_root_action_obj->get_std_obj();
-				// $result->updated_root_action_obj_std = $updated_root_action_obj_std;
-			}
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
 				// 롤을 업데이트하는 경우.
-
 
 				// $MEETING_ID;
 				$ROLE_ID = $ACTION_CONTEXT_OBJ->ROLE_ID;
@@ -192,31 +178,9 @@
 
 				// 롤을 업데이트합니다.
 
-				// 
-
-
-
-				// wonder.jung11 - 해시 키가 필요한가? 내부적인 처리인데?
-				/*
-				$updated_action_item = $wdj_mysql_interface->copy_action_item($cur_action_item);
-
-				$updated_root_action_obj = $updated_action_item->get_root_action_obj();
-				$updated_root_action_obj_std = $cur_root_action_obj->get_std_obj();
-				$result->updated_root_action_obj_std = $updated_root_action_obj_std;
-				*/
-
-				// $updated_root_action_list = $wdj_mysql_interface->get_root_action_collection($updated_root_action_id, $MEETING_ID);
-
-				// $updated_root_action_list_std = $updated_root_action_list->get_std_obj();
-				// $result->updated_action_std = $updated_root_action_list_std;
-
+				//
 
 			}
-
-
-			//"{"ACTION_DB_UPDATE_MSG":"IS_UPDATE_TODAY_ROLE","MEETING_ID":134,"ROLE_ID":7,"MEMBER_HASH_KEY":"","SELECTED_KEY":"Ace Youm","SELECTED_VALUE":"2ecd378863339ee3e8de65b8e4407e7f"}"
-
-			// $cur_action_item = new ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=true)
 
 		}
 

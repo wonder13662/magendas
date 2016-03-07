@@ -95,52 +95,10 @@
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
 	// test action list
-	// $new_action_list = $wdj_mysql_interface->test_action_list_insert_timeline_BDTM_with_action_obj();
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(5883, 134); 	// 용인
+	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6138, 134); 	// 용인
 	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
 	$new_action_list_std = $new_action_list->get_std_obj();
-
-	// TEST
-	// action item id :: 15206
-	// $updated_action_item_obj = $wdj_mysql_interface->copy_action_obj(15206);
-	// $updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
-
-	// 판교 
-	// root id : 6377
-	// action id : 15206
-	// meeting id : 145
-
-	/*
-	$root_action_collection_obj = $wdj_mysql_interface->get_root_action_collection(6377, 145);
-	$root_action_collection_obj_std = $root_action_collection_obj->get_std_obj();
-
-	$cur_action_item_obj = $root_action_collection_obj->search_hash_key("5a339f387a1a7e1b724303e382259c7b");
-	$cur_action_item_obj_std = $cur_action_item_obj->get_std_obj();
-	$updated_action_item_obj = $wdj_mysql_interface->copy_action_obj($cur_action_item_obj);
-	$updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
-
-	$updated_root_action_obj = $updated_action_item_obj->get_root_action_obj();
-	$updated_root_action_obj_std = $updated_root_action_obj->get_std_obj();
-	*/
-
-
-	// 용인 
-	// root id : 5991 / 088c4725784732404e7b97c2a5228f41
-	// action id : 14183 / 872d79601a3f1deb86b9bd8eb7217666
-	// meeting id : 145
-
-	$root_action_collection_obj = $wdj_mysql_interface->get_root_action_collection(5991, 145);
-	$root_action_collection_obj_std = $root_action_collection_obj->get_std_obj();
-
-	$cur_action_item_obj = $root_action_collection_obj->search_hash_key("872d79601a3f1deb86b9bd8eb7217666");
-	$cur_action_item_obj_std = $cur_action_item_obj->get_std_obj();
-	$updated_action_item_obj = $wdj_mysql_interface->copy_action_obj($cur_action_item_obj);
-	$updated_action_item_obj_std = $updated_action_item_obj->get_std_obj();
-
-	$updated_root_action_obj = $updated_action_item_obj->get_root_action_obj();
-	$updated_root_action_obj_std = $updated_root_action_obj->get_std_obj();
-
-	// add on list에 대한 처리가 없어서 그런 것 아닐까?
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -341,6 +299,8 @@ console.log(">>> updated_root_action_obj_std ::: ",updated_root_action_obj_std);
 
 var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
 var new_action_list = _action.get_action_obj(new_action_list_std);
+
+console.log(">>> new_action_list_std ::: ",new_action_list_std);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

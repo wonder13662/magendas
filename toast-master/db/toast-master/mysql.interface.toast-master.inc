@@ -351,6 +351,58 @@ class MYSQLInterface{
 		if( is_null($target) || count($target) < 1 ) return false;
 		return true;
 	}
+
+	// @ Private
+	// @ Desc : "09:20" 형식의 시간:분 문자열인지 확인합니다. 12시간 단위
+	private function is_valid_time_format_hh12_mm($target){
+		if(empty($target)) {
+			return false;
+		}
+		return preg_match("/(1[012]|0[0-9]):([0-5][0-9])/", $target);
+	}
+	private function is_not_valid_time_format_hh12_mm($target){
+		return !$this->is_valid_time_format_hh12_mm($target);
+	}
+
+
+	// @ Private
+	// @ Desc : "19:20" 형식의 시간:분 문자열인지 확인합니다. 24시간 단위
+	private function is_valid_time_format_hh24_mm($target){
+		if(empty($target)) {
+			return false;
+		}
+
+		$is_over_20h = preg_match("/(2[0-3]|[01][0-9]):([0-5][0-9])/", $target);
+		$is_under_20h = preg_match("/(1[012]|0[0-9]):([0-5][0-9])/", $target);
+
+		return ($is_over_20h || $is_under_20h);
+	}
+	private function is_not_valid_time_format_hh24_mm($target){
+		return !$this->is_valid_time_format_hh24_mm($target);
+	}
+	// @ Private
+	// @ Desc : "19:20" 형식의 시간:분을 초단위로 바꾸어 줍니다.
+	private function convert_hh24_mm_to_seconds($str_time){
+
+		if($this->is_not_valid_time_format_hh24_mm($str_time)) {
+			return -1;
+		}
+
+		sscanf($str_time, "%d:%d", $hours, $minutes);
+		$time_seconds = $hours * 3600 + $minutes * 60 + $seconds;
+
+		return $time_seconds;
+	}
+	private function convert_seconds_to_hh24_mm($seconds) {
+
+		if($this->is_not_unsigned_number(null, $seconds)) {
+			return -1;
+		}
+
+		return gmdate("H:i", $seconds);
+	}
+
+
 	/*
 		@ Public
 		@ Desc : 사용자가 입력한 값을 바탕으로 hashkey를 반환합니다. 입력값이 없다면 millisec 서버 시간을 기준으로 만들어줍니다.
@@ -5383,8 +5435,6 @@ class MYSQLInterface{
 			
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 
-		// CHECK
-		echo "<br/>copy_action_obj / src<br/>";
 		$target_action_obj->show_info();
 
 		// 어떤 타입인지 구분한다.
@@ -5394,14 +5444,10 @@ class MYSQLInterface{
 			// 1. COLLECTION
 			if($target_action_obj->is_list()) {
 
-				echo "copy_action_obj - LIST <br/>";
-
 				// 1-1. LIST
 				$action_obj_copy = $this->copy_action_list($target_action_obj);
 
 			} else if($target_action_obj->is_table()) {
-
-				echo "copy_action_obj - TABLE <br/>";
 
 				// 1-2. TABLE
 				$action_obj_copy = $this->copy_action_table($target_action_obj);
@@ -5409,8 +5455,6 @@ class MYSQLInterface{
 			}
 
 		} else if(ActionItem::is_instance($target_action_obj)) {
-
-			echo "copy_action_obj - ITEM <br/>";
 
 			// 2. ITEM
 			$action_obj_copy = $this->copy_action_item($target_action_obj);
@@ -5420,8 +5464,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// CHECK
-		echo "<br/>copy_action_obj / copy<br/>";
 		$action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
@@ -5450,7 +5492,6 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_table_id_copy, "action_table_id_copy")){
 			return;
 		}
-		echo "TEST - 0001-3<br/>";
 
 		// 복사한 액션을 가져옵니다.
 		$action_table_obj_copy = $this->get_action_table_object($action_table_id_copy);
@@ -5461,9 +5502,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		echo "TEST - 0002<br/>";
-
-		// wonder.jung11
 		// UPDATE MYSELF - ACTION LIST ID
 		$action_table_obj_copy_hash_key = $action_table_obj_copy->get_hash_key();
 		$target_action_table->set_id($action_table_id_copy);
@@ -5503,20 +5541,11 @@ class MYSQLInterface{
 			);
 		}
 
-		echo "TEST - 0003<br/>";
-
 		// CHECK 
 		if($target_action_table->is_root_collection()) {
 			echo "copy_action_table - is_root_collection<br/>";
 			return $target_action_table;
 		}
-		/*
-		$parent_action_obj = $target_action_table->get_parent();
-		if($this->is_null_object(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
-			return;
-		}
-		$this->copy_action_obj($parent_action_obj);
-		*/
 
 		// COPY PARENT
 		$parent_action_obj = $target_action_table->get_parent();
@@ -5531,8 +5560,6 @@ class MYSQLInterface{
 		if(!is_null($parent_add_on_action_obj)) {
 			$parent_add_on_action_obj_copy = $this->copy_action_obj($parent_add_on_action_obj);
 		}
-
-		echo "TEST - 0004<br/>";
 
 		return $target_action_table;                                                                                                                     
 	}
@@ -5622,8 +5649,6 @@ class MYSQLInterface{
 			);
 		}
 	
-		// wonder.jung11
-
 		//public function get_action_list_object($list_id, $order=0, $is_shy=0, $meeting_id=-1) {		
 		// $this->get_action_list_object();
 		// list 타입은 add on child 가 없습니다. add on child는 action item에서만 사용 가능합니다.
@@ -5653,7 +5678,7 @@ class MYSQLInterface{
 	}
 	/*
 		@ Private
-		@ Desc : ACTION ITEM 을 복제합니다.
+		@ Desc : ACTION ITEM 을 복제합니다. 원본의 모든 부모, 자식 객체를 가져와 연결합니다.
 	*/	
 	private function copy_action_item($target_action_item=null) {
 
@@ -5701,7 +5726,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung11
 		// 4. 원본 아이템과 새로운 아이템의 데이터 비교. 
 		if($action_item_obj_copy->is_equal($target_action_table)) {
 			echo "!Error! / copy_action_table / \$action_table_obj_copy->is_equal(\$target_action_table)<br/>";
@@ -5782,8 +5806,6 @@ class MYSQLInterface{
 
 		$target_action_item->set_parent($parent_action_obj_copy);
 
-		// 새로 복사한 부모 객체와 새로 만든 자신을 연결하는 과정은 어디에? / wonder.jung11		
-
 		return $target_action_item;
 	}	
 
@@ -5800,10 +5822,10 @@ class MYSQLInterface{
 	//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP        dMP    dMP   dMP     dMP dMP dMP   
 	// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP        dMP    dMP   dMMMMMP dMP dMP dMP    
 	/*
-		@ Private
+		@ public
 		@ Desc : 리스트 아이템을 추가합니다. 추가한 아이템의 id를 돌려줍니다.
 	*/
-	private function insert_action_item($type, $name, $context="") {
+	public function insert_action_item($type, $name, $context="") {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $type, "type")){
 			return;
@@ -5849,6 +5871,35 @@ class MYSQLInterface{
 			$__action_item_id = $result->__action_item_id;	
 		}
 		return $__action_item_id;
+	}
+	// @ Public
+	// @ Desc : 액션 아이템의 이름, 내용을 업데이트합니다.
+	public function update_action_item($action_item_id=-1, $action_name="", $action_item_context="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_id, "action_item_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $action_name, "action_name")){
+			return;
+		}
+
+		$context_mysql_safe = $this->mysql_manager->escape_json_str($action_item_context);
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `magendas`.`ACTION_ITEM`"
+				,"SET `name` = \"$action_name\","
+				,"`context` = \"$context_mysql_safe\""
+				,"WHERE `id` = $action_item_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
 	}
 	/*
 		@ Private
@@ -6173,7 +6224,9 @@ class MYSQLInterface{
 		}
 		return $__child_action_item_cnt;
 	}
-	private function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
+	// @ public
+	// @ Desc : 부모 리스트와 자식 액션 아이템의 관계 테이블에 등록합니다.
+	public function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
 			return;
@@ -6873,7 +6926,6 @@ class MYSQLInterface{
 			$__collection_id = intval($cur_action_item->__collection_id);	
 		}
 		
-		// wonder.jung11
 		return $__collection_id;
 	}	
 	/*
@@ -6913,15 +6965,14 @@ class MYSQLInterface{
 			$__item_id = intval($cur_action_item->__item_id);	
 		}
 		
-		// wonder.jung11
 		return $__item_id;
 	}
 
 	/*
-		@ private
+		@ public
 		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 부모, 자식 관계를 오브젝트, 프로퍼티 형태로 변환하여 전달합니다.
 	*/
-	private function get_action_item_object($item_id, $order=0, $is_shy=0) {
+	public function get_action_item_object($item_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $item_id, "item_id")){
 			return;
@@ -8282,7 +8333,14 @@ class MYSQLInterface{
 		@ Desc : BDTM Toastmaster timeline 템플릿을 만들어 봅니다. Action Obj로 구조를 만든 다음, 이 구조를 DB로 이전하는 과정을 검사합니다.
 		DB 업데이트 횟수를 최소한으로 줄입니다.
 	*/
-	public function test_action_list_insert_timeline_BDTM_with_action_obj() {
+	public function get_template_meeting_timeline_BDTM($hh_mm_begins) {
+
+		// wonder.jung11
+
+		if($this->is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$hh_mm_begins)<br/>";
+			return;
+		}
 
 		$params = new ToastMasterParamManager();
 
@@ -8300,14 +8358,31 @@ class MYSQLInterface{
 		);
 
 		// 1.Greeting
+
+		$time_init_sec = $this->convert_hh24_mm_to_seconds($hh_mm_begins);
+		$time_init_hh24_mm = $this->convert_seconds_to_hh24_mm($time_init_sec);
+		$time_offset_sec = 0;
+		$time_next_sec = $time_init_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec);
+
+		if($this->is_not_valid_time_format_hh24_mm($time_init_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_init_hh24_mm)<br/>";
+			return;
+		}
+
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Greetings"
 			// $time_str_hhmm_init=""
-			, "19:40"
+			, $time_init_hh24_mm
 			// $time_str_hhmm_specific=""
-			, "19:40"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8339,14 +8414,24 @@ class MYSQLInterface{
 
 
 		// 2.Call meeting to order [Chairperson]
+
+		$time_offset_sec = 60 * 10; // 10 mins / "19:50"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec);
+
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Call meeting to order [Chairperson]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "19:50"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "19:50"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8407,14 +8492,24 @@ class MYSQLInterface{
 
 		// 20:00
 		// 3.Theme & Role Introduction [Toastmaster]
+
+		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "19:50" --> "20:00"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Theme & Role Introduction [Toastmaster]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "20:00"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "20:00"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8838,14 +8933,23 @@ class MYSQLInterface{
 
 		// 20:15
 		// 4.Table Topics Session [ Table Topic Master ]
+
+		$time_offset_sec = 60 * 15; // 15 mins / "19:40" / "20:00" --> "20:15"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Table Topics Session [ Table Topic Master ]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "20:15"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "20:15"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8910,14 +9014,23 @@ class MYSQLInterface{
 
 		// 20:25
 		// 5. Prepared Speech Session [ Toastmaster ]
+
+		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "20:15" --> "20:25"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Prepared Speech Session [ Toastmaster ]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "20:25"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "20:25"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -8982,7 +9095,6 @@ class MYSQLInterface{
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
 
-		// wonder.jung11
 		// DB interface prop
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
@@ -9170,14 +9282,23 @@ class MYSQLInterface{
 
 		// 21:00
 		// 6. Break
+
+		$time_offset_sec = 60 * 35; // 35 mins / "19:40" / "20:25" --> "21:00"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Break"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:00"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:00"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9223,14 +9344,23 @@ class MYSQLInterface{
 
 		// 21:10
 		// 7. Break
+
+		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "21:00" --> "21:10"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Mini debate session"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:10"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:10"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 		// 7-1. Sublist
@@ -9267,14 +9397,23 @@ class MYSQLInterface{
 
 		// 21:20
 		// 8. Evaluation Session [ General Evaluator ]
+
+		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "21:10" --> "21:20"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Evaluation Session [ General Evaluator ]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:20"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:20"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9347,14 +9486,23 @@ class MYSQLInterface{
 
 		// 21:35
 		// 9. Evaluation Session [ General Evaluator ]
+
+		$time_offset_sec = 60 * 15; // 15 mins / "19:40" / "21:20" --> "21:35"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Award Session [ Toastmaster ]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:35"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:35"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9397,14 +9545,23 @@ class MYSQLInterface{
 
 		// 21:40
 		// 10. Club Business [ Chairperson ]
+
+		$time_offset_sec = 60 * 5; // 5 mins / "19:40" / "21:35" --> "21:40"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Club Business [ Chairperson ]"
-			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:40"
+			// $time_str_hhmm_init="" / "19:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:40"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
@@ -9501,14 +9658,23 @@ class MYSQLInterface{
 
 		// 21:50
 		// 11. Call Meeting to adjourn & Group photos
+
+		$time_offset_sec = 60 * 5; // 5 mins / "19:40" / "21:40" --> "21:45"
+		$time_next_sec = $time_next_sec + $time_offset_sec;
+		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
+		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
+			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
+			return;
+		}
+
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
 			"Call Meeting to adjourn & Group photos"
 			// $time_str_hhmm_init=""
-			, "19:40"
-			// $time_str_hhmm_specific=""
-			, "21:40"
+			, $time_init_hh24_mm
+			// $time_str_hhmm_specific="" / "21:40"
+			, $time_next_hh24_mm
 		);
 		$root_action_obj->add_child($child_action_item);
 
