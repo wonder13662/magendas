@@ -4,7 +4,8 @@ var airborne = {
 	validator:null
 	,server:null	
 	,bootstrap:{
-		obj:null
+		obj:{
+		}
 		,column:null
 		,modal:null
 		,table_manager:null
@@ -12,6 +13,9 @@ var airborne = {
 			obj:{
 				list:null
 				,table:null
+				,__action:null
+				,__action_list:null
+				,__action_table:null
 			}
 			,mobile:{
 				list:null
@@ -56,6 +60,9 @@ airborne.console = {
 						console.log(msg);
 					}
 				}
+			}
+			,say_err:function(msg, obj) {
+				this.say("!Error! / " + msg, obj);
 			}
 			,isShow:true
 			,on:function(){
@@ -330,6 +337,7 @@ airborne.phone = {
 //airborne.html.getUnSQLText
 //airborne.html.getId
 //airborne.html.getIdRandomTail
+//airborne.html.get_id_auto_increase
 //airborne.html.getTextHead
 //airborne.html.restoreText
 //airborne.html.getQueryStringSafeText
@@ -525,6 +533,8 @@ airborne.html = {
 
 		if(!isNaN(raw_id)) return raw_id;
 
+		raw_id = raw_id.replace(/ /gi, "_");
+
 	    var patt1 = /[a-z_0-9\-]/gi; 
 	    var result = raw_id.toLowerCase().match(patt1);
 
@@ -545,6 +555,15 @@ airborne.html = {
 		var n = d.getTime();
 
 		return this.getId(raw_id) + "_" + n + "_" + Math.floor((Math.random() * 1000000) + 1);
+	}
+	,auto_increase_num:0
+	,get_id_auto_increase:function(raw_id){
+		this.auto_increase_num += 1;
+		return this.getId(raw_id) + "_" + this.auto_increase_num;
+	}
+	,get_num_id_auto_increase:function(raw_id){
+		this.auto_increase_num += 1;
+		return this.auto_increase_num + "_" + this.getId(raw_id);
 	}
 	,restoreText:function(safe_text){ // TODO wdjung
 
@@ -671,6 +690,7 @@ airborne.html = {
 airborne.json = {
 	parseJSON:function(json_str){
 		var _v = airborne.validator;
+		if(_v.isNotValidStr(json_str)) return null;
 
 		// json parsing safe filter
 		// \& --> &
@@ -680,8 +700,6 @@ airborne.json = {
 		// \n --> <br/>
 		json_str = json_str.replace(/\n/gi, "<br/>");
 
-		if(_v.isNotValidStr(json_str)) return null;
-
 		var json_obj = $.parseJSON(json_str);
 
 		// 모든 json obj에서 유효하지 않는 문자가 없는지 확인한다.
@@ -689,6 +707,8 @@ airborne.json = {
 
 		return json_obj;
 	}
+	// REMOVE ME
+	/*
 	, findNode:function(json_obj, delegate_action) {
 
 		if(json_obj === undefined) return;
@@ -736,6 +756,7 @@ airborne.json = {
 
 		return json_obj;
 	}
+	*/
 }
 
 

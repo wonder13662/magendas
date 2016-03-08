@@ -73,28 +73,6 @@
 		$meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
 		$meeting_agenda_obj = $meeting_agenda_arr[0];
 
-	} else if(	!empty($meeting_agenda_list) && count($meeting_agenda_list) > 0	){
-
-		// REMOVE ME - DEAD CODE
-		/*
-		// 지정한 meeting_id가 없는 경우, 유저가 속한 클럽의 가장 최신의 예정된 미팅을 가져옵니다.
-		// 앞으로 진행할 최신 미팅 1개의 정보를 가져옵니다.
-		// 최신순으로 등록된 미팅을 10개 가져옵니다.
-		$recent_meeting_agenda_list =
-		$wdj_mysql_interface->getMeetingAgendaListUpcoming(
-			// meeting_membership_id
-			$meeting_membership_id
-			// page
-			, 1
-			// size
-			, 1
-			// is_sooner_first
-			, true
-		);
-
-		$meeting_agenda_obj = $recent_meeting_agenda_list[0];
-		$meeting_id = $meeting_agenda_obj->__meeting_id;
-		*/
 	}
 
 	$today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));
@@ -116,13 +94,15 @@
 
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
-	// 96, 2
-	// $output = $wdj_mysql_interface->copyTimelineFromTemplate(96, 2);
-	// print_r($output);
+	// test action list
+	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6138, 134); 	// 용인
+	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
+	$new_action_list_std = $new_action_list->get_std_obj();
 
 	// @ required
 	$wdj_mysql_interface->close();
-
+	
 ?>
 
 
@@ -137,6 +117,7 @@
 ?>
 <!-- view controller -->
 <script src="../js/toast-master/meeting.agenda.js"></script>
+<script src="../js/toast-master/action.manager.js"></script>
 </head>
 
 
@@ -301,12 +282,25 @@ var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
 var is_update_timeline_after_job = <?php echo json_encode($is_update_timeline_after_job);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
-console.log(">>> meeting_agenda_list : ",meeting_agenda_list);
-console.log(">>> meeting_agenda_obj : ",meeting_agenda_obj);
-console.log(">>> member_role_cnt_list : ",member_role_cnt_list);
-console.log(">>> meeting_membership_id : ",meeting_membership_id);
-console.log(">>> executive_member_list : ",executive_member_list);
+//cur_action_item_obj_std
 
+var cur_action_item_obj_std = <?php echo json_encode($cur_action_item_obj_std);?>;
+console.log(">>> cur_action_item_obj_std ::: ",cur_action_item_obj_std);
+
+var updated_action_item_obj_std = <?php echo json_encode($updated_action_item_obj_std);?>;
+console.log(">>> updated_action_item_obj_std ::: ",updated_action_item_obj_std);
+
+var root_action_collection_obj_std = <?php echo json_encode($root_action_collection_obj_std);?>;
+console.log(">>> root_action_collection_obj_std ::: ",root_action_collection_obj_std);
+
+var updated_root_action_obj_std = <?php echo json_encode($updated_root_action_obj_std);?>;
+console.log(">>> updated_root_action_obj_std ::: ",updated_root_action_obj_std);
+
+
+var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
+var new_action_list = _action.get_action_obj(new_action_list_std);
+
+console.log(">>> new_action_list_std ::: ",new_action_list_std);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -345,6 +339,10 @@ var meeting_agenda_data_obj =
 	, window_scroll_y:window_scroll_y
 	, is_log_in_user:is_log_in_user 
 	, login_user_info:login_user_info
+
+	// TEST
+	, new_action_list:new_action_list
+	// , new_action_list_v2:new_action_list_v2
 };
 
 console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);

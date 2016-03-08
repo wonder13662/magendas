@@ -7,7 +7,7 @@ class TCPDFManager{
 
 	private $pdf;
 	private $service_root_path;
-	private $default_font="helvetica";
+	private $default_font="nanumgothic";
 
 	public function TCPDFManager($service_root_path){
 		$this->pdf = $this->get_empty_pdf();
@@ -58,7 +58,6 @@ class TCPDFManager{
 		$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
 		// set default font / http://www.tcpdf.org/fonts.php
-		//$pdf->SetFont('dejavusans', '', 10);
 		$pdf->SetFont($this->default_font, '', 10);
 
 		// add a page
@@ -94,7 +93,7 @@ class TCPDFManager{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => $this->color_tint_warm_gray_arr
+				, 'color' => TCPDFElement::$COLOR_DARK_GRAY_ARR
 			);
 		}
 		return $this->border_style_card_board_top_n_bottom_gray_outline;
@@ -107,7 +106,7 @@ class TCPDFManager{
 				, 'cap' => 'squre'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => $this->color_tint_warm_gray_arr
+				, 'color' => TCPDFElement::$COLOR_DARK_GRAY_ARR
 			);
 
 			$this->border_style_card_board_body_gray_outline=
@@ -131,7 +130,8 @@ class TCPDFManager{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => $this->color_warm_gray_arr
+				// , 'color' => $this->color_warm_gray_arr
+				, 'color' => TCPDFElement::$COLOR_DARK_GRAY_ARR
 			);
 
 			$this->border_style_simple_table_cell_gray_outline=
@@ -145,7 +145,7 @@ class TCPDFManager{
 	private $card_board_title_font="dejavusans";
 	private $card_board_title_font_style="B";
 	private $card_board_title_font_size=8;
-	// private $card_board_title_font_size=10;
+	// private $card_board_title_font_size=12;
 	private function set_font_cart_board_title($caller_name=""){
 		$caller_name .= "<br/>set_font_cart_board_title";
 		$this->pdf->SetFont(
@@ -156,8 +156,8 @@ class TCPDFManager{
 	}
 	private $card_board_content_font="dejavusans";
 	private $card_board_content_font_style="";
-	// private $card_board_content_font_size=6;
 	private $card_board_content_font_size=8;
+	// private $card_board_content_font_size=12;
 	private function set_font_cart_board_content($caller_name=""){
 		$caller_name .= "<br/>set_font_cart_board_content";
 		$this->pdf->SetFont(
@@ -168,7 +168,6 @@ class TCPDFManager{
 	}
 	private $simple_table_title_small_font="dejavusans";
 	private $simple_table_title_small_font_style="B";
-	// private $simple_table_title_small_font_size=5;
 	private $simple_table_title_small_font_size=6;
 	private function set_font_simple_table_title_small($caller_name=""){
 		$caller_name .= "<br/>set_font_simple_table_content_small";
@@ -180,7 +179,6 @@ class TCPDFManager{
 	}
 	private $simple_table_content_small_font="dejavusans";
 	private $simple_table_content_small_font_style="";
-	// private $simple_table_content_small_font_size=5;
 	private $simple_table_content_small_font_size=6;
 	private function set_font_simple_table_content_small($caller_name=""){
 		$caller_name .= "<br/>set_font_simple_table_content_small";
@@ -234,8 +232,8 @@ class TCPDFManager{
 
 
 
-
-
+	// REMOVE ME
+	/*
 	private $text_align_center = "CENTER";
 	private $text_align_left = "LEFT";
 	private $text_align_right = "RIGHT";
@@ -275,6 +273,10 @@ class TCPDFManager{
 
 		return $title_prop_obj;
 	}
+	*/
+
+	// REMOVE ME
+	/*
 	private function get_card_board_row_content_key_prop_obj(	$text
 																, $parent_x_pos
 																, $prev_y_pos=0
@@ -304,6 +306,10 @@ class TCPDFManager{
 
 		return $content_key_prop_obj;
 	}
+	*/
+
+	// REMOVE ME
+	/*
 	private function get_card_board_row_content_value_prop_obj(	$text
 																, $parent_x_pos
 																, $prev_y_pos=0
@@ -332,6 +338,7 @@ class TCPDFManager{
 
 		return $content_value_prop_obj;
 	}
+	*/
 	private function get_card_board_row_content_prop_obj(	$text
 															, $parent_x_pos
 															, $prev_y_pos=0
@@ -1196,7 +1203,8 @@ class TCPDFManager{
 													, $meeting_agenda_obj
 													, $today_news_list=null
 													, $today_role_list=null
-													, $today_speech_list=null ) {
+													, $today_speech_list=null
+													, $font_type=null ) {
 
 		$caller_name = "<br/>draw_card_board_timeline_V2<br/>";
 		if(empty($element_set_title)){
@@ -1322,142 +1330,155 @@ class TCPDFManager{
 			$element_first_depth = $schedule_obj_arr[$idx];
 			foreach ($element_first_depth as $key => $value) {
 
-			    if(is_array($value)) {
+				if(!is_array($value)) {
+					continue;
+				}
 
-			    	$value_array = $value;
-			    	for ($idx_second_depth = 0; $idx_second_depth < count($value); $idx_second_depth++) {
+		    	$value_array = $value;
+		    	for ($idx_second_depth = 0; $idx_second_depth < count($value); $idx_second_depth++) {
 
-			    		$element_third_depth = $value_array[$idx_second_depth];
+		    		$element_third_depth = $value_array[$idx_second_depth];
 
-			    		foreach ($element_third_depth as $element_third_depth_key => $element_third_depth_value) {
+		    		foreach ($element_third_depth as $element_third_depth_key => $element_third_depth_value) {
 
-			    			if(strcmp($element_third_depth_key, "simple_table") == 0 && is_array($element_third_depth_value)) {
+		    			if(!strcmp($element_third_depth_key, "simple_table") == 0 || !is_array($element_third_depth_value)) {
+		    				continue;
+		    			}
 
-			    				// 내부 테이블인 경우의 처리
-			    				$element_third_depth_array = $element_third_depth_value;
-			    				$is_speech_table = false;
-			    				for ($idx_fourth_depth = 0; $idx_fourth_depth < count($element_third_depth_array); $idx_fourth_depth++) {
-			    					$element_fourth_depth = $element_third_depth_array[$idx_fourth_depth];
+	    				// 내부 테이블인 경우의 처리
+	    				$element_third_depth_array = $element_third_depth_value;
+	    				$is_speech_table = false;
+	    				for ($idx_fourth_depth = 0; $idx_fourth_depth < count($element_third_depth_array); $idx_fourth_depth++) {
+	    					$element_fourth_depth = $element_third_depth_array[$idx_fourth_depth];
 
-			    					if(is_array($element_fourth_depth)) {
-			    						$element_fourth_depth_array = $element_fourth_depth;
+	    					if(!is_array($element_fourth_depth)) {
+	    						continue;
+	    					}
 
-			    						// NEWS
-			    						if( count($element_fourth_depth_array) > 0 && 
-			    							strcmp($element_fourth_depth_array[0]->name, "News Contents") == 0 ) {
+    						$element_fourth_depth_array = $element_fourth_depth;
 
-			    							$simple_table_new = array();
-			    							array_push($simple_table_new, $element_fourth_depth_array);
+    						// NEWS
+    						if( count($element_fourth_depth_array) > 0 && 
+    							strcmp($element_fourth_depth_array[0]->name, "News Contents") == 0 ) {
 
-				    						for ($idx_speech = 0; $idx_speech < count($today_news_list); $idx_speech++) {
-				    							$news_obj = $today_news_list[$idx_speech];
+    							$simple_table_new = array();
+    							array_push($simple_table_new, $element_fourth_depth_array);
 
-												$simple_table_row_arr = array();
+	    						for ($idx_speech = 0; $idx_speech < count($today_news_list); $idx_speech++) {
+	    							$news_obj = $today_news_list[$idx_speech];
 
-												$simple_table_row_column_obj = new stdClass();
-												$simple_table_row_column_obj->name=$news_obj->__news_content;
-												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
-												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+									$simple_table_row_arr = array();
 
-												array_push($simple_table_new, $simple_table_row_arr);
-				    						}
+									$simple_table_row_column_obj = new stdClass();
+									$simple_table_row_column_obj->name=$news_obj->__news_content;
+									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
+									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_WARM_GRAY_ARR;
 
-				    						// 원본 데이터를 수정본으로 바꿉니다.
-				    						$element_third_depth->$element_third_depth_key = $simple_table_new;
+									array_push($simple_table_row_arr,$simple_table_row_column_obj);
+									array_push($simple_table_new, $simple_table_row_arr);
+	    						}
 
-				    						break;
-			    						}
+	    						// 원본 데이터를 수정본으로 바꿉니다.
+	    						$element_third_depth->$element_third_depth_key = $simple_table_new;
 
-			    						// SPEECH
-			    						if( count($element_fourth_depth_array) == 4 && 
-			    							strcmp($element_fourth_depth_array[0]->name, "Project") == 0 &&
-			    							strcmp($element_fourth_depth_array[1]->name, "Title") == 0 &&
-			    							strcmp($element_fourth_depth_array[2]->name, "Speaker") == 0 &&
-			    							strcmp($element_fourth_depth_array[3]->name, "Evaluator") == 0) {
+	    						break;
+    						}
 
-			    							// 스피치 테이블 업데이트
-			    							$is_speech_table = true;
-			    							$simple_table_new = array();
-			    							array_push($simple_table_new, $element_fourth_depth_array);
+    						// SPEECH
+    						if( count($element_fourth_depth_array) == 4 && 
+    							strcmp($element_fourth_depth_array[0]->name, "Project") == 0 &&
+    							strcmp($element_fourth_depth_array[1]->name, "Title") == 0 &&
+    							strcmp($element_fourth_depth_array[2]->name, "Speaker") == 0 &&
+    							strcmp($element_fourth_depth_array[3]->name, "Evaluator") == 0) {
 
-				    						// 지금 업데이트 해야할 스피치 정보
-				    						for ($idx_speech = 0; $idx_speech < count($today_speech_list); $idx_speech++) {
-				    							$speech_obj = $today_speech_list[$idx_speech];
+    							// 스피치 테이블 업데이트
+    							$is_speech_table = true;
+    							$simple_table_new = array();
+    							array_push($simple_table_new, $element_fourth_depth_array);
 
-				    							// 스피치 객체 정보를 
-				    							$simple_table_row_arr = array();
+	    						// 지금 업데이트 해야할 스피치 정보
+	    						for ($idx_speech = 0; $idx_speech < count($today_speech_list); $idx_speech++) {
+	    							$speech_obj = $today_speech_list[$idx_speech];
 
-					    						// 1. project
-												$simple_table_row_column_obj = new stdClass();
-												$simple_table_row_column_obj->name=$speech_obj->__speech_project_title;
-												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
-												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+	    							// 스피치 객체 정보를 
+	    							$simple_table_row_arr = array();
 
-												// 2. speech title
-												$simple_table_row_column_obj = new stdClass();
-												$simple_table_row_column_obj->name=$speech_obj->__title;
-												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
-												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+		    						// 1. project
+									$simple_table_row_column_obj = new stdClass();
+									$simple_table_row_column_obj->name=$speech_obj->__speech_project_title;
+									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
+									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
-												// 3. speaker name
-												$simple_table_row_column_obj = new stdClass();
-												$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name;
-												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
-												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-												// 4. evaluator name
-												$simple_table_row_column_obj = new stdClass();
-												$simple_table_row_column_obj->name=$speech_obj->__evaluator_member_name;
-												$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-												$simple_table_row_column_obj->bg_color=$this->color_white_arr;
-												array_push($simple_table_row_arr,$simple_table_row_column_obj);
+									// 2. speech title
+									$simple_table_row_column_obj = new stdClass();
+									$simple_table_row_column_obj->name=$speech_obj->__title;
 
-												array_push($simple_table_new, $simple_table_row_arr);
-				    						}
-				    						
-				    						// 원본 데이터를 수정본으로 바꿉니다.
-				    						$element_third_depth->$element_third_depth_key = $simple_table_new;
+									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
+									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
-				    						break;
-			    						}
+									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-			    						// ROLES
-			    						for ($idx_fifth_depth = 0; $idx_fifth_depth < count($element_fourth_depth_array); $idx_fifth_depth++) {
+									// 3. speaker name
+									$simple_table_row_column_obj = new stdClass();
+									$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name;
+									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
+									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
-											$element_fifth_depth_key = $element_fourth_depth_array[$idx_fifth_depth];
+									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-											// 타이틀과 내용이 한줄에 표시되는 형태
-											if(	$is_speech_table == false && 
-												$element_fifth_depth_key->is_title == 1 && 
-												$idx_fifth_depth < (count($element_fourth_depth_array) - 1)) {
+									// 4. evaluator name
+									$simple_table_row_column_obj = new stdClass();
+									$simple_table_row_column_obj->name=$speech_obj->__evaluator_member_name;
+									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
+									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
-												$element_fifth_depth_value = $element_fourth_depth_array[$idx_fifth_depth + 1];
+									array_push($simple_table_row_arr,$simple_table_row_column_obj);
+									array_push($simple_table_new, $simple_table_row_arr);
+	    						}
+	    						
+	    						// 원본 데이터를 수정본으로 바꿉니다.
+	    						$element_third_depth->$element_third_depth_key = $simple_table_new;
 
-												$element_fifth_depth_value = 
-												update_simple_table(
-													$element_fifth_depth_key
-													, $element_fifth_depth_value
-													, $meeting_agenda_obj
-													, $today_news_list
-													, $today_role_list
-													, $today_speech_list
-												);	
+	    						break;
+    						}
 
-												$element_fourth_depth_array[$idx_fifth_depth + 1] = $element_fifth_depth_value;
-											}
+    						// ROLES
+    						for ($idx_fifth_depth = 0; $idx_fifth_depth < count($element_fourth_depth_array); $idx_fifth_depth++) {
 
-			    						}  // 6 depth for end
-			    					} // if end
-			    				} // 5 depth for end
-			    			} // if end
-			    		} // 4 depth for end
-			    	} // 3 depth for end
-			    } // if end
+								$element_fifth_depth_key = $element_fourth_depth_array[$idx_fifth_depth];
+
+								// 타이틀과 내용이 한줄에 표시되는 형태
+								if(	$is_speech_table == false && 
+									$element_fifth_depth_key->is_title == 1 && 
+									$idx_fifth_depth < (count($element_fourth_depth_array) - 1)) {
+
+									$element_fifth_depth_value = $element_fourth_depth_array[$idx_fifth_depth + 1];
+
+									$element_fifth_depth_value = 
+									update_simple_table(
+										$element_fifth_depth_key
+										, $element_fifth_depth_value
+										, $meeting_agenda_obj
+										, $today_news_list
+										, $today_role_list
+										, $today_speech_list
+									);	
+
+									$element_fourth_depth_array[$idx_fifth_depth + 1] = $element_fifth_depth_value;
+								} // end if
+
+    						}  // 6 depth for end
+
+	    				} // 5 depth for end
+
+		    		} // 4 depth for end
+
+		    	} // 3 depth for end
+			    
 			} // 2 depth for end
+
 		} // 1 depth for end
 
 
@@ -1474,6 +1495,20 @@ class TCPDFManager{
 			, $element_set_y_pos
 			, $element_set_width
 		);
+
+		// wonder.jung
+		if(strcmp($font_type,TCPDFElement::$FONT_SIZE_LARGE) == 0) {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE_LARGE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE;
+		} else {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
+		}
+
 		$element_prop_main_action;
 		for ($idx = 0; $idx < count($flatten_timeline_action_obj_arr); $idx++) {
 
@@ -1494,9 +1529,10 @@ class TCPDFManager{
 					// text
 					, $element_set_title
 					// text_color_arr
-					, TCPDFElement::$COLOR_WARM_GRAY_ARR
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_WHITE_ARR
 					// text_size
-					, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+					, $ELEMENT_SET_TITLE_FONT_SIZE
 					// cell_x_pos
 					, $element_set_x_pos
 					// cell_y_pos
@@ -1507,7 +1543,8 @@ class TCPDFManager{
 					// cell_height
 					, -1
 					// cell_color_arr
-					, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+					// , TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+					, TCPDFElement::$COLOR_DARK_GRAY_ARR
 					, $depth
 					// is_first
 					, true
@@ -1538,9 +1575,9 @@ class TCPDFManager{
 					// text
 					, $name
 					// text_color_arr
-					, TCPDFElement::$COLOR_WARM_GRAY_ARR
+					, TCPDFElement::$COLOR_DARK_GRAY_ARR
 					// text_size
-					, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+					, $CARD_BOARD_TITLE_FONT_SIZE
 					// cell_x_pos
 					, $element_set_x_pos
 					// cell_y_pos
@@ -1550,7 +1587,8 @@ class TCPDFManager{
 					// cell_height
 					, -1
 					// cell_color_arr
-					, TCPDFElement::$COLOR_MILK_GRAY_ARR
+					// , TCPDFElement::$COLOR_MILK_GRAY_ARR
+					, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
 					// depth
 					, $depth
 					// is_first
@@ -1565,7 +1603,6 @@ class TCPDFManager{
 					, $caller_name
 				);
 
-
 				// 타임 마커를 그리고 배치합니다.
 				// 타임 마커 전용 text only prop 생성.
 				$element_prop_time_marker = 
@@ -1578,9 +1615,10 @@ class TCPDFManager{
 					// text
 					, $action_obj->time
 					// text_color_arr
-					, TCPDFElement::$COLOR_WHITE_ARR
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_WARM_GRAY_ARR
 					// text_size
-					, TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE
+					, $CARD_BOARD_TITLE_FONT_SIZE
 					// cell_x_pos
 					, $element_prop_main_action->get_cell_x_pos()
 					// cell_y_pos
@@ -1590,7 +1628,8 @@ class TCPDFManager{
 					// cell_height
 					, -1
 					// cell_color_arr
-					, TCPDFElement::$COLOR_WARM_GRAY_ARR
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
 					// depth
 					, $depth
 					// is_first
@@ -1641,9 +1680,9 @@ class TCPDFManager{
 						// text
 						, $name
 						// text_color_arr
-						, TCPDFElement::$COLOR_WARM_GRAY_ARR
+						, TCPDFElement::$COLOR_DARK_GRAY_ARR
 						// text_size
-						, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+						, $CARD_BOARD_TITLE_FONT_SIZE
 						// cell_x_pos
 						, $element_set_x_pos
 						// cell_y_pos
@@ -1741,7 +1780,8 @@ class TCPDFManager{
 								// , TCPDFElement::$COLOR_WARM_GRAY_ARR
 								, $simple_table_column->color
 								// text_size
-								, TCPDFElement::$CARD_BOARD_SIMPLE_TABE_FONT_SIZE
+								, $CARD_BOARD_SIMPLE_TABLE_FONT_SIZE
+								//, TCPDFElement::$CARD_BOARD_SIMPLE_TABLE_FONT_SIZE
 								// cell_x_pos
 								, 0
 								// cell_y_pos
@@ -1807,7 +1847,7 @@ class TCPDFManager{
 						// text
 						, ""
 						// text_color_arr
-						, TCPDFElement::$COLOR_WARM_GRAY_ARR
+						, TCPDFElement::$COLOR_DARK_GRAY_ARR
 						// text_size
 						, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
 						// cell_x_pos
@@ -1969,12 +2009,13 @@ class TCPDFManager{
 
 
 
-
+	// REMOVE ME
 	/*
 
 		토스트 마스터의 오피서들의 정보를 키, 벨류 쌍으로 돌려줍니다.
 
 	*/
+	/*
 	public function get_card_board_key_value_data_from_toastmaster_officer($toastmaster_officer_list){
 
 		$wdj_key_value_arr=array();
@@ -1990,6 +2031,7 @@ class TCPDFManager{
 
 		return $wdj_key_value_arr;
 	}
+	*/
 
 
 	/*
@@ -2002,7 +2044,8 @@ class TCPDFManager{
 												, $element_set_x_pos
 												, $element_set_y_pos
 												, $element_set_width
-												, $toastmaster_officer_list){
+												, $toastmaster_officer_list
+												, $font_type=null){
 
 		$caller_name = "<br/>draw_toastmaster_officer<br/>";
 		if(empty($element_set_title)){
@@ -2032,6 +2075,10 @@ class TCPDFManager{
 
 		$is_first = true;
 		$is_bold = true;
+		$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+		if(!is_null($font_type) && strcmp(TCPDFElement::$FONT_SIZE_LARGE,$font_type) == 0) {
+			$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+		}
 		// 엘리먼트 셋의 타이틀을 나타내는 엘리먼트를 작성합니다.
 		$element_prop_title = 
 		TCPDFElement::GET_ELEMENT_PROP(
@@ -2043,9 +2090,9 @@ class TCPDFManager{
 			// text
 			, $element_set_title
 			// text_color_arr
-			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_WHITE_ARR
 			// text_size
-			, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+			, $font_size
 			// cell_x_pos
 			, $element_set_x_pos
 			// cell_y_pos
@@ -2056,7 +2103,7 @@ class TCPDFManager{
 			// cell_height
 			, -1
 			// cell_color_arr
-			, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			, $depth
 			, $is_first
 			, $is_last
@@ -2069,10 +2116,19 @@ class TCPDFManager{
 		$element_prop_title->draw();
 		$element_set->add_element($element_prop_title);
 
-
 		$depth=0;
+		$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+		if(!is_null($font_type) && strcmp(TCPDFElement::$FONT_SIZE_LARGE,$font_type) == 0) {
+			$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+		}
 		for ($idx = 0; $idx < count($toastmaster_officer_list); $idx++) {
 			$officer_obj = $toastmaster_officer_list[$idx];
+
+			// DEBUG
+			// if($idx == 0) {
+			// 	print_r($officer_obj);
+			// 	echo "<br/>";
+			// }
 
 			// key - officer_name
 			$key = $officer_obj->__officer_name;
@@ -2091,7 +2147,7 @@ class TCPDFManager{
 				// text_color_arr
 				, TCPDFElement::$COLOR_WARM_GRAY_ARR
 				// text_size
-				, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+				, $font_size
 				// cell_x_pos
 				, $element_set_x_pos
 				// cell_y_pos
@@ -2101,7 +2157,7 @@ class TCPDFManager{
 				// cell_height
 				, -1
 				// cell_color_arr
-				, TCPDFElement::$COLOR_MILK_GRAY_ARR
+				, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
 				, $depth
 				, $is_first
 				, $is_last
@@ -2116,8 +2172,8 @@ class TCPDFManager{
 
 			// value
 			$officer_member_name = $officer_obj->__member_name;
-			$officer_member_mobile = $officer_obj->__member_mobile;
-			$value = $officer_member_mobile . "     " . $officer_member_name;
+			$officer_member_email = $officer_obj->__member_email;
+			$value = $officer_member_name . " / " . $officer_member_email;
 			// props
 			$is_first = false;
 			$is_last = false;
@@ -2136,9 +2192,10 @@ class TCPDFManager{
 				// text
 				, $value
 				// text_color_arr
-				, TCPDFElement::$COLOR_WARM_GRAY_ARR
+				, TCPDFElement::$COLOR_DARK_GRAY_ARR
 				// text_size
-				, TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE
+				, $CARD_BOARD_CONTENT_FONT_SIZE
+				//, TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE
 				// cell_x_pos
 				, $element_set_x_pos
 				// cell_y_pos
@@ -2148,7 +2205,7 @@ class TCPDFManager{
 				// cell_height
 				, -1
 				// cell_color_arr
-				, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+				, TCPDFElement::$COLOR_MILK_GRAY_ARR
 				, $depth
 				, $is_first
 				, $is_last
@@ -2261,21 +2318,21 @@ class TCPDFManager{
 				$key = $inner_obj->key;
 				$type = $inner_obj->type;
 				$name = $key;
-				// $color = $this->color_dark_gray_arr;//color_warm_gray_arr
-				$color = $this->color_warm_gray_arr;
-				$bg_color = $this->color_white_arr;
+
+				$color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+				$bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+
 				$is_title = false;
 
 				if($type == "ELEMENT_TYPE_TABLE_TITLE") {
 					// 타이틀일 경우 배경색을 다르게 지정.
-					$color = $this->color_warm_gray_arr;
-					$bg_color = $this->color_tint_warm_gray_arr;
+					$color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+					$bg_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
 					$is_title = true;
 				} else if($type == "ELEMENT_TYPE_TABLE_TITLE_ADDABLE") {
 					// 타이틀일 경우 배경색을 다르게 지정.
-					// $bg_color = $this->color_light_tint_warm_gray_arr;
-					$color = $this->color_warm_gray_arr;
-					$bg_color = $this->color_tint_warm_gray_arr;
+					$color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+					$bg_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
 					// 테이블 최상단 타이틀일 경우는 내용을 option_group_name에서 참조
 					$name = $option_group_name;
 					$is_title = true;
@@ -2452,19 +2509,19 @@ class TCPDFManager{
 		$simple_table_row_column_obj = new stdClass();
 		$simple_table_row_column_obj->name="title";
 		$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-		$simple_table_row_column_obj->bg_color=$this->color_tint_warm_gray_arr;
+		$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 		array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
 		$simple_table_row_column_obj = new stdClass();
 		$simple_table_row_column_obj->name="duration";
 		$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-		$simple_table_row_column_obj->bg_color=$this->color_tint_warm_gray_arr;
+		$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 		array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
 		$simple_table_row_column_obj = new stdClass();
 		$simple_table_row_column_obj->name="playcnt";
 		$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
-		$simple_table_row_column_obj->bg_color=$this->color_tint_warm_gray_arr;
+		$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 		array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
 		array_push($simple_table_row_arr, $simple_table_row_column_arr);
@@ -2542,7 +2599,9 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_left->role_name;
-			$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			// REMOVE ME
+			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
@@ -2554,7 +2613,9 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			// REMOVE ME
+			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
@@ -2563,7 +2624,9 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_right->role_name;
-			$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			// REMOVE ME
+			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
@@ -2575,7 +2638,9 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			$simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			// REMOVE ME
+			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
+			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
 
@@ -2673,6 +2738,24 @@ class TCPDFManager{
 		} else {
 			$round_desc = $meeting_agenda_round . "th";	
 		}
+
+
+		// 2016-02-14
+		// Osan TM ( id = 13 ) 차수 노출 안함
+		if($meeting_agenda_obj->__membership_id == 13) {
+
+$tbl = <<<EOD
+<table cellspacing="0" cellpadding="0" border="0">
+    <tr style="text-align:center;">
+        <td>
+            <b><span color="#FFFFFF" style="font-size:x-large;">$meeting_agenda_obj->__membership_desc Meeting</span></b>
+        </td>
+    </tr>
+</table>    
+EOD;
+
+		} else {
+
 $tbl = <<<EOD
 <table cellspacing="0" cellpadding="0" border="0">
     <tr style="text-align:center;">
@@ -2682,6 +2765,8 @@ $tbl = <<<EOD
     </tr>
 </table>    
 EOD;
+		}
+
 		$this->pdf->writeHTMLCell(
 		//@param $w (float) Cell width. If 0, the cell extends up to the right margin.
 		    150
@@ -2825,7 +2910,7 @@ EOD;
 	// dMP   dMP dMP dMP dMPdMMMMMP         VMMMP"  VMMMP" dMP dMMMMP" dMMMMMP         dMMMMMP dMP dMP dMP dMMMMMP  
 
 	// *time guide line -  simple table version
-	public function draw_toast_master_time_guide_line_simple_table($element_set_title, $element_set_x_pos, $element_set_y_pos, $element_set_width) {
+	public function draw_toast_master_time_guide_line_simple_table($element_set_title, $element_set_x_pos, $element_set_y_pos, $element_set_width, $font_type=null) {
 
 		$caller_name = "draw_toast_master_time_guide_line_simple_table<br/>";
 		if(empty($element_set_title)){
@@ -2851,6 +2936,12 @@ EOD;
 
 		$depth=0;
 
+		// font_type
+		$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+		if(!is_null($font_type) && strcmp(TCPDFElement::$FONT_SIZE_LARGE,$font_type) == 0) {
+			$font_size = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+		}
+
 		// 1. draw element set title
 		$is_first = true;
 		$is_bold = true;
@@ -2866,9 +2957,9 @@ EOD;
 			// text
 			, $element_set_title
 			// text_color_arr
-			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_WHITE_ARR
 			// text_size
-			, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+			, $font_size
 			// cell_x_pos
 			, $element_set_x_pos
 			// cell_y_pos
@@ -2878,7 +2969,7 @@ EOD;
 			// cell_height
 			, -1
 			// cell_color_arr
-			, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			, $depth
 			// is_first
 			, true
@@ -2902,6 +2993,11 @@ EOD;
 
 
 		// CREATE TABLE FIELD ELEMENT PROP
+		// font_type
+		$font_size = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
+		if(!is_null($font_type) && strcmp(TCPDFElement::$FONT_SIZE_LARGE,$font_type) == 0) {
+			$font_size = TCPDFElement::$SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE;
+		}
 		$element_prop_simple_table_field_dummy = 
 		TCPDFElement::GET_ELEMENT_PROP(
 			$this->pdf
@@ -2912,9 +3008,9 @@ EOD;
 			// text
 			, "dummy"
 			// text_color_arr
-			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			// text_size
-			, TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE
+			, $font_size
 			// cell_x_pos
 			, 0
 			// cell_y_pos
@@ -2957,27 +3053,27 @@ EOD;
 			$cur_column_name = $column_names[$column_idx];
 
 			$cur_key = "";
-			$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+			$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 			if($cur_column_name == "qualified_min") {
 				$cur_key = "MIN";
-				$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 			} else if($cur_column_name == "green") {
 				$cur_key = "GREEN";
-				$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_EMERALD_GREEN_ARR;
 			} else if($cur_column_name == "yellow") {
 				$cur_key = "YELLOW";
-				$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_CREAM_YELLOW_ARR;
 			} else if($cur_column_name == "red") {
 				$cur_key = "RED";
-				$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_WINE_RED_ARR;
 			} else if($cur_column_name == "qualified_max") {
 				$cur_key = "MAX";
-				$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 			}
 
@@ -3014,8 +3110,8 @@ EOD;
 			$element_prop_row_role->set_cell_y_pos($cur_element_set_bottom_y_pos);
 			$element_prop_row_role->set_cell_width($element_set_simple_table_for_title->get_element_set_width());
 			$element_prop_row_role->set_cell_height($element_set_simple_table_for_title->get_element_set_height());
-			$element_prop_row_role->set_cell_color_arr(TCPDFElement::$COLOR_WHITE_ARR);
-			$element_prop_row_role->set_text_color_arr(TCPDFElement::$COLOR_WARM_GRAY_ARR);
+			$element_prop_row_role->set_cell_color_arr(TCPDFElement::$COLOR_WARM_GRAY_ARR);
+			$element_prop_row_role->set_text_color_arr(TCPDFElement::$COLOR_DARK_GRAY_ARR);
 			$element_prop_row_role->set_is_bold(true);
 			$element_prop_row_role->updateTextProps($cur_role);
 			$element_prop_row_role->draw();
@@ -3037,32 +3133,32 @@ EOD;
 				// "qualified_min", "green", "yellow", "red", "qualified_max"
 				$cur_key = "";
 				$cur_value = "";
-				$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+				$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 				$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 				if($cur_column_name == "qualified_min") {
 					$cur_key = "MIN";
 					$cur_value = $toastmaster_officer_obj->qualified_min;
-					$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+					$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 					$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 				} else if($cur_column_name == "green") {
 					$cur_key = "GREEN";
 					$cur_value = $toastmaster_officer_obj->green;
-					$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+					$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 					$cur_bg_color = TCPDFElement::$COLOR_EMERALD_GREEN_ARR;
 				} else if($cur_column_name == "yellow") {
 					$cur_key = "YELLOW";
 					$cur_value = $toastmaster_officer_obj->yellow;
-					$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+					$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 					$cur_bg_color = TCPDFElement::$COLOR_CREAM_YELLOW_ARR;
 				} else if($cur_column_name == "red") {
 					$cur_key = "RED";
 					$cur_value = $toastmaster_officer_obj->red;
-					$cur_text_color = TCPDFElement::$COLOR_WHITE_ARR;
+					$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 					$cur_bg_color = TCPDFElement::$COLOR_WINE_RED_ARR;
 				} else if($cur_column_name == "qualified_max") {
 					$cur_key = "MAX";
 					$cur_value = $toastmaster_officer_obj->qualified_max;
-					$cur_text_color = TCPDFElement::$COLOR_WARM_GRAY_ARR;
+					$cur_text_color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 					$cur_bg_color = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 				}
 				$cur_value = $this->getTimeFormat_MM_SS_Str($cur_value);
@@ -3076,7 +3172,7 @@ EOD;
 				$element_prop_table_field->set_cell_height($element_set_simple_table_for_title->get_element_set_height());
 				$element_prop_table_field->set_text_color_arr($cur_text_color);
 				$element_prop_table_field->set_cell_color_arr($cur_bg_color);
-				// $element_prop_table_field->set_is_bold(false);
+				$element_prop_table_field->set_is_bold(true);
 				// $element_prop_table_field->updateTextProps($cur_value);
 				$element_prop_table_field->set_raw_text($cur_value);
 
@@ -3109,7 +3205,7 @@ EOD;
 			// text
 			, " "
 			// text_color_arr
-			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			// text_size
 			, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
 			// cell_x_pos
@@ -3121,7 +3217,7 @@ EOD;
 			// cell_height
 			, -1
 			// cell_color_arr
-			, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			, $depth
 			// is_first
 			, false
@@ -3181,7 +3277,7 @@ EOD;
 			// text
 			, $element_set_title
 			// text_color_arr
-			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			// text_size
 			, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
 			// cell_x_pos
@@ -3226,7 +3322,7 @@ EOD;
 				// text
 				, $key
 				// text_color_arr
-				, TCPDFElement::$COLOR_WARM_GRAY_ARR
+				, TCPDFElement::$COLOR_DARK_GRAY_ARR
 				// text_size
 				, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
 				// cell_x_pos
@@ -3267,9 +3363,10 @@ EOD;
 				// text
 				, ""
 				// text_color_arr
-				, TCPDFElement::$COLOR_WARM_GRAY_ARR
+				, TCPDFElement::$COLOR_DARK_GRAY_ARR
 				// text_size
-				, TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE
+				, $CARD_BOARD_CONTENT_FONT_SIZE
+				//, TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE
 				// cell_x_pos
 				, $element_set_x_pos
 				// cell_y_pos
@@ -3678,8 +3775,14 @@ EOD;
 
 		$caller_name .= "draw_timeline_time_marker_V2<br/>";
 
-		$height = ROUND($element_prop->get_text_height() * 0.9, 1);
-		
+		// $height = ROUND($element_prop->get_text_height() * 0.9, 1);
+		$height = $element_prop->get_text_height();
+
+		// DEBUG
+		// $cur_text_height = $element_prop->get_text_height();
+		// echo "\$cur_text_height :: $cur_text_height<br/>";
+		// echo "\$height :: $height<br/><br/>";
+
 		// update radius & height
 		$radius = ROUND(($height/2),1);
 		$height = $radius*2;

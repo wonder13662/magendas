@@ -120,7 +120,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 		} else if($type == self::$BORDER_STYLE_CARD_BOARD_HEAD_DARK_GRAY) {
@@ -131,7 +132,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 		} else if($type == self::$BORDER_STYLE_CARD_BOARD_GRAY_TAIL) {
@@ -145,7 +147,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);			
 
 			$border_style=
@@ -164,7 +167,8 @@ class TCPDFElement{
 				, 'cap' => 'squre'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_TINT_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 			$border_style=
@@ -183,7 +187,8 @@ class TCPDFElement{
 				, 'cap' => 'round'
 				, 'join' => 'miter'
 				, 'dash' => 0
-				, 'color' => self::$COLOR_WARM_GRAY_ARR
+				// , 'color' => self::$COLOR_WARM_GRAY_ARR
+				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
 			$border_style=
@@ -216,34 +221,43 @@ class TCPDFElement{
 	//   dMMMP   dMP dMP dMP dMP   dMP     
 	//  dMP     dMP.aMP dMP dMP   dMP      
 	// dMP      VMMMP" dMP dMP   dMP    
-	private static $DEFAULT_FONT="helvetica";
+	private static $DEFAULT_FONT="nanumgothic";
 	//private static $DEFAULT_FONT="dejavusans";
 	//private static $DEFAULT_FONT="helvetica";
 
 	//helvetica
 
-	private static $FONT_NAME_DEFAULT="helvetica";
+	private static $FONT_NAME_DEFAULT="nanumgothic";
 	private static $FONT_STYLE_BOLD="B";
 	private static $FONT_STYLE_NORMAL="";
+
+	public static $FONT_SIZE_LARGE="FONT_SIZE_LARGE";
+	public static $FONT_SIZE_SMALL="FONT_SIZE_SMALL";	
 
 	private static $FONT_SIZE_TITLE=8;
 	private static $FONT_SIZE_CONTENT=8;
 	private static $FONT_SIZE_CONTENT_SMALL=6;
 	public static $CARD_BOARD_TITLE_FONT_SIZE=8;
-	public static $CARD_BOARD_SIMPLE_TABE_FONT_SIZE=6;
+	public static $CARD_BOARD_TITLE_FONT_SIZE_LARGE=9;
+	public static $CARD_BOARD_TITLE_FONT_SIZE_HUGE=12;
+	public static $CARD_BOARD_SIMPLE_TABLE_FONT_SIZE=6;
 
-	private static $CARD_BOARD_CONTENT_FONT="helvetica";
+	private static $CARD_BOARD_CONTENT_FONT="nanumgothic";
 	private static $CARD_BOARD_CONTENT_FONT_STYLE="";
 	public static $CARD_BOARD_CONTENT_FONT_SIZE=8;
+	public static $CARD_BOARD_CONTENT_FONT_SIZE_LARGE=9;
 
-	private static $SIMPLE_TABLE_TITLE_SMALL_FONT="helvetica";
+	private static $SIMPLE_TABLE_TITLE_SMALL_FONT="nanumgothic";
 	private static $SIMPLE_TABLE_TITLE_SMALL_FONT_STYLE="B";
+
 	public static $SIMPLE_TABLE_TITLE_SMALL_FONT_SIZE=6;
 	public static $SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE=7;
+	public static $SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE=8;
 
-	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT="helvetica";
+	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT="nanumgothic";
 	private static $SIMPLE_TABLE_CONTENT_SMALL_FONT_STYLE="";
 	public static $SIMPLE_TABLE_CONTENT_SMALL_FONT_SIZE=6;
+	public static $SIMPLE_TABLE_CONTENT_FONT_SIZE_LARGE=9;
 
 	private $font_name;		// 텍스트에 사용되는 폰트 정보.
 	public function set_font_name($font_name) {
@@ -270,6 +284,10 @@ class TCPDFElement{
 	}
 
 	public function set_font(){
+
+		$cur_font_name = $this->get_font_name();
+		$cur_font_size = $this->get_font_size();
+
 		$this->pdf->SetFont(
 		    $this->get_font_name()
 		    , $this->get_font_style()
@@ -503,8 +521,10 @@ class TCPDFElement{
 	public function get_text_height_on_font($cell_width, $text){
 		// 텍스트 높이를 확인하기 전에 폰트 설정을 합니다.
 		$this->set_font();
-		// return round($this->pdf->getStringHeight($cell_width, $text), 2);
-		return CEIL($this->pdf->getStringHeight($cell_width, $text));
+
+		// return round($this->pdf->getStringHeight($cell_width, $text), 1);
+		return round($this->pdf->getStringHeight($cell_width, $text), 1);
+		// return CEIL($this->pdf->getStringHeight($cell_width, $text));
 	}
 
 	private $text_color_arr;
@@ -885,7 +905,7 @@ class TCPDFElement{
 
 		// USER CUSTOM - CELL BORDER
 		if($is_last == true) {
-
+			// wonder.jung
 			if( self::$ELEMENT_TYPE_TABLE_FIELD == $element_type ) {
 				$element_prop->set_cell_border_style(self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY));
 			} else {
@@ -975,12 +995,21 @@ class TCPDFElement{
 		}
 
 		// 사용자가 입력한 텍스트를 기준으로 cell height를 구합니다.
-		$element_prop->updateTextProps($element_prop->get_raw_text());
+		$element_prop->updateTextProps(
+			// $raw_text=null
+			$element_prop->get_raw_text()
+			// $text_x_pos_offset=0
+			, 0
+			// $received_cell_height=0
+			, 0
+			// $font_size=10
+			, $element_prop->get_font_size()
+		);
 
 		return $element_prop;
 	}
 
-	public function updateTextProps($raw_text=null, $text_x_pos_offset=0, $received_cell_height=0) {
+	public function updateTextProps($raw_text=null, $text_x_pos_offset=0, $received_cell_height=0, $font_size=10) {
 
 		$cur_raw_text = $this->get_raw_text();
 		if(empty($raw_text) && empty($cur_raw_text)) {
@@ -1008,7 +1037,18 @@ class TCPDFElement{
 		$raw_text_width = $this->get_text_width_on_font($raw_text);
 
 		// http://www.tcpdf.org/doc/code/classTCPDF.html
-		$raw_text_height = $this->get_text_height_on_font(10, "A");
+		// wonder.jung - 왜 폰트가 고정이지??
+		$raw_text_height = 
+		$this->get_text_height_on_font(
+			// $cell_width
+			10
+			// $text
+			, "A"
+		);
+
+		// echo "\$raw_text :: $raw_text<br/>";
+		// echo "\$raw_text_height :: $raw_text_height<br/><br/>";
+
 		$this->set_text_height_single_line($raw_text_height);
 
 		// b-1-1. 좌우 패딩이 포함된 너비를 구합니다.
@@ -1017,9 +1057,10 @@ class TCPDFElement{
 		// b-2. 사용자의 글의 글자수를 구합니다.
 		$raw_text_char_count = STRLEN($raw_text);
 
+		// REMOVE ME
 		// b-3. 사용자의 글자당 길이를 구합니다. (이 값을 이용해서 몇 번째 글자에서 2줄로 분할할지가 결정됩니다.)
 		// $raw_char_width = ROUND(($raw_text_width/$raw_text_char_count),1);
-		$raw_char_width = CEIL($raw_text_width/$raw_text_char_count);
+		// $raw_char_width = CEIL($raw_text_width/$raw_text_char_count);
 
 		// 좌,우의 패딩 너비를 제외한 셀의 너비가 사용자 입력 글자가 가질 수 있는 최대 너비입니다.
 		if($this->get_cell_width() > 0) {
@@ -1109,6 +1150,7 @@ class TCPDFElement{
 			while($cur_cnt < $max_loop_cnt) {
 
 				$sub_text = SUBSTR($raw_text_to_slice, 0, $slice_length);
+
 				$sub_text_width = $this->get_text_width_on_font($sub_text);
 
 				// if(strpos($raw_text,"Your time is limited") !== FALSE) {
@@ -1127,6 +1169,21 @@ class TCPDFElement{
 
 
 				if($cur_max_text_width < $sub_text_width) {
+
+					$prev_sub_text_last_char = SUBSTR($prev_sub_text, (strlen($prev_sub_text) - 1), strlen($prev_sub_text));
+					$sub_text_next = SUBSTR($raw_text_to_slice, ($slice_length - 1), ($slice_length * 2) - 1);
+					$next_sub_text_fisrt_char = SUBSTR($sub_text_next, 0, 1);
+					$last_pos_white_space = -1;
+					if(strcmp($prev_sub_text_last_char," ") != 0 && strcmp($next_sub_text_fisrt_char," ") != 0) {
+						// 나눈 줄의 마지막 글자가 공백이 아니다. && 다음 줄의 첫글자가 공백이 아니다.
+						// 그렇다면 단어가 줄바꿈으로 둘로 나뉜것이다.
+						// 이 단어는 다음줄에 표시한다.
+
+						$last_pos_white_space = strrpos($prev_sub_text," ");
+						$prev_sub_text = SUBSTR($prev_sub_text, 0, $last_pos_white_space);
+						$_raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
+					}
+
 					// 문자열을 시작하는 인덱스를 조정합니다.
 					// 1을 빼지 않을 경우, 다음 열의 첫번째 문자가 사라집니다.
 					array_push($text_arr, $prev_sub_text);
@@ -1135,10 +1192,15 @@ class TCPDFElement{
 					// echo "\$slice_length : $slice_length<br/>";
 					// echo "before / $raw_text_to_slice<br/>";
 					$raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
-					// echo "after / $raw_text_to_slice<br/>";
 
+					// 첫 글자가 공백이면 제거
+					$raw_text_to_slice_fisrt_char = SUBSTR($raw_text_to_slice, 0, 1);
+					if(strcmp($raw_text_to_slice_fisrt_char," ") == 0) {
+						$raw_text_to_slice = SUBSTR($raw_text_to_slice, 1, strlen($raw_text_to_slice));
+					}
+
+					// echo "after / $raw_text_to_slice<br/>";
 					$slice_length = 1;
-					
 					
 				} else if($slice_length == $raw_text_char_count) {
 					// 마지막 열의 마지막 글자를 검사함. 입력하고 종료한다.

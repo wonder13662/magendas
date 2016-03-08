@@ -41,8 +41,14 @@ airborne.validator = {
 	,isNotNumber:function(targetStr){
 		return !this.isNumber(targetStr); 
 	}
+	,is_unsigned_number:function(targetNumStr){
+		return this.isUnsignedNumber(targetNumStr);
+	}
 	,isUnsignedNumber:function(targetStr){
-		return $.isNumeric(targetStr) && targetStr > 0;
+		return $.isNumeric(targetStr) && (0 <= targetStr);
+	}
+	,is_not_unsigned_number:function(targetNumStr){
+		return this.isNotUnsignedNumber(targetNumStr);
 	}
 	,isNotUnsignedNumber:function(targetStr){
 		return !this.isUnsignedNumber(targetStr);
@@ -63,7 +69,7 @@ airborne.validator = {
 		return false;
 	}
 	,is_not_valid_array:function(targetArr){
-		return this.isNotValidArray(targetArr);	
+		return this.isNotValidArray(targetArr);
 	}
 	,isNotValidArray:function(targetArr){
 		return !this.isValidArray(targetArr);
@@ -204,5 +210,132 @@ airborne.validator = {
 
 	    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
 	    return re.test(email);
+	}	
+
+}
+
+airborne.validator.factory = {
+	get:function(scope_name) {
+
+		if(scope_name == undefined) {
+			console.log("!Error! / airborne.validator.factory.get / scope_name == undefined");
+			return;
+		}
+
+		var validator = {
+			scope_name:scope_name
+			,validator_engine:airborne.validator
+			,is_null_object:function(target_obj, show_log){
+
+				var is_null_object = (target_obj == undefined)?true:false;
+				if(is_null_object) {
+					this.show_err_msg("is_null_object", "target_obj", target_obj, show_log);
+				}
+
+				return is_null_object;
+			}
+			,is_not_valid_str:function(target_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				var is_not_valid_str = this.validator_engine.isNotValidStr(target_str);
+				if(is_not_valid_str) {
+					this.show_err_msg("is_not_valid_str", "target_str", target_str, show_log);
+				}
+
+				return is_not_valid_str;
+			}
+			,is_not_valid_array:function(target_array, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				var is_not_valid_array = this.validator_engine.is_not_valid_array(target_array);
+				if(is_not_valid_array) {
+					this.show_err_msg("is_not_valid_array", "target_array", target_array, show_log);
+				}
+
+				return is_not_valid_array;
+			}
+			,is_not_unsigned_number:function(target_number, show_log){
+
+
+				var is_not_unsigned_number = this.validator_engine.isNotUnsignedNumber(target_number);
+				if(is_not_unsigned_number) {
+					this.show_err_msg("is_not_unsigned_number", "target_number", target_number, show_log);
+				}
+
+				return is_not_unsigned_number;
+			}			
+			,is_not_number_str:function(target_number_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				return !this.is_number_str(target_number_str, show_log);
+			}
+			,is_number_str:function(target_number_str, show_log){
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				var is_number_str = this.validator_engine.isNumberStr(target_number_str);
+				if(!is_number_str) {
+					this.show_err_msg("is_not_number_str", "target_number_str", target_number_str, show_log);
+				}
+
+				return is_number_str;
+			}
+			,is_not_valid_time_format_hhmm:function(time_format_str_hhmm, show_log) {
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+
+				return !this.is_valid_time_format_hhmm(time_format_str_hhmm, show_log);
+			}
+			/*
+				@ Public
+				@ Desc : 시간 포맷 문자열이 hh:mm ex) 10:24 인지 확인합니다.
+			*/
+			,is_valid_time_format_hhmm:function(time_format_str_hhmm, show_log) {
+
+				if(show_log == undefined) {
+					show_log = true;
+				}
+				var is_valid_time_format_hhmm = _dates.is_valid_time_format_str(time_format_str_hhmm, _dates.DATE_TYPE_HH_MM);
+				if(!is_valid_time_format_hhmm) {
+					this.show_err_msg("is_not_valid_time_format_hhmm", "time_format_str_hhmm", time_format_str_hhmm, show_log);
+				}
+
+				return is_valid_time_format_hhmm;
+			}
+			,get_err_msg:function(func_checker_name, target_name) {
+
+				var err_msg = 
+				"!Error! / <FUNC_REQUEST_NAME> / <FUNC_CHECKER_NAME>(<TARGET_NAME>) / "
+				.replace(/\<FUNC_REQUEST_NAME\>/gi, this.scope_name)
+				.replace(/\<FUNC_CHECKER_NAME\>/gi, func_checker_name)
+				.replace(/\<TARGET_NAME\>/gi, target_name)
+				;
+
+				return err_msg;
+			}
+			,show_err_msg:function(func_checker_name, target_name, target_obj, show_log) {
+				var err_msg = this.get_err_msg(func_checker_name, target_name);
+				if(show_log == undefined || show_log == true) {
+					console.log(err_msg,target_obj);	
+				}
+				
+			}
+		}
+
+		return validator;
+
 	}	
 }

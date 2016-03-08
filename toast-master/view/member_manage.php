@@ -359,7 +359,7 @@ var list_search_tab = {
 									_link.go_there(
 										_link.MEMBER_MANAGE
 										,_param
-										.get(_param.MEMBER_ID, __member_id)
+										.get(_param.MEMBER_HASH_KEY, __member_hash_key)
 										.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
 									);
 
@@ -487,8 +487,8 @@ var list_search_tab = {
 				// 해당 유저의 정보를 가져와서 modal window로 띄워 줍니다. 
 				for (var idx = 0; idx < all_member_list.length; idx++) {
 					var member_obj = all_member_list[idx];
-					var member_id_number = parseInt(member_obj.__member_id);
-					if(member_id_number == null || member_id_number != selected_value) continue;
+					var __member_hash_key = member_obj.__member_hash_key;
+					if(__member_hash_key == null || __member_hash_key != selected_value) continue;
 
 					show_modal_member_info(member_obj);
 
@@ -572,6 +572,7 @@ var list_search_tab = {
 							// delegate_func
 							function(data){
 
+								// TODO 아래 부분 수정 필요.
 								var new_member_n_membership;
 								if(data != undefined && _v.is_valid_array(data.query_output_arr)) {
 									new_member_n_membership = data.query_output_arr[1][0];

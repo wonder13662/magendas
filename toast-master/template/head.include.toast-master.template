@@ -1,7 +1,7 @@
 
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
+<meta name="google-site-verification" content="m-spPEsYJJULxRof-x12D5lCiGuK3VKE0v2YFHnqM3A" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Toast Master</title>
 
@@ -33,6 +33,9 @@
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.list.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.table.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.list.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.table.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.column.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.modal.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.list_search_tab.js"></script>
@@ -71,9 +74,10 @@
 
 </script>
 
-<!-- Mobile Javascript Library -->
+<!-- PC Javascript Library -->
 <script>
   var _v = airborne.validator;
+  var _v_factory = airborne.validator.factory;
   var _dates = airborne.dates;
   var _html = airborne.html;
   var _obj = airborne.bootstrap.obj;
@@ -84,6 +88,11 @@
   var _color = airborne.color;
   var _json = airborne.json;
   var _print = airborne.bootstrap.view.print;
+  var _console = airborne.console;
+  var _view_list = airborne.bootstrap.view.obj.list;
+  var _action = airborne.bootstrap.obj.__action;
+  var _action_list = airborne.bootstrap.view.obj.__action_list;
+  var _action_table = airborne.bootstrap.view.obj.__action_table;
 
   var _param = param_manager;
   var _link = link_manager.init(service_root_path, _server, _param);

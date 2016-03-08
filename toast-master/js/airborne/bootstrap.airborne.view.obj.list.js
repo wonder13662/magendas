@@ -17,14 +17,14 @@ airborne.bootstrap.view.obj.list = {
 
 		return true;
 	}
+	,is_not_valid_list_row_text_type:function(list_row_text_type){
+		return !this.is_valid_list_row_text_type(list_row_text_type);
+	}
 	,COLOR_TYPE_LIST_ROW_WHITE:"list-group-item-default"
 	,COLOR_TYPE_LIST_ROW_GREEN:"list-group-item-success"
 	,COLOR_TYPE_LIST_ROW_BLUE:"list-group-item-info"
 	,COLOR_TYPE_LIST_ROW_YELLOW:"list-group-item-warning"
 	,COLOR_TYPE_LIST_ROW_RED:"list-group-item-danger"
-	,is_not_valid_list_row_text_type:function(list_row_text_type){
-		return !this.is_valid_list_row_text_type(list_row_text_type);
-	}
 	// @ Section : LIST META INFO
 	// @ public
 	// @ Desc : 리스트 속성을 정의하는 객체를 만듭니다.
@@ -419,6 +419,17 @@ airborne.bootstrap.view.obj.list = {
 			delegate_add_list_row_info = 
 			_obj.get_delegate(function(cur_action_obj){
 
+				var __v = _v_factory.get("add list / get_delegate_add_list_row_info");
+				if(__v.is_null_object(cur_action_obj)) {
+					return;
+				}
+				if(__v.is_null_object(cur_action_obj.__prop_map)) {
+					return;
+				}
+				if(__v.is_not_unsigned_number(cur_action_obj.__prop_map.__time_sec)) {
+					return;
+				}
+
 				var cur_editable_list_row_meta_info_obj = 
 				_view_list.get_editable_list_time_hh_mm_n_input_text_row_meta_info_obj(
 					// list_row_text
@@ -656,29 +667,32 @@ airborne.bootstrap.view.obj.list = {
 	*/
 	,add_editable_action_list:function(list_element_type_arr, action_list, list_title, parent_element_set, list_container_jq, delegate_save_n_reload) {
 
-		var _v = airborne.validator;
-		var _html = airborne.html;
-		var _obj = airborne.bootstrap.obj;
-		var _dates = airborne.dates;
-		var _view_list = airborne.bootstrap.view.obj.list;
-
 		if(_v.is_not_valid_array(list_element_type_arr)) {
-			console.log("!Error! / airborne.bootstrap.obj.list / add_editable_action_list / _v.is_not_valid_array(list_element_type_arr)");
+			console.log("!Error! / add_editable_action_list / _v.is_not_valid_array(list_element_type_arr)");
 			return;
 		}
 		if(_v.is_not_valid_str(list_title)) {
-			console.log("!Error! / airborne.bootstrap.obj.list / add_editable_action_list / _v.is_not_valid_str(list_title)");
+			console.log("!Error! / add_editable_action_list / _v.is_not_valid_str(list_title)");
 			return;
 		}
 		if(list_container_jq == undefined) {
-			console.log("!Error! / airborne.bootstrap.obj.list / add_editable_action_list / list_container_jq == undefined");
+			console.log("!Error! / add_editable_action_list / list_container_jq == undefined");
 			return;
 		}
 		if(_obj.isNotValidDelegate(delegate_save_n_reload)){
-			console.log("!Error! / airborne.bootstrap.obj.list / add_editable_action_list / _obj.isNotValidDelegate(delegate_save_n_reload)");
+			console.log("!Error! / add_editable_action_list / _obj.isNotValidDelegate(delegate_save_n_reload)");
 			return;
 		}
 
+		var consoler = airborne.console.get();
+		consoler.off();
+
+		// DEBUG
+		var msg = 
+		"add_editable_action_list / <list_title>"
+		.replace(/\<list_title\>/gi, list_title)
+		;
+		consoler.say(msg, action_list);
 
 
 		// 배열에 LIST ELEMENT TYPE이 있습니다.
@@ -694,8 +708,8 @@ airborne.bootstrap.view.obj.list = {
 
 		var is_editable_list_action = false;
 		var is_fixed_row_action = false;
-		var delegate_add_list_row_info = this.get_delegate_add_list_row_info(cur_element_type);
 
+		var delegate_add_list_row_info = this.get_delegate_add_list_row_info(cur_element_type);
 		var delegate_add_element = this.get_delegate_add_element(parent_element_set, list_container_jq, delegate_save_n_reload, cur_color_type, delegate_add_list_row_info);
 
 		var cur_element_collection_set;
@@ -727,11 +741,18 @@ airborne.bootstrap.view.obj.list = {
 		if(cur_element_collection_set != undefined) {
 
 			var cur_element_set_arr = cur_element_collection_set.get_element_set_arr();
-			var idx;
 			var length = cur_element_set_arr.length;
-			for(idx = 0; idx < length; idx++){
+			for(var idx = 0; idx < length; idx++){
 				var cur_element_set = cur_element_set_arr[idx];
 				var cur_meta_info = cur_element_set.get_meta_info();
+
+				// DEBUG
+				var msg = 
+				"add_editable_action_list / <list_title> / <idx> / cur_meta_info / "
+				.replace(/\<list_title\>/gi, list_title)
+				.replace(/\<idx\>/gi, idx)
+				;
+				consoler.say(msg, cur_meta_info);
 
 				if(cur_element_set.get_meta_info().get_is_shy()) {
 					// 자신이 shy mode 인 경우는 자식 객체를 추가하지 않는다.
@@ -739,13 +760,52 @@ airborne.bootstrap.view.obj.list = {
 				}
 
 				var cur_action_list_list = cur_meta_info.get_prop_map().__action_list;
+				// DEBUG
+				var msg = 
+				"add_editable_action_list / <list_title> / <idx> / cur_action_list_list / "
+				.replace(/\<list_title\>/gi, list_title)
+				.replace(/\<idx\>/gi, idx)
+				;
+				consoler.say(msg, cur_action_list_list);
+
 				if(_v.is_valid_array(cur_action_list_list)){
 					// 내부의 자식 객체가 있는 경우.
+
+					// DEBUG
+					var msg = 
+					"add_editable_action_list / <list_title> / <idx> / 내부의 자식 객체가 있는 경우. / "
+					.replace(/\<list_title\>/gi, list_title)
+					.replace(/\<idx\>/gi, idx)
+					;
+					consoler.say(msg, cur_meta_info);
 
 					var inner_idx;
 					var inner_length = cur_action_list_list.length;
 					for(inner_idx = 0; inner_idx < inner_length; inner_idx++){
+
 						var cur_action_list = cur_action_list_list[inner_idx];
+						var cur_list_title = cur_element_set.get_meta_info().get_prop_map().__action_name;
+
+						if(_v.is_not_valid_array(cur_action_list)) {
+							console.log("!Error! / add_editable_action_list / _v.is_not_valid_array(cur_action_list)");
+							return;
+						}
+						if(_v.is_not_valid_str(cur_list_title)) {
+							console.log("!Error! / add_editable_action_list / _v.is_not_valid_str(cur_list_title)");
+							return;
+						}
+
+						// DEBUG
+						var msg = 
+						"add_editable_action_list / <list_title>  / <idx> / <inner_idx> / <cur_list_title>"
+						.replace(/\<list_title\>/gi, list_title)
+						.replace(/\<idx\>/gi, idx)
+						.replace(/\<inner_idx\>/gi, inner_idx)
+						.replace(/\<cur_list_title\>/gi, cur_list_title)
+						;
+						consoler.say(msg, cur_action_list);
+
+						
 
 						this.add_editable_action_list(
 							// list_element_type_arr
@@ -1873,9 +1933,6 @@ airborne.bootstrap.view.obj.list = {
 	// @ public
 	// @ Desc : src_element_collection_set에서 저장된 json format 데이터로 자신 내부에 포함될 element collection set을 골라 집어 넣습니다.
 	,set_add_on_json_format_on_list:function(src_element_collection_set, target_element_collection_set_arr){
-
-		var _v = airborne.validator;
-		var _obj = airborne.bootstrap.obj;
 
 		if(src_element_collection_set == undefined){
 			console.log("!Error! / airborne.view.obj.list / set_add_on_json_format_on_list / src_element_collection_set == undefined");

@@ -1,6 +1,7 @@
 
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="google-site-verification" content="m-spPEsYJJULxRof-x12D5lCiGuK3VKE0v2YFHnqM3A" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"">
 <title>Toast Master</title>
 
@@ -87,6 +88,7 @@
 <script>
 
   var _v = airborne.validator;
+  var _v_factory = airborne.validator.factory;
   var _dates = airborne.dates;
   var _html = airborne.html;
   var _obj = airborne.bootstrap.obj;
@@ -96,6 +98,7 @@
   var _color = airborne.color;
   var _json = airborne.json;
   var _print = airborne.bootstrap.view.print;
+  var _console = airborne.console;
 
   var _m_list = airborne.bootstrap.view.mobile.list;
   var _tm_m_list = toast_master.mobile_list_manager;
