@@ -113,6 +113,19 @@ echo "<img id=\"ealry_bird_head\" src=\"$service_root_path/images/event/D93_PREM
 			</td>
 		</tr>
 
+		<!-- Q&A -->
+		<tr class="active" style="color:rgb(51, 51, 51);background-color:#004064;border-bottom:1px solid #ddd;">
+			<td class="text-center" style="border-top:0px;border-bottom: 1px solid #004064;background-color:#F2E074;color:#004064;">
+				<h5><span><strong>Feedbacks are always welcome!</strong></span></h5>
+			</td>
+		</tr>
+		<tr id="test" style="color:#c0c0c0;background-color:#FFF;">
+			<td class="text-left" style="border-top:0px;background-color:#004064;color:#F2E074;">
+				<a href="mailto:wonder13662@gmail.com">Ask us via email! Click Me!</a>
+			</td>
+		</tr>
+
+
 	</tbody>
 	
 </table>
