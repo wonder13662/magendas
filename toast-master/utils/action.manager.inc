@@ -65,8 +65,27 @@ class ActionObject implements Action{
 	public function get_parent() {
 		return $this->parent_action_obj;
 	}
+	public function get_idx() {
+		if($this->has_no_parent()) {
+			return -1;
+		}
 
-	public function add_child($child_action_obj) {
+		$parent_action_obj = $this->get_parent();
+		if(ActionObject::is_not_action_obj($parent_action_obj)) {
+			return -1;
+		}
+		$child_action_obj_list = $parent_action_obj->get_children();
+
+		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
+			$child_action_obj = $child_action_obj_list[$idx];
+
+			if($child_action_obj->get_id() == $this->get_id()) {
+				return $idx;
+			}
+		}
+	}
+
+	public function add_child($child_action_obj, $idx_insert=-1) {
 
 		// DEBUG
 		$cur_name = $this->get_name();
@@ -84,8 +103,14 @@ class ActionObject implements Action{
 		if(!is_null($child_action_obj)) {
 
 			$child_action_name = $child_action_obj->get_name();
-			
-			array_push($this->children_action_object_list, $child_action_obj);
+
+			if(-1 < $idx_insert) {
+				$array_replacement = array($child_action_obj);
+				array_splice( $this->children_action_object_list, $idx_insert, 0, $array_replacement );	
+			} else {
+				array_push($this->children_action_object_list, $child_action_obj);	
+			}
+
 			$child_action_obj->set_parent($this);
 		}
 

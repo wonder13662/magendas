@@ -5469,6 +5469,51 @@ class MYSQLInterface{
 		return $action_obj_copy;                                             
 	}
 	/*
+		@ Public
+		@ Desc : target action obj를 복사합니다. 자식 객체애 대해서는 shy mode로 1개만 남겨둡니다. 엘리먼트를 추가할 때 사용합니다.
+	*/
+	public function copy_action_obj_empty($target_action_obj=null) {
+
+		if($this->is_not_action_obj(__FUNCTION__, $target_action_obj, "target_action_obj")){
+			return;
+		}
+			
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+
+		// $target_action_obj->show_info();
+
+		// 어떤 타입인지 구분한다.
+		$action_obj_copy = null;
+		if(ActionCollection::is_instance($target_action_obj)) {
+
+			// 1. COLLECTION
+			if($target_action_obj->is_list()) {
+
+				// 1-1. LIST
+				$action_obj_copy = $this->copy_action_list($target_action_obj);
+
+			} else if($target_action_obj->is_table()) {
+
+				// 1-2. TABLE
+				$action_obj_copy = $this->copy_action_table($target_action_obj);
+
+			}
+
+		} else if(ActionItem::is_instance($target_action_obj)) {
+
+			// 2. ITEM
+			$action_obj_copy = $this->copy_action_item($target_action_obj);
+
+		}
+		if($this->is_not_action_obj(__FUNCTION__, $action_obj_copy, "action_obj_copy")){
+			return;
+		}
+
+		$action_obj_copy->show_info();
+
+		return $action_obj_copy;                                             
+	}	
+	/*
 		@ Private
 		@ Desc : 자신이 포함된 상위 부모 컬렉션(TABLE)을 복제합니다.
 	*/	
@@ -7313,11 +7358,67 @@ class MYSQLInterface{
 
 		return $root_action_list;
 	}
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 객체는 shy mode로 복제합니다.
+	public function copy_action_item_relation($action_item_target_before, $action_item_target_after) {
+
+		// wonder.jung11
+		$parent_action_obj = null;
+		$child_action_obj_list = null;
+		$action_item_copy = null;
+		if($this->is_action_item(__FUNCTION__, $action_item_target_before)) {
+			$parent_action_obj = $action_item_target_before->get_parent();
+
+			if($action_item_target_before->has_children()) {
+				$child_action_obj_list = $action_item_target_before->get_children();	
+			}
+
+			$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before);
+			if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
+				return;
+			}
+
+			// SET PARENT
+			if($this->is_action_obj(__FUNCTION__, $parent_action_obj)){
+				$action_item_copy->set_parent($parent_action_obj);
+				$cur_idx = $action_item_target_before->get_idx();
+				$parent_action_obj->add_child($action_item_copy, ($cur_idx + 1));
+			}
+
+
+		}
+		if($this->is_action_item(__FUNCTION__, $action_item_target_after)) {
+			$parent_action_obj = $action_item_target_after->get_parent();
+
+			if($action_item_target_after->has_children()) {
+				$child_action_obj_list = $action_item_target_after->get_children();	
+			}
+
+			if($this->is_not_action_item(__FUNCTION__, $action_item_copy)) {
+				$action_item_copy = $this->copy_action_item_no_relation($action_item_target_after);
+			}
+
+			// SET PARENT
+			if($this->is_action_obj(__FUNCTION__, $parent_action_obj)){
+				$action_item_copy->set_parent($parent_action_obj);
+			}
+
+			// wonder.jung11
+			if($this->is_not_action_obj(__FUNCTION__, $parent_action_obj)){
+
+			}
+
+			
+		}
+
+
+
+	}
 	/*
 		@ Private
-		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다.
+		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다. 부모, 자식 객체 관계는 연결하지 않습니다.
 	*/
-	private function copy_action_item_v2($action_item_target) {
+	private function copy_action_item_no_relation($action_item_target) {
 
 		if($this->is_not_action_item(__FUNCTION__, $action_item_target, "action_item_target")){
 			return;
@@ -7369,11 +7470,13 @@ class MYSQLInterface{
 			$__action_item_id = $result->__action_item_id;	
 		}
 
-		// action item update
-		$action_item_target->set_id($__action_item_id);
-		$action_item_target->set_hash_key($hash_key);
+		// create action item copy
+		$action_item_copy = new ActionItem(null, $type);
+		$action_item_copy->set_id($__action_item_id);
+		$action_item_copy->set_hash_key($hash_key);
+		$action_item_copy->set_context($context_mysql_safe);
 
-		return $action_item_target;
+		return $action_item_copy;
 	}	
 	/*
 		@ Private
@@ -8334,8 +8437,6 @@ class MYSQLInterface{
 		DB 업데이트 횟수를 최소한으로 줄입니다.
 	*/
 	public function get_template_meeting_timeline_BDTM($hh_mm_begins) {
-
-		// wonder.jung11
 
 		if($this->is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
 			echo "\$this->is_not_valid_time_format_hh24_mm(\$hh_mm_begins)<br/>";
