@@ -96,8 +96,8 @@
 
 	// test action list
 	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6138, 134); 	// 용인
-	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
+	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6138, 134); 	// 용인
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6377, 134); 	// 판교
 	$new_action_list_std = $new_action_list->get_std_obj();
 
 	// @ required

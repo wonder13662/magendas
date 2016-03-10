@@ -101,53 +101,40 @@
 		// 새로운 아이템 추가
 		$new_action_item_id = $wdj_mysql_interface->insert_action_item($ACTION_ITEM_TYPE, $ACTION_NAME, $ACTION_CONTEXT);
 
-		// DEBUG
-		$action_item_id_before = -1;
-		if(!empty($ACTION_HASH_KEY_BEFORE)) {
-			$action_item_id_before = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_BEFORE);	
+		$root_action_id = $wdj_mysql_interface->get_action_collection_id($ROOT_ACTION_HASH_KEY);
+		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
+			return;
 		}
-		$result->action_item_id_before = $action_item_id_before;
-
-		$action_item_id_after = -1;
-		if(!empty($ACTION_HASH_KEY_BEFORE)) {
-			$action_item_id_after = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_AFTER);	
-		}
-		$result->action_item_id_after = $action_item_id_after;
-
-		$parent_action_list_id = -1;
-		if(!empty($PARENT_ACTION_HASH_KEY)) {
-			$parent_action_list_id = $wdj_mysql_interface->get_action_collection_id($PARENT_ACTION_HASH_KEY);	
+		$root_action_list = $wdj_mysql_interface->get_root_action_collection($root_action_id, $MEETING_ID);
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+			return;
 		}
 		// DEBUG
-		$result->parent_action_list_id = $parent_action_list_id;
-		if(0 < $parent_action_list_id) {
-			$wdj_mysql_interface->insert_parent_list_n_child_item($parent_action_list_id, $new_action_item_id);
+		$result->root_action_id_debug = $root_action_list->get_id();
+
+		$action_item_obj_before = $root_action_list->search_hash_key($ACTION_HASH_KEY_BEFORE);
+		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+			return;
 		}
-		// 자식 객체 복제 작업도 필요!
-
-		// wonder.jung11
-		// 특정 객체를 복사, 자식 객체들은 모두 shy 처리되는 플래그값을 넘겨준다면?
-
-		// 부모가 가진 자식 객체들의 순서 정렬 이슈.
-		// 넣으려는 객체 사이에 추가 뒤에 재정렬.
-
-		// $this->reorder_child_item_in_parent_list($parent_action_list_id);
-
-
-
-		
-
-		//public function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
-		// $this->insert_parent_list_n_child_item();
-
-		
-
+		if(strcmp($action_item_obj_before->get_hash_key(), $ACTION_HASH_KEY_BEFORE) != 0) {
+			echo "strcmp(\$action_item_obj_before->get_hash_key(), \$ACTION_HASH_KEY_BEFORE) != 0";
+			return;
+		}
 		// DEBUG
-		$result->new_action_item_id = $new_action_item_id;
+		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
 
-		// 완성된 객체 가져오기.
-		// public function get_action_item_object($item_id, $order=0, $is_shy=0) {
+		$action_item_copy = $wdj_mysql_interface->copy_action_item_relation($action_item_obj_before);
+		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")) {
+			return;
+		}
 
+		// 업데이트된 root_action_list를 가져옵니다.
+		$root_action_list = $wdj_mysql_interface->get_root_action_collection($root_action_id, $MEETING_ID);
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+			return;
+		}
+
+		$result->root_action_list_updated = $root_action_list->get_std_obj();
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
@@ -163,7 +150,6 @@
 			// update_action_item($action_item_id=-1, $action_name="", $action_item_context="")
 			$wdj_mysql_interface->update_action_item($cur_action_item_id, $ACTION_NAME, $ACTION_CONTEXT);
 
-
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
 				// 롤을 업데이트하는 경우.
@@ -176,6 +162,7 @@
 				$result->ROLE_ID = $ROLE_ID;
 				$result->SELECTED_VALUE = $SELECTED_VALUE;
 
+				// wonder.jung11
 				// 롤을 업데이트합니다.
 
 				//

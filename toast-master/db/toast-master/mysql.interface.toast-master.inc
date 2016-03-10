@@ -201,7 +201,7 @@ class MYSQLInterface{
 		return $is_instance;
 	}
 
-	private function is_not_action_collection($function_name="", $target, $param_name=""){
+	public function is_not_action_collection($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
@@ -212,7 +212,7 @@ class MYSQLInterface{
 	private function is_action_list($function_name="", $target, $param_name=""){
 		return !$this->is_not_action_list($function_name, $target, $param_name);
 	}
-	private function is_not_action_list($function_name="", $target, $param_name=""){
+	public function is_not_action_list($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
@@ -253,7 +253,7 @@ class MYSQLInterface{
 		return $is_action_item;
 	}
 
-	private function is_not_action_item($function_name="", $target, $param_name=""){
+	public function is_not_action_item($function_name="", $target, $param_name=""){
 		$is_not_action_item = ActionItem::is_not_instance($target);
 		if($is_not_action_item == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_action_item(\$$param_name)<br/>";
@@ -298,7 +298,7 @@ class MYSQLInterface{
 		return $is_action_item;
 	}
 
-	private function is_not_unsigned_number($function_name="", $target, $param_name=""){
+	public function is_not_unsigned_number($function_name="", $target, $param_name=""){
 
 		$is_not_unsigned_number = !$this->isUnsignedNumber($target);
 		if($is_not_unsigned_number == true && !empty($function_name) && !empty($param_name)) {
@@ -7359,66 +7359,110 @@ class MYSQLInterface{
 		return $root_action_list;
 	}
 	// @ Public
-	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 객체는 shy mode로 복제합니다.
-	public function copy_action_item_relation($action_item_target_before, $action_item_target_after) {
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 item 객체는 shy mode로 복제합니다.
+	public function copy_action_collection_relation($action_collection_obj) {
+
+		if($this->is_not_action_collection(__FUNCTION__, $action_collection_obj, "action_collection_obj")){
+			return;
+		}
+		// root collection action은 지원하지 않습니다.
+		if($action_collection_obj->is_root_collection()) {
+			echo "!Error! / copy_action_collection_relation / \$action_collection_obj->is_root_collection()";
+			return;
+		}
+
+		// LIST 형만 지원합니다.
+		if($this->is_not_action_list(__FUNCTION__, $action_collection_obj, "action_collection_obj")){
+			return;
+		}
+
+
+		$parent_action_item_obj = $action_collection_obj->get_parent();
+		// 부모 액션 엘리먼트는 아이템 객체입니다. 그러므로 부모 액션이 item type인지 확인합니다. 이 메서드안에서 부모 객체는 반드시 있어야 합니다.
+		if($this->is_not_action_item(__FUNCTION__, $parent_action_item_obj, "parent_action_item_obj")){
+			return;
+		}
+
+		//add_action_collection_no_relation
+		$action_collection_obj_copy = $this->add_action_collection_no_relation($action_collection_obj);
+		if($this->is_not_action_collection(__FUNCTION__, $action_collection_obj_copy, "action_collection_obj_copy")){
+			return;
+		}
+
+		// SET PARENT RELATION
+		$action_collection_obj_copy->set_parent($parent_action_item_obj);
+		$parent_action_item_obj->add_child($action_collection_obj_copy);
+		$this->insert_parent_action_item_n_child_collection_v2($parent_action_item_obj, $action_collection_obj_copy);
+
+
+		// SET CHILDREN RELATION
+		$cur_first_child_item_obj = null;
+		if($action_collection_obj->has_children()) {
+			// 자식 객체가 있는 경우라면 shy mode로 추가합니다.
+			$cur_first_child_item_obj = $action_collection_obj->get_first_child();
+
+			$is_shy = 1; // shy mode로 추가합니다.
+			$cur_first_child_item_obj_copy = $this->copy_action_item_relation($cur_first_child_item_obj, $is_shy);
+			$action_collection_obj_copy->add_child($cur_first_child_item_obj_copy);
+		}
+
+	}
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 collection 객체는 복제합니다.
+	public function copy_action_item_relation($action_item_target_before, $is_shy=0, $action_name="", $action_context="") {
+
+		if($this->is_not_action_item(__FUNCTION__, $action_item_target_before, "action_item_target_before")){
+			return;
+		}
+
+		$parent_action_collection_obj = $action_item_target_before->get_parent();
+		// 부모 액션 엘리먼트는 컬렉션 객체입니다. 그러므로 부모 액션이 collection type인지 확인합니다.
+		if($this->is_not_action_collection(__FUNCTION__, $parent_action_collection_obj, "parent_action_collection_obj")){
+			return;
+		}
+		
+		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
+			return;
+		}
 
 		// wonder.jung11
-		$parent_action_obj = null;
-		$child_action_obj_list = null;
-		$action_item_copy = null;
-		if($this->is_action_item(__FUNCTION__, $action_item_target_before)) {
-			$parent_action_obj = $action_item_target_before->get_parent();
+		// SET PARENT
+		if($this->is_action_obj(__FUNCTION__, $parent_action_collection_obj)){
+			$action_item_copy->set_parent($parent_action_collection_obj);
+			$cur_idx = $action_item_target_before->get_idx();
+			// 형제 리스트의 추가는 앞선 형제의 뒤로만 추가합니다.
+			$parent_action_collection_obj->add_child($action_item_copy, ($cur_idx + 1));
 
-			if($action_item_target_before->has_children()) {
-				$child_action_obj_list = $action_item_target_before->get_children();	
-			}
+			// 실제 DB상에서 형제 사이에 추가합니다.
+			$this->insert_parent_list_n_child_item(
+				$parent_action_collection_obj->get_id()
+				, $action_item_copy->get_id()
+				, ($cur_idx * 100 + 50) // 형제 사이에 추가하기 위한 인덱스
+				, $is_shy
+			);
 
-			$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before);
-			if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
-				return;
-			}
-
-			// SET PARENT
-			if($this->is_action_obj(__FUNCTION__, $parent_action_obj)){
-				$action_item_copy->set_parent($parent_action_obj);
-				$cur_idx = $action_item_target_before->get_idx();
-				$parent_action_obj->add_child($action_item_copy, ($cur_idx + 1));
-			}
-
-
-		}
-		if($this->is_action_item(__FUNCTION__, $action_item_target_after)) {
-			$parent_action_obj = $action_item_target_after->get_parent();
-
-			if($action_item_target_after->has_children()) {
-				$child_action_obj_list = $action_item_target_after->get_children();	
-			}
-
-			if($this->is_not_action_item(__FUNCTION__, $action_item_copy)) {
-				$action_item_copy = $this->copy_action_item_no_relation($action_item_target_after);
-			}
-
-			// SET PARENT
-			if($this->is_action_obj(__FUNCTION__, $parent_action_obj)){
-				$action_item_copy->set_parent($parent_action_obj);
-			}
-
-			// wonder.jung11
-			if($this->is_not_action_obj(__FUNCTION__, $parent_action_obj)){
-
-			}
-
-			
+			// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
+			$this->reorder_child_item_in_parent_list($parent_action_collection_obj->get_id());
 		}
 
+		// SET CHILD RELATION
+		$child_action_collection_obj_list = null;
+		if($action_item_target_before->has_children()) {
+			// 첫번째 자식 객체만 추가합니다.
+			$cur_first_child_collection_obj = $action_item_target_before->get_first_child();
+			// 새로 만든 아이템으로 부모 객체를 변경합니다.
+			$cur_first_child_collection_obj->set_parent($action_item_copy);
+			$this->copy_action_collection_relation($cur_first_child_collection_obj);
+		}
 
-
+		return $action_item_copy;
 	}
 	/*
 		@ Private
 		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다. 부모, 자식 객체 관계는 연결하지 않습니다.
 	*/
-	private function copy_action_item_no_relation($action_item_target) {
+	private function copy_action_item_no_relation($action_item_target, $action_name="", $action_context="") {
 
 		if($this->is_not_action_item(__FUNCTION__, $action_item_target, "action_item_target")){
 			return;
@@ -7427,11 +7471,21 @@ class MYSQLInterface{
 		if($this->is_not_action_item_type(__FUNCTION__, $type, "type")){
 			return;
 		}
-		$name = $action_item_target->get_name();
+		if(empty($action_name)) {
+			$name = $action_item_target->get_name();
+		} else {
+			$name = $action_name;
+		}
+		
 		if($this->is_empty(__FUNCTION__, $name, "name")){
 			return;
 		}
-		$context = $action_item_target->get_context();
+
+		if(empty($action_context)) {
+			$context = $action_item_target->get_context();	
+		} else {
+			$context = $action_context;
+		}
 		$context_mysql_safe = $this->mysql_manager->escape_json_str($context);
 
 		$hash_key = $this->get_hash_key("$type $name $context");
@@ -7647,7 +7701,7 @@ class MYSQLInterface{
 		@ Private
 		@ Desc : action collection을 DB에 저장합니다.
 	*/
-	private function add_action_collection_v2($action_collection) {
+	private function add_action_collection_no_relation($action_collection) {
 
 		if($this->is_not_action_collection(__FUNCTION__, $action_collection, "action_collection")){
 			return;
@@ -7815,6 +7869,8 @@ class MYSQLInterface{
 		$this->reorder_child_collection_in_parent_item($parent_action_item_id);
 
 	}
+	// @ private
+	// @ desc : 맨 마지막 엘리먼트로 추가합니다.
 	private function insert_parent_list_n_child_item_v2($parent_action_list, $child_action_item) {
 
 		if($this->is_not_action_list(__FUNCTION__, $parent_action_list, "parent_action_list")){
@@ -7892,6 +7948,7 @@ class MYSQLInterface{
 			$is_shy_child_int = 1;
 		}
 
+		// 맨 마지막 엘리먼트로 추가합니다.
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
@@ -8259,7 +8316,7 @@ class MYSQLInterface{
 
 			// add on action collection 타입인 경우의 처리.
 			// add on action collection을 등록합니다.
-			$new_action_obj = $this->add_action_collection_v2($action_obj);
+			$new_action_obj = $this->add_action_collection_no_relation($action_obj);
 			$action_obj->inject($new_action_obj);
 
 			// add on action parent와 add on action collection을 연결합니다.
@@ -8295,7 +8352,7 @@ class MYSQLInterface{
 			// 객체가 새로 만들어지거나 변경된 경우에만 DB에 추가합니다.
 			// action collection 객체를 DB에 추가합니다.
 			if($action_obj->has_changed() == true) {
-				$new_action_obj = $this->add_action_collection_v2($action_obj);
+				$new_action_obj = $this->add_action_collection_no_relation($action_obj);
 				$action_obj->inject($new_action_obj);
 			}
 
