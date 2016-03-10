@@ -79,6 +79,8 @@ wonglish.meeting_agenda_manager = {
 		var meeting_agenda_obj = meeting_agenda_data_set.meeting_agenda_obj;
 		var meeting_membership_id = meeting_agenda_data_set.meeting_membership_id;
 
+		console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
+
 		var meeting_agenda_id = meeting_agenda_obj.__meeting_id;
 		var meeting_agenda_startdttm = meeting_agenda_obj.__startdttm;
 		var click_event_lock_obj = null;

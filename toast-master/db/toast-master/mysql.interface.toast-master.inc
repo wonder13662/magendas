@@ -6315,7 +6315,6 @@ class MYSQLInterface{
 				"DELETE FROM `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`"
 				,"WHERE parent_action_list_id=$parent_action_list_id"
 				,"AND child_action_item_id=$child_action_item_id"
-				,"AND is_shy_child=1"
 			)
 		);
 		$query_manager->modify();
@@ -6475,6 +6474,23 @@ class MYSQLInterface{
 
 
 	// action list
+	public function get_root_action_collection_by_hash_key($action_collection_hash_key="", $meeting_id=-1) {
+
+		// wonder.jung11
+		if($this->is_empty(__FUNCTION__, $action_collection_hash_key, "action_collection_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$root_action_id = $this->get_action_collection_id($action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
+			return;
+		}
+
+		return $this->get_root_action_collection($root_action_id, $meeting_id);
+	}
 	public function get_root_action_collection($action_collection_id=-1, $meeting_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
@@ -7012,6 +7028,25 @@ class MYSQLInterface{
 		
 		return $__item_id;
 	}
+	// @ desc : 부모, 형제, 자식 참조를 가지고 있는 action item obj를 돌려줍니다.
+	public function get_action_item_obj_with_relation($root_action_hash_key="", $meeting_id=-1, $action_item_hash_key="") {
+
+		$root_action_id = $this->get_action_collection_id($root_action_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
+			return;
+		}
+		$root_action_list = $this->get_root_action_collection($root_action_id, $meeting_id);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+			return;
+		}
+
+		$action_item_obj_target = $root_action_list->search_hash_key($action_item_hash_key);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_obj_target, "action_item_obj_target")) {
+			return;
+		}
+
+		return $action_item_obj_target;
+	}
 
 	/*
 		@ public
@@ -7421,12 +7456,11 @@ class MYSQLInterface{
 			return;
 		}
 		
-		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before);
+		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before, $action_name, $action_context);
 		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
 			return;
 		}
 
-		// wonder.jung11
 		// SET PARENT
 		if($this->is_action_obj(__FUNCTION__, $parent_action_collection_obj)){
 			$action_item_copy->set_parent($parent_action_collection_obj);
@@ -7528,9 +7562,36 @@ class MYSQLInterface{
 		$action_item_copy = new ActionItem(null, $type);
 		$action_item_copy->set_id($__action_item_id);
 		$action_item_copy->set_hash_key($hash_key);
+		$action_item_copy->set_name($name);
 		$action_item_copy->set_context($context_mysql_safe);
 
 		return $action_item_copy;
+	}	
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 삭제합니다. 부모에서의 참조도 제거합니다.
+	public function delete_action_item_relation($action_item_target) {
+
+		// wonder.jung11
+
+		if($this->is_not_action_item(__FUNCTION__, $action_item_target, "action_item_target")){
+			return;
+		}
+
+		$parent_action_collection_obj = $action_item_target->get_parent();
+		// 부모 액션 엘리먼트는 컬렉션 객체입니다. 그러므로 부모 액션이 collection type인지 확인합니다.
+		if($this->is_not_action_collection(__FUNCTION__, $parent_action_collection_obj, "parent_action_collection_obj")){
+			return;
+		}
+
+		// 실제 DB상에서 부모와의 연결을 제거합니다.
+		$this->delete_parent_list_n_child_item(
+			$parent_action_collection_obj->get_id()
+			, $action_item_target->get_id()
+		);
+
+		// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
+		$this->reorder_child_item_in_parent_list($parent_action_collection_obj->get_id());
+
 	}	
 	/*
 		@ Private

@@ -55,11 +55,7 @@ class ActionObject implements Action{
 	public function has_parent() {
 		return (!is_null($this->parent_action_obj))?true:false;
 	}
-	public function set_parent($parent_action_obj) {
-
-		if(is_null($parent_action_obj)) return;
-		if(ActionObject::is_not_action_obj($parent_action_obj)) return;
-
+	public function set_parent($parent_action_obj=null) {
 		$this->parent_action_obj = $parent_action_obj;
 	}
 	public function get_parent() {
@@ -84,7 +80,36 @@ class ActionObject implements Action{
 			}
 		}
 	}
+	public function remove_child($child_action_obj_remove) {
 
+		// DEBUG
+		$cur_name = $this->get_name();
+		$cur_child_name = $child_action_obj_remove->get_name();
+
+		if(ActionObject::is_not_action_obj($child_action_obj_remove)) {
+			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
+			return;
+		}
+
+		if($this->has_no_child()) {
+			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->has_no_child()<br/>";
+			return;
+		}
+
+		// wonder.jung11
+		$child_action_obj_list = $this->get_children();
+		$child_action_obj_list_next = array();
+		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
+			$child_action_obj = $child_action_obj_list[$idx];
+
+			if($child_action_obj->get_id() != $child_action_obj_remove->get_id()) {
+				array_push($child_action_obj_list_next, $child_action_obj);	
+			}
+		}
+
+		$this->set_children($child_action_obj_list_next);
+
+	}
 	public function add_child($child_action_obj, $idx_insert=-1) {
 
 		// DEBUG
@@ -124,6 +149,9 @@ class ActionObject implements Action{
 		}
 
 		return $this->children_action_object_list;
+	}
+	public function has_no_child() {
+		return !$this->has_children();
 	}
 	public function has_children() {
 		if(0 < $this->get_children_cnt()) {
