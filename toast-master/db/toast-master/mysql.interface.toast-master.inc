@@ -4764,48 +4764,7 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}	
 
-	// REMOVE ME
-	/*
-	public function updateTimer($meeting_id, $timer_record_id, $timer_type_id, $member_id, $time_record_milli_sec=0,$is_qualified=false){
 
-		$function_name = "updateTimer";
-		if($this->isNotUnsignedNumber($meeting_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$timer_record_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($timer_type_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$timer_type_id)<br/>";
-			return;
-		}
-		if($this->isNotNumber($member_id)){
-			echo "$function_name / \$this->isNotNumber(\$member_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($time_record_milli_sec)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$time_record_milli_sec)<br/>";
-			return;
-		}
-		$is_qualified_num = ($is_qualified == true)?1:0;
-
-		$query = 
-		"UPDATE `magendas`.`MA_TIMER_RECORD`"
-		. " SET `timer_type_id` = $timer_type_id"
-		. " , `meeting_id` = $meeting_id"
-		. " , `member_id` = $member_id"
-		. " , `time_record_milli_sec` = $time_record_milli_sec"
-		. " , `is_qualified` = $is_qualified_num"
-		. " WHERE `id` = $timer_record_id"
-		;
-
-		$json_res_obj = $this->getModifyResult($query);
-
-		return $this->getSimpleResult($json_res_obj);
-	}
-	*/
 
 
 	public function deleteTimer($timer_record_id){
@@ -5617,11 +5576,6 @@ class MYSQLInterface{
 		if($this->is_null_object(__FUNCTION__, $target_action_list, "target_action_list")) {
 			return;
 		}
-
-		// REMOVE ME?
-		// if($this->is_not_instance(__FUNCTION__, $target_action_list, "target_action_list")) {
-		// 	return;
-		// }
 
 		if($this->is_not_action_list(__FUNCTION__, $target_action_list, "target_action_list")) {
 			return;

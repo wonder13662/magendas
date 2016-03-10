@@ -101,25 +101,6 @@
 		// 새로운 아이템 추가
 		$new_action_item_id = $wdj_mysql_interface->insert_action_item($ACTION_ITEM_TYPE, $ACTION_NAME, $ACTION_CONTEXT);
 
-
-		// REMOVE ME
-		/*
-		$root_action_id = $wdj_mysql_interface->get_action_collection_id($ROOT_ACTION_HASH_KEY);
-		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
-			return;
-		}
-		$root_action_list = $wdj_mysql_interface->get_root_action_collection($root_action_id, $MEETING_ID);
-		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
-			return;
-		}
-		// DEBUG
-		$result->root_action_id_debug = $root_action_list->get_id();
-
-		$action_item_obj_before = $root_action_list->search_hash_key($ACTION_HASH_KEY_BEFORE);
-		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
-			return;
-		}
-		*/
 		$action_item_obj_before = 
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
 			// $root_action_hash_key=""
@@ -188,21 +169,6 @@
 	} else if((strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) && !empty($ACTION_HASH_KEY)) {
 
 		// 아이템을 삭제합니다. 실제로 데이터를 지웁니다.
-		// REMOVE ME
-		/*
-		$root_action_id = $wdj_mysql_interface->get_action_collection_id($ROOT_ACTION_HASH_KEY);
-		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
-			return;
-		}
-		$root_action_list = $wdj_mysql_interface->get_root_action_collection($root_action_id, $MEETING_ID);
-		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
-			return;
-		}
-		// DEBUG
-		$result->root_action_id_debug = $root_action_list->get_id();
-
-		$action_item_obj_delete = $root_action_list->search_hash_key($ACTION_HASH_KEY);
-		*/
 
 		$action_item_obj_delete = 
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
