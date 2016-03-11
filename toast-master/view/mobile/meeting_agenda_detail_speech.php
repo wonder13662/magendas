@@ -99,24 +99,24 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 		, membership_obj
 		// header_arr
 		,[
+			//_link.get_header_link(
+			//	_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
+			//	,_param
+			//	.get(_param.MEETING_ID, MEETING_ID)
+			//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			//)
+			//,_link.get_header_link(
+			//	_link.MOBILE_MEETING_AGENDA_DETAIL
+			//	,_param
+			//	.get(_param.MEETING_ID, MEETING_ID)
+			//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			//)
+			//_link.get_header_link(
+			//	_link.MOBILE_MEETING_AGENDA_LIST
+			//	,_param
+			//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			//)
 			_link.get_header_link(
-				_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
-				,_param
-				.get(_param.MEETING_ID, MEETING_ID)
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			)
-			,_link.get_header_link(
-				_link.MOBILE_MEETING_AGENDA_DETAIL
-				,_param
-				.get(_param.MEETING_ID, MEETING_ID)
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			)
-			,_link.get_header_link(
-				_link.MOBILE_MEETING_AGENDA_LIST
-				,_param
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			)
-			,_link.get_header_link(
 				_link.MOBILE_TOP
 				,_param
 				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
