@@ -252,12 +252,12 @@ if(!IS_EXTERNAL_SHARE) {
 		, membership_obj
 		// header_arr
 		,[
+			//_link.get_header_link(
+			//	_link.MOBILE_ROLE_SIGN_UP_LIST
+			//	,_param
+			//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			//)
 			_link.get_header_link(
-				_link.MOBILE_ROLE_SIGN_UP_LIST
-				,_param
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			)
-			,_link.get_header_link(
 				_link.MOBILE_TOP
 				,_param
 				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)

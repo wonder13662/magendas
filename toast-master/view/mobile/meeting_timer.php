@@ -161,12 +161,12 @@ if(IS_EXTERNAL_SHARE===false) {
 		, membership_obj
 		// header_arr 
 		,[
+		//	_link.get_header_link(
+		//		_link.MOBILE_MEETING_TIMER
+		//		,_param
+		//		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
+		//	)
 			_link.get_header_link(
-				_link.MOBILE_MEETING_TIMER
-				,_param
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
-			)
-			,_link.get_header_link(
 				_link.MOBILE_TOP
 				,_param
 				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)

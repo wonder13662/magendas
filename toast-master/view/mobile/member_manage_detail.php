@@ -139,18 +139,18 @@ _tm_m_list.addHeaderRow(
 	, membership_obj
 	// header_arr 
 	,[
+		//_link.get_header_link(
+		//	_link.MOBILE_MEMBER_MANAGE_DETAIL
+		//	,_param
+		//	.get(_param.MEMBER_ID, MEMBER_ID)
+		//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
+		//)
+		//,_link.get_header_link(
+		//	_link.MOBILE_MEMBER_MANAGE
+		//	,_param
+		//	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
+		//)
 		_link.get_header_link(
-			_link.MOBILE_MEMBER_MANAGE_DETAIL
-			,_param
-			.get(_param.MEMBER_ID, MEMBER_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEMBER_MANAGE
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)			
-		)
-		,_link.get_header_link(
 			_link.MOBILE_TOP
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
