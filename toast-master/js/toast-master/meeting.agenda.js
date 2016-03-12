@@ -217,6 +217,20 @@ wonglish.meeting_agenda_manager = {
 								console.log(">>> data : ",data);
 
 								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
+								if(_action.EVENT_TYPE_INSERT_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
+									// 새로운 엘리먼트를 추가한 경우라면 해당되는 action item 정보(id, hash key)도 같이 업데이트 해줍니다.
+									console.log("FIN / action_item_obj :: ",action_item_obj);
+
+									var action_item_copy = data.action_item_copy;
+									if(action_item_copy == undefined) {
+										console.log("!Error! / _delegate_after_job_done / action_item_copy == undefined");
+										return;
+									}
+
+									action_item_obj.set_action_id(action_item_copy.action_id);
+									action_item_obj.set_action_hash_key(action_item_copy.action_hash_key);
+
+								}
 
 								// 내용이 다른 경우 알려줍니다.
 								// _action.compare_root_action(cur_root_action_obj, new_root_action_obj);

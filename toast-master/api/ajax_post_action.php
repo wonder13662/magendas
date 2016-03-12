@@ -142,8 +142,19 @@
 			$result->cur_action_item_id = $cur_action_item_id;
 
 			// 선택된 액션의 내용만 업데이트합니다.
-			// update_action_item($action_item_id=-1, $action_name="", $action_item_context="")
 			$wdj_mysql_interface->update_action_item($cur_action_item_id, $ACTION_NAME, $ACTION_CONTEXT);
+
+			// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
+			$wdj_mysql_interface->arrange_action_item_order(
+				// $root_action_obj_hash_key=null
+				$ROOT_ACTION_HASH_KEY
+				// $action_item_hash_key_before=null
+				, $ACTION_HASH_KEY_BEFORE
+				// $action_item_hash_key=null
+				, $ACTION_HASH_KEY
+				// $action_item_hash_key_after=null
+				, $ACTION_HASH_KEY_AFTER
+			);
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
