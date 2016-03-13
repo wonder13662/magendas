@@ -6392,7 +6392,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung11
 		$result = $this->sel_action_item_n_parent($parent_action_list_id, $child_action_item_id);
 
 		if(is_null($result)) {
@@ -6667,13 +6666,12 @@ class MYSQLInterface{
 		return $root_action_collection;
 	}
 	// @ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
-	private function get_action_collection_by_hash_key($action_collection_hash_key=-1) {
+	public function get_action_collection_by_hash_key($action_collection_hash_key=-1) {
 
 		if($this->is_empty(__FUNCTION__, $action_collection_hash_key, "action_collection_hash_key")){
 			return;
 		}
 
-		// wonder.jung11
 		$action_collection_id = $this->get_action_collection_id($action_collection_hash_key);
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -6919,6 +6917,47 @@ class MYSQLInterface{
 
 		return $action_table_obj;
 	}
+	// @ desc : add row into list. it makes a copy previous row.
+	public function add_row_into_list($list_action_item_obj=null, $action_name="", $action_context="") {
+		
+		if($this->is_not_action_item(__FUNCTION__, $list_action_item_obj, "list_action_item_obj")) {
+			return;
+		}
+
+		$is_shy = 0;
+		$action_item_copy = $wdj_mysql_interface->copy_action_item_relation($action_item_obj_before, $is_shy, $action_name, $action_context);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")) {
+			return;
+		}
+
+		return $action_item_copy;
+	}	
+	// @ desc : add row into table. it makes a copy previous row.
+	public function add_row_into_table($table_field_action_item_obj=null) {
+		
+		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+			return;
+		}
+
+		if($table_field_action_item_obj->is_not_table_field_item()) {
+			echo "!Error! / add_row_into_table / \$table_field_action_item_obj->is_not_table_field_item()<br/>";
+			return;
+		}
+
+		$cur_table_row_field_action_item_list = $table_field_action_item_obj->get_table_row_field_action_item_list();
+		for($idx = 0;$idx < count($cur_table_row_field_action_item_list);$idx++) {
+			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
+			if($this->is_not_action_item(__FUNCTION__, $table_row_field_action_item_obj, "table_row_field_action_item_obj")) {
+				return;
+			}
+
+			// wonder.jung11
+			// 엘리먼트를 복사합니다.
+			$is_shy = 0;
+			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);
+		}
+
+	}
 	/*
 		@ private
 		@ Desc : 액션 테이블 관련 정보를 가져옵니다. 컬럼 리스트 정보를 포함합니다.
@@ -7095,14 +7134,16 @@ class MYSQLInterface{
 		return $__item_id;
 	}
 	// @ desc : 부모, 형제, 자식 참조를 가지고 있는 action item obj를 돌려줍니다.
-	public function get_action_item_obj_with_relation($root_action_hash_key="", $meeting_id=-1, $action_item_hash_key="") {
+	public function get_action_item_obj_with_relation($root_action_hash_key="", $action_item_hash_key="") {
 
-		$root_action_id = $this->get_action_collection_id($root_action_hash_key);
-		if($this->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
-			return;
+		if($this->is_empty(__FUNCTION__, $root_action_hash_key, "root_action_hash_key")){
+			return;			
 		}
-		$root_action_list = $this->get_root_action_collection($root_action_id, $meeting_id);
-		if($this->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
+			return;			
+		}
+		$root_action_list = $this->get_action_collection_by_hash_key($root_action_hash_key);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")){
 			return;
 		}
 

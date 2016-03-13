@@ -683,6 +683,20 @@ class ActionCollection extends ActionObject{
 		return false;
 	}
 
+	public function is_table_column_list() {
+
+		$cur_parent = $this->get_parent();
+		if(ActionCollection::is_not_instance($cur_parent)) {
+			return false;
+		}
+
+		if($cur_parent->is_table()) {
+			return true;
+		}
+		return false;
+
+	}
+
 	public function is_table() {
 
 		$action_collection_type = parent::get_collection_type();
@@ -693,6 +707,10 @@ class ActionCollection extends ActionObject{
 			return true;
 		}
 		return false;
+	}
+
+	public function is_not_table() {
+		return !$this->is_table();
 	}
 	/*	
 		@ Public
@@ -862,6 +880,23 @@ class ActionItem extends ActionObject{
 			return true;
 		}
 		return false;
+	}
+
+	public function is_not_table_field_item() {
+		return !$this->is_table_field_item();
+	}
+	public function is_table_field_item() {
+
+		$cur_parent = $this->get_parent();
+		if(ActionCollection::is_not_instance($cur_parent)) {
+			return false;
+		}
+
+		if($cur_parent->is_table_column_list()) {
+			return true;
+		}
+		return false;
+
 	}
 
 	/*
@@ -1288,6 +1323,65 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 	// @ Override
 	public function get_context() {
 		return parent::get_context();
+	}
+
+	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다.
+	public function get_table_row_field_action_item_list() {
+
+		if($this->is_not_table_field_item()) {
+			echo "!Error! / get_table_row_field_action_item_list / \$this->is_not_table_field_item()";
+			return;
+		}
+
+		$cur_idx = $this->get_idx();
+		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $cur_idx, "cur_idx")) {
+			return;
+		}
+
+		$table_column_action_list = $this->get_parent();
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $table_column_action_list, "table_column_action_list")) {
+			return;
+		}
+
+		$table_action_obj = $table_column_action_list->get_parent();
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $table_action_obj, "table_action_obj")) {
+			return;
+		}
+
+		if($table_action_obj->is_not_table()) {
+			echo "!Error! / get_table_row_field_action_item_list / \$table_action_obj->is_not_table()";
+			return;
+		}
+
+		$cur_child_column_action_list_list = $table_action_obj->get_children();
+		$table_row_field_action_item_list = array();
+		for($idx = 0;$idx < count($cur_child_column_action_list_list);$idx++) {
+			$cur_child_column_action_list = $cur_child_column_action_list_list[$idx];
+			if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $table_action_obj, "table_action_obj")) {
+				return;
+			}
+
+			$table_field_action_item_list = $cur_child_column_action_list->get_children();
+			for($inner_idx = 0;$inner_idx < count($cur_child_column_action_list_list);$inner_idx++) {
+				$table_field_action_item_obj = $table_field_action_item_list[$inner_idx];
+
+				if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+					return;
+				}
+
+				if($table_field_action_item_obj->get_idx() == $cur_idx) {
+					array_push($table_row_field_action_item_list, $table_field_action_item_obj);
+				}
+			} // end inner for
+		} // end outer for
+
+		if($table_action_obj->get_children_cnt() != count($table_row_field_action_item_list)) {
+			echo "!Error! / get_table_row_field_action_item_list / \$table_action_obj->get_children_cnt() != count(\$table_row_field_action_item_list)";
+			return;
+		}
+
+		return $table_row_field_action_item_list;
+		
 	}
 
 }

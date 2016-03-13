@@ -98,40 +98,36 @@
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
-		// 새로운 아이템 추가
-		$new_action_item_id = $wdj_mysql_interface->insert_action_item($ACTION_ITEM_TYPE, $ACTION_NAME, $ACTION_CONTEXT);
-
+		// LIST일 경우에는 action item이 1개만 추가. TABLE일 경우에는 이전 열의 모든 action item이 복사되어 열이 추가되어야 함.
 		$action_item_obj_before = 
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
 			// $root_action_hash_key=""
 			$ROOT_ACTION_HASH_KEY
-			// $meeting_id=-1
-			, $MEETING_ID
 			// $action_item_hash_key=""
 			, $ACTION_HASH_KEY_BEFORE
 		);
-		if(strcmp($action_item_obj_before->get_hash_key(), $ACTION_HASH_KEY_BEFORE) != 0) {
-			echo "strcmp(\$action_item_obj_before->get_hash_key(), \$ACTION_HASH_KEY_BEFORE) != 0";
-			return;
-		}
-		// DEBUG
 		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
 
-		$is_shy = 0;
-		$action_item_copy = $wdj_mysql_interface->copy_action_item_relation($action_item_obj_before, $is_shy, $ACTION_NAME, $ACTION_CONTEXT);
-		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")) {
-			return;
-		}
-		$result->action_item_copy = $action_item_copy->get_std_obj();
+		if($action_item_obj_before->is_table_field_item()) {
+			// 새로운 아이템 추가 - TABLE
+			$wdj_mysql_interface->add_row_into_table($action_item_obj_before);
 
-		// 업데이트된 root_action_list를 가져옵니다.
-		$root_action_list = $wdj_mysql_interface->get_root_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY, $MEETING_ID);
-		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+		} else {
+			// 새로운 아이템 추가 - LIST	
+			$action_item_copy = $wdj_mysql_interface->add_row_into_table($action_item_obj_before, $ACTION_NAME, $ACTION_CONTEXT);
+			$result->action_item_copy = $action_item_copy->get_std_obj();
+		}
+
+		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
+		$root_action_collection_updated = $this->get_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY);
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")) {
 			return;
 		}
-		$result->root_action_list_deleted = $root_action_list->get_std_obj();
+		$result->root_action_list_deleted = $root_action_collection_updated->get_std_obj();
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
+
+		// TODO shy --> not shy mode 변경에 대해서는 어떻게 처리?
 
 		$is_valid_action_obj = (!empty($ACTION_HASH_KEY));
 		// 아이템의 내용을 변경합니다.
@@ -187,8 +183,6 @@
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
 			// $root_action_hash_key=""
 			$ROOT_ACTION_HASH_KEY
-			// $meeting_id=-1
-			, $MEETING_ID
 			// $action_item_hash_key=""
 			, $ACTION_HASH_KEY
 		);
