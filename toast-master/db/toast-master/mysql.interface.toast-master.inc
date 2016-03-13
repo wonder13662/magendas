@@ -5958,16 +5958,17 @@ class MYSQLInterface{
 	}
 	// @ public
 	// @ desc : 앞, 뒤의 형제 아이템을 비교해서 새로운 순서로 바꿔줍니다.
-	public function arrange_action_item_order($root_action_obj_hash_key=null, $action_item_hash_key_before=null, $action_item_hash_key=null, $action_item_hash_key_after=null) {
+	public function arrange_action_item_order($root_action_obj_hash_key=null, $parent_action_hash_key=null, $action_item_hash_key_before=null, $action_item_hash_key=null, $action_item_hash_key_after=null) {
 
 		if($this->is_empty(__FUNCTION__, $root_action_obj_hash_key, "root_action_obj_hash_key")){
 			return;
 		}
-
+		if($this->is_empty(__FUNCTION__, $parent_action_hash_key, "parent_action_hash_key")){
+			return;
+		}
 		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
 			return;
 		}
-
 		if(empty($action_item_hash_key_before) && empty($action_item_hash_key_after)) {
 			echo "\$action_item_hash_key_before and \$action_item_hash_key_after is not valid!<br/>";
 			return;
@@ -5996,7 +5997,8 @@ class MYSQLInterface{
 			return;
 		}
 
-		$parent_action_obj = $action_item_obj->get_parent();
+		// 부모가 변경될 수 있습니다. root action 객체에서 검색합니다.
+		$parent_action_obj = $root_action_collection->search_hash_key($parent_action_hash_key);
 		if($this->is_not_action_list(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
 			return;
 		}
@@ -6023,9 +6025,10 @@ class MYSQLInterface{
 
 		} else if(0 < $action_item_id_after) {
 
-			$action_item_order_after = $this->sel_child_item_order_on_parent_list($parent_action_obj->get_id(), $action_item_id_after);
+			$parent_action_id = $parent_action_obj->get_id();
+			$action_item_order_after = $this->sel_child_item_order_on_parent_list($parent_action_id, $action_item_id_after);
 
-			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order_after, "action_item_order_after")){
+			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order_after, "\$parent_action_id : $parent_action_id / \$action_item_id_after : $action_item_id_after / action_item_order")){
 				return;
 			}
 
@@ -6389,18 +6392,34 @@ class MYSQLInterface{
 			return;
 		}
 
-		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-		$query_manager->addQueryLineArr(
-			array(
-				"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
-				, " SET `order` = $order"
-				, " WHERE `parent_action_list_id` = $parent_action_list_id"
-				, " AND `child_action_item_id` = $child_action_item_id"
-			)
-		);
-		$query_manager->modify();
-		if($query_manager->is_failed()) {
-			return;
+		// wonder.jung11
+		$result = $this->sel_action_item_n_parent($parent_action_list_id, $child_action_item_id);
+
+		if(is_null($result)) {
+			// 다른 부모로 이동했습니다.
+			// 연결된 부모가 다르다면, 자식 객체가 등록된 모든 데이터를 삭제합니다.
+			$this->delete_parent_lists_n_child_item($child_action_item_id);
+
+			// 새로운 데이터를 추가합니다.
+			$is_shy_child = 0;
+			$this->insert_parent_list_n_child_item($parent_action_list_id, $child_action_item_id, $order, $is_shy_child);
+
+		} else {
+			// 같은 부모 안에서 이동했습니다.
+			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+			$query_manager->addQueryLineArr(
+				array(
+					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+					, " SET `order` = $order"
+					, " WHERE `parent_action_list_id` = $parent_action_list_id"
+					, " AND `child_action_item_id` = $child_action_item_id"
+				)
+			);
+			$query_manager->modify();
+			if($query_manager->is_failed()) {
+				return;
+			}
+
 		}
 
 	}
@@ -6427,7 +6446,27 @@ class MYSQLInterface{
 			return;
 		}
 
-	}	
+	}
+	// @ desc : child item이 등록되어 있는 모든 parent list와의 관계 정보를 지웁니다.
+	private function delete_parent_lists_n_child_item($child_action_item_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"DELETE FROM `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`"
+				,"WHERE child_action_item_id=$child_action_item_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
 	/*
 		@ Private
 		@ Desc : 리스트의 모든 아이템의 order 값의 간격을 모두 100단위로 재조정해줍니다.

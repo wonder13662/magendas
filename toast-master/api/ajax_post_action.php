@@ -148,6 +148,8 @@
 			$wdj_mysql_interface->arrange_action_item_order(
 				// $root_action_obj_hash_key=null
 				$ROOT_ACTION_HASH_KEY
+				// $parent_action_hash_key=null
+				, $PARENT_ACTION_HASH_KEY
 				// $action_item_hash_key_before=null
 				, $ACTION_HASH_KEY_BEFORE
 				// $action_item_hash_key=null
