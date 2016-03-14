@@ -6957,6 +6957,14 @@ class MYSQLInterface{
 			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);
 		}
 
+		$table_field_action_item_obj_after = $table_field_action_item_obj->get_sibling_after();
+		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj_after, "table_field_action_item_obj_after")) {
+			return;
+		}
+
+		$cur_table_row_field_action_item_list_after = $table_field_action_item_obj_after->get_table_row_field_action_item_list();
+
+		return $cur_table_row_field_action_item_list_after;
 	}
 	/*
 		@ private

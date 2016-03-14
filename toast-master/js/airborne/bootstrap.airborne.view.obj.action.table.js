@@ -2288,7 +2288,8 @@ airborne.bootstrap.view.obj.__action_table = {
 		}
 
 		// 뷰가 추가되었습니다. 
-		var cur_event_manager = action_table_obj.get_first_child().get_last_child().get_event_manager();
+		var cur_table_field_action_item_obj = action_table_obj.get_first_child().get_last_child();
+		var cur_event_manager = cur_table_field_action_item_obj.get_event_manager();
 		var cur_delegate_save_n_reload = cur_event_manager.get_delegate_save_n_reload();
 
 		// action table obj에서 새로운 열의 정보가 추가되어야 합니다.
@@ -2318,6 +2319,23 @@ airborne.bootstrap.view.obj.__action_table = {
 			// delegate_on_event
 			, cur_delegate_save_n_reload
 		);
+
+		// 새로운 열에 이벤트를 추가하였습니다. 
+		// 새로운 열의 action item obj를 가져옵니다.
+		var next_cur_table_field_action_item_obj = cur_table_field_action_item_obj.get_sibling_action_obj_after();
+		if(_action.is_not_valid_action_item_obj(next_cur_table_field_action_item_obj)) {
+			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_item_obj(next_cur_table_field_action_item_obj)");
+			return;
+		}
+		var next_event_manager = next_cur_table_field_action_item_obj.get_event_manager();
+		if(next_event_manager == undefined) {
+			console.log("!Error! / add_editable_table_row / next_event_manager == undefined");
+			return;
+		}
+
+		// wonder.jung11
+		// 열이 추가되었으므로 DB 업데이트를 진행합니다.
+		next_event_manager.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_NONE, _action.EVENT_TYPE_INSERT_ITEM);	
 
 	}
 	,set_event_table_row_field_element:function(table_row_element_jq, action_table_obj, idx_row, cur_table_element_collection_set, delegate_on_event) {
@@ -2834,10 +2852,6 @@ airborne.bootstrap.view.obj.__action_table = {
 							cur_sibling_element_set_mouse_over.get_event_manager().get_delegate_callback_after_landing_element();
 						}
 
-
-
-
-						// wonder.jung11
 						// cur_element_set_on_mouse_over
 						
 						var cur_action_item_obj_mouse_over = undefined;
@@ -2845,29 +2859,6 @@ airborne.bootstrap.view.obj.__action_table = {
 							cur_action_item_obj_mouse_over = cur_sibling_element_set_mouse_over.get_event_manager().get_action_item_obj();
 						}
 						console.log("cur_action_item_obj_mouse_over ::: ",cur_action_item_obj_mouse_over);
-
-						/*
-						// add on table을 옮겼을 때의 처리.
-						var cur_table_action_obj = undefined;
-						if(hovering_element_collection_set != undefined) {
-							cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
-						}
-						if(_action.is_valid_action_obj(cur_table_action_obj)) {
-
-							// add on table을 옮겼을 때의 처리.
-							var cur_table_action_obj = hovering_element_collection_set.get_table_action_obj();
-
-							// 이전 부모 자식 관계를 제거.
-							var prev_parent_add_on = cur_table_action_obj.get_parent_add_on();
-							prev_parent_add_on.remove_from_add_on_list(cur_table_action_obj);
-
-							// 새로운 부모 자식 관계를 추가.
-							cur_action_item_obj_mouse_over.push_add_on(cur_table_action_obj);
-
-							// jump spot update
-							cur_table_action_obj.update_table_jump_spot();
-						}
-						*/				
 
 						jsm.land_element(
 							// cur_src_jq
@@ -2955,8 +2946,6 @@ airborne.bootstrap.view.obj.__action_table = {
 					.replace(/\<_v\>/gi, table_title)
 					.replace(/\<id\>/gi, table_id)
 
-
-					// wonder.jung11
 				+ "<div id=\"btn_collection_eject\" style=\"float:right;height:32px;width:32px;top:-5px;position:relative;border-radius:4px;margin-bottom:-10px;margin-left:4px;margin-right:-5px;\">"
 					+ "<span id=\"btn_collection_eject\" class=\"glyphicon glyphicon-move\" style=\"position:absolute;top:9px;left:8px;\"></span>"
 				+ "</div>"

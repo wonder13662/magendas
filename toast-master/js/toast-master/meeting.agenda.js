@@ -216,6 +216,8 @@ wonglish.meeting_agenda_manager = {
 								
 								console.log(">>> data : ",data);
 
+								// TODO - 테이블에서 열을 추가한 경우, 열의 모든 엘리먼트의 정보를 돌려받아 업데이트를 해줘야 합니다.
+
 								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
 								if(_action.EVENT_TYPE_INSERT_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
 									// 새로운 엘리먼트를 추가한 경우라면 해당되는 action item 정보(id, hash key)도 같이 업데이트 해줍니다.
