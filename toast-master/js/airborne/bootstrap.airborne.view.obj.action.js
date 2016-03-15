@@ -271,7 +271,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			// @ Private
 			// @ Scope 	: action object
-			// @ Desc 	: root 객체부터 폭포수 방식으로 action_depth_arr를 업데이트 합니다.
+			// @ Desc 	: root 객체부터 폭포수 방식으로 action_depth_arr를 업데이트 합니다. n depth에 해당하는 action obj를 배열로 돌려받습니다.
 			,set_action_depth_arr:function(action_depth_arr) {
 				if(_v.is_not_valid_array(action_depth_arr)) {
 					console.log("!Error! / set_action_depth_arr / _v.is_not_valid_array(action_depth_arr)");
@@ -319,6 +319,7 @@ airborne.bootstrap.obj.__action = {
 					action_depth_arr_element_arr.push(this);
 					action_depth_arr[depth] = action_depth_arr_element_arr;
 				}
+
 				this.set_action_depth_arr_from_root(action_depth_arr);
 
 			}
@@ -625,7 +626,7 @@ airborne.bootstrap.obj.__action = {
 					parent_action_obj.set_first_child_action_obj(action_obj_copy);
 				}
 
-
+				this.reset_root_coordinate();
 				if(is_shy === true) {
 					// shy 모드일 경우는 복사하는 객체가 자식 객체를 가지고 있는 엘리먼트인 경우, 
 					// 초기값으로 1개의 자식 객체만 세팅해서 연결해줍니다.
@@ -665,7 +666,6 @@ airborne.bootstrap.obj.__action = {
 
 				consoler.say("copy / 001-0-1 / src_action_obj.has_after() : ",src_action_obj.has_after());
 				consoler.say("copy / 001-0-1 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
-
 
 				consoler.say("copy / 001-1 / before action : ",src_action_obj);
 				consoler.say("copy / 001-1 / before action : ",src_action_obj.get_coordinate());
@@ -715,6 +715,11 @@ airborne.bootstrap.obj.__action = {
 
 				this.reset_root_coordinate();
 
+				consoler.say("copy / 004-1 / before src action : ",src_action_obj);
+				consoler.say("copy / 004-1 / before src action : ",src_action_obj.get_coordinate());
+				consoler.say("copy / 004-2 / after copy action : ",action_obj_copy);
+				consoler.say("copy / 004-2 / after copy action : ",action_obj_copy.get_coordinate());
+
 				// CHECK - 추가한 객체가 있는지 확인합니다.
 				var cur_coordinate_copy = action_obj_copy.get_coordinate();
 				if(_v.is_not_valid_str(cur_coordinate_copy)) {
@@ -735,9 +740,14 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				var src_action_depth_arr = src_action_obj.get_action_depth_arr();
+				if(_v.is_valid_array(src_action_depth_arr)) {
+					action_obj_copy.set_action_depth_arr_from_root(src_action_depth_arr);
+				}
 				var cur_depth = src_action_obj.get_depth();
-				action_obj_copy.set_action_depth_arr_from_root(src_action_obj.get_action_depth_arr());
-				action_obj_copy.push_action_obj_depth_arr(cur_depth);
+				if(_v.is_unsigned_number(cur_depth)) {
+					action_obj_copy.push_action_obj_depth_arr(cur_depth);	
+				}
 
 				return action_obj_copy;
 
@@ -1661,6 +1671,7 @@ airborne.bootstrap.obj.__action = {
 			// @ Private
 			// @ Desc : 관계 정보를 root action item을 시작으로 업데이트 합니다.
 			,reset_root_coordinate:function(){
+				// wonder.jung11
 				var cur_root_action_obj = this.get_root_action_obj();
 				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
 					console.log("!Error! / copy / _action.is_not_valid_action_obj(cur_root_action_obj)");
@@ -1676,12 +1687,12 @@ airborne.bootstrap.obj.__action = {
 				consoler.off();
 
 				var action_name = this.get_action_name();
-				if(this.has_no_parent()) {
+				if(this.has_no_parent() && this.has_no_parent_add_on()) {
 					// 1-1. root action obj입니다.
 					this.set_coordinate("root");
 					this.set_action_order(0);
 
-				} else if(this.has_parent()) {
+				} else if(this.has_parent() || this.has_parent_add_on()) {
 					// 2-1. root action obj가 아닙니다.
 					if(_v.is_not_valid_str(coordinate)) {
 						console.log("!Error! / reset_coordinate / _v.is_not_valid_str(coordinate)");
@@ -1703,6 +1714,22 @@ airborne.bootstrap.obj.__action = {
 
 					// 2-1. 자식 객체가 있다면 reset 해줍니다.
 					var cur_chilren_action_obj_arr = this.get_children();
+					if(_v.is_not_valid_array(cur_chilren_action_obj_arr)) {
+						console.log("!Error! / reset_coordinate / _v.is_not_valid_arr(cur_chilren_action_obj_arr)");
+						return;
+					}
+
+					for(var idx=0;idx < cur_chilren_action_obj_arr.length;idx++) {
+						var cur_child_action_obj = cur_chilren_action_obj_arr[idx];
+						cur_child_action_obj.reset_coordinate(this.get_coordinate(), idx);
+					}
+
+				} // end if
+
+				if(this.has_add_on_list()) {
+
+					// 2-1. add on 자식 객체가 있다면 reset 해줍니다.
+					var cur_chilren_action_obj_arr = this.get_add_on_list();
 					if(_v.is_not_valid_array(cur_chilren_action_obj_arr)) {
 						console.log("!Error! / reset_coordinate / _v.is_not_valid_arr(cur_chilren_action_obj_arr)");
 						return;
@@ -1773,6 +1800,9 @@ airborne.bootstrap.obj.__action = {
 			,is_list:function() {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_LIST === action_collection_type)?true:false;
+			}
+			,is_list_row_item:function() {
+				return this.is_not_table_child_column_list_field_item();
 			}
 			,is_not_table_child_column_list_field_item:function() {
 				return !this.is_table_child_column_list_field_item();
