@@ -1169,7 +1169,9 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_children_cnt = this.get_children_cnt();
 				if(cur_children_cnt <= selected_idx) {
-					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx");
+					console.log("this ::: ",this);
+					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx / selected_idx :: ",selected_idx);
+					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
 					return;
 				}
 
@@ -1996,13 +1998,20 @@ airborne.bootstrap.obj.__action = {
 						// field를 하나씩 검사하는 것으로 변경.
 						var cur_column_child_action_list_obj = this.get_child(idx_column);
 						if(_action.is_not_valid_action_obj(cur_column_child_action_list_obj)) {
-							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(cur_column_child_action_list_obj)");
+							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(cur_column_child_action_list_obj) / idx_column ::: ",idx_column);
+							return;
+						}
+
+						var children_cnt = cur_column_child_action_list_obj.get_children_cnt();
+						if(children_cnt <= idx_row) {
+							console.log("!Error! / get_table_action_item_obj_list / children_cnt <= idx_row / children_cnt ::: ",children_cnt);
+							console.log("!Error! / get_table_action_item_obj_list / children_cnt <= idx_row / idx_row ::: ",idx_row);
 							return;
 						}
 
 						var cur_column_child_action_list_field_child_action_item_obj = cur_column_child_action_list_obj.get_child(idx_row);
 						if(_action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)) {
-							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)");
+							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj) / idx_row ::: ",idx_row);
 							return;
 						}
 
@@ -5317,6 +5326,10 @@ airborne.bootstrap.obj.__action = {
 							// 1. REMOVE TABLE FIELD ELEMENT
 							// 자신의 row sibling element를 모두 불러서 화면에서 지워줍니다.
 							var cur_table_row_field_arr = action_item_obj_clicked.get_table_row_sibling_arr();
+							if(_v.is_not_valid_array(cur_table_row_field_arr)) {
+								console.log("!Error! / this.btn_remove_element_jq.click / _action.is_not_valid_array(cur_table_row_field_arr)");
+								return;
+							}
 							for(var idx = 0; idx < cur_table_row_field_arr.length; idx++) {
 								var cur_table_row_field_obj = cur_table_row_field_arr[idx];
 								if(_action.is_not_valid_action_item_obj(cur_table_row_field_obj)) {

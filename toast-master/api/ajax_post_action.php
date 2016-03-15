@@ -110,7 +110,7 @@
 
 		if($action_item_obj_before->is_table_field_item()) {
 			// 새로운 아이템 추가 - TABLE
-			$cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
+			// $cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
 
 			// $cur_table_row_field_action_item_list_after_std = array();
 			// for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
