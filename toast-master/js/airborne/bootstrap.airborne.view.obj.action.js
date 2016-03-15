@@ -5873,13 +5873,9 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				this.off_title_input_btn_cancel_jq();
-				cur_title_input_btn_cancel_jq.click(function(e){
-					do_on_event(e);
-				});
-
 				// set button event
 				this.off_title_input_btn_cancel_jq();
+
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_cancel_jq, is_force_change);
 
@@ -5887,7 +5883,6 @@ airborne.bootstrap.obj.__action = {
 					e.stopPropagation();
 					do_on_event(e);
 				});
-
 
 				var cur_title_input_jq = this.get_title_input_jq();
 				cur_title_input_jq.focus();
@@ -6028,8 +6023,6 @@ airborne.bootstrap.obj.__action = {
 
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
-
-				cur_title_input_btn_ok_jq.off();
 				cur_title_input_btn_ok_jq.click(function(e){
 					do_on_event(e, cur_event_type);
 				});
