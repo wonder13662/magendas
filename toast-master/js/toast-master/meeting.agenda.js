@@ -220,17 +220,64 @@ wonglish.meeting_agenda_manager = {
 
 								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
 								if(_action.EVENT_TYPE_INSERT_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
+
 									// 새로운 엘리먼트를 추가한 경우라면 해당되는 action item 정보(id, hash key)도 같이 업데이트 해줍니다.
 									console.log("FIN / action_item_obj :: ",action_item_obj);
 
-									var action_item_copy = data.action_item_copy;
-									if(action_item_copy == undefined) {
-										console.log("!Error! / _delegate_after_job_done / action_item_copy == undefined");
-										return;
-									}
+									if(action_item_obj.is_table_child_column_list_field_item()) {
+										// TABLE FIELD ITEM
+										var cur_table_row_field_action_item_list_after_std = data.cur_table_row_field_action_item_list_after_std;
+										if(cur_table_row_field_action_item_list_after_std == undefined) {
+											console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_list_after_std == undefined");
+											return;
+										}
 
-									action_item_obj.set_action_id(action_item_copy.action_id);
-									action_item_obj.set_action_hash_key(action_item_copy.action_hash_key);
+										var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+										if(_v.is_not_valid_array(cur_table_row_sibling_arr)) {
+											console.log("!Error! / _delegate_after_job_done / _v.is_not_valid_array(cur_table_row_sibling_arr)");
+											return;
+										}
+
+										if(cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length) {
+											console.log("!Error! / _delegate_after_job_done / cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length");
+											return;
+										}
+
+										for(var idx=0; idx < cur_table_row_field_action_item_list_after_std.length; idx++) {
+
+											var cur_table_row_field_action_item_obj_copy = cur_table_row_field_action_item_list_after_std[idx];
+											if(cur_table_row_field_action_item_obj_copy == undefined) {
+												console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_obj_copy == undefined");
+												return;
+											}
+											var cur_table_row_field_action_item_obj_src = cur_table_row_sibling_arr[idx];
+											if(_action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)) {
+												console.log("!Error! / _delegate_after_job_done / _action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)");
+												return;
+											}
+
+											var is_update_coordinate_n_search_map = true;
+											cur_table_row_field_action_item_obj_src.set_action_id(cur_table_row_field_action_item_obj_copy.action_id, is_update_coordinate_n_search_map);
+											cur_table_row_field_action_item_obj_src.set_action_hash_key(cur_table_row_field_action_item_obj_copy.action_hash_key);
+
+										}
+
+										console.log(">>> cur_table_row_sibling_arr ::: ",cur_table_row_sibling_arr);
+
+									} else {
+										// LIST ROW ITEM
+
+										var action_item_copy = data.action_item_copy;
+										if(action_item_copy == undefined) {
+											console.log("!Error! / _delegate_after_job_done / action_item_copy == undefined");
+											return;
+										}
+
+										var is_update_coordinate_n_search_map = true;
+										action_item_obj.set_action_id(action_item_copy.action_id, is_update_coordinate_n_search_map);
+										action_item_obj.set_action_hash_key(action_item_copy.action_hash_key);
+
+									}
 
 								}
 

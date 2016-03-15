@@ -95,6 +95,8 @@
 
 	}
 
+	// echo "TEST 001<br/>";
+
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
@@ -108,18 +110,20 @@
 		);
 		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
 
+		// echo "TEST 002<br/>";
+
 		if($action_item_obj_before->is_table_field_item()) {
 			// 새로운 아이템 추가 - TABLE
-			// $cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
+			$cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
 
-			// $cur_table_row_field_action_item_list_after_std = array();
-			// for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
-			// 	$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
-			// 	$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
-			// 	array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
-			// }
+			$cur_table_row_field_action_item_list_after_std = array();
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
+				$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
+				$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
+				array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
+			}
 
-			$result->table_row_action_item_copy_list = "TEST / 001";
+			$result->cur_table_row_field_action_item_list_after_std = $cur_table_row_field_action_item_list_after_std;
 
 		} else {
 			// 새로운 아이템 추가 - LIST	
@@ -129,10 +133,11 @@
 
 		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
 		$root_action_collection_updated = $wdj_mysql_interface->get_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY);
-		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")) {
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_collection_updated, "root_action_collection_updated")) {
 			return;
 		}
-		$result->root_action_list_deleted = $root_action_collection_updated->get_std_obj();
+		$result->root_action_collection_updated = $root_action_collection_updated->get_std_obj();
+
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
@@ -199,8 +204,24 @@
 			return;
 		}
 
-		// 실제 DB의 데이터도 제거.
-		$wdj_mysql_interface->delete_action_item_relation($action_item_obj_delete);
+
+		if($action_item_obj_delete->is_table_field_item()) {
+			// 실제 DB의 데이터도 제거 - TABLE
+			$cur_table_row_field_action_item_list_delete = $action_item_obj_delete->get_table_row_field_action_item_list();
+
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_delete); $idx++) {
+				$cur_action_item_delete = $cur_table_row_field_action_item_list_delete[$idx];
+				$wdj_mysql_interface->delete_action_item_relation($cur_action_item_delete);
+			}
+
+			$result->cur_table_row_field_action_item_list_after_std = $cur_table_row_field_action_item_list_after_std;
+
+		} else {
+			// 실제 DB의 데이터도 제거 - LIST	
+			$wdj_mysql_interface->delete_action_item_relation($action_item_obj_delete);
+
+		}
+
 		
 		// 업데이트된 root_action_list를 가져옵니다.
 		$root_action_list = $wdj_mysql_interface->get_root_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY, $MEETING_ID);

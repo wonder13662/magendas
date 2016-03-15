@@ -553,7 +553,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				consoler.off();
+				// consoler.off();
 
 				var action_obj_copy = _action.get_action_obj_empty();
 				if(_action.is_not_valid_action_obj(action_obj_copy)) {
@@ -638,6 +638,9 @@ airborne.bootstrap.obj.__action = {
 
 				consoler.say("copy / 001-0-0 / src_action_obj.has_after() : ",src_action_obj.has_after());
 				consoler.say("copy / 001-0-0 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
+
+				console.log("src_action_obj :: ",src_action_obj);
+				console.log("action_obj_copy :: ",action_obj_copy);
 				
 				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
 				// 다음 형제 객체는 없을 수도 있다. 있는 경우만 검사.
@@ -1167,11 +1170,17 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				var cur_children_cnt = this.get_children_cnt();
-				if(cur_children_cnt <= selected_idx) {
+				var first_table_column_list_obj = this.get_first_child();
+				if(_action.is_not_valid_action_obj(first_table_column_list_obj)) {
+					console.log("!Error! / get_table_row_field_arr / _action.is_not_valid_action_obj(first_table_column_list_obj)");
+					return;
+				}
+
+				var cur_table_column_field_children_cnt = first_table_column_list_obj.get_children_cnt();
+				if(cur_table_column_field_children_cnt <= selected_idx) {
 					console.log("this ::: ",this);
-					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx / selected_idx :: ",selected_idx);
-					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
+					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / selected_idx :: ",selected_idx);
+					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
 					return;
 				}
 
@@ -1536,8 +1545,17 @@ airborne.bootstrap.obj.__action = {
 
 				return undefined;
 			}
-			,set_action_id:function(action_id) {
+			,set_action_id:function(action_id, is_update_coordinate_n_search_map) {
 				this.action_id = action_id;
+				// wonder.jung11
+				if(is_update_coordinate_n_search_map == undefined) {
+					is_update_coordinate_n_search_map = false;
+				}
+
+				if(is_update_coordinate_n_search_map) {
+					this.reset_root_coordinate();
+					this.reset_search_map();
+				}
 			}
 			,get_action_id:function() {
 				return this.action_id;
@@ -1978,22 +1996,23 @@ airborne.bootstrap.obj.__action = {
 					return [];
 				}
 
-				var colspan_cnt = this.get_children_cnt();
-				if(_v.is_not_unsigned_number(colspan_cnt)) {
-					console.log("!Error! / get_table_action_item_obj_list / _v.is_not_unsigned_number(colspan_cnt)");
+				var table_column_cnt = this.get_children_cnt();
+				if(_v.is_not_unsigned_number(table_column_cnt)) {
+					console.log("!Error! / get_table_action_item_obj_list / _v.is_not_unsigned_number(table_column_cnt)");
 					return;
 				}
 
-				var first_child_action_list_obj = this.get_child(0);
-				if(_action.is_not_valid_action_obj(first_child_action_list_obj)) {
-					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(first_child_action_list_obj)");
+				var table_action_id = this.get_action_id();
+				var first_table_column_action_list_obj = this.get_first_child();
+				if(_action.is_not_valid_action_obj(first_table_column_action_list_obj)) {
+					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(first_table_column_action_list_obj)");
 					return;
 				}
-				var rowspan_cnt = first_child_action_list_obj.get_children_cnt();
+				var table_row_cnt = first_table_column_action_list_obj.get_children_cnt();
 
 				var table_action_item_obj_list = [];
-				for (var idx_row = 0; idx_row < rowspan_cnt; idx_row++) {
-					for (var idx_column = 0; idx_column < colspan_cnt; idx_column++) {
+				for (var idx_row = 0; idx_row < table_row_cnt; idx_row++) {
+					for (var idx_column = 0; idx_column < table_column_cnt; idx_column++) {
 
 						// field를 하나씩 검사하는 것으로 변경.
 						var cur_column_child_action_list_obj = this.get_child(idx_column);
@@ -2002,10 +2021,14 @@ airborne.bootstrap.obj.__action = {
 							return;
 						}
 
-						var children_cnt = cur_column_child_action_list_obj.get_children_cnt();
-						if(children_cnt <= idx_row) {
-							console.log("!Error! / get_table_action_item_obj_list / children_cnt <= idx_row / children_cnt ::: ",children_cnt);
-							console.log("!Error! / get_table_action_item_obj_list / children_cnt <= idx_row / idx_row ::: ",idx_row);
+						// wonder.jung11
+						var table_column_field_children_cnt = cur_column_child_action_list_obj.get_children_cnt();
+						var table_column_list_id = cur_column_child_action_list_obj.get_action_id();
+						if(table_column_field_children_cnt <= idx_row) {
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_action_id ::: ",table_action_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_column_list_id ::: ",table_column_list_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_column_field_children_cnt ::: ",table_column_field_children_cnt);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / idx_row ::: ",idx_row);
 							return;
 						}
 
@@ -8295,7 +8318,6 @@ airborne.bootstrap.obj.__action = {
 									return;
 								}
 
-								// wonder.jung11
 								var is_hover = _obj.is_hover(mousemove_event, cur_parent_sibling_action_obj.get_event_manager().get_element_jq());
 								if(is_hover) {
 
@@ -8312,12 +8334,10 @@ airborne.bootstrap.obj.__action = {
 							// LIST일 경우의 처리
 						}
 
+						// REMOVE ME?
 						// 이벤트 설정 - 아래 2가지 사항을 정의합니다.
 						// 1. 자기 자신 내부에서의 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행. 충돌한 element set을 리턴합니다.
 						// cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
-
-
-
 
 						// wonder.jung11 - 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
 						// 2. 추가된 jump spot에 대한 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행 충돌한 element set을 리턴합니다.

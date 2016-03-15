@@ -6666,7 +6666,7 @@ class MYSQLInterface{
 		return $root_action_collection;
 	}
 	// @ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
-	public function get_action_collection_by_hash_key($action_collection_hash_key=-1) {
+	public function get_action_collection_by_hash_key($action_collection_hash_key="") {
 
 		if($this->is_empty(__FUNCTION__, $action_collection_hash_key, "action_collection_hash_key")){
 			return;
