@@ -244,7 +244,7 @@ class MYSQLInterface{
 		return false;
 	}
 
-	private function is_action_item($function_name="", $target, $param_name=""){
+	public function is_action_item($function_name="", $target, $param_name=""){
 		$is_action_item = ActionItem::is_instance($target);
 		if($is_action_item == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_action_item(\$$param_name)<br/>";
@@ -6055,6 +6055,43 @@ class MYSQLInterface{
 		}
 
 	}	
+	// @ desc : 앞, 뒤의 형제 아이템을 비교해서 새로운 순서로 바꿔줍니다.
+	public function arrange_action_item_order_by_new_order($root_action_obj_hash_key=null, $parent_action_hash_key=null, $action_item_hash_key=null, $action_item_order=-1) {
+
+		if($this->is_empty(__FUNCTION__, $root_action_obj_hash_key, "root_action_obj_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $parent_action_hash_key, "parent_action_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "action_item_order")){
+			return;
+		}
+
+		
+		// DB에 저장된 관계 데이터를 가져옵니다.
+		$root_action_collection = $this->get_action_collection_by_hash_key($root_action_obj_hash_key);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")) {
+			return;
+		}
+
+		$action_item_obj = $root_action_collection->search_hash_key($action_item_hash_key);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_obj, "action_item_obj")) {
+			return;
+		}
+
+		// 부모가 변경될 수 있습니다. root action 객체에서 검색합니다.
+		$parent_action_obj = $root_action_collection->search_hash_key($parent_action_hash_key);
+		if($this->is_not_action_list(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+			return;
+		}
+
+		$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_obj->get_id(), $action_item_order);
+		$this->reorder_child_item_in_parent_list($parent_action_obj->get_id());
+	}		
 	/*
 		@ Private
 		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.

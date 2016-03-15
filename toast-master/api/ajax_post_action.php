@@ -95,8 +95,6 @@
 
 	}
 
-	// echo "TEST 001<br/>";
-
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
@@ -109,8 +107,6 @@
 			, $ACTION_HASH_KEY_BEFORE
 		);
 		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
-
-		// echo "TEST 002<br/>";
 
 		if($action_item_obj_before->is_table_field_item()) {
 			// 새로운 아이템 추가 - TABLE
@@ -229,6 +225,86 @@
 			return;
 		}
 		$result->root_action_list_deleted = $root_action_list->get_std_obj();
+
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_TABLE_ROW_ORDER) == 0) {
+
+		// 테이블의 열 순서를 바꿉니다.
+		$table_field_action_item_obj_update = 
+		$wdj_mysql_interface->get_action_item_obj_with_relation(
+			// $root_action_hash_key=""
+			$ROOT_ACTION_HASH_KEY
+			// $action_item_hash_key=""
+			, $ACTION_HASH_KEY
+		);
+		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $table_field_action_item_obj_update, "table_field_action_item_obj_update")) {
+			return;
+		}
+		$action_item_order = -1;
+
+		$table_field_action_item_obj_update_before = null;
+		if(!empty($ACTION_HASH_KEY_BEFORE)) {
+			$table_field_action_item_obj_update_before = 
+			$wdj_mysql_interface->get_action_item_obj_with_relation(
+				// $root_action_hash_key=""
+				$ROOT_ACTION_HASH_KEY
+				// $action_item_hash_key=""
+				, $ACTION_HASH_KEY_BEFORE
+			);
+		}
+		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_before)) {
+			$action_item_order = $table_field_action_item_obj_update_before->get_order() + 50;
+		}
+
+		$table_field_action_item_obj_update_after = null;
+		if(!empty($ACTION_HASH_KEY_AFTER)) {
+			$table_field_action_item_obj_update_after = 
+			$wdj_mysql_interface->get_action_item_obj_with_relation(
+				// $root_action_hash_key=""
+				$ROOT_ACTION_HASH_KEY
+				// $action_item_hash_key=""
+				, $ACTION_HASH_KEY_AFTER
+			);
+		}
+		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_after)){
+			$action_item_order = $table_field_action_item_obj_update_after->get_order() - 50;
+		}
+
+		if($table_field_action_item_obj_update->is_table_field_item()) {
+			// 실제 DB의 데이터도 제거 - TABLE
+			$cur_table_row_field_action_item_list_update = $table_field_action_item_obj_update->get_table_row_field_action_item_list();
+			$cur_table_row_field_action_hash_key_list_update = array();
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_update); $idx++) {
+				$cur_action_item_update = $cur_table_row_field_action_item_list_update[$idx];
+				if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $cur_action_item_update, "cur_action_item_update")) {
+					return;
+				}
+				$action_hash_key = $cur_action_item_update->get_hash_key();
+
+				$parent_action_hash_key = "";
+				if($cur_action_item_update->has_parent()) {
+					$cur_parent_action_obj = $cur_action_item_update->get_parent();
+					$parent_action_hash_key = $cur_parent_action_obj->get_hash_key();
+				}
+
+				// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
+				$wdj_mysql_interface->arrange_action_item_order_by_new_order(
+					// $root_action_obj_hash_key=null
+					$ROOT_ACTION_HASH_KEY
+					// $parent_action_hash_key=null
+					, $parent_action_hash_key
+					// $action_item_hash_key=null
+					, $action_hash_key
+					// $action_item_order=-1
+					, $action_item_order
+				);
+
+				array_push($cur_table_row_field_action_hash_key_list_update, $cur_action_item_update->get_hash_key());
+			}
+
+			$result->cur_table_row_field_action_hash_key_list_update = $cur_table_row_field_action_hash_key_list_update;
+
+		}		
+
 
 	}
 

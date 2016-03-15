@@ -189,6 +189,13 @@ class ActionObject implements Action{
 
 		return $this->get_child($length - 1);
 	}
+	public function has_sibling_before() {
+		$cur_sibling_before = $this->get_sibling_before();
+		if(ActionObject::is_not_action_obj($cur_sibling_before)) {
+			return false;
+		}
+		return true;
+	}
 	public function get_sibling_before() {
 
 		if($this->has_no_parent()) {
@@ -212,6 +219,13 @@ class ActionObject implements Action{
 
 		return null;
 
+	}
+	public function has_sibling_after() {
+		$cur_sibling_after = $this->get_sibling_after();
+		if(ActionObject::is_not_action_obj($cur_sibling_after)) {
+			return false;
+		}
+		return true;
 	}
 	public function get_sibling_after() {
 		

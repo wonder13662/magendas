@@ -199,7 +199,8 @@ wonglish.meeting_agenda_manager = {
 
 				if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 					_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
-					_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ) {
+					_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
+					_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
 
 					console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 					cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;

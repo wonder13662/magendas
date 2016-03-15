@@ -869,6 +869,9 @@ airborne.bootstrap.view.obj.__action_list = {
 						// 자식 객체를 보여줘야 함. 
 						target_element_set.get_event_manager().show_child();
 
+						// add on 자식 객체를 보여줘야 함. 
+						target_element_set.get_event_manager().show_child_add_on();
+
 						// shy 자식 객체는 가림.
 						target_element_set.get_event_manager().hide_shy_child();
 					} else {

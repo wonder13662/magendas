@@ -4531,6 +4531,9 @@ airborne.bootstrap.obj.__action = {
 				// 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
 
+				// add on 자식 객체가 있다면 가려줍니다.
+				this.hide_child_add_on();
+
 			}
 			// @ Public
 			// @ Scope 	: Event Manager
@@ -4571,6 +4574,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.set_colors_back();
 				
 				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
@@ -4610,6 +4614,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.show_shy_child();
 
 				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
@@ -4664,6 +4669,7 @@ airborne.bootstrap.obj.__action = {
 				this.hide_title_jq_text_head();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.show_shy_child();
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
@@ -4831,6 +4837,51 @@ airborne.bootstrap.obj.__action = {
 					cur_list_element_collection_set.show_element_collection_container_jq();
 				}
 			}
+			// @ Desc  	: 뷰에 표현된 add on 자식 객체들을 가립니다.
+			,hide_child_add_on:function() {
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / hide_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_child_action_obj_list = cur_action_item_obj.get_add_on_list();
+				for(var idx = 0; idx < cur_child_action_obj_list.length;idx++) {
+					var cur_child_action_obj = cur_child_action_obj_list[idx];
+					if(_action.is_not_valid_action_obj(cur_action_item_obj)) {
+						console.log("!Error! / hide_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+						return;
+					}
+
+					if(cur_child_action_obj.is_table()) {
+						var cur_table_element_collection_set = cur_child_action_obj.get_table_element_collection_set();
+						cur_table_element_collection_set.hide_element_collection_container_jq();
+					}
+				}
+			}
+			// @ Desc  	: 뷰에 표현된 add on 자식 객체들을 보여줍니다.
+			,show_child_add_on:function() {
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_child_action_obj_list = cur_action_item_obj.get_add_on_list();
+				for(var idx = 0; idx < cur_child_action_obj_list.length;idx++) {
+					var cur_child_action_obj = cur_child_action_obj_list[idx];
+					if(_action.is_not_valid_action_obj(cur_action_item_obj)) {
+						console.log("!Error! / show_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+						return;
+					}
+
+					if(cur_child_action_obj.is_table()) {
+						var cur_table_element_collection_set = cur_child_action_obj.get_table_element_collection_set();
+						cur_table_element_collection_set.show_element_collection_container_jq();
+					}
+				}
+			}
+
 			,show_input_mode_default:function(event_mode){
 
 				var cur_action_item_obj = this.get_action_item_obj();
@@ -8494,6 +8545,9 @@ airborne.bootstrap.obj.__action = {
 
 						// 자식 객체를 보여줘야 함. 
 						target_element_set.get_event_manager().show_child();
+
+						// add on 자식 객체를 보여줘야 함. 
+						target_element_set.get_event_manager().show_child_add_on();
 
 						// shy 자식 객체는 가림.
 						target_element_set.get_event_manager().hide_shy_child();

@@ -2858,7 +2858,6 @@ airborne.bootstrap.view.obj.__action_table = {
 						if(cur_sibling_element_set_mouse_over != undefined) {
 							cur_action_item_obj_mouse_over = cur_sibling_element_set_mouse_over.get_event_manager().get_action_item_obj();
 						}
-						console.log("cur_action_item_obj_mouse_over ::: ",cur_action_item_obj_mouse_over);
 
 						jsm.land_element(
 							// cur_src_jq
@@ -2874,7 +2873,7 @@ airborne.bootstrap.view.obj.__action_table = {
 							// delegate_on_completed
 							, cur_delegate_callback_after_landing_element
 							// delegate_on_completed_param_event_manager
-							, cur_event_manager
+							, event_manager_toss
 						); // animation end
 
 					}); // click event end
