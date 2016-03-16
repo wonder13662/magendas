@@ -185,7 +185,6 @@ wonglish.meeting_agenda_manager = {
 					var cur_sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
 					if(_action.is_valid_action_item_obj(cur_sibling_action_obj_before)) {
 						cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = cur_sibling_action_obj_before.get_action_hash_key();
-						// cur_action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = cur_sibling_action_obj_before.get_parent();
 					}
 
 					var cur_sibling_action_obj_after = action_item_obj.get_sibling_action_obj_after();

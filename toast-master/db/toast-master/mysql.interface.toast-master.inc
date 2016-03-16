@@ -6219,6 +6219,33 @@ class MYSQLInterface{
 		$this->reorder_add_on_collection_in_parent_item($parent_action_item_id);
 
 	}
+	// @ desc : add on 아이템을 삭제합니다.
+	private function delete_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"DELETE FROM `magendas`.`PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION`"
+				," WHERE parent_action_item_id=$parent_action_item_id"
+				," AND add_on_action_collection_id=$add_on_action_collection_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		// 추가한 데이터를 재정렬 해줍니다.
+		$this->reorder_add_on_collection_in_parent_item($parent_action_item_id);
+
+	}	
 	/*
 		@ Private
 		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
