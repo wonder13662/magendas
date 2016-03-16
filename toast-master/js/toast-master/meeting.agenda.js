@@ -149,20 +149,14 @@ wonglish.meeting_agenda_manager = {
 				if(cur_root_action_context_obj != undefined && cur_root_action_context_obj.meeting_id != undefined) {
 					MEETING_ID = cur_root_action_context_obj.meeting_id;
 				}
-				console.log("HERE / cur_root_action_obj :: ",cur_root_action_obj);
-				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
-				console.log("HERE / obj_tree :: ",obj_tree);
-				console.log("HERE / MEETING_ID :: ",MEETING_ID);
 
-				console.log("TEST / 001");
+				// DEBUG
+				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
 
 				var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 				if(_v.is_not_unsigned_number(MEETING_ID)) {
 					cur_action_obj_for_db_update["MEETING_ID"] = MEETING_ID;	
-				}
-
-				console.log("TEST / 002");
-				
+				}				
 
 				if(_v.is_not_unsigned_number(action_item_obj.get_action_id())) {
 					// 전달 파라미터 내용 중에 자신의 앞,뒤의 형제 정보를 추가한다.

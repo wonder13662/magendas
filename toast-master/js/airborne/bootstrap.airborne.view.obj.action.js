@@ -2803,8 +2803,10 @@ airborne.bootstrap.obj.__action = {
 				cur_add_on_element_container_jq.append(add_on_element_jq);
 			}
 			,add_on_element_collection_set_arr:[]
+			// REMOVE ME
 			// @ private
 			// @ Desc : 공식적으로 등록될 element collection set을 추가할 경우 사용하는 메서드
+			/*
 			,push_add_on_element_collection_set:function(add_on_element_collection_set){
 				if(add_on_element_collection_set == undefined) return;
 
@@ -2832,6 +2834,7 @@ airborne.bootstrap.obj.__action = {
 
 				this.push_add_on_element_jq(add_on_element_collection_set.get_element_collection_container_jq());
 			}
+			*/
 			// @ private
 			// @ Desc : 공식적으로 등록될 element collection set을 제거할 경우 사용하는 메서드
 			,remove_add_on_element_collection_set:function(element_collection_set_to_remove){
