@@ -125,7 +125,7 @@
 
 		} else {
 			// 새로운 아이템 추가 - LIST	
-			$action_item_copy = $wdj_mysql_interface->add_row_into_table($action_item_obj_before, $ACTION_NAME, $ACTION_CONTEXT);
+			$action_item_copy = $wdj_mysql_interface->add_row_into_list($action_item_obj_before, $ACTION_NAME, $ACTION_CONTEXT);
 			$result->action_item_copy = $action_item_copy->get_std_obj();
 		}
 
