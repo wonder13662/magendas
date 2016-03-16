@@ -6161,12 +6161,33 @@ class MYSQLInterface{
 		}
 
 	}
+	public function insert_parent_action_item_n_add_on_collection_by_hash_key($parent_action_item_hash_key, $add_on_action_collection_hash_key) {
+
+		if($this->is_empty(__FUNCTION__, $parent_action_item_hash_key, "parent_action_item_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $add_on_action_collection_hash_key, "add_on_action_collection_hash_key")){
+			return;
+		}
+
+		$parent_action_item_id = $this->get_action_item_id($parent_action_item_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+
+		$add_on_action_collection_id = $this->get_action_collection_id($add_on_action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$this->insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id);
+	}
 	/*
 		@ Private
 		@ Desc : 리스트 아이템과 아이템의 추가 자식 컬렉션을 연결합니다. 추가 자식 컬렉션은 뷰 단 로직에서 추가되는 컬렉션입니다.
 		ex ) 타임라인에서 스피치 관련 테이블이 포함되는 경우. 타임 라인이 수정되어 스피치 테이블이 빠지거나 추가되는 경우를 위해서 필요합니다.
 	*/
-	private function insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id, $order=-1) {
+	private function insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
 			return;
@@ -6220,11 +6241,23 @@ class MYSQLInterface{
 
 	}
 	// @ desc : add on 아이템을 삭제합니다.
-	private function delete_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id) {
+	public function delete_parent_action_item_n_add_on_collection_by_hash_key($add_on_action_collection_hash_key) {
 
-		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+		if($this->is_empty(__FUNCTION__, $add_on_action_collection_hash_key, "add_on_action_collection_hash_key")){
 			return;
 		}
+
+		$add_on_action_collection_id = $this->get_action_collection_id($add_on_action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$this->delete_parent_action_item_n_add_on_collection($add_on_action_collection_id);
+	}
+
+	// @ desc : add on 아이템을 삭제합니다.
+	private function delete_parent_action_item_n_add_on_collection($add_on_action_collection_id) {
+
 		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
 			return;
 		}
@@ -6233,17 +6266,13 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"DELETE FROM `magendas`.`PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION`"
-				," WHERE parent_action_item_id=$parent_action_item_id"
-				," AND add_on_action_collection_id=$add_on_action_collection_id"
+				," WHERE add_on_action_collection_id=$add_on_action_collection_id"
 			)
 		);
 		$query_manager->modify();
 		if($query_manager->is_failed()) {
 			return;
 		}
-
-		// 추가한 데이터를 재정렬 해줍니다.
-		$this->reorder_add_on_collection_in_parent_item($parent_action_item_id);
 
 	}	
 	/*

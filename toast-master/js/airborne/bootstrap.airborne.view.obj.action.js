@@ -2302,12 +2302,24 @@ airborne.bootstrap.obj.__action = {
 				// wonder.jung11
 				if(this.has_add_on_list()) {
 					var cur_add_on_list = this.get_add_on_list();
-					if(_action.is_not_valid_action_obj(cur_add_on_list)) {
-						console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_add_on_list)");
+
+					if(_v.is_not_valid_array(cur_add_on_list)) {
+						console.log("!Error! / get_action_obj_for_db_update / _v.is_not_valid_array(cur_add_on_list)");
 						return;
 					}
-					cur_add_on_list.get_action_hash_key();
-					action_obj_for_db_update[_param.CHILD_ADD_ON_ACTION_HASH_KEY] = cur_add_on_list.get_action_hash_key();
+
+					var child_add_on_action_hash_key_array = [];
+					for(var idx = 0; idx < cur_add_on_list.length; idx++) {
+						var cur_add_on_action_obj = cur_add_on_list[idx];
+						if(_action.is_not_valid_action_obj(cur_add_on_action_obj)) {
+							console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_add_on_action_obj)");
+							return;
+						}
+
+						child_add_on_action_hash_key_array.push(cur_add_on_action_obj.get_action_hash_key());
+					}
+
+					action_obj_for_db_update[_param.CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR] = JSON.stringify(child_add_on_action_hash_key_array);
 				}
 
 				if(this.has_parent()) {

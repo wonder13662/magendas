@@ -47,7 +47,7 @@
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
 	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
 	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
-	$CHILD_ADD_ON_ACTION_HASH_KEY = $params->getParamString($params->CHILD_ADD_ON_ACTION_HASH_KEY);
+	$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $params->getParamString($params->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR);
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$PARENT_ACTION_HASH_KEY_DELETE = $params->getParamString($params->PARENT_ACTION_HASH_KEY_DELETE);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
@@ -59,7 +59,7 @@
 	// DEBUG
 	$result->ACTION_NAME = $ACTION_NAME;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
-	$result->CHILD_ADD_ON_ACTION_HASH_KEY = $CHILD_ADD_ON_ACTION_HASH_KEY;
+	$result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR;
 	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
 	$result->ACTION_HASH_KEY_AFTER = $ACTION_HASH_KEY_AFTER;
 	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
@@ -171,8 +171,22 @@
 
 			}
 
-			if(!empty($CHILD_ADD_ON_ACTION_HASH_KEY)) {
-				echo "\$CHILD_ADD_ON_ACTION_HASH_KEY ::: $CHILD_ADD_ON_ACTION_HASH_KEY<br/>";
+			$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = null;
+			if(!empty($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR)) {
+				$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = json_decode($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR);
+				$result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY;
+			}
+			if(is_array($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY)) {
+				for($idx=0;$idx < count($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY); $idx++) {
+					$CHILD_ADD_ON_ACTION_HASH_KEY = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY[$idx];
+
+					// 이전에 등록된 내역을 먼저 연결 삭제
+					$wdj_mysql_interface->delete_parent_action_item_n_add_on_collection_by_hash_key($CHILD_ADD_ON_ACTION_HASH_KEY);
+
+					// 액션 아이템과 add on 자식 액션 아이템을 연결
+					$wdj_mysql_interface->insert_parent_action_item_n_add_on_collection_by_hash_key($ACTION_HASH_KEY, $CHILD_ADD_ON_ACTION_HASH_KEY);
+
+				}
 			}
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
