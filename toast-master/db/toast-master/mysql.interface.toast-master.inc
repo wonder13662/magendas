@@ -6989,7 +6989,7 @@ class MYSQLInterface{
 		}
 
 		$is_shy = 0;
-		$action_item_copy = $wdj_mysql_interface->copy_action_item_relation($action_item_obj_before, $is_shy, $action_name, $action_context);
+		$action_item_copy = $this->copy_action_item_relation($list_action_item_obj, $is_shy, $action_name, $action_context);
 		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")) {
 			return;
 		}
