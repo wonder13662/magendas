@@ -5885,9 +5885,9 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"UPDATE `magendas`.`ACTION_ITEM`"
-				,"SET `name` = \"$action_name\","
-				,"`context` = \"$context_mysql_safe\""
-				,"WHERE `id` = $action_item_id"
+				," SET `name` = \"$action_name\""
+				," ,`context` = \"$context_mysql_safe\""
+				," WHERE `id` = $action_item_id"
 			)
 		);
 		$query_manager->modify();
@@ -6530,6 +6530,51 @@ class MYSQLInterface{
 		}
 
 	}
+	public function update_child_item_shy_mode_by_hash_key($parent_action_list_hash_key=null, $child_action_item_hash_key=null, $is_shy=0) {
+
+		if($this->is_empty(__FUNCTION__, $parent_action_list_hash_key, "parent_action_list_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $child_action_item_hash_key, "child_action_item_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy, "is_shy")){
+			return;
+		}
+
+		// wonder.jung11
+		$parent_action_list_id = $this->get_action_collection_id($parent_action_list_hash_key);
+		$child_action_item_id = $this->get_action_item_id($child_action_item_hash_key);
+
+		$this->update_child_item_shy_mode($parent_action_list_id, $child_action_item_id, $is_shy);
+	}
+	private function update_child_item_shy_mode($parent_action_list_id=-1, $child_action_item_id=-1, $is_shy=0) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy, "is_shy")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+				,"SET `is_shy_child`=$is_shy"
+				,"WHERE `parent_action_list_id` = $parent_action_list_id"
+				,"AND `child_action_item_id` = $child_action_item_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
 	/*
 		@ Private
 		@ Desc : 리스트의 모든 아이템의 order 값의 간격을 모두 100단위로 재조정해줍니다.
@@ -6583,6 +6628,11 @@ class MYSQLInterface{
 
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
 			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
+			$this->update_child_item_shy_mode($parent_action_list_id, $__child_action_item_id);
+
+			// wonder.jung11
+			// REMOVE ME
+			/*
 			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 			$query_manager->addQueryLineArr(
 				array(
@@ -6597,6 +6647,7 @@ class MYSQLInterface{
 			if($query_manager->is_failed()) {
 				return;
 			}
+			*/
 		}
 
 		
@@ -7015,7 +7066,6 @@ class MYSQLInterface{
 				return;
 			}
 
-			// wonder.jung11
 			// 엘리먼트를 복사합니다.
 			$is_shy = 0;
 			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);

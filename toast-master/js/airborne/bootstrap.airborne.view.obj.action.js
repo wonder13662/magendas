@@ -1557,7 +1557,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,set_action_id:function(action_id, is_update_coordinate_n_search_map) {
 				this.action_id = action_id;
-				// wonder.jung11
 				if(is_update_coordinate_n_search_map == undefined) {
 					is_update_coordinate_n_search_map = false;
 				}
@@ -1671,7 +1670,6 @@ airborne.bootstrap.obj.__action = {
 			// @ Private
 			// @ Desc : 관계 정보를 root action item을 시작으로 업데이트 합니다.
 			,reset_root_coordinate:function(){
-				// wonder.jung11
 				var cur_root_action_obj = this.get_root_action_obj();
 				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
 					console.log("!Error! / copy / _action.is_not_valid_action_obj(cur_root_action_obj)");
@@ -2051,7 +2049,6 @@ airborne.bootstrap.obj.__action = {
 							return;
 						}
 
-						// wonder.jung11
 						var table_column_field_children_cnt = cur_column_child_action_list_obj.get_children_cnt();
 						var table_column_list_id = cur_column_child_action_list_obj.get_action_id();
 						if(table_column_field_children_cnt <= idx_row) {
@@ -2302,8 +2299,19 @@ airborne.bootstrap.obj.__action = {
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
 				action_obj_for_db_update[_param.ACTION_COORDINATE] = this.get_coordinate();
 
+				// wonder.jung11
+				if(this.has_add_on_list()) {
+					var cur_add_on_list = this.get_add_on_list();
+					if(_action.is_not_valid_action_obj(cur_add_on_list)) {
+						console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_add_on_list)");
+						return;
+					}
+					cur_add_on_list.get_action_hash_key();
+					action_obj_for_db_update[_param.CHILD_ADD_ON_ACTION_HASH_KEY] = cur_add_on_list.get_action_hash_key();
+				}
+
 				if(this.has_parent()) {
-					action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = this.get_parent().get_action_hash_key();					
+					action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = this.get_parent().get_action_hash_key();
 				}
 				if(this.has_before()) {
 					action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = this.get_sibling_action_obj_before().get_action_hash_key();
@@ -8205,6 +8213,7 @@ airborne.bootstrap.obj.__action = {
 					return mouse_move_checksum;
 
 				}	
+				// @ scope : jump spot manager / jsm
 				, land_element:function(cur_src_jq, cur_clone_jq, eject_btn_jq, cur_mousemove_callback_set, cur_element_set_on_mouse_over, delegate_on_completed, delegate_on_completed_param_event_manager, hovering_element_collection_set) {
 
 					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
@@ -8414,7 +8423,7 @@ airborne.bootstrap.obj.__action = {
 						// 1. 자기 자신 내부에서의 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행. 충돌한 element set을 리턴합니다.
 						// cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
-						// wonder.jung11 - 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
+						// 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
 						// 2. 추가된 jump spot에 대한 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행 충돌한 element set을 리턴합니다.
 						// cur_additional_element_set_on_mouse_over = _self.get_additional_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
@@ -8471,9 +8480,6 @@ airborne.bootstrap.obj.__action = {
 							var event_manager_on_mouse_over = cur_element_set_on_mouse_over.get_event_manager();
 						}
 						_self_eject_btn_jq.show();
-
-						// wonder.jung11
-						console.log(">>> cur_event_manager ::: ",cur_event_manager);
 
 						// 이동 완료후의 save n reload의 델리게이트 호출은 첫번째 element set에게 맡깁니다.
 						jsm.land_element(

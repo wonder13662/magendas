@@ -6614,7 +6614,9 @@ airborne.bootstrap.obj = {
 				this.btn_collection_eject_jq = btn_collection_eject_jq;
 
 				// btn_collection_eject를 설정하면 자동으로 관련 이벤트가 주입됩니다.
-				this.set_jump_event(this.btn_collection_eject_jq);
+				if(this.btn_collection_eject_jq != undefined) {
+					this.set_jump_event(this.btn_collection_eject_jq);	
+				}
 			}
 			,get_btn_collection_eject_jq:function(){
 				return this.btn_collection_eject_jq;

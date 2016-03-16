@@ -43,11 +43,11 @@
 
 	$result->MEETING_ID = $MEETING_ID;
 
-	// $ACTION_ID = $params->getParamNumber($params->ACTION_ID);
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
 	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
 	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
+	$CHILD_ADD_ON_ACTION_HASH_KEY = $params->getParamString($params->CHILD_ADD_ON_ACTION_HASH_KEY);
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$PARENT_ACTION_HASH_KEY_DELETE = $params->getParamString($params->PARENT_ACTION_HASH_KEY_DELETE);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
@@ -57,9 +57,9 @@
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 
 	// DEBUG
-	// $result->ACTION_ID = $ACTION_ID;
 	$result->ACTION_NAME = $ACTION_NAME;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
+	$result->CHILD_ADD_ON_ACTION_HASH_KEY = $CHILD_ADD_ON_ACTION_HASH_KEY;
 	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
 	$result->ACTION_HASH_KEY_AFTER = $ACTION_HASH_KEY_AFTER;
 	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
@@ -151,20 +151,29 @@
 
 			// 선택된 액션의 내용만 업데이트합니다.
 			$wdj_mysql_interface->update_action_item($cur_action_item_id, $ACTION_NAME, $ACTION_CONTEXT);
+			$wdj_mysql_interface->update_child_item_shy_mode_by_hash_key($PARENT_ACTION_HASH_KEY, $ACTION_HASH_KEY);
 
 			// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
-			$wdj_mysql_interface->arrange_action_item_order(
-				// $root_action_obj_hash_key=null
-				$ROOT_ACTION_HASH_KEY
-				// $parent_action_hash_key=null
-				, $PARENT_ACTION_HASH_KEY
-				// $action_item_hash_key_before=null
-				, $ACTION_HASH_KEY_BEFORE
-				// $action_item_hash_key=null
-				, $ACTION_HASH_KEY
-				// $action_item_hash_key_after=null
-				, $ACTION_HASH_KEY_AFTER
-			);
+			if(!empty($ACTION_HASH_KEY_BEFORE) && !empty($ACTION_HASH_KEY_AFTER)) {
+
+				$wdj_mysql_interface->arrange_action_item_order(
+					// $root_action_obj_hash_key=null
+					$ROOT_ACTION_HASH_KEY
+					// $parent_action_hash_key=null
+					, $PARENT_ACTION_HASH_KEY
+					// $action_item_hash_key_before=null
+					, $ACTION_HASH_KEY_BEFORE
+					// $action_item_hash_key=null
+					, $ACTION_HASH_KEY
+					// $action_item_hash_key_after=null
+					, $ACTION_HASH_KEY_AFTER
+				);
+
+			}
+
+			if(!empty($CHILD_ADD_ON_ACTION_HASH_KEY)) {
+				echo "\$CHILD_ADD_ON_ACTION_HASH_KEY ::: $CHILD_ADD_ON_ACTION_HASH_KEY<br/>";
+			}
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 

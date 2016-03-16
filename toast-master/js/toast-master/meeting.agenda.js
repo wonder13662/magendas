@@ -181,7 +181,7 @@ wonglish.meeting_agenda_manager = {
 					cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
 					// wonder.jung11
-					return;
+					// return;
 
 					_ajax.send_simple_post(
 						// _url
