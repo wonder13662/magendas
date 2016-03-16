@@ -554,7 +554,7 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				var consoler = airborne.console.get();
-				// consoler.off();
+				consoler.off();
 
 				var action_obj_copy = _action.get_action_obj_empty();
 				if(_action.is_not_valid_action_obj(action_obj_copy)) {
@@ -7918,9 +7918,10 @@ airborne.bootstrap.obj.__action = {
 					this.set_jump_event(this.btn_collection_eject_jq);	
 				}
 			}
-			,get_btn_collection_eject_jq:function(){
-				return this.btn_collection_eject_jq;
-			}
+			// REMOVE ME
+			// ,get_btn_collection_eject_jq:function(){
+			// 	return this.btn_collection_eject_jq;
+			// }
 			,is_show_btn_collection_eject:false
 			,show_btn_collection_eject_jq:function(){
 				if(this.is_show_btn_collection_eject == true){
@@ -8470,6 +8471,9 @@ airborne.bootstrap.obj.__action = {
 							var event_manager_on_mouse_over = cur_element_set_on_mouse_over.get_event_manager();
 						}
 						_self_eject_btn_jq.show();
+
+						// wonder.jung11
+						console.log(">>> cur_event_manager ::: ",cur_event_manager);
 
 						// 이동 완료후의 save n reload의 델리게이트 호출은 첫번째 element set에게 맡깁니다.
 						jsm.land_element(
