@@ -2959,9 +2959,15 @@ class MYSQLInterface{
 		. " , IFNULL(MSS.`id`,-1) AS __speaker_id"
 		. " , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
 		. " , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
+
 		. " , IFNULL(MTGL.`sec_green`,0) AS __speaker_timer_green"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speaker_timer_green_mm_ss"
+ 
 		. " , IFNULL(MTGL.`sec_yellow`,0) AS __speaker_timer_yellow"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speaker_timer_yellow_mm_ss"
+
 		. " , IFNULL(MTGL.`sec_red`,0) AS __speaker_timer_red"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
 
 		. " , IFNULL(MSE.`id`,-1) AS __evaluator_id"
 		. " , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"

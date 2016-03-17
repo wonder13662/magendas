@@ -1304,7 +1304,7 @@ class TCPDFManager{
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 2. speech title
+									// 3. speech title
 									$simple_table_row_column_obj = new stdClass();
 									$simple_table_row_column_obj->name=$speech_obj->__title;
 
@@ -1313,15 +1313,20 @@ class TCPDFManager{
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 3. speaker name
+									// 4. speaker name
 									$simple_table_row_column_obj = new stdClass();
-									$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name;
+									if($speech_obj->__speaker_timer_red_mm_ss == 0) {
+										$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name . " (05-07min)";
+									} else {
+										$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name . " (" . $speech_obj->__speaker_timer_green_mm_ss . "-" . $speech_obj->__speaker_timer_red_mm_ss . "min)";
+									}
+
 									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
 									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 4. evaluator name
+									// 5. evaluator name
 									$simple_table_row_column_obj = new stdClass();
 									$simple_table_row_column_obj->name=$speech_obj->__evaluator_member_name;
 									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
