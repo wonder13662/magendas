@@ -243,39 +243,6 @@ var jessie = {
 						, param_obj
 					);
 
-					// REMOVE ME
-					//var cur_opacity = cur_glyphicon_circle_arrow_down_jq.css("opacity");
-
-					// REMOVE ME
-					/*
-					var blinker = 
-					_self.getBlinker(
-						// targetJq
-						cur_glyphicon_circle_arrow_down_jq
-						// delegate_on_finish_blink
-						, _obj.get_delegate(function(){
-
-							console.log("animation done!");
-							_self.sayLogin(log_in_jq);
-
-						},_self)
-						// maxBlinkCnt
-						, 5
-					);
-					blinker._do();
-
-					// 사용자가 말풍선을 누르면 깜빡이 애니메이션이 종료되고 다음 동작( sayLogin )을 진행합니다.
-					var cur_text_balloon_clickable_mask_jq = this.get_text_balloon_clickable_mask_jq();
-					if(cur_text_balloon_clickable_mask_jq != undefined && cur_text_balloon_clickable_mask_jq.length > 0) {
-						cur_text_balloon_clickable_mask_jq.click(function(e){
-
-							console.log("mask clicked / animation done! / blinker :: ",blinker);
-							blinker._stop();
-							_self.sayLogin(log_in_jq);
-
-						});
-					}
-					*/
 
 				}
 			}

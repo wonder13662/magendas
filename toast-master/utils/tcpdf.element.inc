@@ -1057,11 +1057,6 @@ class TCPDFElement{
 		// b-2. 사용자의 글의 글자수를 구합니다.
 		$raw_text_char_count = STRLEN($raw_text);
 
-		// REMOVE ME
-		// b-3. 사용자의 글자당 길이를 구합니다. (이 값을 이용해서 몇 번째 글자에서 2줄로 분할할지가 결정됩니다.)
-		// $raw_char_width = ROUND(($raw_text_width/$raw_text_char_count),1);
-		// $raw_char_width = CEIL($raw_text_width/$raw_text_char_count);
-
 		// 좌,우의 패딩 너비를 제외한 셀의 너비가 사용자 입력 글자가 가질 수 있는 최대 너비입니다.
 		if($this->get_cell_width() > 0) {
 			// $max_chars_width = ROUND($this->get_cell_width() - (($this->get_padding_left_n_right() * 2) + $text_x_pos_offset),1);	

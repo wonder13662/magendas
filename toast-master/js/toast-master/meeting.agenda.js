@@ -406,14 +406,6 @@ wonglish.meeting_agenda_manager = {
 					// _delegate_after_job_done
 					,_obj.get_delegate(function(data){
 
-		            	console.log(">>> exec members / data : ",data);
-
-		            	// REMOVE ME
-		            	// update_timeline();
-
-		            	// TODO 이벤트 릴리스도 공통 로직 (call_delegate_save_n_reload)안에 포함되어야 할 듯.
-		            	// 이벤트를 릴리즈, 초기 상태로 전환합니다.
-		            	// cur_element_event_manager.release();
 
 					},this)
 				); // ajax done.		        
@@ -555,14 +547,6 @@ wonglish.meeting_agenda_manager = {
 				input_meeting_date_jq.focus();
 				return;
 			}
-
-			// REMOVE ME
-			/*
-			if(_dates.isExpired(cur_input_meeting_date, _dates.DATE_TYPE_YYYY_MM_DD)) {
-				alert("Meeting date is over.\nPlease check your meeeting date.");
-				return;
-			}*/
-
 
 			// 선택한 미팅 템플릿을 가져옵니다.
 			var timeline_template_row_jq_arr = $("li#timeline_template_row");
@@ -1034,24 +1018,6 @@ wonglish.meeting_agenda_manager = {
 					, function(selected_key, selected_value){
 
 						// 현재 타임라인 내용을 업데이트 뒤에 PDF 뷰로 이동한다.
-						// REMOVE ME
-						/*
-						update_timeline(
-							// delegate_func_after_update_timeline
-							_obj.get_delegate(function(){
-
-								_link.open_new_window(
-									_link.PDF_VIEWER
-									,_param
-									.get(_param.MEETING_ID, selected_value)
-									.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-								);
-
-							},this)
-
-						);
-						*/
-
 						_link.open_new_window(
 							_link.PDF_VIEWER
 							,_param
@@ -1073,24 +1039,13 @@ wonglish.meeting_agenda_manager = {
 					, function(selected_key, selected_value){
 
 						// 현재 타임라인 내용을 업데이트 뒤에 PDF 뷰로 이동한다.
-						// REMOVE ME
-						/*
-						update_timeline(
-							// delegate_func_after_update_timeline
-							_obj.get_delegate(function(){
-
-								_link.open_new_window(
-									_link.PDF_VIEWER
-									,_param
-									.get(_param.MEETING_ID, selected_value)
-									.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-									.get(_param.FONT_SIZE_LARGE, _param.FONT_SIZE_LARGE)
-								);
-
-							},this)
-
+						_link.open_new_window(
+							_link.PDF_VIEWER
+							,_param
+							.get(_param.MEETING_ID, selected_value)
+							.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+							.get(_param.FONT_SIZE_LARGE, _param.FONT_SIZE_LARGE)
 						);
-						*/
 
 					}
 				);

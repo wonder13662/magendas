@@ -416,25 +416,6 @@ airborne.html = {
 
 		return safe_text;
 	}
-	// REMOVE ME?
-	// @ Desc : POST 전송시 파라미터로 전달하기 위한 문자열로 변경해 줍니다.
-	,getPostQueryStringSafeText:function(unsafe_text){
-
-		if(airborne.validator.isNotValidStr(unsafe_text)){
-			return "";
-		}
-
-		// escape "
-		// escape '
-		unsafe_text = this.getSQLSafeText(unsafe_text);
-
-		// &amp; --> &
-		// &gt; --> >
-		// &lt; --> <
-		unsafe_text = this.get_decode_text(unsafe_text);
-
-		return unsafe_text;
-	}
 	,getJSONStrSafeText:function(unsafe_text){
 
 		if(unsafe_text.indexOf("'") > -1){

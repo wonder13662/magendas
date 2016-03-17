@@ -2332,12 +2332,6 @@ airborne.bootstrap.obj.__action = {
 					action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = this.get_sibling_action_obj_after().get_action_hash_key();
 				}
 
-				// REMOVE ME
-				var cur_root_action_obj = this.get_root_action_obj();
-				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
-					console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_root_action_obj)");
-					return;
-				}
 				action_obj_for_db_update[_param.ROOT_ACTION_HASH_KEY] = this.get_root_action_obj().get_action_hash_key();
 
 				return action_obj_for_db_update;
@@ -2803,38 +2797,6 @@ airborne.bootstrap.obj.__action = {
 				cur_add_on_element_container_jq.append(add_on_element_jq);
 			}
 			,add_on_element_collection_set_arr:[]
-			// REMOVE ME
-			// @ private
-			// @ Desc : 공식적으로 등록될 element collection set을 추가할 경우 사용하는 메서드
-			/*
-			,push_add_on_element_collection_set:function(add_on_element_collection_set){
-				if(add_on_element_collection_set == undefined) return;
-
-				// 공식적으로 등록될 수 있는 참조를 1개로 유지하게 위해 
-				// 최상위 top element collection set부터 조사하여 
-				// 이전 등록된 add_on_element_collection_set_arr안의 다른 모든 참조를 지웁니다.
-				var delegate_do_to_all_element_set = _obj.get_delegate(function(cur_element_set){
-
-					var cur_add_on_element_collection_set_arr = cur_element_set.get_event_manager().get_add_on_element_collection_set_arr();
-					var idx;
-					var length = cur_add_on_element_collection_set_arr.length;
-					for(idx = 0; idx < length; idx++){
-						var cur_add_on_element_collection_set = cur_add_on_element_collection_set_arr[idx];
-						if(add_on_element_collection_set.get_element_collection_id() == cur_add_on_element_collection_set.get_element_collection_id()){
-							cur_element_set.get_event_manager().remove_add_on_element_collection_set(cur_add_on_element_collection_set);
-						}
-					}
-
-				},this);
-				this.call_delegate_do_to_all_element_set(this.get_top_parent_element_collection_set(this), delegate_do_to_all_element_set);
-
-
-				// 등록된 참조가 없습니다. 새롭게 이 element collection set에 등록해 줍니다.
-				this.add_on_element_collection_set_arr.push(add_on_element_collection_set);
-
-				this.push_add_on_element_jq(add_on_element_collection_set.get_element_collection_container_jq());
-			}
-			*/
 			// @ private
 			// @ Desc : 공식적으로 등록될 element collection set을 제거할 경우 사용하는 메서드
 			,remove_add_on_element_collection_set:function(element_collection_set_to_remove){
@@ -7941,10 +7903,6 @@ airborne.bootstrap.obj.__action = {
 					this.set_jump_event(this.btn_collection_eject_jq);	
 				}
 			}
-			// REMOVE ME
-			// ,get_btn_collection_eject_jq:function(){
-			// 	return this.btn_collection_eject_jq;
-			// }
 			,is_show_btn_collection_eject:false
 			,show_btn_collection_eject_jq:function(){
 				if(this.is_show_btn_collection_eject == true){
@@ -8432,15 +8390,6 @@ airborne.bootstrap.obj.__action = {
 						} else {
 							// LIST일 경우의 처리
 						}
-
-						// REMOVE ME?
-						// 이벤트 설정 - 아래 2가지 사항을 정의합니다.
-						// 1. 자기 자신 내부에서의 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행. 충돌한 element set을 리턴합니다.
-						// cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
-
-						// 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
-						// 2. 추가된 jump spot에 대한 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행 충돌한 element set을 리턴합니다.
-						// cur_additional_element_set_on_mouse_over = _self.get_additional_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
 					}, this)); // end mouse move call back
 					

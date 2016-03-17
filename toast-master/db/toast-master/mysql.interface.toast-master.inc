@@ -155,7 +155,7 @@ class MYSQLInterface{
 		return $is_null_object;
 	}
 
-	private function is_empty($function_name="", $target, $param_name="") {
+	public function is_empty($function_name="", $target, $param_name="") {
 
 		$is_empty = empty($target);
 		if($is_empty == true && !empty($function_name) && !empty($param_name)) {
@@ -6090,6 +6090,7 @@ class MYSQLInterface{
 		}
 
 		$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_obj->get_id(), $action_item_order);
+
 		$this->reorder_child_item_in_parent_list($parent_action_obj->get_id());
 	}		
 	/*
@@ -6604,6 +6605,33 @@ class MYSQLInterface{
 			return;
 		}
 	}
+	private function update_child_item_order($parent_action_list_id=-1, $child_action_item_id=-1, $new_item_order=0) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_item_order, "new_item_order")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+				," SET `order`=$new_item_order, `is_shy_child`=0"
+				," WHERE `parent_action_list_id` = $parent_action_list_id"
+				," AND `child_action_item_id` = $child_action_item_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}	
 	/*
 		@ Private
 		@ Desc : 리스트의 모든 아이템의 order 값의 간격을 모두 100단위로 재조정해줍니다.
@@ -6622,7 +6650,7 @@ class MYSQLInterface{
 				,",PACLNCAI.`is_shy_child` AS __child_action_item_is_shy"
 				," FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
 				," WHERE parent_action_list_id=$parent_action_list_id"
-				," ORDER BY PACLNCAI.order"
+				," ORDER BY PACLNCAI.`order`"
 			)
 		);
 		$query_manager->select();
@@ -6658,25 +6686,7 @@ class MYSQLInterface{
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
 			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
 			$this->update_child_item_shy_mode($parent_action_list_id, $__child_action_item_id);
-
-			// wonder.jung11
-			// REMOVE ME
-			/*
-			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-			$query_manager->addQueryLineArr(
-				array(
-					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
-					,"SET `order` = $new_item_order, `is_shy_child`=0"
-					,"WHERE `parent_action_list_id` = $parent_action_list_id"
-					,"AND `child_action_item_id` = $__child_action_item_id"
-				)
-			);
-			// $query_manager->printFormattedQuery();
-			$query_manager->modify();
-			if($query_manager->is_failed()) {
-				return;
-			}
-			*/
+			$this->update_child_item_order($parent_action_list_id, $__child_action_item_id, $new_item_order);
 		}
 
 		

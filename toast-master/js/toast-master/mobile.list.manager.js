@@ -1063,15 +1063,10 @@ toast_master.mobile_list_manager = {
 				// delegate_obj_click_row
 				, _obj.getDelegate(function(delegate_data){
 
-					console.log(">>> delegate_obj_click_row / delegate_data :: ",delegate_data);
-
-					// EVENT TYPE을 받는 것이 나을것 같은데?
 					var target_controller = delegate_data.target_controller;
 					var container_jq = target_controller.get_container_jq();
 
 					if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
-
-						console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
 
 						// TODO 왜 2번 눌러야 이벤트 제어가 가능한가? 이슈.
 						// 타이틀 버튼을 눌렀을 때의 이벤트 제어
@@ -1080,12 +1075,7 @@ toast_master.mobile_list_manager = {
 							delegate_on_click_timer_title._apply([target_controller]);
 						}
 
-						// REMOVE ME
-						// 2. 선택한 정보를 DB로 업데이트(외부 delegate 호출)
-
 					} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
-
-						console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
 
 						// 0. 열을 삭제하므로 이전 열의 참조를 다음 타이머 추가시, 아래에 붙일 참조로 변경.
 						timer_table_controller.set_row_before_new_timer_jq(container_jq.prev());
@@ -1369,8 +1359,6 @@ toast_master.mobile_list_manager = {
 
 					if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_TITLE) {
 
-						console.log(">>> target_controller.EVENT_TYPE_CLICK_TITLE");
-
 						// TODO 왜 2번 눌러야 이벤트 제어가 가능한가? 이슈.
 						// 타이틀 버튼을 눌렀을 때의 이벤트 제어
 
@@ -1378,12 +1366,7 @@ toast_master.mobile_list_manager = {
 							delegate_on_click_timer_title._apply([target_controller]);
 						}
 
-						// REMOVE ME
-						// 2. 선택한 정보를 DB로 업데이트(외부 delegate 호출)
-
 					} else if(delegate_data.EVENT_TYPE === target_controller.EVENT_TYPE_CLICK_REMOVE) {
-
-						console.log(">>> target_controller.EVENT_TYPE_CLICK_REMOVE");
 
 						// 0. 열을 삭제하므로 이전 열의 참조를 다음 타이머 추가시, 아래에 붙일 참조로 변경.
 						timer_table_controller.set_row_before_new_timer_jq(container_jq.prev());
@@ -1528,129 +1511,6 @@ toast_master.mobile_list_manager = {
 
 		return timer_table_controller;
 	}
-	// REMOVE ME
-	/*
-	,addMemberSelectorList:function(target_list, table_jq){
-
-		var _v = airborne.validator;
-		var _m_list = airborne.bootstrap.view.mobile.list;
-		var _obj = airborne.bootstrap.obj;
-
-		if(_v.isNotValidArray(target_list)){
-			console.log("!Error! / toast_master.mobile_list_manager / addMemberSelectorList / _v.isNotValidArray(target_list)");
-			return;
-		}
-		if(table_jq == null){
-			console.log("!Error! / toast_master.mobile_list_manager / addMemberSelectorList / table_jq == null");
-			return;
-		}
-
-
-		// 멤버쉽 별로 그룹을 나눈다.
-
-		// __member_membership: "3"
-		// __member_membership_name: "Guest"		
-		
-		var prev_membership_id = -1;
-		var membership_group_arr = [];
-		var membership_member_arr = [];
-		for(var idx = 0; idx < target_list.length; idx++) {
-
-			var row_tag = "";
-			var member_obj = target_list[idx];
-			var membership_id = parseInt(member_obj.__member_membership);
-			var membership_name = parseInt(member_obj.__member_membership_name);
-
-			if(prev_membership_id != membership_id){
-				// 새로운 그룹이 시작되었습니다.
-				prev_membership_id = membership_id;
-
-				if(membership_member_arr.length > 0){
-					membership_group_arr.push(membership_member_arr);	
-					membership_member_arr = [];
-				}
-
-				// title row
-				membership_member_arr.push({__title:member_obj.__member_membership_name,__call_url:""});
-			}
-
-			// member_row
-			var member_name = member_obj.__member_first_name + " " + member_obj.__member_last_name;
-
-			var __call_url = cur_link_manager.get_link(cur_link_manager.MOBILE_MEMBER_MANAGE_DETAIL,{__member_id:member_obj.__member_id});
-			membership_member_arr.push({__title:member_name,__call_url:__call_url});
-
-			// 마지막 멤버쉽을 그룹에 포함시킵니다.
-			if(idx == (target_list.length-1)){
-				membership_group_arr.push(membership_member_arr);
-			}
-		}	
-
-		for(var idx = 0; idx < membership_group_arr.length; idx++) {
-			membership_member_arr = membership_group_arr[idx];
-			if(_v.isNotValidArray(membership_member_arr)) continue;
-
-			_m_list.addTableContentFolderRow(membership_member_arr, table_jq);
-		}
-
-	}
-	*/
-	// REMOVE ME
-	/*
-	,addSelectorGroupDepthList:function(target_list, group_depth_names_arr, table_jq, delegate_get_group_id, delegate_get_group_title_tag, delegate_get_content_tag, delegate_get_call_url_tag){
-		var _v = airborne.validator;
-		var _m_list = airborne.bootstrap.view.mobile.list;
-		var _obj = airborne.bootstrap.obj;
-
-		if(_v.isNotValidArray(target_list)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _v.isNotValidArray(target_list)");
-			return;
-		}
-		if(_v.isNotValidArray(group_depth_names_arr)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _v.isNotValidArray(group_depth_names_arr)");
-			return;
-		}
-		if(table_jq == null){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / table_jq == null");
-			return;
-		}
-		if(_obj.isNotValidDelegate(delegate_get_group_id)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _obj.isNotValidDelegate(delegate_get_group_id)");
-			return null;
-		}
-		if(_obj.isNotValidDelegate(delegate_get_group_title_tag)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _obj.isNotValidDelegate(delegate_get_group_title_tag)");
-			return null;
-		}
-		if(_obj.isNotValidDelegate(delegate_get_content_tag)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _obj.isNotValidDelegate(delegate_get_content_tag)");
-			return null;
-		}
-		if(_obj.isNotValidDelegate(delegate_get_call_url_tag)){
-			console.log("!Error! / toast_master.mobile_list_manager / addSelectorGroupDepthList / _obj.isNotValidDelegate(delegate_get_call_url_tag)");
-			return null;
-		}
-
-		// group id 별로 그룹을 나눈다.
-
-		// __member_membership: "3"
-		// __member_membership_name: "Guest"		
-		
-		var prev_content_id = -1;
-		var content_group_arr = [];
-		var content_arr = [];
-		var get_recursive_group = function(){
-
-
-
-
-
-
-
-			return null;
-		}
-	}
-	*/
 	/*
 		@ public
 		@ desc : 브라우저 로딩 완료시 화면 움직임 현상이 보이지 않도록 문서가 준비되면 fade in 및 bootstrap 로딩 완료 메시지를 제거한다. (공통 로직)

@@ -1703,13 +1703,9 @@ airborne.bootstrap.view.mobile.list = {
 				var cur_timer_btn_jq = this.get_timer_btn_jq();
 
 				cur_delete_btn_jq.removeClass("disabled");
-				// REMOVE ME
-				// cur_title_btn_jq.removeClass("disabled");
 				cur_timer_btn_jq.removeClass("disabled");
 
 				cur_delete_btn_jq.css("opacity",_param.OPACITY_ENABLED);
-				// REMOVE ME
-				// cur_title_btn_jq.css("opacity","1");
 				cur_timer_btn_jq.css("opacity",_param.OPACITY_ENABLED);
 
 				this.on_title_btn();
@@ -1757,13 +1753,9 @@ airborne.bootstrap.view.mobile.list = {
 				this.event_toggle_obj[event_type_exclude] = true;
 				if(this.EVENT_TYPE_CLICK_REMOVE === event_type_exclude) {
 					cur_delete_btn_jq.removeClass("disabled");
-					// REMOVE ME
-					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_ENABLED);
-					// REMOVE ME
-					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 
 					this.off_title_btn();
@@ -1771,13 +1763,9 @@ airborne.bootstrap.view.mobile.list = {
 				} else if(this.EVENT_TYPE_CLICK_TITLE === event_type_exclude) {
 
 					cur_delete_btn_jq.addClass("disabled");
-					// REMOVE ME
-					// cur_title_btn_jq.removeClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					// REMOVE ME
-					// cur_title_btn_jq.css("opacity",_param.OPACITY_ENABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 
 					this.on_title_btn();
@@ -1785,13 +1773,9 @@ airborne.bootstrap.view.mobile.list = {
 				} else if(this.EVENT_TYPE_CLICK_TIMER === event_type_exclude) {
 
 					cur_delete_btn_jq.addClass("disabled");
-					// REMOVE ME
-					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.removeClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					// REMOVE ME
-					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_ENABLED);
 
 					this.off_title_btn();
@@ -1799,13 +1783,9 @@ airborne.bootstrap.view.mobile.list = {
 				} else {
 
 					cur_delete_btn_jq.addClass("disabled");
-					// REMOVE ME
-					// cur_title_btn_jq.addClass("disabled");
 					cur_timer_btn_jq.addClass("disabled");
 
 					cur_delete_btn_jq.css("opacity",_param.OPACITY_DISABLED);
-					// REMOVE ME
-					// cur_title_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 					cur_timer_btn_jq.css("opacity",_param.OPACITY_DISABLED);
 
 					this.off_title_btn();

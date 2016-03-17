@@ -753,18 +753,7 @@ class ActionCollection extends ActionObject{
 	}
 
 	public function is_root_collection() {
-
-		// wonder.jung11
 		return ($this->has_no_parent() && $this->has_no_add_on_parent());
-
-		// REMOVE ME
-
-		// $has_no_parent = false;
-		// if(is_null($this->parent_action_obj)) {
-		// 	$has_no_parent = true;
-		// }
-
-		// return $has_no_parent;
 	}
 
 	private $add_on_action_parent_obj;

@@ -232,113 +232,6 @@ class TCPDFManager{
 
 
 
-	// REMOVE ME
-	/*
-	private $text_align_center = "CENTER";
-	private $text_align_left = "LEFT";
-	private $text_align_right = "RIGHT";
-	private $card_board_padding = 0.7;
-	private $card_board_round_radius_top_left_top_right = 1.6;
-	private function get_card_board_row_title_prop_obj(	$text
-														, $parent_x_pos
-														, $parent_y_pos
-														, $cell_width
-														, $align="CENTER"){
-
-		// TODO 폰트 사이즈를 지정할 수 있어야 합니다.
-
-		$depth=0;
-		$caller_name="get_card_board_row_title_prop_obj";
-		$this->set_font_cart_board_title($caller_name);
-
-		$title_prop_obj = 
-		$this->get_row_text_prop_obj(
-			$text
-			, $parent_x_pos
-			, $parent_y_pos
-			, $cell_width
-			, $this->card_board_padding
-			, $align
-			, $depth
-			, $caller_name
-		);
-		$title_prop_obj->round_radius=$this->card_board_round_radius_top_left_top_right;
-		$title_prop_obj->border_style=$this->get_border_style_card_board_top_n_bottom_gray_outline();
-		$title_prop_obj->round_rect_style=$this->card_board_round_rect_style;
-		$title_prop_obj->round_rect_round_corner=$this->card_board_round_rect_round_corner_head;
-		$title_prop_obj->font=$this->card_board_title_font;
-		$title_prop_obj->font_style=$this->card_board_title_font_style;
-		$title_prop_obj->font_size=$this->card_board_title_font_size;
-		$title_prop_obj->font_color=$this->color_wine_red_arr;
-
-		return $title_prop_obj;
-	}
-	*/
-
-	// REMOVE ME
-	/*
-	private function get_card_board_row_content_key_prop_obj(	$text
-																, $parent_x_pos
-																, $prev_y_pos=0
-																, $cell_width
-																, $align="CENTER"
-																, $depth
-																, $is_title=false){
-
-		$depth=0;
-		$is_last=false;
-
-		$content_key_prop_obj = 
-		$this->get_card_board_row_content_prop_obj(	$text
-													, $parent_x_pos
-													, $prev_y_pos
-													, $cell_width
-													, $align
-													, $depth
-													, $is_last);
-
-		$content_key_prop_obj->font=$this->card_board_content_font;
-		$content_key_prop_obj->font_style=$this->card_board_title_font_style;
-		$content_key_prop_obj->font_size=$this->card_board_content_font_size;
-		$content_key_prop_obj->font_color=$this->color_warm_gray_arr;
-
-		$content_key_prop_obj->is_title=$is_title;
-
-		return $content_key_prop_obj;
-	}
-	*/
-
-	// REMOVE ME
-	/*
-	private function get_card_board_row_content_value_prop_obj(	$text
-																, $parent_x_pos
-																, $prev_y_pos=0
-																, $cell_width
-																, $align="CENTER"
-																, $depth
-																, $is_last=false
-																, $is_title=false ){
-
-		$depth=0;
-
-		$content_value_prop_obj = 
-		$this->get_card_board_row_content_prop_obj(	$text
-													, $parent_x_pos
-													, $prev_y_pos
-													, $cell_width
-													, $align
-													, $depth
-													, $is_last);
-
-		$content_value_prop_obj->font=$this->card_board_content_font;
-		$content_value_prop_obj->font_style=$this->card_board_content_font_style;
-		$content_value_prop_obj->font_size=$this->card_board_content_font_size;
-		$content_value_prop_obj->font_color=$this->color_warm_gray_arr;
-		$content_value_prop_obj->is_title=$is_title;
-
-		return $content_value_prop_obj;
-	}
-	*/
 	private function get_card_board_row_content_prop_obj(	$text
 															, $parent_x_pos
 															, $prev_y_pos=0
@@ -2008,32 +1901,6 @@ class TCPDFManager{
 
 
 
-
-	// REMOVE ME
-	/*
-
-		토스트 마스터의 오피서들의 정보를 키, 벨류 쌍으로 돌려줍니다.
-
-	*/
-	/*
-	public function get_card_board_key_value_data_from_toastmaster_officer($toastmaster_officer_list){
-
-		$wdj_key_value_arr=array();
-		for ($idx = 0; $idx < count($toastmaster_officer_list); $idx++) {
-			$officer_obj = $toastmaster_officer_list[$idx];
-
-			$officer_name = $officer_obj->__member_name;
-			$officer_member_name = $officer_obj->__officer_name;
-			$officer_member_mobile = $officer_obj->__member_mobile;
-
-			$wdj_key_value_arr[$officer_member_name]=$officer_name;
-		}
-
-		return $wdj_key_value_arr;
-	}
-	*/
-
-
 	/*
 
 		토스트 마스터의 오피서들의 정보를 키, 벨류 배열 쌍으로 돌려줍니다. - V2
@@ -2599,8 +2466,6 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_left->role_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2613,8 +2478,6 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2624,8 +2487,6 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_right->role_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2638,8 +2499,6 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);

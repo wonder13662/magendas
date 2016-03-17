@@ -154,7 +154,7 @@
 			$wdj_mysql_interface->update_child_item_shy_mode_by_hash_key($PARENT_ACTION_HASH_KEY, $ACTION_HASH_KEY);
 
 			// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
-			if(!empty($ACTION_HASH_KEY_BEFORE) && !empty($ACTION_HASH_KEY_AFTER)) {
+			if(!empty($ACTION_HASH_KEY_BEFORE) || !empty($ACTION_HASH_KEY_AFTER)) {
 
 				$wdj_mysql_interface->arrange_action_item_order(
 					// $root_action_obj_hash_key=null
@@ -293,6 +293,7 @@
 		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_after)){
 			$action_item_order = $table_field_action_item_obj_update_after->get_order() - 50;
 		}
+		$result->table_row_action_item_order = $action_item_order;
 
 		if($table_field_action_item_obj_update->is_table_field_item()) {
 			// 실제 DB의 데이터도 제거 - TABLE
@@ -304,6 +305,9 @@
 					return;
 				}
 				$action_hash_key = $cur_action_item_update->get_hash_key();
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $action_hash_key, "action_hash_key")) {
+					return;
+				}
 
 				$parent_action_hash_key = "";
 				if($cur_action_item_update->has_parent()) {
