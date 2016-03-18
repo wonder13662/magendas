@@ -69,6 +69,15 @@ airborne.bootstrap.view.print = {
 			.replace(/\<PADDING_TOP\>/gi, padding_left)
 			.replace(/\<WORKING_PAPER_CONTAINER_HEIGHT\>/gi, working_paper_container_height)
 
+			// sandbox="allow-same-origin allow-scripts"
+
+				// IFRAME으로 PDF 영역을 그려준다. 
+				+ "<div id=\"pdf_view_container\" style=\"width:100%;height:100%;position: absolute;z-index: 1000;\">"
+					+ "<iframe src=\"http://localhost/service/toast-master/view/meeting_agenda_pdf.php?MEETING_ID=151&MEETING_MEMBERSHIP_ID=1\" scrolling=\"no\" style=\"width:100%;height:100%;\">"
+						+ "<p>Your browser does not support iframes.</p>"
+					+ "</iframe>"
+				+ "</div>"
+
 				+ "<div id=\"grid_view_container\" style=\"width:<WORKING_PAPER_WIDTH>px;height:<WORKING_PAPER_HEIGHT>px;background-color:#CCC;margin:0px;\">"
 				.replace(/\<WORKING_PAPER_WIDTH\>/gi, working_paper_width + 1)
 				.replace(/\<WORKING_PAPER_HEIGHT\>/gi, working_paper_height + 1)
@@ -188,6 +197,13 @@ airborne.bootstrap.view.print = {
 				cursor_jq.remove();
 			}
 		});
+
+		// IFRAME으로 PDF 영역을 그려준다. 
+		// SAMPLE : http://localhost/service/toast-master/view/meeting_agenda_pdf.php?MEETING_ID=151&MEETING_MEMBERSHIP_ID=1
+
+// <iframe src="http://www.w3schools.com">
+//   <p>Your browser does not support iframes.</p>
+// </iframe>		
 
 
 

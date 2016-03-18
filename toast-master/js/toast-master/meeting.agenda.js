@@ -82,8 +82,8 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
+		// wonder.jung11
+		// _print.draw_grid_view(container_jq, _print.PRINT_FORMAT_A4_LANDSCAPE);
 
 
 
