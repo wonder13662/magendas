@@ -28,7 +28,7 @@ class ActionObject implements Action{
 	private $coordinate;
 	private $search_map;
 	private $has_changed;
-	private $context;	
+	private $context;
 
 	public function test() { return 'ActionObject'; }
 	/*
@@ -189,6 +189,9 @@ class ActionObject implements Action{
 
 		return $this->get_child($length - 1);
 	}
+	public function is_first() {
+		return (!$this->has_sibling_before())?true:false;
+	}
 	public function has_sibling_before() {
 		$cur_sibling_before = $this->get_sibling_before();
 		if(ActionObject::is_not_action_obj($cur_sibling_before)) {
@@ -219,6 +222,9 @@ class ActionObject implements Action{
 
 		return null;
 
+	}
+	public function is_last() {
+		return (!$this->has_sibling_after())?true:false;
 	}
 	public function has_sibling_after() {
 		$cur_sibling_after = $this->get_sibling_after();
@@ -613,6 +619,102 @@ class ActionObject implements Action{
 
 	}
 
+	// VIEW PROPS
+	private $text_color_arr;	// TCPDFElement::$COLOR_DARK_GRAY_ARR
+	private $text_size;			// $CARD_BOARD_TITLE_FONT_SIZE
+	private $cell_x_pos;		// $element_set_x_pos
+	private $cell_y_pos;
+	private $cell_width;
+	private $cell_height;
+	private $cell_color_arr;	// TCPDFElement::$COLOR_MILK_GRAY_ARR
+	private $is_bold;			// true or false
+	private $text_align;		// TCPDFElement::$TEXT_ALIGN_LEFT
+	private $font_type;
+
+	public function set_text_color_arr($text_color_arr) {
+		$this->text_color_arr = $text_color_arr;
+	}
+	public function get_text_color_arr() {
+		return $this->text_color_arr;	
+	}
+
+	public function set_text_size($text_size) {
+		$this->text_size = $text_size;
+	}
+	public function get_text_size() {
+		return $this->text_size;	
+	}
+
+	public function set_cell_x_pos($cell_x_pos) {
+		$this->cell_x_pos = $cell_x_pos;
+	}
+	public function get_cell_x_pos() {
+		return $this->cell_x_pos;	
+	}
+
+	public function set_cell_y_pos($cell_y_pos) {
+		$this->cell_y_pos = $cell_y_pos;
+	}
+	public function get_cell_y_pos() {
+		return $this->cell_y_pos;	
+	}
+
+	public function set_cell_width($cell_width) {
+		$this->cell_width = $cell_width;
+	}
+	public function get_cell_width() {
+		return $this->cell_width;	
+	}
+
+	public function set_cell_height($cell_height) {
+		$this->cell_height = $cell_height;
+	}
+	public function get_cell_height() {
+		return $this->cell_height;
+	}
+
+	public function set_cell_color_arr($cell_color_arr) {
+		$this->cell_color_arr = $cell_color_arr;
+	}
+	public function get_cell_color_arr() {
+		return $this->cell_color_arr;	
+	}
+
+	public function set_is_bold($is_bold) {
+		$this->is_bold = $is_bold;
+	}
+	public function get_is_bold() {
+		return $this->is_bold;	
+	}
+
+	public function set_text_align($text_align) {
+		$this->text_align = $text_align;
+	}
+	public function get_text_align() {
+		return $this->text_align;	
+	}
+
+	public function set_font_type($font_type) {
+		$this->font_type = $font_type;
+	}
+	public function get_font_type() {
+		return $this->font_type;	
+	}
+
+	// @ desc : 들여쓰기에 필요한 depth 정보를 가져옵니다.
+	public function get_depth($depth=0) {
+		if(ActionCollection::is_instance($this) && $this->is_root_collection()) {
+			return $depth;
+		}
+
+		if($this->has_parent()) {
+			$cur_parent = $this->get_parent();	
+			return $cur_parent->get_depth($depth + 1);
+		}
+
+		return $depth;
+	}
+
 }
 
 class ActionCollection extends ActionObject{
@@ -972,6 +1074,10 @@ class ActionItem extends ActionObject{
 
 
 	}
+	public function has_add_on_list() {
+		$cur_add_on_list = $this->get_add_on_list();
+		return !empty($cur_add_on_list)?true:false;
+	}
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
 			$this->add_on_action_object_list = array();
@@ -1150,9 +1256,11 @@ class ActionItem extends ActionObject{
 */
 class ActionItemTitleNTimeHHMM extends ActionItem{
 
+	// @ Usage : ActionItemTitleNTimeHHMM::is_not_instance($target)
 	public static function is_not_instance($target) {
 		return !ActionItemTitleNTimeHHMM::is_instance($target);
 	}
+	// @ Usage : ActionItemTitleNTimeHHMM::is_instance($target)
 	public static function is_instance($target) {
 		if(!is_null($target) && is_a($target,'ActionItemTitleNTimeHHMM')) {
 			return true;

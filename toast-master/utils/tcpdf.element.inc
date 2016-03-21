@@ -32,6 +32,9 @@ class TCPDFElement{
 		return $this->pdf;
 	}
 
+	// @ Desc : 띄어쓰기 탭 기준 너비 값
+	public static $INDENT=4; // TCPDFElement::$INDENT
+
 
 
 

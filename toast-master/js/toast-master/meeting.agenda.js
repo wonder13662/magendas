@@ -83,7 +83,8 @@ wonglish.meeting_agenda_manager = {
 
 
 		// wonder.jung11
-		// _print.draw_grid_view(container_jq, _print.PRINT_FORMAT_A4_LANDSCAPE);
+		// var pdf_url = service_root_path + "/images/test_show_pdf.pdf";
+		// _print.draw_grid_view(container_jq, _print.PRINT_FORMAT_A4_LANDSCAPE, pdf_url);
 
 
 
@@ -348,6 +349,8 @@ wonglish.meeting_agenda_manager = {
 		//  dMP     dMP"AMF dMP     dMP.aMP dMP.aMP    dMP   dMP  YMvAP" dMP             dMP dMP dMPdMP     dMP dMP dMPdMP.aMF dMP     dMP"AMF dP .dMP   
 		// dMMMMMP dMP dMP dMMMMMP  VMMMP"  VMMMP"    dMP   dMP    VP"  dMMMMMP         dMP dMP dMPdMMMMMP dMP dMP dMPdMMMMP" dMMMMMP dMP dMP  VMMMP"    
 
+		// REMOVE ME LATER
+/*
 		// executive member list
 		var table_row_data_list_executive_member = meeting_agenda_data_set.executive_member_list;
 
@@ -412,7 +415,7 @@ wonglish.meeting_agenda_manager = {
 
 			},this)
 		);
-
+*/
 
 
 
@@ -679,13 +682,17 @@ wonglish.meeting_agenda_manager = {
 		// 지난주의 미팅 아젠다도 가져옵니다.
 		var recent_club_schedule_timeline_list = meeting_agenda_data_set.recent_club_schedule_timeline_list;
 		// 템플릿 포맷으로 변환.
-		for(var idx = 0;idx < recent_club_schedule_timeline_list.length;idx++) {
-			var recent_club_schedule_obj = recent_club_schedule_timeline_list[idx];
-			var template_obj = {
-				__timeline_template_title:recent_club_schedule_obj.__meeting_agenda_startdttm + " " + recent_club_schedule_obj.__meeting_agenda_theme
-				, __timeline_template_json_str:recent_club_schedule_obj.__timeline_schedule_json_str
-			};
-			schedule_timeline_template_list.push(template_obj);
+		if(_v.is_valid_array(recent_club_schedule_timeline_list)) {
+
+			for(var idx = 0;idx < recent_club_schedule_timeline_list.length;idx++) {
+				var recent_club_schedule_obj = recent_club_schedule_timeline_list[idx];
+				var template_obj = {
+					__timeline_template_title:recent_club_schedule_obj.__meeting_agenda_startdttm + " " + recent_club_schedule_obj.__meeting_agenda_theme
+					, __timeline_template_json_str:recent_club_schedule_obj.__timeline_schedule_json_str
+				};
+				schedule_timeline_template_list.push(template_obj);
+			}
+
 		}
 
 
@@ -695,88 +702,93 @@ wonglish.meeting_agenda_manager = {
 		console.log("지난주의 미팅 아젠다도 가져옵니다.");
 		console.log("recent_club_schedule_timeline_list :: ",recent_club_schedule_timeline_list);
 
-
+		// wonder.jung11
+		// TODO - 정보만 보여주는 리스트 형태를 만듭니다.
 		// timeline template event ends
 		var timeline_template_tag = "";
-		for(var idx = 0;idx < schedule_timeline_template_list.length;idx++) {
-			var template_obj = schedule_timeline_template_list[idx];
-			var type = template_obj.__timeline_template_title;
+		if(_v.is_valid_array(schedule_timeline_template_list)) {
 
-			var jsonObjList = _json.parseJSON(template_obj.__timeline_template_json_str);
-			if(jsonObjList == undefined) {
-				continue;
-			}
+			for(var idx = 0;idx < schedule_timeline_template_list.length;idx++) {
+				var template_obj = schedule_timeline_template_list[idx];
+				var type = template_obj.__timeline_template_title;
 
-			var checked = "";
-			if(idx == 0) {
-				checked = "checked";
-			}
+				var jsonObjList = _json.parseJSON(template_obj.__timeline_template_json_str);
+				if(jsonObjList == undefined) {
+					continue;
+				}
 
-			timeline_template_tag += ""
-			+ "<li id=\"timeline_template_row\" template_id=\"<template_id>\" class=\"list-group-item\" style=\"color:#B1B1B1;background-color:#F1F1F1;\">".replace(/\<template_id\>/gi, template_obj.__timeline_template_id)				
-				
-				+ "<div class=\"radio\" style=\"margin-top:0px;margin-bottom:0px;\">"
-					+ "<label>"
-						+ "<input type=\"radio\" id=\"radio_btn_meeting_template\" <checked>><span id=\"title\"><strong><title></strong></span>".replace(/\<title\>/gi, type).replace(/\<checked\>/gi, checked)
-					+ "</label>"
-					+ "<button id=\"folder_open_n_close\" type=\"button\" class=\"btn btn-default btn-xs\" style=\"float:right;margin-right:0px;margin-top:-2px;\"><span class=\"glyphicon glyphicon-folder-close\" style=\"padding-top:3px;padding-bottom:5px;padding-left:3px;padding-right:3px;\"></span>&nbsp;</button>"
-				+ "</div>"
-
-				+ "<ul id=\"main_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
-			;
-
-			// main action
-			for(var idx_main_action = 0;idx_main_action < jsonObjList.length;idx_main_action++) {
-				var main_action_json_obj = jsonObjList[idx_main_action];
-
-				var __action_name = main_action_json_obj.__action_name;
-				var __action_list = main_action_json_obj.__action_list;
-				var __time_sec = main_action_json_obj.__prop_map.__time_sec;
-				var __time_hh_mm = _dates.get_hh_mm_from_seconds(__time_sec);
+				var checked = "";
+				if(idx == 0) {
+					checked = "checked";
+				}
 
 				timeline_template_tag += ""
-					+ "<li id=\"main_action_row\" class=\"list-group-item\" style=\"color:rgb(138, 109, 59);background-color:rgb(252, 248, 227);padding-left:10px;\">"
-						+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;\"><time_hh_mm></span>".replace(/\<time_hh_mm\>/gi, __time_hh_mm)
-						+ "<span id=\"title\" style=\"padding-left:10px;\"><title></span>".replace(/\<title\>/gi, __action_name)
+				+ "<li id=\"timeline_template_row\" template_id=\"<template_id>\" class=\"list-group-item\" style=\"color:#B1B1B1;background-color:#F1F1F1;\">".replace(/\<template_id\>/gi, template_obj.__timeline_template_id)				
+					
+					+ "<div class=\"radio\" style=\"margin-top:0px;margin-bottom:0px;\">"
+						+ "<label>"
+							+ "<input type=\"radio\" id=\"radio_btn_meeting_template\" <checked>><span id=\"title\"><strong><title></strong></span>".replace(/\<title\>/gi, type).replace(/\<checked\>/gi, checked)
+						+ "</label>"
+						+ "<button id=\"folder_open_n_close\" type=\"button\" class=\"btn btn-default btn-xs\" style=\"float:right;margin-right:0px;margin-top:-2px;\"><span class=\"glyphicon glyphicon-folder-close\" style=\"padding-top:3px;padding-bottom:5px;padding-left:3px;padding-right:3px;\"></span>&nbsp;</button>"
+					+ "</div>"
+
+					+ "<ul id=\"main_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
 				;
 
-				for(var idx_sub_action_list = 0;idx_sub_action_list < __action_list.length;idx_sub_action_list++) {
-					var sub_action_json_obj_list = __action_list[idx_sub_action_list];
+				// main action
+				for(var idx_main_action = 0;idx_main_action < jsonObjList.length;idx_main_action++) {
+					var main_action_json_obj = jsonObjList[idx_main_action];
+
+					var __action_name = main_action_json_obj.__action_name;
+					var __action_list = main_action_json_obj.__action_list;
+					var __time_sec = main_action_json_obj.__prop_map.__time_sec;
+					var __time_hh_mm = _dates.get_hh_mm_from_seconds(__time_sec);
 
 					timeline_template_tag += ""
-						+ "<ul id=\"sub_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
+						+ "<li id=\"main_action_row\" class=\"list-group-item\" style=\"color:rgb(138, 109, 59);background-color:rgb(252, 248, 227);padding-left:10px;\">"
+							+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;\"><time_hh_mm></span>".replace(/\<time_hh_mm\>/gi, __time_hh_mm)
+							+ "<span id=\"title\" style=\"padding-left:10px;\"><title></span>".replace(/\<title\>/gi, __action_name)
 					;
 
-					for(var idx_sub_action = 0;idx_sub_action < sub_action_json_obj_list.length;idx_sub_action++) {
-						var sub_action_json_obj = sub_action_json_obj_list[idx_sub_action];
+					for(var idx_sub_action_list = 0;idx_sub_action_list < __action_list.length;idx_sub_action_list++) {
+						var sub_action_json_obj_list = __action_list[idx_sub_action_list];
 
-						var __sub_action_name = sub_action_json_obj.__action_name;
 						timeline_template_tag += ""
-						+ "<li class=\"list-group-item\">"
-							+ "<span id=\"title\"><title></span>".replace(/\<title\>/gi, __sub_action_name)
+							+ "<ul id=\"sub_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
+						;
+
+						for(var idx_sub_action = 0;idx_sub_action < sub_action_json_obj_list.length;idx_sub_action++) {
+							var sub_action_json_obj = sub_action_json_obj_list[idx_sub_action];
+
+							var __sub_action_name = sub_action_json_obj.__action_name;
+							timeline_template_tag += ""
+							+ "<li class=\"list-group-item\">"
+								+ "<span id=\"title\"><title></span>".replace(/\<title\>/gi, __sub_action_name)
+							+ "</li>"
+							;
+
+						} // for sub action obj end
+
+						timeline_template_tag += ""
+							+ "</ul>"
+						;
+
+					} // for sub action list end
+
+					timeline_template_tag += ""
 						+ "</li>"
 						;
 
-					} // for sub action obj end
-
-					timeline_template_tag += ""
-						+ "</ul>"
-					;
-
-				} // for sub action list end
+				} // for main action list end
 
 				timeline_template_tag += ""
-					+ "</li>"
-					;
+					+ "</ul>"			
+				+ "</li>"
+				;
 
-			} // for main action list end
+			} // for template end
 
-			timeline_template_tag += ""
-				+ "</ul>"			
-			+ "</li>"
-			;
-
-		} // for template end
+		}
 
 		timeline_template_tag +=
 		"</ul>";

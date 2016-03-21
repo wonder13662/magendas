@@ -28,7 +28,13 @@ $member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $para
 $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
 $executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
 
-$FONT_SIZE_LARGE = $params->getParamString($params->FONT_SIZE_LARGE);
+$FONT_SIZE = $params->getParamString($params->FONT_SIZE_LARGE);
+
+// 액션 리스트로 출력합니다.
+$action_list = $wdj_mysql_interface->get_root_action_collection(6229, 134); 	// 용인
+// $action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
+
+
 
 // @ required
 $wdj_mysql_interface->close();
@@ -115,7 +121,7 @@ $wdj_pdf->draw_toast_master_time_guide_line_simple_table(
 	// element_set_width
 	, $wdj_second_column_width
 	// font_type
-	, $FONT_SIZE_LARGE
+	, $FONT_SIZE
 );
 
 
@@ -144,7 +150,7 @@ $wdj_pdf->draw_toastmaster_officer(
 	// data
 	, $executive_member_list
 	// font_type
-	, $FONT_SIZE_LARGE
+	, $FONT_SIZE
 );
 
 /*
@@ -176,6 +182,7 @@ dMP   dMP dMP dMP dMPdMMMMMP dMMMMMP dMP dMP dMP dMMMMMP
 // print_r($test);
 // echo "000<br/>";
 
+/*
 $wdj_pdf->draw_card_board_timeline_V2(
 	// title
 	"Schedule"
@@ -196,8 +203,17 @@ $wdj_pdf->draw_card_board_timeline_V2(
 	// today_speech_speaker
 	, $today_speech_speaker_v2_list
 	// font_type=null
-	, $FONT_SIZE_LARGE
+	, $FONT_SIZE
 );
+*/
+
+// wonder.jung11
+$action_list->set_cell_x_pos(2);
+$action_list->set_cell_y_pos($wdj_first_row_y_pos);
+$action_list->set_cell_width(133);
+$action_list->set_font_type($FONT_SIZE);
+
+$wdj_pdf->draw_element($action_list);
 
 
 
