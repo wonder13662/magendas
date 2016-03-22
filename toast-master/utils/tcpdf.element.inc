@@ -1328,28 +1328,20 @@ class TCPDFElement{
 		// echo "001<br/>";
 
 		// wonder.jung11
-		$cell_x_pos = $this->get_cell_x_pos();
+		$cell_buffer = 0.6;
+		$cell_x_pos = $this->get_cell_x_pos() - ($cell_buffer / 2);
 		$cell_y_pos = $this->get_cell_y_pos();
-		$cell_width = $this->get_cell_width();
-		$cell_height = $this->get_cell_height();
+		
+		$cell_width = $this->get_cell_width() + $cell_buffer;
+		$cell_height = $this->get_cell_height() + $cell_buffer;
 
-		$cell_color_arr = TCPDFElement::$COLOR_DARK_WINE_RED_ARR;
+		$cell_color_arr = TCPDFElement::$COLOR_WHITE_ARR;
 
 		$cell_border_round_rect_style = self::$CARD_BOARD_ROUND_RECT_ROUND_CORNER_BODY;
 		$cell_border_style = self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_ERASE);
 
-		$cell_height_buffer = 0.2;
-		$this->pdf->Rect(
-			$cell_x_pos
-			, $cell_y_pos + 10
-			, $cell_width
-			, $cell_height + $cell_height_buffer
-			// , $cell_border_round_rect_style
-			, ""
-			// , $cell_border_style
-			, array()
-			, $cell_color_arr
-		);
+		$style_empty = array('L' => 0,'T' => 0,'R' => 0,'B' => 0);
+		$this->pdf->Rect($cell_x_pos, $cell_y_pos, $cell_width, $cell_height, 'DF', $style_empty, $cell_color_arr);
 
 	}
 

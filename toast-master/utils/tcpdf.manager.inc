@@ -18,6 +18,10 @@ class TCPDFManager{
 		$this->pdf->Output('example_006.pdf', 'I');
 	}
 
+	public function get_pdf() {
+		return $this->pdf;
+	}
+
 	private function get_empty_pdf(){
 		$pdf = 
 		new TCPDF(
@@ -1266,7 +1270,7 @@ class TCPDFManager{
 		return $parent_element_set;
 	}	
 
-	// @ Desc : 타임마커가 있는 액션 객체를 그립니다.
+	// @ Desc : 테이블 열의 액션 객체를 그립니다.
 	private function draw_element_list_row_title($action_item_obj=null, $parent_element_set=null, $is_last=false) {
 
 		$caller_name = __FUNCTION__;
@@ -1371,7 +1375,23 @@ class TCPDFManager{
 				);
 			}
 
-			if($action_obj->is_list()) {
+			if($action_obj->is_table_column_list()) {
+
+				// TABLE COLUMN LIST
+				$cur_column_idx = $action_obj->get_idx();
+				$cur_children = $action_obj->get_children();
+
+				for($idx=0;$idx < count($cur_children);$idx++) {
+					$cur_child_action_item_obj = $cur_children[$idx];
+					if(ActionItem::is_not_instance($cur_child_action_item_obj)) {
+						echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$cur_child_action_item_obj)<br/>";
+						return;
+					}
+
+					$this->draw_element($cur_child_action_item_obj, $parent_element_set);
+				}
+
+			} else if($action_obj->is_list()) {
 
 				// 1. ACTION LIST일 경우, 타이틀 열을 그려줍니다.
 				if($action_obj->is_root_collection()) {
@@ -1394,23 +1414,43 @@ class TCPDFManager{
 					$cur_last_element = $parent_element_set->get_last_element();
 
 					// EREASE - 마지막 엘리먼트 위를 배경색으로 덮습니다.
-					$cur_last_element->erase();					
+					$cur_last_element->erase();
 
-					/*
-					// 리스트의 마지막 객체에 둥근 테두리를 추가.
-					$last_action_item_obj = new ActionItem(" ");
-					$last_action_item_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
-					$last_action_item_obj->set_cell_width($action_obj->get_cell_width());
-					// 임시적으로 마지막은 테두리로 막습니다.
-					$parent_element_set = $this->draw_element_set_list_title($last_action_item_obj, $parent_element_set, false, true);
-					*/
+					// INDENT - 들여쓰기 설정
+					$x_pos_offset = $cur_last_element->get_depth() * TCPDFElement::$INDENT;
+					$cur_last_element->updateTextProps(null, $x_pos_offset);
+
+					$cur_last_element->set_is_last(true);
+					$cur_last_element->draw();
+
 				}
 
 			} else if($action_obj->is_table() && $action_obj->has_children()) {
 
-				// 자식 column list들에 대한 처리
+				// TABLE Element set을 그립니다.
+				/*
+				$element_set_simple_table = 
+				new TCPDFElementSet(
+					$element_set_title
+					, $element_set_x_pos + $x_pos_offset
+					, $element_set_y_pos
+					, $simple_table_width
+				);
+				*/
 
-			}
+				// 자식 column list들에 대한 처리
+				if($action_obj->has_children()) {
+					// 자식 열들에 대한 처리
+					$cur_children = $action_obj->get_children();
+					for($idx=0;$idx < count($cur_children);$idx++) {
+
+						$cur_child_action_list_obj = $cur_children[$idx];
+						$cur_child_action_list_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
+
+						$this->draw_element($cur_child_action_list_obj, $parent_element_set);
+					} // end for
+				} // end inner if
+			} // end outer if
 
 
 
@@ -1436,16 +1476,28 @@ class TCPDFManager{
 
 			// 4. ACTION ITEM일 경우
 			if($action_obj->is_table_field_item()) {
-				// 4-1. TABLE형 아이템일 경우의 x, y 좌표 위치 처리	
+
+				// 4-1. TABLE형 아이템일 경우의 x, y 좌표 위치 처리
+				$parent_action_obj = $action_obj->get_parent();
+				if(ActionObject::is_not_action_obj($parent_action_obj)) {
+					echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$parent_action_obj)<br/>";
+					return;
+				}
+				// INDENT
+				$parent_action_idx = $parent_action_obj->get_idx();
+
+
+
 			} else {
+
 				// 4-2. LIST형 아이템일 경우의 x, y 좌표 위치 처리
 				$parent_action_obj = $action_obj->get_parent();
 				if(ActionObject::is_not_action_obj($parent_action_obj)) {
 					echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$parent_action_obj)<br/>";
 					return;
 				}
-				
 				$parent_element_set = $this->draw_element_list_row_title($action_obj, $parent_element_set);
+
 			}
 
 		}
