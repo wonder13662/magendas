@@ -1169,12 +1169,6 @@ class ActionItem extends ActionObject{
 	}
 
 	// @ Override
-	/*
-	public function get_name() {
-		return parent::get_name();
-	}
-	*/
-	// @ Override
 	public function set_context($new_context=null) {
 		parent::set_context($new_context);
 	}

@@ -155,6 +155,24 @@ class TCPDFElementSet{
 		}
 
 	}
+	// @ Desc : child element set을 추가합니다. add on table을 가지는 경우를 나타냅니다.
+	private $child_add_on_element_set_arr;
+	public function push_child_add_on_element_set($child_add_on_element_set) {
+		
+		if(is_null($this->child_add_on_element_set_arr)) {
+			$this->child_add_on_element_set_arr = array();
+		}
+		array_push($this->child_add_on_element_set_arr, $child_add_on_element_set);
+
+		$caller_name .= __FUNCTION__;
+		if(method_exists($child_add_on_element_set,'get_element_set_height')) {
+			$this->add_element_set_height($child_add_on_element_set->get_element_set_height());	
+		} else {
+			echo "$caller_name\t\$element->get_element_set_height is not exists!";
+			return;
+		}
+
+	}
 	public function get_element_arr() {
 		return $this->element_arr;
 	}

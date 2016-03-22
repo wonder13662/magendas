@@ -1270,6 +1270,8 @@ class TCPDFManager{
 		return $parent_element_set;
 	}	
 
+
+
 	// @ Desc : 테이블 열의 액션 객체를 그립니다.
 	private function draw_element_list_row_title($action_item_obj=null, $parent_element_set=null, $is_last=false) {
 
@@ -1346,6 +1348,86 @@ class TCPDFManager{
 		$parent_element_set->add_element($element_prop_sub_action);
 
 	}
+
+	// @ Desc : 테이블 필드 엘리먼트를 그립니다. SIMPLE TABLE TYPE
+	private function draw_element_simple_table_field($simple_table_row_idx=-1, $simple_table_column_idx=-1, $action_item_obj=null, $element_set_simple_table=null) {
+
+		$caller_name = __FUNCTION__;
+
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionItem::is_not_instance($action_item_obj)) {
+			echo "TCPDFManager\t$caller_name\ActionItem::is_not_instance(\$action_item_obj)<br/>";
+			return;
+		}
+		if(is_null($element_set_simple_table)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$element_set_simple_table)<br/>";
+			return;
+		}
+
+		// wonder.jung22
+
+		// 타입에 따라서 화면에 그려지는 모양이 달라집니다.
+		// TABLE ROW CONTENT
+		$is_bold = false;
+		$text_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+		$cell_color_arr = TCPDFElement::$COLOR_WHITE_ARR;
+		if(ActionItem::$TITLE_ONLY_FIXED == $action_item_obj->get_item_type()) {
+			// TABLE ROW TITLE
+			$is_bold = true;
+			$text_color_arr = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+			$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+		}
+
+
+		$element_prop_simple_table_field = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_TABLE_FIELD
+			// element_name
+			, "sub_action_" . $simple_table_row_idx . "_" . $simple_table_column_idx . "_" . $simple_table_column->name
+			// text
+			, $action_item_obj->get_name()
+			// text_color_arr
+			, $text_color_arr
+			// text_size
+			, $action_item_obj->get_text_size()
+			// cell_x_pos
+			, 0
+			// cell_y_pos
+			, 0
+			// cell_width / 테이블의 전체 너비를 조정해야 하므로 입력하지 않습니다.
+			, -1
+			// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
+			, -1
+			// cell_color_arr
+			, $cell_color_arr
+			// depth
+			, $action_item_obj->get_depth()
+			// is_first
+			, false
+			// is_last
+			, false
+			// is_bold
+			, $is_bold
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);
+
+		// table field를 그릴 경우는 테이블 전체 너비를 기준으로 
+		// 컬럼의 간격 조정, 텍스트의 구분등이 모든 테이블 필드의 데이터가 완료된 이후에 가능합니다.
+		// 그러므로 테이블 필드를 바로 그리지 않습니다.
+
+		$cur_row_idx = $simple_table_row_idx;
+		$cur_column_idx = $simple_table_column_idx;
+		$cur_element = $element_prop_simple_table_field;
+		$element_set_simple_table->add_table_element($cur_row_idx, $cur_column_idx, $cur_element);
+
+		return $element_set_simple_table;
+
+	}	
 
 	// wonder.jung11
 	// ACTION CARD BOARD
@@ -1428,28 +1510,43 @@ class TCPDFManager{
 			} else if($action_obj->is_table() && $action_obj->has_children()) {
 
 				// TABLE Element set을 그립니다.
-				/*
+				$x_pos_offset = $action_obj->get_depth() * TCPDFElement::$INDENT;
+				$element_set_x_pos = $parent_element_set->get_element_set_x_pos();
+				// $element_set_y_pos = $parent_element_set->get_element_set_y_pos();
+				$element_set_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
+				$element_set_width = $parent_element_set->get_element_set_width();
+
+				// echo "\$element_set_width ::: $element_set_width<br/>";
+
+				$simple_table_width = $element_set_width - ($x_pos_offset + TCPDFElement::$PADDING_CARD_BOARD_TIMELINE_TITLE * 2);
+
+				// wonder.jung22
 				$element_set_simple_table = 
 				new TCPDFElementSet(
-					$element_set_title
+					$action_obj->get_name()
 					, $element_set_x_pos + $x_pos_offset
 					, $element_set_y_pos
 					, $simple_table_width
 				);
-				*/
 
 				// 자식 column list들에 대한 처리
-				if($action_obj->has_children()) {
-					// 자식 열들에 대한 처리
-					$cur_children = $action_obj->get_children();
-					for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_children = $action_obj->get_children();
+				for($idx=0;$idx < count($cur_children);$idx++) {
 
-						$cur_child_action_list_obj = $cur_children[$idx];
-						$cur_child_action_list_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
+					$cur_child_action_list_obj = $cur_children[$idx];
+					$cur_child_action_list_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
 
-						$this->draw_element($cur_child_action_list_obj, $parent_element_set);
-					} // end for
-				} // end inner if
+					$this->draw_element($cur_child_action_list_obj, $element_set_simple_table);
+				} // end for
+
+				// wonder.jung22
+
+				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
+
+				// 배경 이미지를 먼저 만들어 준다.
+
+				$element_set_simple_table->draw_table();
+
 			} // end outer if
 
 
@@ -1484,9 +1581,18 @@ class TCPDFManager{
 					return;
 				}
 				// INDENT
-				$parent_action_idx = $parent_action_obj->get_idx();
+				$simple_table_column_idx = $parent_action_obj->get_idx();
+				$simple_table_row_idx = $action_obj->get_idx();
 
+				$cur_item_type = $action_obj->get_item_type();
+				$cur_item_type_name = $action_obj->get_item_type_name();
 
+				// echo "\$simple_table_column_idx ::: $simple_table_column_idx<br/>";
+				// echo "\$simple_table_row_idx ::: $simple_table_row_idx<br/>";
+				// echo "\$cur_item_type ::: $cur_item_type<br/>";
+				// echo "\$cur_item_type_name ::: $cur_item_type_name<br/>";
+
+				$this->draw_element_simple_table_field($simple_table_row_idx, $simple_table_column_idx, $action_obj, $parent_element_set);
 
 			} else {
 
@@ -1496,11 +1602,21 @@ class TCPDFManager{
 					echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$parent_action_obj)<br/>";
 					return;
 				}
-				$parent_element_set = $this->draw_element_list_row_title($action_obj, $parent_element_set);
+				$this->draw_element_list_row_title($action_obj, $parent_element_set);
 
-			}
+				// 4-3. ACTION ITEM의 add on child이 있는지 확인.
+				if($action_obj->has_add_on_list()) {
+					$cur_add_on_list = $action_obj->get_add_on_list();
+					for($idx = 0; $idx < count($cur_add_on_list); $idx++) {
+						$add_on_action_obj = $cur_add_on_list[$idx];
+						$this->draw_element($add_on_action_obj, $parent_element_set);
+					} // inner for end
 
-		}
+				} // inner if end
+
+			} // if end
+
+		} // if end
 
 		// TEST
 		return;

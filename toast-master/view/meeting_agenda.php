@@ -105,8 +105,8 @@
 	// TEST
 	// test action list
 	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
-	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6229, 134); 	// 용인
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
+	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6229, 134); 	// 용인
+	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
 	$new_action_list_std = $new_action_list->get_std_obj();
 
 	// 1. IFRAME으로 PDF를 보여준다. 
