@@ -1309,7 +1309,7 @@ class TCPDFManager{
 			// text
 			, $action_item_obj->get_name()
 			// text_color_arr
-			, TCPDFElement::$COLOR_DARK_GRAY_ARR
+			, TCPDFElement::$COLOR_WARM_GRAY_ARR
 			// text_size
 			, $CARD_BOARD_TITLE_FONT_SIZE
 			// cell_x_pos
@@ -1389,12 +1389,21 @@ class TCPDFManager{
 				}
 
 				if($action_obj->is_root_collection()) {
+
+					// 마지막 엘리먼트를 가져옵니다.
+					$cur_last_element = $parent_element_set->get_last_element();
+
+					// EREASE - 마지막 엘리먼트 위를 배경색으로 덮습니다.
+					$cur_last_element->erase();					
+
+					/*
 					// 리스트의 마지막 객체에 둥근 테두리를 추가.
 					$last_action_item_obj = new ActionItem(" ");
 					$last_action_item_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
 					$last_action_item_obj->set_cell_width($action_obj->get_cell_width());
 					// 임시적으로 마지막은 테두리로 막습니다.
 					$parent_element_set = $this->draw_element_set_list_title($last_action_item_obj, $parent_element_set, false, true);
+					*/
 				}
 
 			} else if($action_obj->is_table() && $action_obj->has_children()) {

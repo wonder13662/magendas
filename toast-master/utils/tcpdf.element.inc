@@ -19,7 +19,7 @@ class TCPDFElement{
 	private $pdf;
 	public function TCPDFElement($pdf){
 
-		$caller_name .= "<br/>tcpdf.element.inc->TCPDFElement constructor";
+		$caller_name = __FUNCTION__;
 		if(is_null($pdf)){
 			echo "$caller_name\t\$pdf is not valid!";
 			return;
@@ -113,9 +113,11 @@ class TCPDFElement{
 	public static $BORDER_STYLE_CARD_BOARD_GRAY_TAIL="BORDER_STYLE_CARD_BOARD_GRAY_TAIL";
 	public static $BORDER_STYLE_CARD_BOARD_GRAY_BODY="BORDER_STYLE_CARD_BOARD_GRAY_BODY";
 	public static $BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY="BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY";
+	public static $BORDER_STYLE_ERASE="BORDER_STYLE_ERASE";
+	// @ USAGE : self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_ERASE)
 	public static function GET_BORDER_STYLE_BY_TYPE($type) {
 
-		if($type == self::$BORDER_STYLE_CARD_BOARD_GRAY_HEAD_N_TAIL) {
+		if(strcmp($type,self::$BORDER_STYLE_CARD_BOARD_GRAY_HEAD_N_TAIL) == 0) {
 
 			$border_style=
 			array(
@@ -127,7 +129,7 @@ class TCPDFElement{
 				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
-		} else if($type == self::$BORDER_STYLE_CARD_BOARD_HEAD_DARK_GRAY) {
+		} else if(strcmp($type,self::$BORDER_STYLE_CARD_BOARD_HEAD_DARK_GRAY) == 0) {
 
 			$border_style=
 			array(
@@ -139,7 +141,7 @@ class TCPDFElement{
 				, 'color' => self::$COLOR_DARK_GRAY_ARR
 			);
 
-		} else if($type == self::$BORDER_STYLE_CARD_BOARD_GRAY_TAIL) {
+		} else if(strcmp($type,self::$BORDER_STYLE_CARD_BOARD_GRAY_TAIL) == 0) {
 
 			// 리스트의 마지막 열을 그립니다.
 			// 좌,우, 하단만 라운드를 넣고 상단은 아무런 효과도 넣지 않습니다.
@@ -162,7 +164,7 @@ class TCPDFElement{
 	            'B' => $border_style_left_n_right
 			);
 
-		} else if($type == self::$BORDER_STYLE_CARD_BOARD_GRAY_BODY) {
+		} else if(strcmp($type,self::$BORDER_STYLE_CARD_BOARD_GRAY_BODY) == 0) {
 
 			$border_style_left_n_right=
 			array(	
@@ -182,7 +184,7 @@ class TCPDFElement{
 	            'B' => 0
 			);
 
-		} else if($type == self::$BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY) {
+		} else if(strcmp($type,self::$BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY) == 0) {
 
 			$border_style_all=
 			array(	
@@ -192,6 +194,20 @@ class TCPDFElement{
 				, 'dash' => 0
 				// , 'color' => self::$COLOR_WARM_GRAY_ARR
 				, 'color' => self::$COLOR_DARK_GRAY_ARR
+			);
+
+			$border_style=
+			array('all' => $border_style_all);
+
+		} else if(strcmp($type,self::$BORDER_STYLE_ERASE) == 0) {
+
+			$border_style_all=
+			array(	
+				'width' => self::$BORDER_STYLE_CARD_BOARD_OUTLINE_WIDTH
+				, 'cap' => 'squre'
+				, 'join' => 'miter'
+				, 'dash' => 0
+				, 'color' => self::$COLOR_WHITE_ARR
 			);
 
 			$border_style=
@@ -908,7 +924,6 @@ class TCPDFElement{
 
 		// USER CUSTOM - CELL BORDER
 		if($is_last == true) {
-			// wonder.jung
 			if( self::$ELEMENT_TYPE_TABLE_FIELD == $element_type ) {
 				$element_prop->set_cell_border_style(self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_SIMPLE_TABLE_CELL_GRAY));
 			} else {
@@ -1040,7 +1055,6 @@ class TCPDFElement{
 		$raw_text_width = $this->get_text_width_on_font($raw_text);
 
 		// http://www.tcpdf.org/doc/code/classTCPDF.html
-		// wonder.jung - 왜 폰트가 고정이지??
 		$raw_text_height = 
 		$this->get_text_height_on_font(
 			// $cell_width
@@ -1308,6 +1322,37 @@ class TCPDFElement{
 		$this->draw_text();
 	}
 
+	// @ desc : 배경색으로 덮어 지운 효과를 냅니다.
+	public function erase() {
+
+		// echo "001<br/>";
+
+		// wonder.jung11
+		$cell_x_pos = $this->get_cell_x_pos();
+		$cell_y_pos = $this->get_cell_y_pos();
+		$cell_width = $this->get_cell_width();
+		$cell_height = $this->get_cell_height();
+
+		$cell_color_arr = TCPDFElement::$COLOR_DARK_WINE_RED_ARR;
+
+		$cell_border_round_rect_style = self::$CARD_BOARD_ROUND_RECT_ROUND_CORNER_BODY;
+		$cell_border_style = self::GET_BORDER_STYLE_BY_TYPE(self::$BORDER_STYLE_ERASE);
+
+		$cell_height_buffer = 0.2;
+		$this->pdf->Rect(
+			$cell_x_pos
+			, $cell_y_pos + 10
+			, $cell_width
+			, $cell_height + $cell_height_buffer
+			// , $cell_border_round_rect_style
+			, ""
+			// , $cell_border_style
+			, array()
+			, $cell_color_arr
+		);
+
+	}
+
 
 
 
@@ -1342,7 +1387,8 @@ class TCPDFElement{
 		$cell_color_arr = $this->get_cell_color_arr();
 
 		// 마지막 열인 경우, 아래 테두리를 추가로 그려줘야 한다.
-		$cell_height_buffer = 0.2; // 여러개의 엘리먼트를 그리게 될때, 생기는 여백을 가리기 위한 추가 높이.
+		// 여러개의 엘리먼트를 그리게 될때, 생기는 여백을 가리기 위한 추가 높이.
+		$cell_height_buffer = 0.2;
 		// if($cell_border_round_rect_round_corner==self::$CARD_BOARD_ROUND_RECT_ROUND_CORNER_BODY){
 		if( ($this->get_is_first() == false) && ($this->get_is_last() == false) ) {
 
@@ -1357,7 +1403,6 @@ class TCPDFElement{
 			);
 
 		} else {
-
 			
 			$this->pdf->RoundedRect(
 			    $cell_x_pos
