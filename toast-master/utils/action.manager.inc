@@ -96,7 +96,6 @@ class ActionObject implements Action{
 			return;
 		}
 
-		// wonder.jung11
 		$child_action_obj_list = $this->get_children();
 		$child_action_obj_list_next = array();
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
@@ -874,6 +873,38 @@ class ActionCollection extends ActionObject{
 		}
 		return false;
 	}
+	public function is_last_add_on() {
+
+		$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();
+		if(ActionItem::is_not_instance($cur_add_on_action_parent_obj)) {
+			echo "!Error! / is_last_add_on / ActionItem::is_not_instance(\$cur_add_on_action_parent_obj)<br/>";
+			return;
+		}
+
+		// wonder.jung11
+		$cur_add_on_list = $cur_add_on_action_parent_obj->get_add_on_list();
+		if(!is_array($cur_add_on_list)) {
+			echo "!Error! / is_last_add_on / !is_array(\$cur_add_on_list)<br/>";
+			return;
+		}
+		if(empty($cur_add_on_list)) {
+			echo "!Error! / is_last_add_on / empty(\$cur_add_on_list)<br/>";
+			return;
+		}
+		$last_idx = (count($cur_add_on_list) - 1);
+		$last_add_on_action_obj = $cur_add_on_list[$last_idx];
+
+		if(ActionCollection::is_not_instance($last_add_on_action_obj)) {
+			echo "!Error! / is_last_add_on / ActionCollection::is_not_instance(\$last_add_on_action_obj)<br/>";
+			return;
+		}
+
+		if(strcmp($last_add_on_action_obj->get_hash_key(),$this->get_hash_key()) == 0) {
+			
+		}
+
+	}
+
 
 	public function search_hash_key($hash_key) {
 
@@ -1068,7 +1099,6 @@ class ActionItem extends ActionObject{
 			array_push($this->add_on_action_object_list, $add_on_collection);
 		}
 
-		// wonder.jung11
 		// add on object는 부모 객체를 가지고 있어야 할까?
 		// 가지고 있다면 parent <--> child와는 다르게 add on parent <--> add on child로 관계가 만들어 져야 하지 않을까?
 
@@ -1077,6 +1107,13 @@ class ActionItem extends ActionObject{
 	public function has_add_on_list() {
 		$cur_add_on_list = $this->get_add_on_list();
 		return !empty($cur_add_on_list)?true:false;
+	}
+	public function get_add_on_cnt() {
+		if(is_null($this->add_on_action_object_list) || !is_array($this->add_on_action_object_list)) {
+			return 0;
+		}
+
+		return count($this->add_on_action_object_list);
 	}
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
@@ -1110,7 +1147,6 @@ class ActionItem extends ActionObject{
 			}
 		}
 
-		// wonder.jung11
 		$children_add_on_action_list = $this->get_add_on_list();
 		for($idx = 0; $idx < count($children_add_on_action_list); $idx++) {
 			$child_add_on_action_object = $children_add_on_action_list[$idx];
@@ -1191,7 +1227,6 @@ class ActionItem extends ActionObject{
 			return;
 		}
 
-		// wonder.jung11
 		$table_column_action_list = $this->get_parent();
 		if(ActionCollection::is_not_instance($table_column_action_list)) {
 			echo "!Error! / get_table_row_field_action_item_list / ActionCollection::is_not_instance(\$table_column_action_list)";

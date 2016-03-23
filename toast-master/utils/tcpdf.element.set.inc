@@ -109,6 +109,20 @@ class TCPDFElementSet{
 	public function get_element_set_bottom_y_pos() {
 		return $this->get_element_set_y_pos() + $this->get_element_set_height();
 	}
+	private $offset_x_pos;
+	public function set_offset_x_pos($offset_x_pos) {
+		$this->offset_x_pos = $offset_x_pos;
+	}
+	public function get_offset_x_pos() {
+		return $this->offset_x_pos;
+	}
+	private $offset_y_pos;
+	public function set_offset_y_pos($offset_y_pos) {
+		$this->offset_y_pos = $offset_y_pos;
+	}
+	public function get_offset_y_pos() {
+		return $this->offset_y_pos;
+	}
 
 
 
@@ -166,7 +180,7 @@ class TCPDFElementSet{
 
 		$caller_name .= __FUNCTION__;
 		if(method_exists($child_add_on_element_set,'get_element_set_height')) {
-			$this->add_element_set_height($child_add_on_element_set->get_element_set_height());	
+			$this->add_element_set_height($child_add_on_element_set->get_element_set_height() + $child_add_on_element_set->get_offset_y_pos());	
 		} else {
 			echo "$caller_name\t\$element->get_element_set_height is not exists!";
 			return;

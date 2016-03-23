@@ -1369,13 +1369,13 @@ class TCPDFManager{
 		// 타입에 따라서 화면에 그려지는 모양이 달라집니다.
 		// TABLE ROW CONTENT
 		$is_bold = false;
-		$text_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
-		$cell_color_arr = TCPDFElement::$COLOR_WHITE_ARR;
+		$text_color_arr = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+		$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 		if(ActionItem::$TITLE_ONLY_FIXED == $action_item_obj->get_item_type()) {
 			// TABLE ROW TITLE
 			$is_bold = true;
 			$text_color_arr = TCPDFElement::$COLOR_DARK_GRAY_ARR;
-			$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+			$cell_color_arr = TCPDFElement::$COLOR_WARM_GRAY_ARR;
 		}
 
 
@@ -1511,6 +1511,7 @@ class TCPDFManager{
 
 				// TABLE Element set을 그립니다.
 				$x_pos_offset = $action_obj->get_depth() * TCPDFElement::$INDENT;
+				$y_pos_offset = 2;
 				$element_set_x_pos = $parent_element_set->get_element_set_x_pos();
 				// $element_set_y_pos = $parent_element_set->get_element_set_y_pos();
 				$element_set_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
@@ -1525,9 +1526,12 @@ class TCPDFManager{
 				new TCPDFElementSet(
 					$action_obj->get_name()
 					, $element_set_x_pos + $x_pos_offset
-					, $element_set_y_pos
+					, $element_set_y_pos + $y_pos_offset
 					, $simple_table_width
 				);
+
+				$element_set_simple_table->set_offset_x_pos($x_pos_offset);
+				$element_set_simple_table->set_offset_y_pos($y_pos_offset);
 
 				// 자식 column list들에 대한 처리
 				$cur_children = $action_obj->get_children();
@@ -1540,6 +1544,21 @@ class TCPDFManager{
 				} // end for
 
 				// wonder.jung22
+
+				if($action_obj->is_last_add_on()) {
+					// 마지막 엘리먼트라면 아래의 여백을 추가한다.
+				}
+
+				// $parent_action_obj = $action_obj->get_parent();
+				// $cur_add_on_cnt = $parent_action_obj->get_add_on_cnt();
+
+				$cur_name = $action_obj->get_name();
+				$is_last = $action_obj->is_last();
+
+				echo "\$cur_name ::: $cur_name<br/>";
+				echo "\$is_last ::: $is_last<br/>";
+
+				//get_add_on_cnt
 
 				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
 
