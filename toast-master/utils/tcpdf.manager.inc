@@ -1287,6 +1287,7 @@ class TCPDFManager{
 		$cell_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
 		// echo "\$cell_y_pos ::: $cell_y_pos<br/>";
 
+		// wonder.jung
 		$element_prop_simple_table_cell = 
 		TCPDFElement::GET_ELEMENT_PROP(
 			$this->pdf
@@ -1303,11 +1304,11 @@ class TCPDFManager{
 			// cell_x_pos
 			, $parent_element_set->get_element_set_x_pos()
 			// cell_y_pos
-			, $parent_element_set->get_element_set_bottom_y_pos()
+			, $parent_element_set->get_element_set_bottom_y_pos() + 0.4
 			// cell_width / 
 			, $parent_element_set->get_element_set_width()
 			// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
-			, $simple_table_obj->get_element_set_height()
+			, $simple_table_obj->get_element_set_height() + ($simple_table_obj->get_offset_y_pos() * 2)
 			// cell_color_arr
 			, TCPDFElement::$COLOR_MILK_GRAY_ARR
 			// depth
@@ -1419,8 +1420,6 @@ class TCPDFManager{
 			return;
 		}
 
-		// wonder.jung22
-
 		// 타입에 따라서 화면에 그려지는 모양이 달라집니다.
 		// TABLE ROW CONTENT
 		$is_bold = false;
@@ -1484,7 +1483,6 @@ class TCPDFManager{
 
 	}	
 
-	// wonder.jung11
 	// ACTION CARD BOARD
 	public function draw_element($action_obj=null, $parent_element_set=null) {
 
@@ -1576,7 +1574,6 @@ class TCPDFManager{
 
 				$simple_table_width = $element_set_width - ($x_pos_offset + TCPDFElement::$PADDING_CARD_BOARD_TIMELINE_TITLE * 2);
 
-				// wonder.jung22
 				$element_set_simple_table = 
 				new TCPDFElementSet(
 					$action_obj->get_name()
@@ -1598,18 +1595,16 @@ class TCPDFManager{
 					$this->draw_element($cur_child_action_list_obj, $element_set_simple_table);
 				} // end for
 
-				// wonder.jung22
-				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
+				// 배경 이미지를 먼저 만들어 준다.
+				$this->draw_element_list_row_empty($parent_element_set, $element_set_simple_table);
 
-				
+				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
 
 				// 마지막 엘리먼트라면 아래의 여백을 추가한다.
 				if($action_obj->is_last_add_on()) {
 					$parent_element_set->add_element_set_height($y_pos_offset);
 				}
 
-				// 배경 이미지를 먼저 만들어 준다.
-				$this->draw_element_list_row_empty($parent_element_set, $element_set_simple_table);
 
 				$element_set_simple_table->draw_table();
 
@@ -3257,7 +3252,7 @@ class TCPDFManager{
 
 		return $simple_table_row_arr;
 	}
-	// wonder.jung11
+
 	// @ Desc : action obj를 timeline card board 형태로 바꿉니다.
 	private function get_timeline_card_board_data_from_action_obj($action_obj){
 
