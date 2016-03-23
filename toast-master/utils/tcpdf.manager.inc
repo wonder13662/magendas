@@ -18,6 +18,10 @@ class TCPDFManager{
 		$this->pdf->Output('example_006.pdf', 'I');
 	}
 
+	public function get_pdf() {
+		return $this->pdf;
+	}
+
 	private function get_empty_pdf(){
 		$pdf = 
 		new TCPDF(
@@ -232,113 +236,6 @@ class TCPDFManager{
 
 
 
-	// REMOVE ME
-	/*
-	private $text_align_center = "CENTER";
-	private $text_align_left = "LEFT";
-	private $text_align_right = "RIGHT";
-	private $card_board_padding = 0.7;
-	private $card_board_round_radius_top_left_top_right = 1.6;
-	private function get_card_board_row_title_prop_obj(	$text
-														, $parent_x_pos
-														, $parent_y_pos
-														, $cell_width
-														, $align="CENTER"){
-
-		// TODO 폰트 사이즈를 지정할 수 있어야 합니다.
-
-		$depth=0;
-		$caller_name="get_card_board_row_title_prop_obj";
-		$this->set_font_cart_board_title($caller_name);
-
-		$title_prop_obj = 
-		$this->get_row_text_prop_obj(
-			$text
-			, $parent_x_pos
-			, $parent_y_pos
-			, $cell_width
-			, $this->card_board_padding
-			, $align
-			, $depth
-			, $caller_name
-		);
-		$title_prop_obj->round_radius=$this->card_board_round_radius_top_left_top_right;
-		$title_prop_obj->border_style=$this->get_border_style_card_board_top_n_bottom_gray_outline();
-		$title_prop_obj->round_rect_style=$this->card_board_round_rect_style;
-		$title_prop_obj->round_rect_round_corner=$this->card_board_round_rect_round_corner_head;
-		$title_prop_obj->font=$this->card_board_title_font;
-		$title_prop_obj->font_style=$this->card_board_title_font_style;
-		$title_prop_obj->font_size=$this->card_board_title_font_size;
-		$title_prop_obj->font_color=$this->color_wine_red_arr;
-
-		return $title_prop_obj;
-	}
-	*/
-
-	// REMOVE ME
-	/*
-	private function get_card_board_row_content_key_prop_obj(	$text
-																, $parent_x_pos
-																, $prev_y_pos=0
-																, $cell_width
-																, $align="CENTER"
-																, $depth
-																, $is_title=false){
-
-		$depth=0;
-		$is_last=false;
-
-		$content_key_prop_obj = 
-		$this->get_card_board_row_content_prop_obj(	$text
-													, $parent_x_pos
-													, $prev_y_pos
-													, $cell_width
-													, $align
-													, $depth
-													, $is_last);
-
-		$content_key_prop_obj->font=$this->card_board_content_font;
-		$content_key_prop_obj->font_style=$this->card_board_title_font_style;
-		$content_key_prop_obj->font_size=$this->card_board_content_font_size;
-		$content_key_prop_obj->font_color=$this->color_warm_gray_arr;
-
-		$content_key_prop_obj->is_title=$is_title;
-
-		return $content_key_prop_obj;
-	}
-	*/
-
-	// REMOVE ME
-	/*
-	private function get_card_board_row_content_value_prop_obj(	$text
-																, $parent_x_pos
-																, $prev_y_pos=0
-																, $cell_width
-																, $align="CENTER"
-																, $depth
-																, $is_last=false
-																, $is_title=false ){
-
-		$depth=0;
-
-		$content_value_prop_obj = 
-		$this->get_card_board_row_content_prop_obj(	$text
-													, $parent_x_pos
-													, $prev_y_pos
-													, $cell_width
-													, $align
-													, $depth
-													, $is_last);
-
-		$content_value_prop_obj->font=$this->card_board_content_font;
-		$content_value_prop_obj->font_style=$this->card_board_content_font_style;
-		$content_value_prop_obj->font_size=$this->card_board_content_font_size;
-		$content_value_prop_obj->font_color=$this->color_warm_gray_arr;
-		$content_value_prop_obj->is_title=$is_title;
-
-		return $content_value_prop_obj;
-	}
-	*/
 	private function get_card_board_row_content_prop_obj(	$text
 															, $parent_x_pos
 															, $prev_y_pos=0
@@ -1185,10 +1082,926 @@ class TCPDFManager{
 	}
 
 
+	private function draw_element_set_list_title($action_obj=null, $parent_element_set=null, $is_first=false, $is_last=false) {
+
+		$caller_name = __FUNCTION__;
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionObject::is_not_action_obj($action_obj)) {
+			echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$action_obj)<br/>";
+			return;
+		}
+
+		// FIX ME
+		if(strcmp($action_obj->get_font_type(),TCPDFElement::$FONT_SIZE_LARGE) == 0) {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE_LARGE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE;
+		} else {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
+		}
+
+		$cell_height = -1;
+		if($is_last) {
+			$cell_height = 2;
+		}
+
+		$element_prop_title = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+			// element_name
+			, $action_obj->get_name()
+			// text
+			, $action_obj->get_name()
+			// text_color_arr
+			, TCPDFElement::$COLOR_WHITE_ARR
+			// text_size
+			, $ELEMENT_SET_TITLE_FONT_SIZE
+			// cell_x_pos
+			// , $element_set_x_pos
+			, $action_obj->get_cell_x_pos()
+			// cell_y_pos
+			, $parent_element_set->get_element_set_bottom_y_pos()
+			// cell_width
+			, $action_obj->get_cell_width()
+			// cell_height
+			, $cell_height
+			// cell_color_arr
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
+			// depth - 들여쓰기를 결정합니다.
+			, $action_obj->get_depth()
+			// is_first
+			, $is_first
+			// is_last
+			, $is_last
+			// is_bold
+			, true
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_CENTER
+			// caller_name
+			, $caller_name
+		);
+		$element_prop_title->draw();
+		$parent_element_set->add_element($element_prop_title);
+
+		return $parent_element_set;
+	}
+	// @ Desc : 타임마커가 있는 액션 객체를 그립니다.
+	private function draw_element_list_row_title_hh_mm($action_item_obj=null, $parent_element_set=null) {
+
+		$caller_name = __FUNCTION__;
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionItemTitleNTimeHHMM::is_not_instance($action_item_obj)) {
+			echo "TCPDFManager\t$caller_name\tActionItemTitleNTimeHHMM::is_not_instance(\$action_item_obj)<br/>";
+			return;
+		}
+
+		if(is_null($parent_element_set)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$parent_element_set)<br/>";
+			return;
+		}
+
+		// FIX ME
+		if(strcmp($action_item_obj->get_font_type(),TCPDFElement::$FONT_SIZE_LARGE) == 0) {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE_LARGE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE;
+		} else {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
+		}
+
+		
+		// Element Property를 만듭니다.
+		$element_prop_main_action = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+			// element_name
+			, $action_item_obj->get_name()
+			// text
+			, $action_item_obj->get_name()
+			// text_color_arr
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
+			// text_size
+			, $CARD_BOARD_TITLE_FONT_SIZE
+			// cell_x_pos
+			, $action_item_obj->get_cell_x_pos()
+			// cell_y_pos
+			, $parent_element_set->get_element_set_bottom_y_pos()
+			// cell_width
+			, $parent_element_set->get_element_set_width()
+			// cell_height
+			, -1
+			// cell_color_arr
+			, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+			// depth
+			, $action_item_obj->get_depth()
+			// is_first
+			, false
+			// is_last
+			, false
+			// is_bold
+			, true
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);
+
+		// 타임 마커를 그리고 배치합니다.
+		// 타임 마커 전용 text only prop 생성.
+		$element_prop_time_marker = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_TEXT_ONLY
+			// element_name
+			, "time_marker_" . $action_item_obj->get_name()
+			// text
+			, $action_item_obj->get_time_hh_mm()
+			// text_color_arr
+			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			// text_size
+			, $CARD_BOARD_TITLE_FONT_SIZE
+			// cell_x_pos
+			, $element_prop_main_action->get_cell_x_pos()
+			// cell_y_pos
+			, $element_prop_main_action->get_cell_y_pos()
+			// cell_width
+			, $element_prop_main_action->get_cell_width()
+			// cell_height
+			, -1
+			// cell_color_arr
+			, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+			// depth
+			, $action_item_obj->get_depth()
+			// is_first
+			, false
+			// is_last
+			, false
+			// is_bold
+			, true
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);	
+
+		// 타임 마커의 너비 만큼 텍스트를 오른쪽으로 이동시킵니다.
+		$text_x_pos_offset = $element_prop_time_marker->get_text_width() + $action_item_obj->get_depth() * TCPDFElement::$INDENT;
+		$element_prop_main_action->set_text_x_pos_offset($text_x_pos_offset);
+		$element_prop_main_action->draw();
+		$parent_element_set->add_element($element_prop_main_action);
+
+		// 타임 마커를 그립니다.
+		$this->draw_timeline_time_marker_V2($element_prop_time_marker, $caller_name);
+		$element_prop_time_marker->draw();		
+
+		return $parent_element_set;
+	}	
 
 
 
+	// @ Desc : 테이블 열의 액션 객체를 그립니다.
+	private function draw_element_list_row_title($action_item_obj=null, $parent_element_set=null, $is_last=false) {
 
+		$caller_name = __FUNCTION__;
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionItem::is_not_instance($action_item_obj)) {
+			echo "TCPDFManager\t$caller_name\ActionItem::is_not_instance(\$action_item_obj)<br/>";
+			return;
+		}
+
+		if(is_null($parent_element_set)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$parent_element_set)<br/>";
+			return;
+		}
+
+		if($action_item_obj->get_is_shy()) {
+			// shy mode인 엘리먼트는 표시하지 않습니다.
+			return;
+		}
+
+		// FIX ME
+		if(strcmp($action_item_obj->get_font_type(),TCPDFElement::$FONT_SIZE_LARGE) == 0) {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE_LARGE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_FONT_SIZE_LARGE;
+		} else {
+			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
+			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE;
+			$CARD_BOARD_CONTENT_FONT_SIZE = TCPDFElement::$CARD_BOARD_CONTENT_FONT_SIZE;
+			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
+		}
+
+		$element_prop_sub_action = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+			// element_name
+			, $action_item_obj->get_name()
+			// text
+			, $action_item_obj->get_name()
+			// text_color_arr
+			, TCPDFElement::$COLOR_WARM_GRAY_ARR
+			// text_size
+			, $CARD_BOARD_TITLE_FONT_SIZE
+			// cell_x_pos
+			, $parent_element_set->get_element_set_x_pos()
+			// cell_y_pos
+			, $parent_element_set->get_element_set_bottom_y_pos()
+			// cell_width
+			, $parent_element_set->get_element_set_width()
+			// cell_height
+			, -1
+			// cell_color_arr
+			, TCPDFElement::$COLOR_MILK_GRAY_ARR
+			// depth
+			, $action_item_obj->get_depth()
+			// is_first
+			, false
+			// is_last
+			, $is_last
+			// is_bold
+			, false
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);	
+
+		$x_pos_offset = $action_item_obj->get_depth() * TCPDFElement::$INDENT;
+		$element_prop_sub_action->updateTextProps($name, $x_pos_offset);
+		$element_prop_sub_action->draw();
+		$parent_element_set->add_element($element_prop_sub_action);
+
+	}
+
+	// @ Desc : 테이블 필드 엘리먼트를 그립니다. SIMPLE TABLE TYPE
+	private function draw_element_simple_table_field($simple_table_row_idx=-1, $simple_table_column_idx=-1, $action_item_obj=null, $element_set_simple_table=null) {
+
+		$caller_name = __FUNCTION__;
+
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionItem::is_not_instance($action_item_obj)) {
+			echo "TCPDFManager\t$caller_name\ActionItem::is_not_instance(\$action_item_obj)<br/>";
+			return;
+		}
+		if(is_null($element_set_simple_table)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$element_set_simple_table)<br/>";
+			return;
+		}
+
+		// wonder.jung22
+
+		// 타입에 따라서 화면에 그려지는 모양이 달라집니다.
+		// TABLE ROW CONTENT
+		$is_bold = false;
+		$text_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+		$cell_color_arr = TCPDFElement::$COLOR_WHITE_ARR;
+		if(ActionItem::$TITLE_ONLY_FIXED == $action_item_obj->get_item_type()) {
+			// TABLE ROW TITLE
+			$is_bold = true;
+			$text_color_arr = TCPDFElement::$COLOR_DARK_GRAY_ARR;
+			$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+		}
+
+
+		$element_prop_simple_table_field = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_TABLE_FIELD
+			// element_name
+			, "sub_action_" . $simple_table_row_idx . "_" . $simple_table_column_idx . "_" . $simple_table_column->name
+			// text
+			, $action_item_obj->get_name()
+			// text_color_arr
+			, $text_color_arr
+			// text_size
+			, $action_item_obj->get_text_size()
+			// cell_x_pos
+			, 0
+			// cell_y_pos
+			, 0
+			// cell_width / 테이블의 전체 너비를 조정해야 하므로 입력하지 않습니다.
+			, -1
+			// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
+			, -1
+			// cell_color_arr
+			, $cell_color_arr
+			// depth
+			, $action_item_obj->get_depth()
+			// is_first
+			, false
+			// is_last
+			, false
+			// is_bold
+			, $is_bold
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);
+
+		// table field를 그릴 경우는 테이블 전체 너비를 기준으로 
+		// 컬럼의 간격 조정, 텍스트의 구분등이 모든 테이블 필드의 데이터가 완료된 이후에 가능합니다.
+		// 그러므로 테이블 필드를 바로 그리지 않습니다.
+
+		$cur_row_idx = $simple_table_row_idx;
+		$cur_column_idx = $simple_table_column_idx;
+		$cur_element = $element_prop_simple_table_field;
+		$element_set_simple_table->add_table_element($cur_row_idx, $cur_column_idx, $cur_element);
+
+		return $element_set_simple_table;
+
+	}	
+
+	// wonder.jung11
+	// ACTION CARD BOARD
+	public function draw_element($action_obj=null, $parent_element_set=null) {
+
+		$caller_name = __FUNCTION__;
+
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(ActionObject::is_not_action_obj($action_obj)) {
+			echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$action_obj)<br/>";
+			return;
+		}
+
+		if(ActionCollection::is_instance($action_obj)) {
+
+			// LIST, TABLE일 경우, 실제 컬럼을 그립니다.
+			if(is_null($parent_element_set)) {
+				$parent_element_set = 
+				new TCPDFElementSet(
+					$action_obj->get_name()
+					//, $element_set_x_pos
+					, $action_obj->get_cell_x_pos()
+					// , $element_set_y_pos
+					, $action_obj->get_cell_y_pos()
+					// , $element_set_width
+					, $action_obj->get_cell_width()
+				);
+			}
+
+			if($action_obj->is_table_column_list()) {
+
+				// TABLE COLUMN LIST
+				$cur_column_idx = $action_obj->get_idx();
+				$cur_children = $action_obj->get_children();
+
+				for($idx=0;$idx < count($cur_children);$idx++) {
+					$cur_child_action_item_obj = $cur_children[$idx];
+					if(ActionItem::is_not_instance($cur_child_action_item_obj)) {
+						echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$cur_child_action_item_obj)<br/>";
+						return;
+					}
+
+					$this->draw_element($cur_child_action_item_obj, $parent_element_set);
+				}
+
+			} else if($action_obj->is_list()) {
+
+				// 1. ACTION LIST일 경우, 타이틀 열을 그려줍니다.
+				if($action_obj->is_root_collection()) {
+					$parent_element_set = $this->draw_element_set_list_title($action_obj, $parent_element_set, true);
+				}
+				if($action_obj->has_children()) {
+					// 자식 열들에 대한 처리
+					$cur_children = $action_obj->get_children();
+					for($idx=0;$idx < count($cur_children);$idx++) {
+						$cur_child_action_obj = $cur_children[$idx];
+						$cur_child_action_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
+						$cur_child_action_obj->set_font_type($action_obj->get_font_type());
+						$this->draw_element($cur_child_action_obj, $parent_element_set);
+					}
+				}
+
+				if($action_obj->is_root_collection()) {
+
+					// 마지막 엘리먼트를 가져옵니다.
+					$cur_last_element = $parent_element_set->get_last_element();
+
+					// EREASE - 마지막 엘리먼트 위를 배경색으로 덮습니다.
+					$cur_last_element->erase();
+
+					// INDENT - 들여쓰기 설정
+					$x_pos_offset = $cur_last_element->get_depth() * TCPDFElement::$INDENT;
+					$cur_last_element->updateTextProps(null, $x_pos_offset);
+
+					$cur_last_element->set_is_last(true);
+					$cur_last_element->draw();
+
+				}
+
+			} else if($action_obj->is_table() && $action_obj->has_children()) {
+
+				// TABLE Element set을 그립니다.
+				$x_pos_offset = $action_obj->get_depth() * TCPDFElement::$INDENT;
+				$element_set_x_pos = $parent_element_set->get_element_set_x_pos();
+				// $element_set_y_pos = $parent_element_set->get_element_set_y_pos();
+				$element_set_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
+				$element_set_width = $parent_element_set->get_element_set_width();
+
+				// echo "\$element_set_width ::: $element_set_width<br/>";
+
+				$simple_table_width = $element_set_width - ($x_pos_offset + TCPDFElement::$PADDING_CARD_BOARD_TIMELINE_TITLE * 2);
+
+				// wonder.jung22
+				$element_set_simple_table = 
+				new TCPDFElementSet(
+					$action_obj->get_name()
+					, $element_set_x_pos + $x_pos_offset
+					, $element_set_y_pos
+					, $simple_table_width
+				);
+
+				// 자식 column list들에 대한 처리
+				$cur_children = $action_obj->get_children();
+				for($idx=0;$idx < count($cur_children);$idx++) {
+
+					$cur_child_action_list_obj = $cur_children[$idx];
+					$cur_child_action_list_obj->set_cell_x_pos($action_obj->get_cell_x_pos());
+
+					$this->draw_element($cur_child_action_list_obj, $element_set_simple_table);
+				} // end for
+
+				// wonder.jung22
+
+				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
+
+				// 배경 이미지를 먼저 만들어 준다.
+
+				$element_set_simple_table->draw_table();
+
+			} // end outer if
+
+
+
+		} else if(ActionItemTitleNTimeHHMM::is_instance($action_obj)) {
+
+			// 3. ACTION ITEM HH:MM 일 경우
+			$parent_element_set = $this->draw_element_list_row_title_hh_mm($action_obj, $parent_element_set);
+
+			// 3-1. CHILDREN ACTION
+			$children_action_list = $action_obj->get_children();
+			for($idx = 0; $idx < count($children_action_list); $idx++) {
+				$cur_child_action_obj = $children_action_list[$idx];
+				$this->draw_element($cur_child_action_obj, $parent_element_set);
+			}
+
+			$children_add_on_action_list = $action_obj->get_add_on_list();
+			for($idx = 0; $idx < count($children_add_on_action_list); $idx++) {
+				$cur_child_action_obj = $children_add_on_action_list[$idx];
+				$this->draw_element($cur_child_action_obj, $parent_element_set);
+			}
+
+		} else if(ActionItem::is_instance($action_obj)) {
+
+			// 4. ACTION ITEM일 경우
+			if($action_obj->is_table_field_item()) {
+
+				// 4-1. TABLE형 아이템일 경우의 x, y 좌표 위치 처리
+				$parent_action_obj = $action_obj->get_parent();
+				if(ActionObject::is_not_action_obj($parent_action_obj)) {
+					echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$parent_action_obj)<br/>";
+					return;
+				}
+				// INDENT
+				$simple_table_column_idx = $parent_action_obj->get_idx();
+				$simple_table_row_idx = $action_obj->get_idx();
+
+				$cur_item_type = $action_obj->get_item_type();
+				$cur_item_type_name = $action_obj->get_item_type_name();
+
+				// echo "\$simple_table_column_idx ::: $simple_table_column_idx<br/>";
+				// echo "\$simple_table_row_idx ::: $simple_table_row_idx<br/>";
+				// echo "\$cur_item_type ::: $cur_item_type<br/>";
+				// echo "\$cur_item_type_name ::: $cur_item_type_name<br/>";
+
+				$this->draw_element_simple_table_field($simple_table_row_idx, $simple_table_column_idx, $action_obj, $parent_element_set);
+
+			} else {
+
+				// 4-2. LIST형 아이템일 경우의 x, y 좌표 위치 처리
+				$parent_action_obj = $action_obj->get_parent();
+				if(ActionObject::is_not_action_obj($parent_action_obj)) {
+					echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$parent_action_obj)<br/>";
+					return;
+				}
+				$this->draw_element_list_row_title($action_obj, $parent_element_set);
+
+				// 4-3. ACTION ITEM의 add on child이 있는지 확인.
+				if($action_obj->has_add_on_list()) {
+					$cur_add_on_list = $action_obj->get_add_on_list();
+					for($idx = 0; $idx < count($cur_add_on_list); $idx++) {
+						$add_on_action_obj = $cur_add_on_list[$idx];
+						$this->draw_element($add_on_action_obj, $parent_element_set);
+					} // inner for end
+
+				} // inner if end
+
+			} // if end
+
+		} // if end
+
+		// TEST
+		return;
+
+
+		$element_prop_main_action;
+		// 실제 화면에 노출될 데이터를 그립니다.
+		for ($idx = 0; $idx < count($flatten_timeline_action_obj_arr); $idx++) {
+
+			$action_obj = $flatten_timeline_action_obj_arr[$idx];
+			$name = $action_obj->name;
+			$depth = $action_obj->depth;
+
+			// 타이틀을 그립니다.
+			if($idx == 0) {
+				
+				$element_prop_title = 
+				TCPDFElement::GET_ELEMENT_PROP(
+					$this->pdf
+					// element type
+					, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+					// element_name
+					, "element_title_" . $idx
+					// text
+					, $element_set_title
+					// text_color_arr
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_WHITE_ARR
+					// text_size
+					, $ELEMENT_SET_TITLE_FONT_SIZE
+					// cell_x_pos
+					, $element_set_x_pos
+					// cell_y_pos
+					// , $prev_cell_y_pos
+					, $element_set->get_element_set_bottom_y_pos()
+					// cell_width
+					, $element_set_width
+					// cell_height
+					, -1
+					// cell_color_arr
+					// , TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+					, TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, $depth
+					// is_first
+					, true
+					// is_last
+					, false
+					// is_bold
+					, true
+					// text_align
+					, TCPDFElement::$TEXT_ALIGN_CENTER
+					// caller_name
+					, $caller_name
+				);
+				$element_prop_title->draw();
+				$element_set->add_element($element_prop_title);
+
+				continue;
+			} else if($depth == 0) {
+
+				// 타임마커가 있는 액션 객체를 그립니다.
+				// Element Property를 만듭니다.
+				$element_prop_main_action = 
+				TCPDFElement::GET_ELEMENT_PROP(
+					$this->pdf
+					// element type
+					, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+					// element_name
+					, "main_action_" . $idx
+					// text
+					, $name
+					// text_color_arr
+					, TCPDFElement::$COLOR_DARK_GRAY_ARR
+					// text_size
+					, $CARD_BOARD_TITLE_FONT_SIZE
+					// cell_x_pos
+					, $element_set_x_pos
+					// cell_y_pos
+					, $element_set->get_element_set_bottom_y_pos()
+					// cell_width
+					, $element_set_width
+					// cell_height
+					, -1
+					// cell_color_arr
+					// , TCPDFElement::$COLOR_MILK_GRAY_ARR
+					, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+					// depth
+					, $depth
+					// is_first
+					, false
+					// is_last
+					, false
+					// is_bold
+					, true
+					// text_align
+					, TCPDFElement::$TEXT_ALIGN_LEFT
+					// caller_name
+					, $caller_name
+				);
+
+				// 타임 마커를 그리고 배치합니다.
+				// 타임 마커 전용 text only prop 생성.
+				$element_prop_time_marker = 
+				TCPDFElement::GET_ELEMENT_PROP(
+					$this->pdf
+					// element type
+					, TCPDFElement::$ELEMENT_TYPE_TEXT_ONLY
+					// element_name
+					, "time_marker_" . $idx
+					// text
+					, $action_obj->time
+					// text_color_arr
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_WARM_GRAY_ARR
+					// text_size
+					, $CARD_BOARD_TITLE_FONT_SIZE
+					// cell_x_pos
+					, $element_prop_main_action->get_cell_x_pos()
+					// cell_y_pos
+					, $element_prop_main_action->get_cell_y_pos()
+					// cell_width
+					, $element_prop_main_action->get_cell_width()
+					// cell_height
+					, -1
+					// cell_color_arr
+					// , TCPDFElement::$COLOR_DARK_GRAY_ARR
+					, TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR
+					// depth
+					, $depth
+					// is_first
+					, false
+					// is_last
+					, false
+					// is_bold
+					, true
+					// text_align
+					, TCPDFElement::$TEXT_ALIGN_LEFT
+					// caller_name
+					, $caller_name
+				);	
+
+				// 타임 마커의 너비 만큼 텍스트를 오른쪽으로 이동시킵니다.
+				$text_x_pos_offset = $element_prop_time_marker->get_text_width() + $element_prop_time_marker->get_text_height();
+				$element_prop_main_action->set_text_x_pos_offset($text_x_pos_offset);
+				$element_prop_main_action->draw();
+				$element_set->add_element($element_prop_main_action);
+
+				// 타임 마커를 그립니다.
+				$this->draw_timeline_time_marker_V2($element_prop_time_marker, $caller_name);
+				$element_prop_time_marker->draw();
+
+				// simple table이 있다면 추가 열을 만듭니다.
+
+			} else if($depth == 1) {
+
+				// simple table이 있다면 추가 열을 만듭니다.			
+				$simple_table = $action_obj->simple_table;
+
+				$is_last = false;
+				if($idx == (count($flatten_timeline_action_obj_arr) - 1)) {
+					$is_last = true;
+				}
+
+				if(is_null($simple_table)) {
+
+					// sub action을 그립니다.
+					// Element Property를 만듭니다.
+					$element_prop_sub_action = 
+					TCPDFElement::GET_ELEMENT_PROP(
+						$this->pdf
+						// element type
+						, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_KEY
+						// element_name
+						, "sub_action_" . $idx
+						// text
+						, $name
+						// text_color_arr
+						, TCPDFElement::$COLOR_DARK_GRAY_ARR
+						// text_size
+						, $CARD_BOARD_TITLE_FONT_SIZE
+						// cell_x_pos
+						, $element_set_x_pos
+						// cell_y_pos
+						, $element_set->get_element_set_bottom_y_pos()
+						// cell_width
+						, $element_set_width
+						// cell_height
+						, -1
+						// cell_color_arr
+						, TCPDFElement::$COLOR_MILK_GRAY_ARR
+						// depth
+						, $depth
+						// is_first
+						, false
+						// is_last
+						, $is_last
+						// is_bold
+						, false
+						// text_align
+						, TCPDFElement::$TEXT_ALIGN_LEFT
+						// caller_name
+						, $caller_name
+					);	
+
+					// 타임 마커의 너비 만큼 텍스트를 오른쪽으로 이동시킵니다.
+					$cur_main_action_text = $element_prop_main_action->get_raw_text();
+					$cur_main_action_text_x_pos = $element_prop_main_action->get_text_x_pos();
+					$cur_main_action_cell_x_pos = $element_prop_main_action->get_cell_x_pos();
+					$x_pos_offset = $element_prop_main_action->get_text_x_pos() - $element_prop_main_action->get_cell_x_pos();
+
+					$element_prop_sub_action->updateTextProps($name, $x_pos_offset);
+					$element_prop_sub_action->draw();
+					$element_set->add_element($element_prop_sub_action);
+
+				} else {
+
+					// 타임 마커의 너비 만큼 텍스트를 오른쪽으로 이동시킵니다.
+					$x_pos_offset = $element_prop_main_action->get_text_x_pos() - $element_prop_main_action->get_cell_x_pos();
+
+					// Simple Table Width
+					$simple_table_width = $element_set_width - ($x_pos_offset + TCPDFElement::$PADDING_CARD_BOARD_TIMELINE_TITLE * 2);
+
+					// TODO
+					// Simple table column width ratio
+					// 심플 테이블의 컬럼 너비 비율을 넘겨줍니다.(선택 사항)
+					$simple_table_column_width_ratio_arr = array();
+
+					// Simple Table
+					$element_set_simple_table = 
+					new TCPDFElementSet(
+						$element_set_title
+						, $element_set_x_pos + $x_pos_offset
+						, $element_set_y_pos
+						, $simple_table_width
+					);
+
+					for ($simple_table_row_idx = 0; $simple_table_row_idx < count($simple_table); $simple_table_row_idx++) {
+						$simple_table_row = $simple_table[$simple_table_row_idx];
+						// print_r($simple_table_row);
+						// echo "<br/><br/>";
+
+						$prev_element_prop_simple_table;
+						for ($simple_table_column_idx = 0; $simple_table_column_idx < count($simple_table_row); $simple_table_column_idx++) {
+							$simple_table_column = $simple_table_row[$simple_table_column_idx];
+							// echo "<br/>";
+							// print_r($simple_table_column);
+							// echo "<br/>";
+
+							$is_bold = false;
+							$cell_color_arr = TCPDFElement::$COLOR_WHITE_ARR;
+							if($simple_table_column->is_title) {
+								$is_bold = true;
+								$cell_color_arr = TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
+							}
+
+							// print_r($simple_table_column);
+							// echo "<br/><br/>";
+
+							// FIX ME - 개발 PC에서는 재현되지 않음. cafe24 php 서버에서 아래 html 특수문자를 파싱실패함.
+							$simple_table_column->name = str_replace("&lsquo;","'",$simple_table_column->name);
+
+							// 테이블에 속한 엘리먼트의 x, y pos은 0으로 고정. 
+							// 테이블의 너비 및 높이가 계산이 된 이후에 이동할 위치를 지정해서
+							// 모든 엘리먼트의 x, y pos을 업데이트 해줍니다.
+							$element_prop_simple_table_field = 
+							TCPDFElement::GET_ELEMENT_PROP(
+								$this->pdf
+								// element type
+								, TCPDFElement::$ELEMENT_TYPE_TABLE_FIELD
+								// element_name
+								, "sub_action_" . $simple_table_row_idx . "_" . $simple_table_column_idx . "_" . $simple_table_column->name
+								// text
+								, $simple_table_column->name
+								// text_color_arr
+								// , TCPDFElement::$COLOR_WARM_GRAY_ARR
+								, $simple_table_column->color
+								// text_size
+								, $CARD_BOARD_SIMPLE_TABLE_FONT_SIZE
+								//, TCPDFElement::$CARD_BOARD_SIMPLE_TABLE_FONT_SIZE
+								// cell_x_pos
+								, 0
+								// cell_y_pos
+								, 0
+								// cell_width / 테이블의 전체 너비를 조정해야 하므로 입력하지 않습니다.
+								, -1
+								// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
+								, -1
+								// cell_color_arr
+								// , $cell_color_arr
+								, $simple_table_column->bg_color
+								// depth
+								, $depth
+								// is_first
+								, false
+								// is_last
+								, false
+								// is_bold
+								, $is_bold
+								// text_align
+								, TCPDFElement::$TEXT_ALIGN_LEFT
+								// caller_name
+								, $caller_name
+							);
+
+							// $raw_text = $element_prop_simple_table_field->get_raw_text();
+							// print_r($raw_text);
+							// echo "<br/><br/>";
+
+							$cur_row_idx = $simple_table_row_idx;
+							$cur_column_idx = $simple_table_column_idx;
+							$cur_element = $element_prop_simple_table_field;
+							$element_set_simple_table->add_table_element($cur_row_idx, $cur_column_idx, $cur_element);
+						}
+
+						// echo "<br/><br/><br/>";
+					}
+
+					// 1-1. table cell의 높이와 너비를 구합니다.
+					// $simple_table_width = $element_set_simple_table->get_table_width();
+					$simple_table_cell_height = $element_set_simple_table->get_table_height() + (TCPDFElement::$PADDING_SIMPLE_TABLE_TEXT * 2);
+
+					// DEBUG
+					// echo "\$simple_table_cell_height : $simple_table_cell_height<br/>";
+
+					// 1-2. 페이지의 전체 너비?
+					$page_width = $element_prop_main_action->get_page_width();
+					// echo "\$page_width : $page_width<br/>";
+					$page_height = $element_prop_main_action->get_page_height();
+					// echo "\$page_height : $page_height<br/>";
+
+					// echo "\$simple_table_height : $simple_table_height<br/>";
+
+					// 1. table cell을 그립니다.
+					// 테이블이 들어갈 배경 cell
+					$element_prop_simple_table_cell = 
+					TCPDFElement::GET_ELEMENT_PROP(
+						$this->pdf
+						// element type
+						, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_EMPTY
+						// element_name
+						, "sub_action_cell" . $idx
+						// text
+						, ""
+						// text_color_arr
+						, TCPDFElement::$COLOR_DARK_GRAY_ARR
+						// text_size
+						, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+						// cell_x_pos
+						, $element_set_x_pos
+						// cell_y_pos
+						, $element_set->get_element_set_bottom_y_pos()
+						// cell_width / 테이블의 전체 너비를 조정해야 하므로 입력하지 않습니다.
+						, $element_set_width
+						// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
+						, $simple_table_cell_height
+						// cell_color_arr
+						, TCPDFElement::$COLOR_MILK_GRAY_ARR
+						// depth
+						, $depth
+						// is_first
+						, false
+						// is_last
+						, false
+						// is_bold
+						, $is_bold
+						// text_align
+						, TCPDFElement::$TEXT_ALIGN_LEFT
+						// caller_name
+						, $caller_name
+					);
+					$element_prop_simple_table_cell->draw();
+					$element_set->add_element($element_prop_simple_table_cell);
+
+					$element_set_simple_table->set_element_set_y_pos($element_prop_simple_table_cell->get_cell_y_pos());
+					$element_set_simple_table->draw_table();
+
+				}
+
+			}
+			// print_r($action_obj);
+			// echo "<br/><br/>";
+
+		}
+
+	}	
 
 
 
@@ -1411,7 +2224,7 @@ class TCPDFManager{
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 2. speech title
+									// 3. speech title
 									$simple_table_row_column_obj = new stdClass();
 									$simple_table_row_column_obj->name=$speech_obj->__title;
 
@@ -1420,15 +2233,20 @@ class TCPDFManager{
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 3. speaker name
+									// 4. speaker name
 									$simple_table_row_column_obj = new stdClass();
-									$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name;
+									if($speech_obj->__speaker_timer_red_mm_ss == 0) {
+										$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name . " (05-07min)";
+									} else {
+										$simple_table_row_column_obj->name=$speech_obj->__speaker_member_name . " (" . $speech_obj->__speaker_timer_green_mm_ss . "-" . $speech_obj->__speaker_timer_red_mm_ss . "min)";
+									}
+
 									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
 									$simple_table_row_column_obj->bg_color=TCPDFElement::$COLOR_TINT_WARM_GRAY_ARR;
 
 									array_push($simple_table_row_arr,$simple_table_row_column_obj);
 
-									// 4. evaluator name
+									// 5. evaluator name
 									$simple_table_row_column_obj = new stdClass();
 									$simple_table_row_column_obj->name=$speech_obj->__evaluator_member_name;
 									$simple_table_row_column_obj->color=TCPDFElement::$COLOR_DARK_GRAY_ARR;
@@ -1496,7 +2314,6 @@ class TCPDFManager{
 			, $element_set_width
 		);
 
-		// wonder.jung
 		if(strcmp($font_type,TCPDFElement::$FONT_SIZE_LARGE) == 0) {
 			$ELEMENT_SET_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_HUGE;
 			$CARD_BOARD_TITLE_FONT_SIZE = TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE_LARGE;
@@ -1959,7 +2776,8 @@ class TCPDFManager{
 
 	}
 
-	private function get_timeline_action_array($timeline_action_obj_arr, $cur_depth=0, $title=""){
+	// @ Desc : action obj를 timeline으로 바꾸어 줍니다.
+	private function get_list_from_action_obj($timeline_action_obj_arr, $cur_depth=0, $title=""){
 
 		// 리스트를 1 depth 배열로 정리해서 넘겨줍니다.
 		$flatten_timeline_action_obj_arr = array();
@@ -2007,31 +2825,53 @@ class TCPDFManager{
 	}
 
 
+	private function get_timeline_action_array($timeline_action_obj_arr, $cur_depth=0, $title=""){
 
+		// 리스트를 1 depth 배열로 정리해서 넘겨줍니다.
+		$flatten_timeline_action_obj_arr = array();
+		if(!empty($title)){
+			// title을 제일 앞에 추가합니다.
+			$title_action_obj = new stdClass();
+			$title_action_obj->name = $title;
+			$title_action_obj->depth = -1;
 
-	// REMOVE ME
-	/*
-
-		토스트 마스터의 오피서들의 정보를 키, 벨류 쌍으로 돌려줍니다.
-
-	*/
-	/*
-	public function get_card_board_key_value_data_from_toastmaster_officer($toastmaster_officer_list){
-
-		$wdj_key_value_arr=array();
-		for ($idx = 0; $idx < count($toastmaster_officer_list); $idx++) {
-			$officer_obj = $toastmaster_officer_list[$idx];
-
-			$officer_name = $officer_obj->__member_name;
-			$officer_member_name = $officer_obj->__officer_name;
-			$officer_member_mobile = $officer_obj->__member_mobile;
-
-			$wdj_key_value_arr[$officer_member_name]=$officer_name;
+			array_push($flatten_timeline_action_obj_arr,$title_action_obj);
 		}
 
-		return $wdj_key_value_arr;
+		for ($idx = 0; $idx < count($timeline_action_obj_arr); $idx++) {
+			$timeline_action_obj = $timeline_action_obj_arr[$idx];
+
+			$action_name = $timeline_action_obj->action_name;
+			$time = $timeline_action_obj->time;
+			$action_list = $timeline_action_obj->action_list;
+
+			// 내부에 포함되는 심플 테이블 데이터
+			$simple_table = $timeline_action_obj->simple_table;
+
+			$action_obj = new stdClass();
+			$action_obj->name = $action_name;
+			$action_obj->time = $time;
+			$action_obj->simple_table = $simple_table;
+			$action_obj->depth = $cur_depth;
+
+			array_push($flatten_timeline_action_obj_arr,$action_obj);//$today_role_arr = array();
+
+			// add sub actions
+			$flatten_sub_timeline_action_obj_arr = null;
+			if(!empty($action_list)){
+				$flatten_sub_timeline_action_obj_arr = $this->get_timeline_action_array($action_list, $cur_depth + 1);
+			}
+			if(!empty($flatten_sub_timeline_action_obj_arr)){
+				foreach ($flatten_sub_timeline_action_obj_arr as $sub_action_obj) {
+					array_push($flatten_timeline_action_obj_arr,$sub_action_obj);//$today_role_arr = array();
+				}
+			}
+		}
+
+		return $flatten_timeline_action_obj_arr;
+
 	}
-	*/
+
 
 
 	/*
@@ -2353,6 +3193,139 @@ class TCPDFManager{
 
 		return $simple_table_row_arr;
 	}
+	// wonder.jung11
+	// @ Desc : action obj를 timeline card board 형태로 바꿉니다.
+	private function get_timeline_card_board_data_from_action_obj($action_obj){
+
+		$caller_name = __FUNCTION__;
+		if(ActionObject::is_not_action_obj($action_obj)) {
+			echo "TCPDFManager\t$caller_name\tActionObject::is_not_action_obj(\$action_obj)";
+			return;
+		}
+
+		if(ActionCollection::is_instance($action_obj)) {
+
+			if($action_obj->is_list()) {
+				// 1. ACTION LIST일 경우
+
+			} else if($action_obj->is_table()) {
+				// 2. ACTION TABLE일 경우
+
+				// simple table 로 바꾸어줍니다.
+
+			}
+
+		} else if(ActionItemTitleNTimeHHMM::is_instance($action_obj)) {
+			// 3. ACTION ITEM HH:MM 일 경우
+
+		} else if(ActionItem::is_instance($action_obj)) {
+			// 4. ACTION ITEM일 경우
+
+		}
+
+		if($action_obj->has_children()) {
+
+		} else if($action_obj->has_children()) {
+
+		}
+
+		
+		
+		
+
+		// 4. CHILD가 있는 경우
+		// 5. ADD ON CHILD가 있는 경우
+
+		// REMOVE ME
+		/*
+		$first_schedule_timeline = $schedule_timeline_list[0];
+
+		$json_str = $first_schedule_timeline->__timeline_schedule_json_str;
+
+		// TODO row 별로 분리해서 파싱 작업을 수행해야 함.
+		// 그렇지 않으면 어느 부분에서 파싱장애가 발생했는지 파악하기 힘듬.
+
+		$timeline_list_row_info_arr = 
+		//JSONManager::get_json_obj(
+		JSONManager::get_json_obj_from_JSONStringify(
+			// $unsafe_json_str
+			$json_str
+			// $is_html_decode
+			// ,true
+		);
+		*/
+
+		// TODO 2줄일 경우의 줄바꿈 설정 필요
+		// 1. time marker의 너비 산정 로직을 여기서 사용하여 time marker 정보를 설정해 주어야 함.
+		
+		$schedule_action_obj_arr = array();
+		for ($idx = 0; $idx < count($timeline_list_row_info_arr); $idx++) {
+			$timeline_list_row_info = $timeline_list_row_info_arr[$idx];
+
+			$__action_list = $timeline_list_row_info->__action_list;
+			$__action_name = $timeline_list_row_info->__action_name;
+
+			$__action_simple_table_arr = 
+			$this->get_simple_table_add_on_arr_from_add_on_obj_list($timeline_list_row_info->__prop_map->__add_on_obj_list);
+			$__action_time_sec = $timeline_list_row_info->__prop_map->__time_sec;
+			$__action_time_H_i_s = gmdate("H:i", $__action_time_sec);
+
+			$schedule_sub_action_obj_arr = array();
+			for ($inner_idx = 0; $inner_idx < count($__action_list); $inner_idx++) {
+				$__child_action_list = $__action_list[$inner_idx];
+				
+				for ($child_idx = 0; $child_idx < count($__child_action_list); $child_idx++) {
+					$__child_action = $__child_action_list[$child_idx];
+					$__child_action_name = $__child_action->__action_name;
+
+					$__child_action_simple_table_arr = 
+					$this->get_simple_table_add_on_arr_from_add_on_obj_list($__child_action->__prop_map->__add_on_obj_list);
+
+					$sub_action_name = $this->get_safe_action_desc($__child_action_name);
+
+					// 액션 이름을 먼저 지정
+					$schedule_sub_action_obj = new stdClass();
+					$schedule_sub_action_obj->action_name=$sub_action_name;
+					array_push($schedule_sub_action_obj_arr,$schedule_sub_action_obj);
+
+					// 이 액션에 속해 있는 테이블 객체 정보를 넣습니다.
+					if(!is_null($__child_action_simple_table_arr) && !empty($__child_action_simple_table_arr)) {
+
+						for ($child_table_idx = 0; $child_table_idx < count($__child_action_simple_table_arr); $child_table_idx++) {
+							$child_action_simple_table = $__child_action_simple_table_arr[$child_table_idx];
+
+							$schedule_sub_action_obj = new stdClass();
+							$schedule_sub_action_obj->simple_table=$child_action_simple_table;
+							array_push($schedule_sub_action_obj_arr,$schedule_sub_action_obj);
+						}
+					}
+					
+				} // for child end
+			} // for inner end
+
+			// 액션 이름을 먼저 지정
+			$schedule_main_action_obj = new stdClass();
+			$schedule_main_action_obj->time=$__action_time_H_i_s;
+			$schedule_main_action_obj->action_name = $this->get_safe_action_desc($__action_name);
+			$schedule_main_action_obj->action_list=$schedule_sub_action_obj_arr;
+			array_push($schedule_action_obj_arr,$schedule_main_action_obj);
+
+			// 이 액션에 속해 있는 테이블 객체 정보를 넣습니다. ( 여러 개일수 있습니다. )
+			if(!is_null($__action_simple_table_arr) && !empty($__action_simple_table_arr)) {
+				for ($inner_idx = 0; $inner_idx < count($__action_simple_table_arr); $inner_idx++) {
+					$action_simple_table = $__action_simple_table_arr[$inner_idx];
+
+					$schedule_main_action_obj = new stdClass();
+					$schedule_main_action_obj->simple_table=$action_simple_table;	
+					array_push($schedule_action_obj_arr,$schedule_main_action_obj);
+				}
+			}
+
+		} // for end
+
+		return $schedule_action_obj_arr;
+	}
+
 	public function get_timeline_card_board_data_from_toastmaster_schedule_V2($schedule_timeline_list){
 
 		$first_schedule_timeline = $schedule_timeline_list[0];
@@ -2599,8 +3572,6 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_left->role_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2613,8 +3584,6 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2624,8 +3593,6 @@ class TCPDFManager{
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->is_title=true;
 			$simple_table_row_column_obj->name=$today_role_obj_right->role_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);
@@ -2638,8 +3605,6 @@ class TCPDFManager{
 
 			$simple_table_row_column_obj = new stdClass();
 			$simple_table_row_column_obj->name=$member_name;
-			// REMOVE ME
-			// $simple_table_row_column_obj->color=$this->color_warm_gray_arr;
 			$simple_table_row_column_obj->color = TCPDFElement::$COLOR_DARK_GRAY_ARR;
 			$simple_table_row_column_obj->bg_color=$this->color_white_arr;
 			array_push($simple_table_row_column_arr,$simple_table_row_column_obj);

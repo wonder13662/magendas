@@ -155,7 +155,7 @@ class MYSQLInterface{
 		return $is_null_object;
 	}
 
-	private function is_empty($function_name="", $target, $param_name="") {
+	public function is_empty($function_name="", $target, $param_name="") {
 
 		$is_empty = empty($target);
 		if($is_empty == true && !empty($function_name) && !empty($param_name)) {
@@ -201,7 +201,7 @@ class MYSQLInterface{
 		return $is_instance;
 	}
 
-	private function is_not_action_collection($function_name="", $target, $param_name=""){
+	public function is_not_action_collection($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
@@ -212,7 +212,7 @@ class MYSQLInterface{
 	private function is_action_list($function_name="", $target, $param_name=""){
 		return !$this->is_not_action_list($function_name, $target, $param_name);
 	}
-	private function is_not_action_list($function_name="", $target, $param_name=""){
+	public function is_not_action_list($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
@@ -244,7 +244,7 @@ class MYSQLInterface{
 		return false;
 	}
 
-	private function is_action_item($function_name="", $target, $param_name=""){
+	public function is_action_item($function_name="", $target, $param_name=""){
 		$is_action_item = ActionItem::is_instance($target);
 		if($is_action_item == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_action_item(\$$param_name)<br/>";
@@ -253,7 +253,7 @@ class MYSQLInterface{
 		return $is_action_item;
 	}
 
-	private function is_not_action_item($function_name="", $target, $param_name=""){
+	public function is_not_action_item($function_name="", $target, $param_name=""){
 		$is_not_action_item = ActionItem::is_not_instance($target);
 		if($is_not_action_item == true && !empty($function_name) && !empty($param_name)) {
 			echo "$function_name / \$this->is_not_action_item(\$$param_name)<br/>";
@@ -298,7 +298,7 @@ class MYSQLInterface{
 		return $is_action_item;
 	}
 
-	private function is_not_unsigned_number($function_name="", $target, $param_name=""){
+	public function is_not_unsigned_number($function_name="", $target, $param_name=""){
 
 		$is_not_unsigned_number = !$this->isUnsignedNumber($target);
 		if($is_not_unsigned_number == true && !empty($function_name) && !empty($param_name)) {
@@ -2959,9 +2959,15 @@ class MYSQLInterface{
 		. " , IFNULL(MSS.`id`,-1) AS __speaker_id"
 		. " , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
 		. " , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
+
 		. " , IFNULL(MTGL.`sec_green`,0) AS __speaker_timer_green"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speaker_timer_green_mm_ss"
+ 
 		. " , IFNULL(MTGL.`sec_yellow`,0) AS __speaker_timer_yellow"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speaker_timer_yellow_mm_ss"
+
 		. " , IFNULL(MTGL.`sec_red`,0) AS __speaker_timer_red"
+		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
 
 		. " , IFNULL(MSE.`id`,-1) AS __evaluator_id"
 		. " , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
@@ -4764,48 +4770,7 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}	
 
-	// REMOVE ME
-	/*
-	public function updateTimer($meeting_id, $timer_record_id, $timer_type_id, $member_id, $time_record_milli_sec=0,$is_qualified=false){
 
-		$function_name = "updateTimer";
-		if($this->isNotUnsignedNumber($meeting_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$timer_record_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($timer_type_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$timer_type_id)<br/>";
-			return;
-		}
-		if($this->isNotNumber($member_id)){
-			echo "$function_name / \$this->isNotNumber(\$member_id)<br/>";
-			return;
-		}
-		if($this->isNotUnsignedNumber($time_record_milli_sec)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$time_record_milli_sec)<br/>";
-			return;
-		}
-		$is_qualified_num = ($is_qualified == true)?1:0;
-
-		$query = 
-		"UPDATE `magendas`.`MA_TIMER_RECORD`"
-		. " SET `timer_type_id` = $timer_type_id"
-		. " , `meeting_id` = $meeting_id"
-		. " , `member_id` = $member_id"
-		. " , `time_record_milli_sec` = $time_record_milli_sec"
-		. " , `is_qualified` = $is_qualified_num"
-		. " WHERE `id` = $timer_record_id"
-		;
-
-		$json_res_obj = $this->getModifyResult($query);
-
-		return $this->getSimpleResult($json_res_obj);
-	}
-	*/
 
 
 	public function deleteTimer($timer_record_id){
@@ -5469,6 +5434,51 @@ class MYSQLInterface{
 		return $action_obj_copy;                                             
 	}
 	/*
+		@ Public
+		@ Desc : target action obj를 복사합니다. 자식 객체애 대해서는 shy mode로 1개만 남겨둡니다. 엘리먼트를 추가할 때 사용합니다.
+	*/
+	public function copy_action_obj_empty($target_action_obj=null) {
+
+		if($this->is_not_action_obj(__FUNCTION__, $target_action_obj, "target_action_obj")){
+			return;
+		}
+			
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+
+		// $target_action_obj->show_info();
+
+		// 어떤 타입인지 구분한다.
+		$action_obj_copy = null;
+		if(ActionCollection::is_instance($target_action_obj)) {
+
+			// 1. COLLECTION
+			if($target_action_obj->is_list()) {
+
+				// 1-1. LIST
+				$action_obj_copy = $this->copy_action_list($target_action_obj);
+
+			} else if($target_action_obj->is_table()) {
+
+				// 1-2. TABLE
+				$action_obj_copy = $this->copy_action_table($target_action_obj);
+
+			}
+
+		} else if(ActionItem::is_instance($target_action_obj)) {
+
+			// 2. ITEM
+			$action_obj_copy = $this->copy_action_item($target_action_obj);
+
+		}
+		if($this->is_not_action_obj(__FUNCTION__, $action_obj_copy, "action_obj_copy")){
+			return;
+		}
+
+		$action_obj_copy->show_info();
+
+		return $action_obj_copy;                                             
+	}	
+	/*
 		@ Private
 		@ Desc : 자신이 포함된 상위 부모 컬렉션(TABLE)을 복제합니다.
 	*/	
@@ -5573,11 +5583,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// REMOVE ME?
-		// if($this->is_not_instance(__FUNCTION__, $target_action_list, "target_action_list")) {
-		// 	return;
-		// }
-
 		if($this->is_not_action_list(__FUNCTION__, $target_action_list, "target_action_list")) {
 			return;
 		}
@@ -5649,10 +5654,7 @@ class MYSQLInterface{
 			);
 		}
 	
-		//public function get_action_list_object($list_id, $order=0, $is_shy=0, $meeting_id=-1) {		
-		// $this->get_action_list_object();
 		// list 타입은 add on child 가 없습니다. add on child는 action item에서만 사용 가능합니다.
-
 		if($target_action_list->is_root_collection()) {
 			echo "copy_action_list - is_root_collection<br/>";
 			return $target_action_list;
@@ -5889,9 +5891,9 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"UPDATE `magendas`.`ACTION_ITEM`"
-				,"SET `name` = \"$action_name\","
-				,"`context` = \"$context_mysql_safe\""
-				,"WHERE `id` = $action_item_id"
+				," SET `name` = \"$action_name\""
+				," ,`context` = \"$context_mysql_safe\""
+				," WHERE `id` = $action_item_id"
 			)
 		);
 		$query_manager->modify();
@@ -5959,7 +5961,144 @@ class MYSQLInterface{
 		// 추가한 데이터를 재정렬 해줍니다.
 		$this->reorder_child_collection_in_parent_item($parent_action_item_id);
 
+	}
+	// @ public
+	// @ desc : 앞, 뒤의 형제 아이템을 비교해서 새로운 순서로 바꿔줍니다.
+	public function arrange_action_item_order($root_action_obj_hash_key=null, $parent_action_hash_key=null, $action_item_hash_key_before=null, $action_item_hash_key=null, $action_item_hash_key_after=null) {
+
+		if($this->is_empty(__FUNCTION__, $root_action_obj_hash_key, "root_action_obj_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $parent_action_hash_key, "parent_action_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
+			return;
+		}
+		if(empty($action_item_hash_key_before) && empty($action_item_hash_key_after)) {
+			echo "\$action_item_hash_key_before and \$action_item_hash_key_after is not valid!<br/>";
+			return;
+		}
+
+		$action_item_id_before = -1;
+		if(!empty($action_item_hash_key_before)) {
+			$action_item_id_before = $this->get_action_item_id($action_item_hash_key_before);
+		}
+
+
+		$action_item_id_after = -1;
+		if(!empty($action_item_hash_key_after)) {
+			$action_item_id_after = $this->get_action_item_id($action_item_hash_key_after);
+		}
+
+		
+		// DB에 저장된 관계 데이터를 가져옵니다.
+		$root_action_collection = $this->get_action_collection_by_hash_key($root_action_obj_hash_key);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")) {
+			return;
+		}
+
+		$action_item_obj = $root_action_collection->search_hash_key($action_item_hash_key);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_obj, "action_item_obj")) {
+			return;
+		}
+
+		// 부모가 변경될 수 있습니다. root action 객체에서 검색합니다.
+		$parent_action_obj = $root_action_collection->search_hash_key($parent_action_hash_key);
+		if($this->is_not_action_list(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+			return;
+		}
+
+		// 순서를 바꿉니다.
+		$action_item_order_before = -1;
+		$action_item_order_after = -1;
+		if(0 < $action_item_id_before) {
+
+			$action_item_order_before = $this->sel_child_item_order_on_parent_list($parent_action_obj->get_id(), $action_item_id_before);
+			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order_before, "action_item_order_before")){
+				return;
+			}
+
+			// 새롭게 위치한 이전 형제 아이템의 순서 바로 뒤로 넣습니다.
+			$action_item_order = $action_item_order_before + 50;
+			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "\$action_item_id_before : $action_item_id_before / action_item_order")){
+				return;
+			}
+
+			$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_obj->get_id(), $action_item_order);
+
+			$this->reorder_child_item_in_parent_list($parent_action_obj->get_id());
+
+		} else if(0 < $action_item_id_after) {
+
+			$parent_action_id = $parent_action_obj->get_id();
+			$action_item_order_after = $this->sel_child_item_order_on_parent_list($parent_action_id, $action_item_id_after);
+
+			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order_after, "\$parent_action_id : $parent_action_id / \$action_item_id_after : $action_item_id_after / action_item_order")){
+				return;
+			}
+
+			if($action_item_order_after == 0) {
+				// 첫번째로 이동하는 경우는, 첫번째에 있던 아이템의 순서도 역시 함께 변경합니다.
+				$action_item_order_after = 50;
+			}
+
+			// 새롭게 위치한 이전 형제 아이템의 순서 바로 앞으로 넣습니다.
+			$action_item_order = $action_item_order_after - 50;
+			if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "\$action_item_order_after : $action_item_order_after / action_item_order")){
+				return;
+			}
+
+			$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_obj->get_id(), $action_item_order);
+
+			if($action_item_order_after == 50) {
+				// 첫번째 열 위로 아이템이 이동했습니다. 뒤의 형제 아이템의 순서 정보도 함께 변경해줍니다.
+				$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_id_after, $action_item_order_after);
+			}
+
+			$this->reorder_child_item_in_parent_list($parent_action_obj->get_id());
+
+		}
+
 	}	
+	// @ desc : 앞, 뒤의 형제 아이템을 비교해서 새로운 순서로 바꿔줍니다.
+	public function arrange_action_item_order_by_new_order($root_action_obj_hash_key=null, $parent_action_hash_key=null, $action_item_hash_key=null, $action_item_order=-1) {
+
+		if($this->is_empty(__FUNCTION__, $root_action_obj_hash_key, "root_action_obj_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $parent_action_hash_key, "parent_action_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "action_item_order")){
+			return;
+		}
+
+		
+		// DB에 저장된 관계 데이터를 가져옵니다.
+		$root_action_collection = $this->get_action_collection_by_hash_key($root_action_obj_hash_key);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")) {
+			return;
+		}
+
+		$action_item_obj = $root_action_collection->search_hash_key($action_item_hash_key);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_obj, "action_item_obj")) {
+			return;
+		}
+
+		// 부모가 변경될 수 있습니다. root action 객체에서 검색합니다.
+		$parent_action_obj = $root_action_collection->search_hash_key($parent_action_hash_key);
+		if($this->is_not_action_list(__FUNCTION__, $parent_action_obj, "parent_action_obj")) {
+			return;
+		}
+
+		$this->update_order_parent_list_n_child_item($parent_action_obj->get_id(), $action_item_obj->get_id(), $action_item_order);
+
+		$this->reorder_child_item_in_parent_list($parent_action_obj->get_id());
+	}		
 	/*
 		@ Private
 		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
@@ -6029,12 +6168,33 @@ class MYSQLInterface{
 		}
 
 	}
+	public function insert_parent_action_item_n_add_on_collection_by_hash_key($parent_action_item_hash_key, $add_on_action_collection_hash_key) {
+
+		if($this->is_empty(__FUNCTION__, $parent_action_item_hash_key, "parent_action_item_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $add_on_action_collection_hash_key, "add_on_action_collection_hash_key")){
+			return;
+		}
+
+		$parent_action_item_id = $this->get_action_item_id($parent_action_item_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
+			return;
+		}
+
+		$add_on_action_collection_id = $this->get_action_collection_id($add_on_action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$this->insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id);
+	}
 	/*
 		@ Private
 		@ Desc : 리스트 아이템과 아이템의 추가 자식 컬렉션을 연결합니다. 추가 자식 컬렉션은 뷰 단 로직에서 추가되는 컬렉션입니다.
 		ex ) 타임라인에서 스피치 관련 테이블이 포함되는 경우. 타임 라인이 수정되어 스피치 테이블이 빠지거나 추가되는 경우를 위해서 필요합니다.
 	*/
-	private function insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id, $order=-1) {
+	private function insert_parent_action_item_n_add_on_collection($parent_action_item_id, $add_on_action_collection_id) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_item_id, "parent_action_item_id")){
 			return;
@@ -6087,6 +6247,41 @@ class MYSQLInterface{
 		$this->reorder_add_on_collection_in_parent_item($parent_action_item_id);
 
 	}
+	// @ desc : add on 아이템을 삭제합니다.
+	public function delete_parent_action_item_n_add_on_collection_by_hash_key($add_on_action_collection_hash_key) {
+
+		if($this->is_empty(__FUNCTION__, $add_on_action_collection_hash_key, "add_on_action_collection_hash_key")){
+			return;
+		}
+
+		$add_on_action_collection_id = $this->get_action_collection_id($add_on_action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$this->delete_parent_action_item_n_add_on_collection($add_on_action_collection_id);
+	}
+
+	// @ desc : add on 아이템을 삭제합니다.
+	private function delete_parent_action_item_n_add_on_collection($add_on_action_collection_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $add_on_action_collection_id, "add_on_action_collection_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"DELETE FROM `magendas`.`PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION`"
+				," WHERE add_on_action_collection_id=$add_on_action_collection_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}	
 	/*
 		@ Private
 		@ Desc : 아이템의 자식 컬렉션의 order 값의 간격을 모두 100단위로 재조정해줍니다.
@@ -6194,6 +6389,35 @@ class MYSQLInterface{
 		$this->reorder_child_item_in_parent_list($parent_action_list_id);
 
 	}
+	// @ desc
+	private function sel_child_item_order_on_parent_list($parent_action_list_id=-1, $child_action_item_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT PACLNCAI.child_action_item_id AS __child_action_item_id"
+				,",PACLNCAI.order AS __child_action_item_order"
+				," FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
+				," WHERE parent_action_list_id=$parent_action_list_id"
+				," AND child_action_item_id=$child_action_item_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		$result = $query_manager->get_result();
+
+		return $result->__child_action_item_order;
+	}	
 	private function sel_child_item_cnt_on_list($parent_action_list_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
@@ -6255,6 +6479,50 @@ class MYSQLInterface{
 		}
 
 	}
+	// @ desc : 부모 리스트와 자식 액션 아이템의 관계 테이블에 등록합니다.
+	private function update_order_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
+			return;
+		}
+
+		$result = $this->sel_action_item_n_parent($parent_action_list_id, $child_action_item_id);
+
+		if(is_null($result)) {
+			// 다른 부모로 이동했습니다.
+			// 연결된 부모가 다르다면, 자식 객체가 등록된 모든 데이터를 삭제합니다.
+			$this->delete_parent_lists_n_child_item($child_action_item_id);
+
+			// 새로운 데이터를 추가합니다.
+			$is_shy_child = 0;
+			$this->insert_parent_list_n_child_item($parent_action_list_id, $child_action_item_id, $order, $is_shy_child);
+
+		} else {
+			// 같은 부모 안에서 이동했습니다.
+			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+			$query_manager->addQueryLineArr(
+				array(
+					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+					, " SET `order` = $order"
+					, " WHERE `parent_action_list_id` = $parent_action_list_id"
+					, " AND `child_action_item_id` = $child_action_item_id"
+				)
+			);
+			$query_manager->modify();
+			if($query_manager->is_failed()) {
+				return;
+			}
+
+		}
+
+	}
+
 	private function delete_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
@@ -6270,7 +6538,6 @@ class MYSQLInterface{
 				"DELETE FROM `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`"
 				,"WHERE parent_action_list_id=$parent_action_list_id"
 				,"AND child_action_item_id=$child_action_item_id"
-				,"AND is_shy_child=1"
 			)
 		);
 		$query_manager->modify();
@@ -6278,6 +6545,98 @@ class MYSQLInterface{
 			return;
 		}
 
+	}
+	// @ desc : child item이 등록되어 있는 모든 parent list와의 관계 정보를 지웁니다.
+	private function delete_parent_lists_n_child_item($child_action_item_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"DELETE FROM `magendas`.`PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM`"
+				,"WHERE child_action_item_id=$child_action_item_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+	public function update_child_item_shy_mode_by_hash_key($parent_action_list_hash_key=null, $child_action_item_hash_key=null, $is_shy=0) {
+
+		if($this->is_empty(__FUNCTION__, $parent_action_list_hash_key, "parent_action_list_hash_key")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $child_action_item_hash_key, "child_action_item_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy, "is_shy")){
+			return;
+		}
+
+		// wonder.jung11
+		$parent_action_list_id = $this->get_action_collection_id($parent_action_list_hash_key);
+		$child_action_item_id = $this->get_action_item_id($child_action_item_hash_key);
+
+		$this->update_child_item_shy_mode($parent_action_list_id, $child_action_item_id, $is_shy);
+	}
+	private function update_child_item_shy_mode($parent_action_list_id=-1, $child_action_item_id=-1, $is_shy=0) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $is_shy, "is_shy")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+				,"SET `is_shy_child`=$is_shy"
+				,"WHERE `parent_action_list_id` = $parent_action_list_id"
+				,"AND `child_action_item_id` = $child_action_item_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
+	private function update_child_item_order($parent_action_list_id=-1, $child_action_item_id=-1, $new_item_order=0) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $parent_action_list_id, "parent_action_list_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_item_order, "new_item_order")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
+				," SET `order`=$new_item_order, `is_shy_child`=0"
+				," WHERE `parent_action_list_id` = $parent_action_list_id"
+				," AND `child_action_item_id` = $child_action_item_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 	}	
 	/*
 		@ Private
@@ -6295,9 +6654,9 @@ class MYSQLInterface{
 				"SELECT PACLNCAI.child_action_item_id AS __child_action_item_id"
 				,",PACLNCAI.`order` AS __child_action_item_order"
 				,",PACLNCAI.`is_shy_child` AS __child_action_item_is_shy"
-				,"FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
-				,"WHERE parent_action_list_id=$parent_action_list_id"
-				,"ORDER BY PACLNCAI.order"
+				," FROM PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PACLNCAI"
+				," WHERE parent_action_list_id=$parent_action_list_id"
+				," ORDER BY PACLNCAI.`order`"
 			)
 		);
 		$query_manager->select();
@@ -6332,20 +6691,8 @@ class MYSQLInterface{
 
 			// 이전과 순서가 달라졌습니다. 업데이트를 진행합니다.
 			// 열이 2개 이상일 경우는 더 이상 숨김열이 아니므로 is_shy_child의 값을 0으로 변경합니다.
-			$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-			$query_manager->addQueryLineArr(
-				array(
-					"UPDATE PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM"
-					,"SET `order` = $new_item_order, `is_shy_child`=0"
-					,"WHERE `parent_action_list_id` = $parent_action_list_id"
-					,"AND `child_action_item_id` = $__child_action_item_id"
-				)
-			);
-			// $query_manager->printFormattedQuery();
-			$query_manager->modify();
-			if($query_manager->is_failed()) {
-				return;
-			}
+			$this->update_child_item_shy_mode($parent_action_list_id, $__child_action_item_id);
+			$this->update_child_item_order($parent_action_list_id, $__child_action_item_id, $new_item_order);
 		}
 
 		
@@ -6430,6 +6777,22 @@ class MYSQLInterface{
 
 
 	// action list
+	public function get_root_action_collection_by_hash_key($action_collection_hash_key="", $meeting_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $action_collection_hash_key, "action_collection_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$root_action_id = $this->get_action_collection_id($action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $root_action_id, "root_action_id")) {
+			return;
+		}
+
+		return $this->get_root_action_collection($root_action_id, $meeting_id);
+	}
 	public function get_root_action_collection($action_collection_id=-1, $meeting_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
@@ -6462,11 +6825,22 @@ class MYSQLInterface{
 
 		return $root_action_collection;
 	}
-	/*
-		@ public
-		@ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
-	*/
-	public function get_action_collection($action_collection_id=-1, $order=0, $is_shy=0, $meeting_id=-1) {
+	// @ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
+	public function get_action_collection_by_hash_key($action_collection_hash_key="") {
+
+		if($this->is_empty(__FUNCTION__, $action_collection_hash_key, "action_collection_hash_key")){
+			return;
+		}
+
+		$action_collection_id = $this->get_action_collection_id($action_collection_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
+			return;
+		}
+
+		return $this->get_action_collection($action_collection_id);
+	}
+	// @ Desc : ACTION COLLECTION 정보를 가져옵니다. action collection 객체로 반환합니다.
+	private function get_action_collection($action_collection_id=-1, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -6474,10 +6848,10 @@ class MYSQLInterface{
 
 		if($this->is_instance_table_type($action_collection_id)) {
 			// 테이블 타입일 경우
-			return $this->get_action_table_object($action_collection_id, $order, $is_shy, $meeting_id);
+			return $this->get_action_table_object($action_collection_id, $order, $is_shy);
 		} else if($this->is_instance_list_type($action_collection_id)) {
 			// 리스트 타입일 경우
-			return $this->get_action_list_object($action_collection_id, $order, $is_shy, $meeting_id);
+			return $this->get_action_list_object($action_collection_id, $order, $is_shy);
 		}
 
 	}
@@ -6485,14 +6859,13 @@ class MYSQLInterface{
 		@ private
 		@ Desc : 액션 리스트 관련 정보를 가져옵니다. 부모, 자식 관계를 오브젝트, 프로퍼티 형태로 변환하여 전달합니다.
 	*/
-	public function get_action_list_object($list_id, $order=0, $is_shy=0, $meeting_id=-1) {
+	public function get_action_list_object($list_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
 			return;
 		}
 
 		// 리스트를 조회합니다.
-		// $list_n_child_item_list = $this->sel_action_list_n_child_item($list_id, $meeting_id);
 		$list_n_child_item_list = $this->sel_action_list_n_child_item($list_id);
 		if($this->is_empty(__FUNCTION__, $list_n_child_item_list, "list_n_child_item_list")) {
 			return;
@@ -6577,96 +6950,50 @@ class MYSQLInterface{
 
 		return $action_list_obj;
 	}
-	/*
-		@ Public
-		@ Desc : 액션 리스트를 조회합니다. 리스트가 가지는 아이템 정보까지 함께 가져옵니다.
-	*/
-	public function sel_action_list_n_child_item($list_id=-1, $meeting_id=-1) {
+	// @ Desc : 액션 리스트를 조회합니다. 리스트가 가지는 아이템 정보까지 함께 가져옵니다.
+	private function sel_action_list_n_child_item($list_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $list_id, "list_id")){
 			return;
 		}
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-		if(0 < $meeting_id) {
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __list_id"
+				,",AC.`hash_key` AS __list_hash_key"
+				,",AC.`type` AS __list_type"
+				,",AC.`name` AS __list_name"
+				,",ACT.`name` AS __list_type_name"
 
-			$query_manager->addQueryLineArr(
-				array(
-					"SELECT AC.`id` AS __list_id"
-					,",AC.`hash_key` AS __list_hash_key"
-					,",AC.`type` AS __list_type"
-					,",AC.`name` AS __list_name"
-					,",ACT.`name` AS __list_type_name"
+				,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
+				,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
+				,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
+				,",IFNULL(DATE_FORMAT(MA.startdttm, '%H:%i:00'),\"\") AS __list_meeting_agenda_starttime"
+				,",IFNULL(TIME_TO_SEC(DATE_FORMAT(MA.startdttm, '%H:%i:00')),0) AS __list_meeting_agenda_starttime_sec"
 
-					,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
-					,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
-					,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
-					,",IFNULL(DATE_FORMAT(MA.startdttm, '%H:%i:00'),\"\") AS __list_meeting_agenda_starttime"
-					,",IFNULL(TIME_TO_SEC(DATE_FORMAT(MA.startdttm, '%H:%i:00')),0) AS __list_meeting_agenda_starttime_sec"
+				,",IFNULL(CHILD_ITEM.`id`,-1) AS __list_child_item_id"
+				,",IFNULL(CHILD_ITEM.`name`,\"\") AS __list_child_item_name"
+				,",IFNULL(CHILD_ITEM.`hash_key`,\"\") AS __list_child_item_hash_key"
+				,",IFNULL(CHILD_ITEM_TYPE.`id`,-1) AS __list_child_item_type_id"
+				,",IFNULL(CHILD_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
+				,",IFNULL(CHILD_ITEM.`context`,\"\") AS __list_child_item_context"
+				,",IFNULL(PARENT_LIST_N_CHILD_ITEM.order,-1) AS __list_child_item_order"
+				,",IFNULL(PARENT_LIST_N_CHILD_ITEM.is_shy_child,-1) AS __list_child_item_is_shy"
 
-					,",IFNULL(CHILD_ITEM.`id`,-1) AS __list_child_item_id"
-					,",IFNULL(CHILD_ITEM.`name`,\"\") AS __list_child_item_name"
-					,",IFNULL(CHILD_ITEM.`hash_key`,\"\") AS __list_child_item_hash_key"
-					,",IFNULL(CHILD_ITEM_TYPE.`id`,-1) AS __list_child_item_type_id"
-					,",IFNULL(CHILD_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
-					,",IFNULL(CHILD_ITEM.`context`,\"\") AS __list_child_item_context"
-					,",IFNULL(PARENT_LIST_N_CHILD_ITEM.order,-1) AS __list_child_item_order"
-					,",IFNULL(PARENT_LIST_N_CHILD_ITEM.is_shy_child,-1) AS __list_child_item_is_shy"
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
 
-					,"FROM ACTION_COLLECTION AS AC"
-					,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
-					,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
-					,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+				,"LEFT JOIN PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PARENT_LIST_N_CHILD_ITEM ON PARENT_LIST_N_CHILD_ITEM.parent_action_list_id=AC.id"
+				,"LEFT JOIN ACTION_ITEM AS CHILD_ITEM ON CHILD_ITEM.id=PARENT_LIST_N_CHILD_ITEM.child_action_item_id"
+				,"LEFT JOIN ACTION_ITEM_TYPE AS CHILD_ITEM_TYPE ON CHILD_ITEM_TYPE.id=CHILD_ITEM.`type`"
 
-					,"LEFT JOIN PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PARENT_LIST_N_CHILD_ITEM ON PARENT_LIST_N_CHILD_ITEM.parent_action_list_id=AC.id"
-					,"LEFT JOIN ACTION_ITEM AS CHILD_ITEM ON CHILD_ITEM.id=PARENT_LIST_N_CHILD_ITEM.child_action_item_id"
-					,"LEFT JOIN ACTION_ITEM_TYPE AS CHILD_ITEM_TYPE ON CHILD_ITEM_TYPE.id=CHILD_ITEM.`type`"
-
-					,"WHERE AC.`id`=$list_id"
-					,"AND MA.`id`=$meeting_id"
-					,"ORDER BY PARENT_LIST_N_CHILD_ITEM.order"
-				)
-			); // end adding query
-
-		} else {
-
-			$query_manager->addQueryLineArr(
-				array(
-					"SELECT AC.`id` AS __list_id"
-					,",AC.`hash_key` AS __list_hash_key"
-					,",AC.`type` AS __list_type"
-					,",AC.`name` AS __list_name"
-					,",ACT.`name` AS __list_type_name"
-
-					,",IFNULL(MA.`id`,-1) AS __list_meeting_agenda_id"
-					,",IFNULL(MA.`round`,-1) AS __list_meeting_agenda_round"
-					,",IFNULL(MA.`theme`,\"\") AS __list_meeting_agenda_theme"
-					,",IFNULL(DATE_FORMAT(MA.startdttm, '%H:%i:00'),\"\") AS __list_meeting_agenda_starttime"
-					,",IFNULL(TIME_TO_SEC(DATE_FORMAT(MA.startdttm, '%H:%i:00')),0) AS __list_meeting_agenda_starttime_sec"
-
-					,",IFNULL(CHILD_ITEM.`id`,-1) AS __list_child_item_id"
-					,",IFNULL(CHILD_ITEM.`name`,\"\") AS __list_child_item_name"
-					,",IFNULL(CHILD_ITEM.`hash_key`,\"\") AS __list_child_item_hash_key"
-					,",IFNULL(CHILD_ITEM_TYPE.`id`,-1) AS __list_child_item_type_id"
-					,",IFNULL(CHILD_ITEM_TYPE.`name`,\"\") AS __list_child_item_type_name"
-					,",IFNULL(CHILD_ITEM.`context`,\"\") AS __list_child_item_context"
-					,",IFNULL(PARENT_LIST_N_CHILD_ITEM.order,-1) AS __list_child_item_order"
-					,",IFNULL(PARENT_LIST_N_CHILD_ITEM.is_shy_child,-1) AS __list_child_item_is_shy"
-
-					,"FROM ACTION_COLLECTION AS AC"
-					,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
-					,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
-					,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
-
-					,"LEFT JOIN PARENT_ACTION_LIST_N_CHILD_ACTION_ITEM AS PARENT_LIST_N_CHILD_ITEM ON PARENT_LIST_N_CHILD_ITEM.parent_action_list_id=AC.id"
-					,"LEFT JOIN ACTION_ITEM AS CHILD_ITEM ON CHILD_ITEM.id=PARENT_LIST_N_CHILD_ITEM.child_action_item_id"
-					,"LEFT JOIN ACTION_ITEM_TYPE AS CHILD_ITEM_TYPE ON CHILD_ITEM_TYPE.id=CHILD_ITEM.`type`"
-
-					,"WHERE AC.`id`=$list_id"
-					,"ORDER BY PARENT_LIST_N_CHILD_ITEM.order"
-				)
-			); // end adding query
-		}
+				,"WHERE AC.`id`=$list_id"
+				,"ORDER BY PARENT_LIST_N_CHILD_ITEM.order"
+			)
+		); // end adding query		
 
 		// $query_manager->printFormattedQuery();
 		$query_manager->select();
@@ -6681,14 +7008,14 @@ class MYSQLInterface{
 		@ public
 		@ Desc : 액션 테이블 관련 정보를 가져옵니다. action collection 객체로 반환합니다.
 	*/
-	public function get_action_table_object($table_id, $order=0, $is_shy=0, $meeting_id=-1) {
+	public function get_action_table_object($table_id, $order=0, $is_shy=0) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
 			return;
 		}
 
 		// 테이블을 조회합니다.
-		$parent_table_n_child_list_list = $this->sel_parent_table_n_child_list($table_id, $meeting_id);
+		$parent_table_n_child_list_list = $this->sel_parent_table_n_child_list($table_id);
 		if($this->is_empty(__FUNCTION__, $parent_table_n_child_list_list, "parent_table_n_child_list_list")) {
 			return;
 		}
@@ -6750,84 +7077,90 @@ class MYSQLInterface{
 
 		return $action_table_obj;
 	}
+	// @ desc : add row into list. it makes a copy previous row.
+	public function add_row_into_list($list_action_item_obj=null, $action_name="", $action_context="") {
+		
+		if($this->is_not_action_item(__FUNCTION__, $list_action_item_obj, "list_action_item_obj")) {
+			return;
+		}
+
+		$is_shy = 0;
+		$action_item_copy = $this->copy_action_item_relation($list_action_item_obj, $is_shy, $action_name, $action_context);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")) {
+			return;
+		}
+
+		return $action_item_copy;
+	}	
+	// @ desc : add row into table. it makes a copy previous row.
+	public function add_row_into_table($table_field_action_item_obj=null) {
+		
+		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+			return;
+		}
+
+		if($table_field_action_item_obj->is_not_table_field_item()) {
+			echo "!Error! / add_row_into_table / \$table_field_action_item_obj->is_not_table_field_item()<br/>";
+			return;
+		}
+
+		$cur_table_row_field_action_item_list = $table_field_action_item_obj->get_table_row_field_action_item_list();
+		for($idx = 0;$idx < count($cur_table_row_field_action_item_list);$idx++) {
+			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
+			if($this->is_not_action_item(__FUNCTION__, $table_row_field_action_item_obj, "table_row_field_action_item_obj")) {
+				return;
+			}
+
+			// 엘리먼트를 복사합니다.
+			$is_shy = 0;
+			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);
+		}
+
+		$table_field_action_item_obj_after = $table_field_action_item_obj->get_sibling_after();
+		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj_after, "table_field_action_item_obj_after")) {
+			return;
+		}
+
+		$cur_table_row_field_action_item_list_after = $table_field_action_item_obj_after->get_table_row_field_action_item_list();
+
+		return $cur_table_row_field_action_item_list_after;
+	}
 	/*
 		@ private
 		@ Desc : 액션 테이블 관련 정보를 가져옵니다. 컬럼 리스트 정보를 포함합니다.
 	*/
-	private function sel_parent_table_n_child_list($table_id=-1, $meeting_id=-1) {
+	private function sel_parent_table_n_child_list($table_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $table_id, "table_id")){
 			return;
 		}
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
-		if(0 < $meeting_id) {
-			// root action table
-			$query_manager->addQueryLineArr(
-				array(
-					"SELECT AC.`id` AS __table_id"
-					,",AC.`hash_key` AS __table_hash_key"
-					,",AC.`type` AS __table_type"
-					,",AC.`name` AS __table_name"
-					,",ACT.`name` AS __table_type_name"
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT AC.`id` AS __table_id"
+				,",AC.`hash_key` AS __table_hash_key"
+				,",AC.`type` AS __table_type"
+				,",AC.`name` AS __table_name"
+				,",ACT.`name` AS __table_type_name"
 
-					,",IFNULL(MA.`id`,-1) AS __table_meeting_agenda_id"
-					,",IFNULL(MA.`round`,-1) AS __table_meeting_agenda_round"
-					,",IFNULL(MA.`theme`,\"\") AS __table_meeting_agenda_theme"
+				,",IFNULL(CHILD_LIST.`id`,-1) AS __table_child_list_id"
+				,",IFNULL(CHILD_LIST.`name`,\"\") AS __table_child_list_name"
+				,",IFNULL(CHILD_LIST.`hash_key`,\"\") AS __table_child_list_hash_key"
+				,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`order`, 0) AS __table_child_list_order"
+				,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`is_shy_child`,-1) AS __table_child_list_is_shy"
 
-					,",IFNULL(CHILD_LIST.`id`,-1) AS __table_child_list_id"
-					,",IFNULL(CHILD_LIST.`name`,\"\") AS __table_child_list_name"
-					,",IFNULL(CHILD_LIST.`hash_key`,\"\") AS __table_child_list_hash_key"
-					,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`order`, 0) AS __table_child_list_order"
-					,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`is_shy_child`,-1) AS __table_child_list_is_shy"
+				,"FROM ACTION_COLLECTION AS AC"
+				,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
+				,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
 
-					,"FROM ACTION_COLLECTION AS AC"
-					,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
-					,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
-					,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
+				,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id=AC.`id`"
+				,"LEFT JOIN ACTION_COLLECTION AS CHILD_LIST ON CHILD_LIST.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id"
 
-					,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id=AC.`id`"
-					,"LEFT JOIN ACTION_COLLECTION AS CHILD_LIST ON CHILD_LIST.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id"
-
-					,"WHERE AC.`id`=$table_id"
-					,"AND MA.`id`=$meeting_id"
-					,"AND AC.`type`=2"
-				)
-			);			
-
-		} else {
-			// normal table
-			$query_manager->addQueryLineArr(
-				array(
-					"SELECT AC.`id` AS __table_id"
-					,",AC.`hash_key` AS __table_hash_key"
-					,",AC.`type` AS __table_type"
-					,",AC.`name` AS __table_name"
-					,",ACT.`name` AS __table_type_name"
-
-					,",IFNULL(MA.`id`,-1) AS __table_meeting_agenda_id"
-					,",IFNULL(MA.`round`,-1) AS __table_meeting_agenda_round"
-					,",IFNULL(MA.`theme`,\"\") AS __table_meeting_agenda_theme"
-
-					,",IFNULL(CHILD_LIST.`id`,-1) AS __table_child_list_id"
-					,",IFNULL(CHILD_LIST.`name`,\"\") AS __table_child_list_name"
-					,",IFNULL(CHILD_LIST.`hash_key`,\"\") AS __table_child_list_hash_key"
-					,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`order`, 0) AS __table_child_list_order"
-					,",IFNULL(PARENT_TABLE_N_CHILD_COLUMN_LIST.`is_shy_child`,-1) AS __table_child_list_is_shy"
-
-					,"FROM ACTION_COLLECTION AS AC"
-					,"LEFT JOIN ACTION_COLLECTION_N_MEETING_AGENDA AS AC_MA ON AC_MA.action_collection_id=AC.`id`"
-					,"LEFT JOIN MEETING_AGENDA AS MA ON MA.id=AC_MA.meeting_agenda_id"
-					,"LEFT JOIN ACTION_COLLECTION_TYPE AS ACT ON ACT.id=AC.`type`"
-
-					,"LEFT JOIN PARENT_ACTION_TABLE_N_CHILD_COLUMN_ACTION_LIST AS PARENT_TABLE_N_CHILD_COLUMN_LIST ON PARENT_TABLE_N_CHILD_COLUMN_LIST.parent_action_table_id=AC.`id`"
-					,"LEFT JOIN ACTION_COLLECTION AS CHILD_LIST ON CHILD_LIST.id=PARENT_TABLE_N_CHILD_COLUMN_LIST.child_column_action_list_id"
-
-					,"WHERE AC.`id`=$table_id"
-					,"AND AC.`type`=2"
-				)
-			);
-		}
+				,"WHERE AC.`id`=$table_id"
+				,"AND AC.`type`=2"
+			)
+		);
 
 		// $query_manager->printFormattedQuery();
 		$query_manager->select();
@@ -6966,6 +7299,27 @@ class MYSQLInterface{
 		}
 		
 		return $__item_id;
+	}
+	// @ desc : 부모, 형제, 자식 참조를 가지고 있는 action item obj를 돌려줍니다.
+	public function get_action_item_obj_with_relation($root_action_hash_key="", $action_item_hash_key="") {
+
+		if($this->is_empty(__FUNCTION__, $root_action_hash_key, "root_action_hash_key")){
+			return;			
+		}
+		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
+			return;			
+		}
+		$root_action_list = $this->get_action_collection_by_hash_key($root_action_hash_key);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")){
+			return;
+		}
+
+		$action_item_obj_target = $root_action_list->search_hash_key($action_item_hash_key);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_obj_target, "action_item_obj_target")) {
+			return;
+		}
+
+		return $action_item_obj_target;
 	}
 
 	/*
@@ -7313,11 +7667,110 @@ class MYSQLInterface{
 
 		return $root_action_list;
 	}
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 item 객체는 shy mode로 복제합니다.
+	public function copy_action_collection_relation($action_collection_obj) {
+
+		if($this->is_not_action_collection(__FUNCTION__, $action_collection_obj, "action_collection_obj")){
+			return;
+		}
+		// root collection action은 지원하지 않습니다.
+		if($action_collection_obj->is_root_collection()) {
+			echo "!Error! / copy_action_collection_relation / \$action_collection_obj->is_root_collection()";
+			return;
+		}
+
+		// LIST 형만 지원합니다.
+		if($this->is_not_action_list(__FUNCTION__, $action_collection_obj, "action_collection_obj")){
+			return;
+		}
+
+
+		$parent_action_item_obj = $action_collection_obj->get_parent();
+		// 부모 액션 엘리먼트는 아이템 객체입니다. 그러므로 부모 액션이 item type인지 확인합니다. 이 메서드안에서 부모 객체는 반드시 있어야 합니다.
+		if($this->is_not_action_item(__FUNCTION__, $parent_action_item_obj, "parent_action_item_obj")){
+			return;
+		}
+
+		//add_action_collection_no_relation
+		$action_collection_obj_copy = $this->add_action_collection_no_relation($action_collection_obj);
+		if($this->is_not_action_collection(__FUNCTION__, $action_collection_obj_copy, "action_collection_obj_copy")){
+			return;
+		}
+
+		// SET PARENT RELATION
+		$action_collection_obj_copy->set_parent($parent_action_item_obj);
+		$parent_action_item_obj->add_child($action_collection_obj_copy);
+		$this->insert_parent_action_item_n_child_collection_v2($parent_action_item_obj, $action_collection_obj_copy);
+
+
+		// SET CHILDREN RELATION
+		$cur_first_child_item_obj = null;
+		if($action_collection_obj->has_children()) {
+			// 자식 객체가 있는 경우라면 shy mode로 추가합니다.
+			$cur_first_child_item_obj = $action_collection_obj->get_first_child();
+
+			$is_shy = 1; // shy mode로 추가합니다.
+			$cur_first_child_item_obj_copy = $this->copy_action_item_relation($cur_first_child_item_obj, $is_shy);
+			$action_collection_obj_copy->add_child($cur_first_child_item_obj_copy);
+		}
+
+	}
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 복사해서 만듭니다. 부모는 그대로 연결, 자식 collection 객체는 복제합니다.
+	public function copy_action_item_relation($action_item_target_before, $is_shy=0, $action_name="", $action_context="") {
+
+		if($this->is_not_action_item(__FUNCTION__, $action_item_target_before, "action_item_target_before")){
+			return;
+		}
+
+		$parent_action_collection_obj = $action_item_target_before->get_parent();
+		// 부모 액션 엘리먼트는 컬렉션 객체입니다. 그러므로 부모 액션이 collection type인지 확인합니다.
+		if($this->is_not_action_collection(__FUNCTION__, $parent_action_collection_obj, "parent_action_collection_obj")){
+			return;
+		}
+		
+		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before, $action_name, $action_context);
+		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
+			return;
+		}
+
+		// SET PARENT
+		if($this->is_action_obj(__FUNCTION__, $parent_action_collection_obj)){
+			$action_item_copy->set_parent($parent_action_collection_obj);
+			$cur_idx = $action_item_target_before->get_idx();
+			// 형제 리스트의 추가는 앞선 형제의 뒤로만 추가합니다.
+			$parent_action_collection_obj->add_child($action_item_copy, ($cur_idx + 1));
+
+			// 실제 DB상에서 형제 사이에 추가합니다.
+			$this->insert_parent_list_n_child_item(
+				$parent_action_collection_obj->get_id()
+				, $action_item_copy->get_id()
+				, ($cur_idx * 100 + 50) // 형제 사이에 추가하기 위한 인덱스
+				, $is_shy
+			);
+
+			// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
+			$this->reorder_child_item_in_parent_list($parent_action_collection_obj->get_id());
+		}
+
+		// SET CHILD RELATION
+		$child_action_collection_obj_list = null;
+		if($action_item_target_before->has_children()) {
+			// 첫번째 자식 객체만 추가합니다.
+			$cur_first_child_collection_obj = $action_item_target_before->get_first_child();
+			// 새로 만든 아이템으로 부모 객체를 변경합니다.
+			$cur_first_child_collection_obj->set_parent($action_item_copy);
+			$this->copy_action_collection_relation($cur_first_child_collection_obj);
+		}
+
+		return $action_item_copy;
+	}
 	/*
 		@ Private
-		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다.
+		@ Desc : action item을 추가합니다. 추가된 action item 객체를 돌려줍니다. 이 객체로 id와 hashkey를 넘겨줍니다. 부모, 자식 객체 관계는 연결하지 않습니다.
 	*/
-	private function copy_action_item_v2($action_item_target) {
+	private function copy_action_item_no_relation($action_item_target, $action_name="", $action_context="") {
 
 		if($this->is_not_action_item(__FUNCTION__, $action_item_target, "action_item_target")){
 			return;
@@ -7326,11 +7779,21 @@ class MYSQLInterface{
 		if($this->is_not_action_item_type(__FUNCTION__, $type, "type")){
 			return;
 		}
-		$name = $action_item_target->get_name();
+		if(empty($action_name)) {
+			$name = $action_item_target->get_name();
+		} else {
+			$name = $action_name;
+		}
+		
 		if($this->is_empty(__FUNCTION__, $name, "name")){
 			return;
 		}
-		$context = $action_item_target->get_context();
+
+		if(empty($action_context)) {
+			$context = $action_item_target->get_context();	
+		} else {
+			$context = $action_context;
+		}
 		$context_mysql_safe = $this->mysql_manager->escape_json_str($context);
 
 		$hash_key = $this->get_hash_key("$type $name $context");
@@ -7369,11 +7832,38 @@ class MYSQLInterface{
 			$__action_item_id = $result->__action_item_id;	
 		}
 
-		// action item update
-		$action_item_target->set_id($__action_item_id);
-		$action_item_target->set_hash_key($hash_key);
+		// create action item copy
+		$action_item_copy = new ActionItem(null, $type);
+		$action_item_copy->set_id($__action_item_id);
+		$action_item_copy->set_hash_key($hash_key);
+		$action_item_copy->set_name($name);
+		$action_item_copy->set_context($context_mysql_safe);
 
-		return $action_item_target;
+		return $action_item_copy;
+	}	
+	// @ Public
+	// @ Desc : action item을 전달받은 전후 객체 참조를 이용, 삭제합니다. 부모에서의 참조도 제거합니다.
+	public function delete_action_item_relation($action_item_target) {
+
+		if($this->is_not_action_item(__FUNCTION__, $action_item_target, "action_item_target")){
+			return;
+		}
+
+		$parent_action_collection_obj = $action_item_target->get_parent();
+		// 부모 액션 엘리먼트는 컬렉션 객체입니다. 그러므로 부모 액션이 collection type인지 확인합니다.
+		if($this->is_not_action_collection(__FUNCTION__, $parent_action_collection_obj, "parent_action_collection_obj")){
+			return;
+		}
+
+		// 실제 DB상에서 부모와의 연결을 제거합니다.
+		$this->delete_parent_list_n_child_item(
+			$parent_action_collection_obj->get_id()
+			, $action_item_target->get_id()
+		);
+
+		// 해당 리스트의 모든 아이템들을 가져와 ordering을 다시 업데이트해줍니다.
+		$this->reorder_child_item_in_parent_list($parent_action_collection_obj->get_id());
+
 	}	
 	/*
 		@ Private
@@ -7544,7 +8034,7 @@ class MYSQLInterface{
 		@ Private
 		@ Desc : action collection을 DB에 저장합니다.
 	*/
-	private function add_action_collection_v2($action_collection) {
+	private function add_action_collection_no_relation($action_collection) {
 
 		if($this->is_not_action_collection(__FUNCTION__, $action_collection, "action_collection")){
 			return;
@@ -7712,6 +8202,8 @@ class MYSQLInterface{
 		$this->reorder_child_collection_in_parent_item($parent_action_item_id);
 
 	}
+	// @ private
+	// @ desc : 맨 마지막 엘리먼트로 추가합니다.
 	private function insert_parent_list_n_child_item_v2($parent_action_list, $child_action_item) {
 
 		if($this->is_not_action_list(__FUNCTION__, $parent_action_list, "parent_action_list")){
@@ -7789,6 +8281,7 @@ class MYSQLInterface{
 			$is_shy_child_int = 1;
 		}
 
+		// 맨 마지막 엘리먼트로 추가합니다.
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
@@ -8156,7 +8649,7 @@ class MYSQLInterface{
 
 			// add on action collection 타입인 경우의 처리.
 			// add on action collection을 등록합니다.
-			$new_action_obj = $this->add_action_collection_v2($action_obj);
+			$new_action_obj = $this->add_action_collection_no_relation($action_obj);
 			$action_obj->inject($new_action_obj);
 
 			// add on action parent와 add on action collection을 연결합니다.
@@ -8192,7 +8685,7 @@ class MYSQLInterface{
 			// 객체가 새로 만들어지거나 변경된 경우에만 DB에 추가합니다.
 			// action collection 객체를 DB에 추가합니다.
 			if($action_obj->has_changed() == true) {
-				$new_action_obj = $this->add_action_collection_v2($action_obj);
+				$new_action_obj = $this->add_action_collection_no_relation($action_obj);
 				$action_obj->inject($new_action_obj);
 			}
 
@@ -8334,8 +8827,6 @@ class MYSQLInterface{
 		DB 업데이트 횟수를 최소한으로 줄입니다.
 	*/
 	public function get_template_meeting_timeline_BDTM($hh_mm_begins) {
-
-		// wonder.jung11
 
 		if($this->is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
 			echo "\$this->is_not_valid_time_format_hh24_mm(\$hh_mm_begins)<br/>";

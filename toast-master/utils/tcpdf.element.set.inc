@@ -100,7 +100,7 @@ class TCPDFElementSet{
 		}
 		return $this->element_set_height;
 	}
-	public function add_element_set_height($offset_height) {
+	private function add_element_set_height($offset_height) {
 		if(is_null($this->element_set_height)) {
 			$this->element_set_height = 0;
 		}
@@ -124,13 +124,14 @@ class TCPDFElementSet{
 	// dMMMMMP dMMMMMP dMMMMMP dMP dMP dMPdMMMMMP dMP dMP   dMP       
 	private $element_arr;
 	public function add_element($element) {
-		if(is_null($element_arr)) {
-			$element_arr = array();
+		if(is_null($this->element_arr)) {
+			$this->element_arr = array();
 		}
-		array_push($element_arr, $element);
+		array_push($this->element_arr, $element);
 
-		$caller_name .= "<br/>tcpdf.element.set.inc->add_element";
+		$caller_name .= __FUNCTION__;
 		if(method_exists($element,'get_cell_height')) {
+			$element->updateTextProps();
 			$this->add_element_set_height($element->get_cell_height());	
 		} else {
 			echo "$caller_name\t\$element->get_cell_height is not exists!";
@@ -150,6 +151,24 @@ class TCPDFElementSet{
 
 		} else {
 			echo "$caller_name\t\$element->set_prev or \$element->set_next is not exists!";
+			return;
+		}
+
+	}
+	// @ Desc : child element set을 추가합니다. add on table을 가지는 경우를 나타냅니다.
+	private $child_add_on_element_set_arr;
+	public function push_child_add_on_element_set($child_add_on_element_set) {
+		
+		if(is_null($this->child_add_on_element_set_arr)) {
+			$this->child_add_on_element_set_arr = array();
+		}
+		array_push($this->child_add_on_element_set_arr, $child_add_on_element_set);
+
+		$caller_name .= __FUNCTION__;
+		if(method_exists($child_add_on_element_set,'get_element_set_height')) {
+			$this->add_element_set_height($child_add_on_element_set->get_element_set_height());	
+		} else {
+			echo "$caller_name\t\$element->get_element_set_height is not exists!";
 			return;
 		}
 

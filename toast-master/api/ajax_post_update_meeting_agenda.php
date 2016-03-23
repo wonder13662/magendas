@@ -149,14 +149,14 @@
 
 
 
-
+	// REMOVE - 아래 로직을 더 이상 사용하지 않습니다. action을 관리하는 API는 다른 로직으로 관리합니다.
 
 	//     .aMMMb  .aMMMb dMMMMMMP dMP .aMMMb  dMMMMb 
 	//    dMP"dMP dMP"VMP   dMP   amr dMP"dMP dMP dMP 
 	//   dMMMMMP dMP       dMP   dMP dMP dMP dMP dMP  
 	//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP   
 	// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP    
-
+/*
 	$IS_INSERT_ACTION_TIMELINE = $params->isYes($params->IS_INSERT_ACTION_TIMELINE);
 	$IS_UPDATE_ACTION_TIMELINE = $params->isYes($params->IS_UPDATE_ACTION_TIMELINE);
 	$IS_DELETE_ACTION_TIMELINE = $params->isYes($params->IS_DELETE_ACTION_TIMELINE);
@@ -233,7 +233,7 @@
 		} // end outer if
 		
 	} // end final if
-
+*/
 
 
 

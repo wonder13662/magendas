@@ -213,46 +213,7 @@ class JSONManager{
 			echo "\$cur_char :: $cur_char<br/>";
 		}
 
-		/*
-		// 2-2. figure out how many "[ (Left Square Bracket)" repeated.
-		$left_square_bracket_repeated_cnt = substr_count($unsafe_json_str, self::$LEFT_SQUARE_BRACKET);
-		echo "json_array \$left_square_bracket_repeated_cnt :: $left_square_bracket_repeated_cnt<br/>";
-		// 2-3. figure out how many "] (Right Square Bracket)" repeated. which means end of object.
-		$right_square_bracket_repeated_cnt = substr_count($unsafe_json_str, self::$RIGHT_SQUARE_BRACKET);
-		echo "json_array \$right_square_bracket_repeated_cnt :: $right_square_bracket_repeated_cnt<br/>";
-
-		// 2-4. get json str elements
-		$json_str_elements = "";
-		$left_square_bracket_first_pos = strpos($unsafe_json_str, $left_square_bracket, 0);
-		$right_square_bracket_last_pos = -1;
-		if($right_square_bracket_repeated_cnt > 0) {
-			$right_square_bracket_last_pos = strpos($unsafe_json_str, $right_square_bracket, ($json_str_length - 1));
-		}
-
-		echo "json_array \$left_square_bracket_first_pos :: $left_square_bracket_first_pos<br/>";
-		echo "json_array \$right_square_bracket_last_pos :: $right_square_bracket_last_pos<br/>";
-
-		echo "json_array \$unsafe_json_str :: $unsafe_json_str<br/>";
-
-		$json_str_working_on = 
-		substr(
-			// string
-			$unsafe_json_str
-			// start
-			, $left_square_bracket_first_pos + 1
-			// length
-			, $right_square_bracket_last_pos - 1
-		);
-
-		echo "json_array \$json_str_working_on :: $json_str_working_on<br/>";
-		*/
-
-
-
 	}
-	// REMOVE ME
-	//public static $PATTERN_ARR_NEXT_ELEMENT_OBJ=",\\{";
-	//public static $PATTERN_ARR_NEXT_ELEMENT_ARR="\\],\\[";
 
 	private static $PATTERN_ARR_BEGINS="\\[";
 	private static $PATTERN_ARR_ELEMENT_NUM="-?\d+,?"; // 
@@ -823,10 +784,6 @@ class JSONManager{
 	}
 	private static function get_json_obj_attr_key_n_value($pattern_key_ends_value_begins, $pattern_value_ends=null, $target_str, $parser_depth){
 
-		// echo "<br/>";
-		// echo "get_json_obj_attr_key_n_value / 1 / <br/> \$target_str ::<br/> $target_str<br/>";
-
-
 		$outcome = self::get_first_str_before_pattern($pattern_key_ends_value_begins, $target_str);
 		$attr_key = $outcome->first_str;
 		$target_str = $outcome->remaining_str;
@@ -836,16 +793,6 @@ class JSONManager{
 		self::print_me("$cur_step :: $target_str",$parser_depth);
 		self::print_me("$cur_step :: \$attr_key :: ",$parser_depth);
 		self::print_me("$cur_step :: $attr_key",$parser_depth);
-
-		// REMOVE ME
-		// echo "<br/>";
-		// echo "get_json_obj_attr_key_n_value / 2 / <br/> \$target_str ::<br/> $target_str<br/>";
-		// echo "get_json_obj_attr_key_n_value / 2 / <br/> \$attr_key ::<br/> $attr_key<br/>";
-
-		// echo "<br/>";
-		// print_r($outcome);
-		// echo "<br/>get_json_obj_attr_key_n_value / 000<br/>";
-
 
 		if(is_null($pattern_value_ends)) {
 			$pattern_value_ends = self::$PATTERN_OBJ_ENDS;
@@ -860,15 +807,6 @@ class JSONManager{
 		self::print_me("$cur_step / DONE / :: $attr_key",$parser_depth);
 		self::print_me("$cur_step / DONE / \$attr_value :: ",$parser_depth);
 		self::print_me("$cur_step / DONE / :: $attr_value",$parser_depth);
-
-		// REMOVE ME
-		// echo "<br/>";
-		// echo "get_json_obj_attr_key_n_value / 3 / <br/> \$target_str ::<br/> $target_str<br/>";
-		// echo "get_json_obj_attr_key_n_value / 3 / <br/> \$attr_value ::<br/> $attr_value<br/>";
-
-		// echo "<br/>";
-		// print_r($outcome);
-		// echo "<br/>get_json_obj_attr_key_n_value / 001<br/>";
 
 		$result = new stdClass();
 
@@ -1043,20 +981,6 @@ class JSONManager{
 		}
 		return false;
 	}
-	// REMOVE ME
-	/*
-		@ Desc : 배열 내에 요소들을 문자열에서 추출해서 배열에 넣고 반환합니다.
-		@ Example : "[1,2,3,4]" --> [1,2,3,4]
-		@ Return : 1. 1 depth 배열 객체
-	*/
-	private static function get_flat_array_from_str($target_str, $parser_depth=0){
-
-		$target_str = str_replace("[", "", $target_str);
-		$target_str = str_replace("]", "", $target_str);
-
-
-	}
-	// HERE
 	// 1. 가장 먼저 해야 할 일은 [,{,},]의 인덱스를 파악해서 뎁스를 가지고 있는 구조체를 만들어야 한다.
 	// 오로지 위의 조건만을 활용할 것.
 	// 배열과 객체의 구분이 모두 확인된 이후에 문자열을 변환해야 함.

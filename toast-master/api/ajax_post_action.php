@@ -43,12 +43,13 @@
 
 	$result->MEETING_ID = $MEETING_ID;
 
-	// $ACTION_ID = $params->getParamNumber($params->ACTION_ID);
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
 	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
 	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
+	$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $params->getParamString($params->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR);
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
+	$PARENT_ACTION_HASH_KEY_DELETE = $params->getParamString($params->PARENT_ACTION_HASH_KEY_DELETE);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_ITEM_TYPE = $params->getParamNumber($params->ACTION_ITEM_TYPE);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
@@ -56,12 +57,13 @@
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 
 	// DEBUG
-	// $result->ACTION_ID = $ACTION_ID;
 	$result->ACTION_NAME = $ACTION_NAME;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
+	$result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR;
 	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
 	$result->ACTION_HASH_KEY_AFTER = $ACTION_HASH_KEY_AFTER;
 	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
+	$result->PARENT_ACTION_HASH_KEY_DELETE = $PARENT_ACTION_HASH_KEY_DELETE;
 	$result->ROOT_ACTION_HASH_KEY = $ROOT_ACTION_HASH_KEY;
 	$result->ACTION_ITEM_TYPE = $ACTION_ITEM_TYPE;
 	$result->ACTION_CONTEXT = $ACTION_CONTEXT;
@@ -98,58 +100,46 @@
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
-		// 새로운 아이템 추가
-		$new_action_item_id = $wdj_mysql_interface->insert_action_item($ACTION_ITEM_TYPE, $ACTION_NAME, $ACTION_CONTEXT);
+		// LIST일 경우에는 action item이 1개만 추가. TABLE일 경우에는 이전 열의 모든 action item이 복사되어 열이 추가되어야 함.
+		$action_item_obj_before = 
+		$wdj_mysql_interface->get_action_item_obj_with_relation(
+			// $root_action_hash_key=""
+			$ROOT_ACTION_HASH_KEY
+			// $action_item_hash_key=""
+			, $ACTION_HASH_KEY_BEFORE
+		);
+		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
 
-		// DEBUG
-		$action_item_id_before = -1;
-		if(!empty($ACTION_HASH_KEY_BEFORE)) {
-			$action_item_id_before = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_BEFORE);	
+		if($action_item_obj_before->is_table_field_item()) {
+			// 새로운 아이템 추가 - TABLE
+			$cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
+
+			$cur_table_row_field_action_item_list_after_std = array();
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
+				$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
+				$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
+				array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
+			}
+
+			$result->cur_table_row_field_action_item_list_after_std = $cur_table_row_field_action_item_list_after_std;
+
+		} else {
+			// 새로운 아이템 추가 - LIST	
+			$action_item_copy = $wdj_mysql_interface->add_row_into_list($action_item_obj_before, $ACTION_NAME, $ACTION_CONTEXT);
+			$result->action_item_copy = $action_item_copy->get_std_obj();
 		}
-		$result->action_item_id_before = $action_item_id_before;
 
-		$action_item_id_after = -1;
-		if(!empty($ACTION_HASH_KEY_BEFORE)) {
-			$action_item_id_after = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY_AFTER);	
+		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
+		$root_action_collection_updated = $wdj_mysql_interface->get_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY);
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_collection_updated, "root_action_collection_updated")) {
+			return;
 		}
-		$result->action_item_id_after = $action_item_id_after;
-
-		$parent_action_list_id = -1;
-		if(!empty($PARENT_ACTION_HASH_KEY)) {
-			$parent_action_list_id = $wdj_mysql_interface->get_action_collection_id($PARENT_ACTION_HASH_KEY);	
-		}
-		// DEBUG
-		$result->parent_action_list_id = $parent_action_list_id;
-		if(0 < $parent_action_list_id) {
-			$wdj_mysql_interface->insert_parent_list_n_child_item($parent_action_list_id, $new_action_item_id);
-		}
-		// 자식 객체 복제 작업도 필요!
-
-		// wonder.jung11
-		// 특정 객체를 복사, 자식 객체들은 모두 shy 처리되는 플래그값을 넘겨준다면?
-
-		// 부모가 가진 자식 객체들의 순서 정렬 이슈.
-		// 넣으려는 객체 사이에 추가 뒤에 재정렬.
-
-		// $this->reorder_child_item_in_parent_list($parent_action_list_id);
-
-
-
-		
-
-		//public function insert_parent_list_n_child_item($parent_action_list_id=-1, $child_action_item_id=-1, $order=-1, $is_shy_child=-1) {
-		// $this->insert_parent_list_n_child_item();
-
-		
-
-		// DEBUG
-		$result->new_action_item_id = $new_action_item_id;
-
-		// 완성된 객체 가져오기.
-		// public function get_action_item_object($item_id, $order=0, $is_shy=0) {
+		$result->root_action_collection_updated = $root_action_collection_updated->get_std_obj();
 
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
+
+		// TODO shy --> not shy mode 변경에 대해서는 어떻게 처리?
 
 		$is_valid_action_obj = (!empty($ACTION_HASH_KEY));
 		// 아이템의 내용을 변경합니다.
@@ -160,9 +150,44 @@
 			$result->cur_action_item_id = $cur_action_item_id;
 
 			// 선택된 액션의 내용만 업데이트합니다.
-			// update_action_item($action_item_id=-1, $action_name="", $action_item_context="")
 			$wdj_mysql_interface->update_action_item($cur_action_item_id, $ACTION_NAME, $ACTION_CONTEXT);
+			$wdj_mysql_interface->update_child_item_shy_mode_by_hash_key($PARENT_ACTION_HASH_KEY, $ACTION_HASH_KEY);
 
+			// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
+			if(!empty($ACTION_HASH_KEY_BEFORE) || !empty($ACTION_HASH_KEY_AFTER)) {
+
+				$wdj_mysql_interface->arrange_action_item_order(
+					// $root_action_obj_hash_key=null
+					$ROOT_ACTION_HASH_KEY
+					// $parent_action_hash_key=null
+					, $PARENT_ACTION_HASH_KEY
+					// $action_item_hash_key_before=null
+					, $ACTION_HASH_KEY_BEFORE
+					// $action_item_hash_key=null
+					, $ACTION_HASH_KEY
+					// $action_item_hash_key_after=null
+					, $ACTION_HASH_KEY_AFTER
+				);
+
+			}
+
+			$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = null;
+			if(!empty($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR)) {
+				$CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = json_decode($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR);
+				$result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY;
+			}
+			if(is_array($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY)) {
+				for($idx=0;$idx < count($CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY); $idx++) {
+					$CHILD_ADD_ON_ACTION_HASH_KEY = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY[$idx];
+
+					// 이전에 등록된 내역을 먼저 연결 삭제
+					$wdj_mysql_interface->delete_parent_action_item_n_add_on_collection_by_hash_key($CHILD_ADD_ON_ACTION_HASH_KEY);
+
+					// 액션 아이템과 add on 자식 액션 아이템을 연결
+					$wdj_mysql_interface->insert_parent_action_item_n_add_on_collection_by_hash_key($ACTION_HASH_KEY, $CHILD_ADD_ON_ACTION_HASH_KEY);
+
+				}
+			}
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
@@ -176,6 +201,7 @@
 				$result->ROLE_ID = $ROLE_ID;
 				$result->SELECTED_VALUE = $SELECTED_VALUE;
 
+				// wonder.jung11
 				// 롤을 업데이트합니다.
 
 				//
@@ -184,9 +210,130 @@
 
 		}
 
-	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) {
+	} else if((strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) && !empty($ACTION_HASH_KEY)) {
 
-		// 아이템을 삭제합니다. 실제로 데이터를 지우지는 않습니다. 아이템이 없는 구조를 새롭게 만듭니다.
+		// 아이템을 삭제합니다. 실제로 데이터를 지웁니다.
+
+		$action_item_obj_delete = 
+		$wdj_mysql_interface->get_action_item_obj_with_relation(
+			// $root_action_hash_key=""
+			$ROOT_ACTION_HASH_KEY
+			// $action_item_hash_key=""
+			, $ACTION_HASH_KEY
+		);
+		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $action_item_obj_delete, "action_item_obj_delete")) {
+			return;
+		}
+
+
+		if($action_item_obj_delete->is_table_field_item()) {
+			// 실제 DB의 데이터도 제거 - TABLE
+			$cur_table_row_field_action_item_list_delete = $action_item_obj_delete->get_table_row_field_action_item_list();
+
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_delete); $idx++) {
+				$cur_action_item_delete = $cur_table_row_field_action_item_list_delete[$idx];
+				$wdj_mysql_interface->delete_action_item_relation($cur_action_item_delete);
+			}
+
+			$result->cur_table_row_field_action_item_list_after_std = $cur_table_row_field_action_item_list_after_std;
+
+		} else {
+			// 실제 DB의 데이터도 제거 - LIST	
+			$wdj_mysql_interface->delete_action_item_relation($action_item_obj_delete);
+
+		}
+
+		
+		// 업데이트된 root_action_list를 가져옵니다.
+		$root_action_list = $wdj_mysql_interface->get_root_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY, $MEETING_ID);
+		if($wdj_mysql_interface->is_not_action_collection(__FUNCTION__, $root_action_list, "root_action_list")) {
+			return;
+		}
+		$result->root_action_list_deleted = $root_action_list->get_std_obj();
+
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_TABLE_ROW_ORDER) == 0) {
+
+		// 테이블의 열 순서를 바꿉니다.
+		$table_field_action_item_obj_update = 
+		$wdj_mysql_interface->get_action_item_obj_with_relation(
+			// $root_action_hash_key=""
+			$ROOT_ACTION_HASH_KEY
+			// $action_item_hash_key=""
+			, $ACTION_HASH_KEY
+		);
+		if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $table_field_action_item_obj_update, "table_field_action_item_obj_update")) {
+			return;
+		}
+		$action_item_order = -1;
+
+		$table_field_action_item_obj_update_before = null;
+		if(!empty($ACTION_HASH_KEY_BEFORE)) {
+			$table_field_action_item_obj_update_before = 
+			$wdj_mysql_interface->get_action_item_obj_with_relation(
+				// $root_action_hash_key=""
+				$ROOT_ACTION_HASH_KEY
+				// $action_item_hash_key=""
+				, $ACTION_HASH_KEY_BEFORE
+			);
+		}
+		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_before)) {
+			$action_item_order = $table_field_action_item_obj_update_before->get_order() + 50;
+		}
+
+		$table_field_action_item_obj_update_after = null;
+		if(!empty($ACTION_HASH_KEY_AFTER)) {
+			$table_field_action_item_obj_update_after = 
+			$wdj_mysql_interface->get_action_item_obj_with_relation(
+				// $root_action_hash_key=""
+				$ROOT_ACTION_HASH_KEY
+				// $action_item_hash_key=""
+				, $ACTION_HASH_KEY_AFTER
+			);
+		}
+		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_after)){
+			$action_item_order = $table_field_action_item_obj_update_after->get_order() - 50;
+		}
+		$result->table_row_action_item_order = $action_item_order;
+
+		if($table_field_action_item_obj_update->is_table_field_item()) {
+			// 실제 DB의 데이터도 제거 - TABLE
+			$cur_table_row_field_action_item_list_update = $table_field_action_item_obj_update->get_table_row_field_action_item_list();
+			$cur_table_row_field_action_hash_key_list_update = array();
+			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_update); $idx++) {
+				$cur_action_item_update = $cur_table_row_field_action_item_list_update[$idx];
+				if($wdj_mysql_interface->is_not_action_item(__FUNCTION__, $cur_action_item_update, "cur_action_item_update")) {
+					return;
+				}
+				$action_hash_key = $cur_action_item_update->get_hash_key();
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $action_hash_key, "action_hash_key")) {
+					return;
+				}
+
+				$parent_action_hash_key = "";
+				if($cur_action_item_update->has_parent()) {
+					$cur_parent_action_obj = $cur_action_item_update->get_parent();
+					$parent_action_hash_key = $cur_parent_action_obj->get_hash_key();
+				}
+
+				// 선택된 액션의 순서가 변경되었다면 업데이트합니다.
+				$wdj_mysql_interface->arrange_action_item_order_by_new_order(
+					// $root_action_obj_hash_key=null
+					$ROOT_ACTION_HASH_KEY
+					// $parent_action_hash_key=null
+					, $parent_action_hash_key
+					// $action_item_hash_key=null
+					, $action_hash_key
+					// $action_item_order=-1
+					, $action_item_order
+				);
+
+				array_push($cur_table_row_field_action_hash_key_list_update, $cur_action_item_update->get_hash_key());
+			}
+
+			$result->cur_table_row_field_action_hash_key_list_update = $cur_table_row_field_action_hash_key_list_update;
+
+		}		
+
 
 	}
 

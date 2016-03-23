@@ -10,11 +10,18 @@ airborne.bootstrap.view.print = {
 	/*
 		@ Desc : 인쇄를 위한 그리드 뷰를 그립니다. 인쇄할 용지를 선택할 수 있습니다.
 	*/
-	, draw_grid_view:function(target_jq, target_paper_format){ // change empty space to underbar
+	, draw_grid_view:function(target_jq, target_paper_format, pdf_url){ // change empty space to underbar
 
 		if(target_jq == undefined) {
 			console.log("!Error! / airborne.bootstrap.view.print / draw_grid_view / target_jq == undefined");
+			return;
 		}
+
+		if(_v.is_not_valid_str(pdf_url)) {
+			console.log("!Error! / airborne.bootstrap.view.print / draw_grid_view / _v.is_not_valid_str(pdf_url)");
+			return;
+		}
+
 
 		if(target_paper_format == undefined){
 			target_paper_format = this.PRINT_FORMAT_A4_PORTRAIT;
@@ -61,6 +68,8 @@ airborne.bootstrap.view.print = {
 		console.log(">>> working_paper_width :: ",working_paper_width);
 		console.log(">>> working_paper_height :: ",working_paper_height);
 
+		// echo "<div id=\"club_title\" class=\"jumbotron\" style=\"background-color:#8e323f;background-image:url($service_root_path/images/MaroonandYellowBannerShort.jpg);background-repeat:no-repeat;height:195px;display:none;\">";	
+
 		var tag_working_paper = 
 		"<ul class=\"list-group\" style=\"display:block;\">"
 
@@ -69,7 +78,21 @@ airborne.bootstrap.view.print = {
 			.replace(/\<PADDING_TOP\>/gi, padding_left)
 			.replace(/\<WORKING_PAPER_CONTAINER_HEIGHT\>/gi, working_paper_container_height)
 
-				+ "<div id=\"grid_view_container\" style=\"width:<WORKING_PAPER_WIDTH>px;height:<WORKING_PAPER_HEIGHT>px;background-color:#CCC;margin:0px;\">"
+			// sandbox="allow-same-origin allow-scripts"
+
+				// IFRAME으로 PDF 영역을 그려준다. 
+				// + "<div id=\"pdf_view_container\" style=\"width:100%;height:100%;position: absolute;z-index: 1000;\">"
+				// + "<div id=\"pdf_view_container\" style=\"width:<WORKING_PAPER_WIDTH>px;height:<WORKING_PAPER_HEIGHT>px;\">"
+				+ "<div id=\"pdf_view_container\" style=\"width:800px;height:1000px;\">"
+				.replace(/\<WORKING_PAPER_WIDTH\>/gi, working_paper_width + 1)
+				.replace(/\<WORKING_PAPER_HEIGHT\>/gi, working_paper_height + 1)
+					+ "<iframe src=\"<PDF_URL>\" scrolling=\"no\" style=\"width:100%;height:100%;display:block;\">"
+						.replace(/\<PDF_URL\>/gi, pdf_url)
+						+ "<p>Your browser does not support iframes.</p>"
+					+ "</iframe>"
+				+ "</div>"
+
+				+ "<div id=\"grid_view_container\" style=\"width:<WORKING_PAPER_WIDTH>px;height:<WORKING_PAPER_HEIGHT>px;background-color:#CCC;margin:0px;position:absolute;z-index: 1000;\">"
 				.replace(/\<WORKING_PAPER_WIDTH\>/gi, working_paper_width + 1)
 				.replace(/\<WORKING_PAPER_HEIGHT\>/gi, working_paper_height + 1)
 
@@ -188,6 +211,13 @@ airborne.bootstrap.view.print = {
 				cursor_jq.remove();
 			}
 		});
+
+		// IFRAME으로 PDF 영역을 그려준다. 
+		// SAMPLE : http://localhost/service/toast-master/view/meeting_agenda_pdf.php?MEETING_ID=151&MEETING_MEMBERSHIP_ID=1
+
+// <iframe src="http://www.w3schools.com">
+//   <p>Your browser does not support iframes.</p>
+// </iframe>		
 
 
 

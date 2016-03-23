@@ -28,7 +28,7 @@ class ActionObject implements Action{
 	private $coordinate;
 	private $search_map;
 	private $has_changed;
-	private $context;	
+	private $context;
 
 	public function test() { return 'ActionObject'; }
 	/*
@@ -55,18 +55,62 @@ class ActionObject implements Action{
 	public function has_parent() {
 		return (!is_null($this->parent_action_obj))?true:false;
 	}
-	public function set_parent($parent_action_obj) {
-
-		if(is_null($parent_action_obj)) return;
-		if(ActionObject::is_not_action_obj($parent_action_obj)) return;
-
+	public function set_parent($parent_action_obj=null) {
 		$this->parent_action_obj = $parent_action_obj;
 	}
 	public function get_parent() {
 		return $this->parent_action_obj;
 	}
+	public function get_idx() {
+		if($this->has_no_parent()) {
+			return -1;
+		}
 
-	public function add_child($child_action_obj) {
+		$parent_action_obj = $this->get_parent();
+		if(ActionObject::is_not_action_obj($parent_action_obj)) {
+			return -1;
+		}
+		$child_action_obj_list = $parent_action_obj->get_children();
+
+		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
+			$child_action_obj = $child_action_obj_list[$idx];
+
+			if($child_action_obj->get_id() == $this->get_id()) {
+				return $idx;
+			}
+		}
+	}
+	public function remove_child($child_action_obj_remove) {
+
+		// DEBUG
+		$cur_name = $this->get_name();
+		$cur_child_name = $child_action_obj_remove->get_name();
+
+		if(ActionObject::is_not_action_obj($child_action_obj_remove)) {
+			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
+			return;
+		}
+
+		if($this->has_no_child()) {
+			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->has_no_child()<br/>";
+			return;
+		}
+
+		// wonder.jung11
+		$child_action_obj_list = $this->get_children();
+		$child_action_obj_list_next = array();
+		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
+			$child_action_obj = $child_action_obj_list[$idx];
+
+			if($child_action_obj->get_id() != $child_action_obj_remove->get_id()) {
+				array_push($child_action_obj_list_next, $child_action_obj);	
+			}
+		}
+
+		$this->set_children($child_action_obj_list_next);
+
+	}
+	public function add_child($child_action_obj, $idx_insert=-1) {
 
 		// DEBUG
 		$cur_name = $this->get_name();
@@ -84,8 +128,14 @@ class ActionObject implements Action{
 		if(!is_null($child_action_obj)) {
 
 			$child_action_name = $child_action_obj->get_name();
-			
-			array_push($this->children_action_object_list, $child_action_obj);
+
+			if(-1 < $idx_insert) {
+				$array_replacement = array($child_action_obj);
+				array_splice( $this->children_action_object_list, $idx_insert, 0, $array_replacement );	
+			} else {
+				array_push($this->children_action_object_list, $child_action_obj);	
+			}
+
 			$child_action_obj->set_parent($this);
 		}
 
@@ -99,6 +149,9 @@ class ActionObject implements Action{
 		}
 
 		return $this->children_action_object_list;
+	}
+	public function has_no_child() {
+		return !$this->has_children();
 	}
 	public function has_children() {
 		if(0 < $this->get_children_cnt()) {
@@ -136,6 +189,16 @@ class ActionObject implements Action{
 
 		return $this->get_child($length - 1);
 	}
+	public function is_first() {
+		return (!$this->has_sibling_before())?true:false;
+	}
+	public function has_sibling_before() {
+		$cur_sibling_before = $this->get_sibling_before();
+		if(ActionObject::is_not_action_obj($cur_sibling_before)) {
+			return false;
+		}
+		return true;
+	}
 	public function get_sibling_before() {
 
 		if($this->has_no_parent()) {
@@ -159,6 +222,16 @@ class ActionObject implements Action{
 
 		return null;
 
+	}
+	public function is_last() {
+		return (!$this->has_sibling_after())?true:false;
+	}
+	public function has_sibling_after() {
+		$cur_sibling_after = $this->get_sibling_after();
+		if(ActionObject::is_not_action_obj($cur_sibling_after)) {
+			return false;
+		}
+		return true;
 	}
 	public function get_sibling_after() {
 		
@@ -546,6 +619,102 @@ class ActionObject implements Action{
 
 	}
 
+	// VIEW PROPS
+	private $text_color_arr;	// TCPDFElement::$COLOR_DARK_GRAY_ARR
+	private $text_size;			// $CARD_BOARD_TITLE_FONT_SIZE
+	private $cell_x_pos;		// $element_set_x_pos
+	private $cell_y_pos;
+	private $cell_width;
+	private $cell_height;
+	private $cell_color_arr;	// TCPDFElement::$COLOR_MILK_GRAY_ARR
+	private $is_bold;			// true or false
+	private $text_align;		// TCPDFElement::$TEXT_ALIGN_LEFT
+	private $font_type;
+
+	public function set_text_color_arr($text_color_arr) {
+		$this->text_color_arr = $text_color_arr;
+	}
+	public function get_text_color_arr() {
+		return $this->text_color_arr;	
+	}
+
+	public function set_text_size($text_size) {
+		$this->text_size = $text_size;
+	}
+	public function get_text_size() {
+		return $this->text_size;	
+	}
+
+	public function set_cell_x_pos($cell_x_pos) {
+		$this->cell_x_pos = $cell_x_pos;
+	}
+	public function get_cell_x_pos() {
+		return $this->cell_x_pos;	
+	}
+
+	public function set_cell_y_pos($cell_y_pos) {
+		$this->cell_y_pos = $cell_y_pos;
+	}
+	public function get_cell_y_pos() {
+		return $this->cell_y_pos;	
+	}
+
+	public function set_cell_width($cell_width) {
+		$this->cell_width = $cell_width;
+	}
+	public function get_cell_width() {
+		return $this->cell_width;	
+	}
+
+	public function set_cell_height($cell_height) {
+		$this->cell_height = $cell_height;
+	}
+	public function get_cell_height() {
+		return $this->cell_height;
+	}
+
+	public function set_cell_color_arr($cell_color_arr) {
+		$this->cell_color_arr = $cell_color_arr;
+	}
+	public function get_cell_color_arr() {
+		return $this->cell_color_arr;	
+	}
+
+	public function set_is_bold($is_bold) {
+		$this->is_bold = $is_bold;
+	}
+	public function get_is_bold() {
+		return $this->is_bold;	
+	}
+
+	public function set_text_align($text_align) {
+		$this->text_align = $text_align;
+	}
+	public function get_text_align() {
+		return $this->text_align;	
+	}
+
+	public function set_font_type($font_type) {
+		$this->font_type = $font_type;
+	}
+	public function get_font_type() {
+		return $this->font_type;	
+	}
+
+	// @ desc : 들여쓰기에 필요한 depth 정보를 가져옵니다.
+	public function get_depth($depth=0) {
+		if(ActionCollection::is_instance($this) && $this->is_root_collection()) {
+			return $depth;
+		}
+
+		if($this->has_parent()) {
+			$cur_parent = $this->get_parent();	
+			return $cur_parent->get_depth($depth + 1);
+		}
+
+		return $depth;
+	}
+
 }
 
 class ActionCollection extends ActionObject{
@@ -630,6 +799,20 @@ class ActionCollection extends ActionObject{
 		return false;
 	}
 
+	public function is_table_column_list() {
+
+		$cur_parent = $this->get_parent();
+		if(ActionCollection::is_not_instance($cur_parent)) {
+			return false;
+		}
+
+		if($cur_parent->is_table()) {
+			return true;
+		}
+		return false;
+
+	}
+
 	public function is_table() {
 
 		$action_collection_type = parent::get_collection_type();
@@ -640,6 +823,10 @@ class ActionCollection extends ActionObject{
 			return true;
 		}
 		return false;
+	}
+
+	public function is_not_table() {
+		return !$this->is_table();
 	}
 	/*	
 		@ Public
@@ -668,18 +855,7 @@ class ActionCollection extends ActionObject{
 	}
 
 	public function is_root_collection() {
-
-		// wonder.jung11
 		return ($this->has_no_parent() && $this->has_no_add_on_parent());
-
-		// REMOVE ME
-
-		// $has_no_parent = false;
-		// if(is_null($this->parent_action_obj)) {
-		// 	$has_no_parent = true;
-		// }
-
-		// return $has_no_parent;
 	}
 
 	private $add_on_action_parent_obj;
@@ -811,6 +987,23 @@ class ActionItem extends ActionObject{
 		return false;
 	}
 
+	public function is_not_table_field_item() {
+		return !$this->is_table_field_item();
+	}
+	public function is_table_field_item() {
+
+		$cur_parent = $this->get_parent();
+		if(ActionCollection::is_not_instance($cur_parent)) {
+			return false;
+		}
+
+		if($cur_parent->is_table_column_list()) {
+			return true;
+		}
+		return false;
+
+	}
+
 	/*
 		@ Public
 		@ Desc : 파라미터로 받은 action obj의 내용을 해당 객체로 주입합니다.
@@ -880,6 +1073,10 @@ class ActionItem extends ActionObject{
 		// 가지고 있다면 parent <--> child와는 다르게 add on parent <--> add on child로 관계가 만들어 져야 하지 않을까?
 
 
+	}
+	public function has_add_on_list() {
+		$cur_add_on_list = $this->get_add_on_list();
+		return !empty($cur_add_on_list)?true:false;
 	}
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
@@ -972,12 +1169,6 @@ class ActionItem extends ActionObject{
 	}
 
 	// @ Override
-	/*
-	public function get_name() {
-		return parent::get_name();
-	}
-	*/
-	// @ Override
 	public function set_context($new_context=null) {
 		parent::set_context($new_context);
 	}
@@ -985,6 +1176,73 @@ class ActionItem extends ActionObject{
 	public function get_context() {
 		return parent::get_context();
 	}
+
+	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다.
+	public function get_table_row_field_action_item_list() {
+
+		if($this->is_not_table_field_item()) {
+			echo "!Error! / get_table_row_field_action_item_list / \$this->is_not_table_field_item()";
+			return;
+		}
+
+		$cur_idx = $this->get_idx();
+		if(is_null($cur_idx) || !(0 <= $cur_idx)) {
+			echo "!Error! / get_table_row_field_action_item_list / \$cur_idx is not valid! / \$cur_idx :: $cur_idx";
+			return;
+		}
+
+		// wonder.jung11
+		$table_column_action_list = $this->get_parent();
+		if(ActionCollection::is_not_instance($table_column_action_list)) {
+			echo "!Error! / get_table_row_field_action_item_list / ActionCollection::is_not_instance(\$table_column_action_list)";
+			return;
+		}
+
+		$table_action_obj = $table_column_action_list->get_parent();
+		if(ActionCollection::is_not_instance($table_action_obj)) {
+			echo "!Error! / get_table_row_field_action_item_list / ActionCollection::is_not_instance(\$table_action_obj)";
+			return;
+		}
+
+		if($table_action_obj->is_not_table()) {
+			echo "!Error! / get_table_row_field_action_item_list / \$table_action_obj->is_not_table()";
+			return;
+		}
+
+		$cur_child_column_action_list_list = $table_action_obj->get_children();
+		$table_row_field_action_item_list = array();
+		for($idx = 0;$idx < count($cur_child_column_action_list_list);$idx++) {
+			$cur_child_column_action_list = $cur_child_column_action_list_list[$idx];
+
+			if(ActionCollection::is_not_instance($cur_child_column_action_list)) {
+				echo "!Error! / get_table_row_field_action_item_list / ActionCollection::is_not_instance(\$cur_child_column_action_list)";
+				return;
+			}
+
+			$table_field_action_item_list = $cur_child_column_action_list->get_children();
+			for($inner_idx = 0;$inner_idx < count($table_field_action_item_list);$inner_idx++) {
+				$table_field_action_item_obj = $table_field_action_item_list[$inner_idx];
+
+				if(ActionItem::is_not_instance($table_field_action_item_obj)) {
+					echo "!Error! / get_table_row_field_action_item_list / ActionItem::is_not_instance(\$table_field_action_item_obj)";
+					return;
+				}
+
+				if($table_field_action_item_obj->get_idx() == $cur_idx) {
+					array_push($table_row_field_action_item_list, $table_field_action_item_obj);
+					break;
+				}
+			} // end inner for
+		} // end outer for
+
+		if($table_action_obj->get_children_cnt() != count($table_row_field_action_item_list)) {
+			echo "!Error! / get_table_row_field_action_item_list / \$table_action_obj->get_children_cnt() != count(\$table_row_field_action_item_list)";
+			return;
+		}
+
+		return $table_row_field_action_item_list;
+		
+	}	
 }
 
 /*
@@ -992,9 +1250,11 @@ class ActionItem extends ActionObject{
 */
 class ActionItemTitleNTimeHHMM extends ActionItem{
 
+	// @ Usage : ActionItemTitleNTimeHHMM::is_not_instance($target)
 	public static function is_not_instance($target) {
 		return !ActionItemTitleNTimeHHMM::is_instance($target);
 	}
+	// @ Usage : ActionItemTitleNTimeHHMM::is_instance($target)
 	public static function is_instance($target) {
 		if(!is_null($target) && is_a($target,'ActionItemTitleNTimeHHMM')) {
 			return true;
@@ -1236,6 +1496,8 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 	public function get_context() {
 		return parent::get_context();
 	}
+
+
 
 }
 

@@ -148,40 +148,6 @@ class ToastMasterLogInManager{
 		}
 	}
 
-// REMOVE ME
-/*
-	public static function checkLogIn($mysql_interface, $redirect_url=null) {
-
-		$login_user_info = null;
-		if(!is_null($mysql_interface)) {
-			// @ required
-			$login_user_info = ToastMasterLogInManager::getLogInCookie($mysql_interface);
-		}
-
-		// 리다이렉트 주소가 없다면 PC TOP으로 이동.
-		if(is_null($redirect_url)) {
-			$redirect_url = ToastMasterLinkManager::get(ToastMasterLinkManager::$PC_MEETING_AGENDA);
-		}
-
-		// 로그인 되어 있지 않으면 LogIn 페이지로 리다이렉트
-		if(is_null($login_user_info) || $login_user_info->__is_login!="YES"){
-
-			// @ required
-			$mysql_interface->close();
-
-			ToastMasterLinkManager::go(
-				// link
-				ToastMasterLinkManager::$LOG_IN
-				// param_arr
-				,array("redirect_url"=>$redirect_url)
-			);
-		}
-
-		return $login_user_info;
-	}
-*/
-
-
 }
 
 ?>

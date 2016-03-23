@@ -203,9 +203,15 @@ airborne.bootstrap.view.obj.__action_list = {
 
 						var cur_element_jq = cur_action_item_obj.get_event_manager().get_element_jq();
 
+						var cur_add_on_element_container_jq = cur_action_item_obj.get_event_manager().get_add_on_element_container_jq();
+						if(cur_add_on_element_container_jq == undefined) {
+							console.log("!Error! / add_editable_action_list / cur_add_on_element_container_jq == undefined");
+							return;
+						}
+
 						_action_table.add_editable_table_from_action_table(
 							// parent_jq
-							cur_element_jq
+							cur_add_on_element_container_jq
 							// action_table_obj
 							, cur_action_add_on_obj
 							// delegate_on_event
@@ -868,6 +874,9 @@ airborne.bootstrap.view.obj.__action_list = {
 
 						// 자식 객체를 보여줘야 함. 
 						target_element_set.get_event_manager().show_child();
+
+						// add on 자식 객체를 보여줘야 함. 
+						target_element_set.get_event_manager().show_child_add_on();
 
 						// shy 자식 객체는 가림.
 						target_element_set.get_event_manager().hide_shy_child();

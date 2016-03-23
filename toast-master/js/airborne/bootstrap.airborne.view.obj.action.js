@@ -271,7 +271,7 @@ airborne.bootstrap.obj.__action = {
 			}
 			// @ Private
 			// @ Scope 	: action object
-			// @ Desc 	: root 객체부터 폭포수 방식으로 action_depth_arr를 업데이트 합니다.
+			// @ Desc 	: root 객체부터 폭포수 방식으로 action_depth_arr를 업데이트 합니다. n depth에 해당하는 action obj를 배열로 돌려받습니다.
 			,set_action_depth_arr:function(action_depth_arr) {
 				if(_v.is_not_valid_array(action_depth_arr)) {
 					console.log("!Error! / set_action_depth_arr / _v.is_not_valid_array(action_depth_arr)");
@@ -319,6 +319,7 @@ airborne.bootstrap.obj.__action = {
 					action_depth_arr_element_arr.push(this);
 					action_depth_arr[depth] = action_depth_arr_element_arr;
 				}
+
 				this.set_action_depth_arr_from_root(action_depth_arr);
 
 			}
@@ -625,7 +626,7 @@ airborne.bootstrap.obj.__action = {
 					parent_action_obj.set_first_child_action_obj(action_obj_copy);
 				}
 
-
+				this.reset_root_coordinate();
 				if(is_shy === true) {
 					// shy 모드일 경우는 복사하는 객체가 자식 객체를 가지고 있는 엘리먼트인 경우, 
 					// 초기값으로 1개의 자식 객체만 세팅해서 연결해줍니다.
@@ -638,6 +639,9 @@ airborne.bootstrap.obj.__action = {
 
 				consoler.say("copy / 001-0-0 / src_action_obj.has_after() : ",src_action_obj.has_after());
 				consoler.say("copy / 001-0-0 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
+
+				console.log("src_action_obj :: ",src_action_obj);
+				console.log("action_obj_copy :: ",action_obj_copy);
 				
 				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
 				// 다음 형제 객체는 없을 수도 있다. 있는 경우만 검사.
@@ -662,7 +666,6 @@ airborne.bootstrap.obj.__action = {
 
 				consoler.say("copy / 001-0-1 / src_action_obj.has_after() : ",src_action_obj.has_after());
 				consoler.say("copy / 001-0-1 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
-
 
 				consoler.say("copy / 001-1 / before action : ",src_action_obj);
 				consoler.say("copy / 001-1 / before action : ",src_action_obj.get_coordinate());
@@ -712,6 +715,11 @@ airborne.bootstrap.obj.__action = {
 
 				this.reset_root_coordinate();
 
+				consoler.say("copy / 004-1 / before src action : ",src_action_obj);
+				consoler.say("copy / 004-1 / before src action : ",src_action_obj.get_coordinate());
+				consoler.say("copy / 004-2 / after copy action : ",action_obj_copy);
+				consoler.say("copy / 004-2 / after copy action : ",action_obj_copy.get_coordinate());
+
 				// CHECK - 추가한 객체가 있는지 확인합니다.
 				var cur_coordinate_copy = action_obj_copy.get_coordinate();
 				if(_v.is_not_valid_str(cur_coordinate_copy)) {
@@ -732,9 +740,14 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				var src_action_depth_arr = src_action_obj.get_action_depth_arr();
+				if(_v.is_valid_array(src_action_depth_arr)) {
+					action_obj_copy.set_action_depth_arr_from_root(src_action_depth_arr);
+				}
 				var cur_depth = src_action_obj.get_depth();
-				action_obj_copy.set_action_depth_arr_from_root(src_action_obj.get_action_depth_arr());
-				action_obj_copy.push_action_obj_depth_arr(cur_depth);
+				if(_v.is_unsigned_number(cur_depth)) {
+					action_obj_copy.push_action_obj_depth_arr(cur_depth);	
+				}
 
 				return action_obj_copy;
 
@@ -1167,9 +1180,17 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				var cur_children_cnt = this.get_children_cnt();
-				if(cur_children_cnt <= selected_idx) {
-					console.log("!Error! / get_table_row_field_arr / cur_children_cnt <= selected_idx");
+				var first_table_column_list_obj = this.get_first_child();
+				if(_action.is_not_valid_action_obj(first_table_column_list_obj)) {
+					console.log("!Error! / get_table_row_field_arr / _action.is_not_valid_action_obj(first_table_column_list_obj)");
+					return;
+				}
+
+				var cur_table_column_field_children_cnt = first_table_column_list_obj.get_children_cnt();
+				if(cur_table_column_field_children_cnt <= selected_idx) {
+					console.log("this ::: ",this);
+					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / selected_idx :: ",selected_idx);
+					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
 					return;
 				}
 
@@ -1534,8 +1555,16 @@ airborne.bootstrap.obj.__action = {
 
 				return undefined;
 			}
-			,set_action_id:function(action_id) {
+			,set_action_id:function(action_id, is_update_coordinate_n_search_map) {
 				this.action_id = action_id;
+				if(is_update_coordinate_n_search_map == undefined) {
+					is_update_coordinate_n_search_map = false;
+				}
+
+				if(is_update_coordinate_n_search_map) {
+					this.reset_root_coordinate();
+					this.reset_search_map();
+				}
 			}
 			,get_action_id:function() {
 				return this.action_id;
@@ -1656,12 +1685,12 @@ airborne.bootstrap.obj.__action = {
 				consoler.off();
 
 				var action_name = this.get_action_name();
-				if(this.has_no_parent()) {
+				if(this.has_no_parent() && this.has_no_parent_add_on()) {
 					// 1-1. root action obj입니다.
 					this.set_coordinate("root");
 					this.set_action_order(0);
 
-				} else if(this.has_parent()) {
+				} else if(this.has_parent() || this.has_parent_add_on()) {
 					// 2-1. root action obj가 아닙니다.
 					if(_v.is_not_valid_str(coordinate)) {
 						console.log("!Error! / reset_coordinate / _v.is_not_valid_str(coordinate)");
@@ -1683,6 +1712,22 @@ airborne.bootstrap.obj.__action = {
 
 					// 2-1. 자식 객체가 있다면 reset 해줍니다.
 					var cur_chilren_action_obj_arr = this.get_children();
+					if(_v.is_not_valid_array(cur_chilren_action_obj_arr)) {
+						console.log("!Error! / reset_coordinate / _v.is_not_valid_arr(cur_chilren_action_obj_arr)");
+						return;
+					}
+
+					for(var idx=0;idx < cur_chilren_action_obj_arr.length;idx++) {
+						var cur_child_action_obj = cur_chilren_action_obj_arr[idx];
+						cur_child_action_obj.reset_coordinate(this.get_coordinate(), idx);
+					}
+
+				} // end if
+
+				if(this.has_add_on_list()) {
+
+					// 2-1. add on 자식 객체가 있다면 reset 해줍니다.
+					var cur_chilren_action_obj_arr = this.get_add_on_list();
 					if(_v.is_not_valid_array(cur_chilren_action_obj_arr)) {
 						console.log("!Error! / reset_coordinate / _v.is_not_valid_arr(cur_chilren_action_obj_arr)");
 						return;
@@ -1753,6 +1798,9 @@ airborne.bootstrap.obj.__action = {
 			,is_list:function() {
 				var action_collection_type = this.get_action_collection_type();
 				return (_action.ACTION_COLLECTION_TYPE_LIST === action_collection_type)?true:false;
+			}
+			,is_list_row_item:function() {
+				return this.is_not_table_child_column_list_field_item();
 			}
 			,is_not_table_child_column_list_field_item:function() {
 				return !this.is_table_child_column_list_field_item();
@@ -1976,33 +2024,44 @@ airborne.bootstrap.obj.__action = {
 					return [];
 				}
 
-				var colspan_cnt = this.get_children_cnt();
-				if(_v.is_not_unsigned_number(colspan_cnt)) {
-					console.log("!Error! / get_table_action_item_obj_list / _v.is_not_unsigned_number(colspan_cnt)");
+				var table_column_cnt = this.get_children_cnt();
+				if(_v.is_not_unsigned_number(table_column_cnt)) {
+					console.log("!Error! / get_table_action_item_obj_list / _v.is_not_unsigned_number(table_column_cnt)");
 					return;
 				}
 
-				var first_child_action_list_obj = this.get_child(0);
-				if(_action.is_not_valid_action_obj(first_child_action_list_obj)) {
-					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(first_child_action_list_obj)");
+				var table_action_id = this.get_action_id();
+				var first_table_column_action_list_obj = this.get_first_child();
+				if(_action.is_not_valid_action_obj(first_table_column_action_list_obj)) {
+					console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(first_table_column_action_list_obj)");
 					return;
 				}
-				var rowspan_cnt = first_child_action_list_obj.get_children_cnt();
+				var table_row_cnt = first_table_column_action_list_obj.get_children_cnt();
 
 				var table_action_item_obj_list = [];
-				for (var idx_row = 0; idx_row < rowspan_cnt; idx_row++) {
-					for (var idx_column = 0; idx_column < colspan_cnt; idx_column++) {
+				for (var idx_row = 0; idx_row < table_row_cnt; idx_row++) {
+					for (var idx_column = 0; idx_column < table_column_cnt; idx_column++) {
 
 						// field를 하나씩 검사하는 것으로 변경.
 						var cur_column_child_action_list_obj = this.get_child(idx_column);
 						if(_action.is_not_valid_action_obj(cur_column_child_action_list_obj)) {
-							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(cur_column_child_action_list_obj)");
+							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_obj(cur_column_child_action_list_obj) / idx_column ::: ",idx_column);
+							return;
+						}
+
+						var table_column_field_children_cnt = cur_column_child_action_list_obj.get_children_cnt();
+						var table_column_list_id = cur_column_child_action_list_obj.get_action_id();
+						if(table_column_field_children_cnt <= idx_row) {
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_action_id ::: ",table_action_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_column_list_id ::: ",table_column_list_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / table_column_field_children_cnt ::: ",table_column_field_children_cnt);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt <= idx_row / idx_row ::: ",idx_row);
 							return;
 						}
 
 						var cur_column_child_action_list_field_child_action_item_obj = cur_column_child_action_list_obj.get_child(idx_row);
 						if(_action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)) {
-							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)");
+							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj) / idx_row ::: ",idx_row);
 							return;
 						}
 
@@ -2240,8 +2299,31 @@ airborne.bootstrap.obj.__action = {
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
 				action_obj_for_db_update[_param.ACTION_COORDINATE] = this.get_coordinate();
 
+				// wonder.jung11
+				if(this.has_add_on_list()) {
+					var cur_add_on_list = this.get_add_on_list();
+
+					if(_v.is_not_valid_array(cur_add_on_list)) {
+						console.log("!Error! / get_action_obj_for_db_update / _v.is_not_valid_array(cur_add_on_list)");
+						return;
+					}
+
+					var child_add_on_action_hash_key_array = [];
+					for(var idx = 0; idx < cur_add_on_list.length; idx++) {
+						var cur_add_on_action_obj = cur_add_on_list[idx];
+						if(_action.is_not_valid_action_obj(cur_add_on_action_obj)) {
+							console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_add_on_action_obj)");
+							return;
+						}
+
+						child_add_on_action_hash_key_array.push(cur_add_on_action_obj.get_action_hash_key());
+					}
+
+					action_obj_for_db_update[_param.CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR] = JSON.stringify(child_add_on_action_hash_key_array);
+				}
+
 				if(this.has_parent()) {
-					action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = this.get_parent().get_action_hash_key();					
+					action_obj_for_db_update[_param.PARENT_ACTION_HASH_KEY] = this.get_parent().get_action_hash_key();
 				}
 				if(this.has_before()) {
 					action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = this.get_sibling_action_obj_before().get_action_hash_key();
@@ -2250,12 +2332,6 @@ airborne.bootstrap.obj.__action = {
 					action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = this.get_sibling_action_obj_after().get_action_hash_key();
 				}
 
-				// REMOVE ME
-				var cur_root_action_obj = this.get_root_action_obj();
-				if(_action.is_not_valid_action_obj(cur_root_action_obj)) {
-					console.log("!Error! / get_action_obj_for_db_update / _action.is_not_valid_action_obj(cur_root_action_obj)");
-					return;
-				}
 				action_obj_for_db_update[_param.ROOT_ACTION_HASH_KEY] = this.get_root_action_obj().get_action_hash_key();
 
 				return action_obj_for_db_update;
@@ -2721,35 +2797,6 @@ airborne.bootstrap.obj.__action = {
 				cur_add_on_element_container_jq.append(add_on_element_jq);
 			}
 			,add_on_element_collection_set_arr:[]
-			// @ private
-			// @ Desc : 공식적으로 등록될 element collection set을 추가할 경우 사용하는 메서드
-			,push_add_on_element_collection_set:function(add_on_element_collection_set){
-				if(add_on_element_collection_set == undefined) return;
-
-				// 공식적으로 등록될 수 있는 참조를 1개로 유지하게 위해 
-				// 최상위 top element collection set부터 조사하여 
-				// 이전 등록된 add_on_element_collection_set_arr안의 다른 모든 참조를 지웁니다.
-				var delegate_do_to_all_element_set = _obj.get_delegate(function(cur_element_set){
-
-					var cur_add_on_element_collection_set_arr = cur_element_set.get_event_manager().get_add_on_element_collection_set_arr();
-					var idx;
-					var length = cur_add_on_element_collection_set_arr.length;
-					for(idx = 0; idx < length; idx++){
-						var cur_add_on_element_collection_set = cur_add_on_element_collection_set_arr[idx];
-						if(add_on_element_collection_set.get_element_collection_id() == cur_add_on_element_collection_set.get_element_collection_id()){
-							cur_element_set.get_event_manager().remove_add_on_element_collection_set(cur_add_on_element_collection_set);
-						}
-					}
-
-				},this);
-				this.call_delegate_do_to_all_element_set(this.get_top_parent_element_collection_set(this), delegate_do_to_all_element_set);
-
-
-				// 등록된 참조가 없습니다. 새롭게 이 element collection set에 등록해 줍니다.
-				this.add_on_element_collection_set_arr.push(add_on_element_collection_set);
-
-				this.push_add_on_element_jq(add_on_element_collection_set.get_element_collection_container_jq());
-			}
 			// @ private
 			// @ Desc : 공식적으로 등록될 element collection set을 제거할 경우 사용하는 메서드
 			,remove_add_on_element_collection_set:function(element_collection_set_to_remove){
@@ -4469,6 +4516,9 @@ airborne.bootstrap.obj.__action = {
 				// 자식 객체가 있다면 가려줍니다.
 				this.hide_child();
 
+				// add on 자식 객체가 있다면 가려줍니다.
+				this.hide_child_add_on();
+
 			}
 			// @ Public
 			// @ Scope 	: Event Manager
@@ -4509,6 +4559,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.set_colors_back();
 				
 				if( cur_action_item_obj.is_item_title_n_time_hh_mm() ){
@@ -4548,6 +4599,7 @@ airborne.bootstrap.obj.__action = {
 				this.show_parent_container_jq();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.show_shy_child();
 
 				var is_addable = (cur_action_item_obj.is_item_title_only_addable() || cur_action_item_obj.is_item_select_box_addable() || cur_action_item_obj.is_item_title_n_time_hh_mm());
@@ -4602,6 +4654,7 @@ airborne.bootstrap.obj.__action = {
 				this.hide_title_jq_text_head();
 				this.show_title_jq();
 				this.show_child();
+				this.show_child_add_on();
 				this.show_shy_child();
 
 				if(cur_action_item_obj.is_item_title_n_time_hh_mm()){
@@ -4769,6 +4822,51 @@ airborne.bootstrap.obj.__action = {
 					cur_list_element_collection_set.show_element_collection_container_jq();
 				}
 			}
+			// @ Desc  	: 뷰에 표현된 add on 자식 객체들을 가립니다.
+			,hide_child_add_on:function() {
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / hide_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_child_action_obj_list = cur_action_item_obj.get_add_on_list();
+				for(var idx = 0; idx < cur_child_action_obj_list.length;idx++) {
+					var cur_child_action_obj = cur_child_action_obj_list[idx];
+					if(_action.is_not_valid_action_obj(cur_action_item_obj)) {
+						console.log("!Error! / hide_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+						return;
+					}
+
+					if(cur_child_action_obj.is_table()) {
+						var cur_table_element_collection_set = cur_child_action_obj.get_table_element_collection_set();
+						cur_table_element_collection_set.hide_element_collection_container_jq();
+					}
+				}
+			}
+			// @ Desc  	: 뷰에 표현된 add on 자식 객체들을 보여줍니다.
+			,show_child_add_on:function() {
+				var cur_action_item_obj = this.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / show_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
+				var cur_child_action_obj_list = cur_action_item_obj.get_add_on_list();
+				for(var idx = 0; idx < cur_child_action_obj_list.length;idx++) {
+					var cur_child_action_obj = cur_child_action_obj_list[idx];
+					if(_action.is_not_valid_action_obj(cur_action_item_obj)) {
+						console.log("!Error! / show_child_add_on / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+						return;
+					}
+
+					if(cur_child_action_obj.is_table()) {
+						var cur_table_element_collection_set = cur_child_action_obj.get_table_element_collection_set();
+						cur_table_element_collection_set.show_element_collection_container_jq();
+					}
+				}
+			}
+
 			,show_input_mode_default:function(event_mode){
 
 				var cur_action_item_obj = this.get_action_item_obj();
@@ -5317,6 +5415,10 @@ airborne.bootstrap.obj.__action = {
 							// 1. REMOVE TABLE FIELD ELEMENT
 							// 자신의 row sibling element를 모두 불러서 화면에서 지워줍니다.
 							var cur_table_row_field_arr = action_item_obj_clicked.get_table_row_sibling_arr();
+							if(_v.is_not_valid_array(cur_table_row_field_arr)) {
+								console.log("!Error! / this.btn_remove_element_jq.click / _action.is_not_valid_array(cur_table_row_field_arr)");
+								return;
+							}
 							for(var idx = 0; idx < cur_table_row_field_arr.length; idx++) {
 								var cur_table_row_field_obj = cur_table_row_field_arr[idx];
 								if(_action.is_not_valid_action_item_obj(cur_table_row_field_obj)) {
@@ -5756,13 +5858,9 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				this.off_title_input_btn_cancel_jq();
-				cur_title_input_btn_cancel_jq.click(function(e){
-					do_on_event(e);
-				});
-
 				// set button event
 				this.off_title_input_btn_cancel_jq();
+
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_cancel_jq, is_force_change);
 
@@ -5770,7 +5868,6 @@ airborne.bootstrap.obj.__action = {
 					e.stopPropagation();
 					do_on_event(e);
 				});
-
 
 				var cur_title_input_jq = this.get_title_input_jq();
 				cur_title_input_jq.focus();
@@ -5911,8 +6008,6 @@ airborne.bootstrap.obj.__action = {
 
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
-
-				cur_title_input_btn_ok_jq.off();
 				cur_title_input_btn_ok_jq.click(function(e){
 					do_on_event(e, cur_event_type);
 				});
@@ -7808,9 +7903,6 @@ airborne.bootstrap.obj.__action = {
 					this.set_jump_event(this.btn_collection_eject_jq);	
 				}
 			}
-			,get_btn_collection_eject_jq:function(){
-				return this.btn_collection_eject_jq;
-			}
 			,is_show_btn_collection_eject:false
 			,show_btn_collection_eject_jq:function(){
 				if(this.is_show_btn_collection_eject == true){
@@ -8094,6 +8186,7 @@ airborne.bootstrap.obj.__action = {
 					return mouse_move_checksum;
 
 				}	
+				// @ scope : jump spot manager / jsm
 				, land_element:function(cur_src_jq, cur_clone_jq, eject_btn_jq, cur_mousemove_callback_set, cur_element_set_on_mouse_over, delegate_on_completed, delegate_on_completed_param_event_manager, hovering_element_collection_set) {
 
 					var cur_event_hierarchy_manager = _action.get_event_hierarchy_manager();
@@ -8282,7 +8375,6 @@ airborne.bootstrap.obj.__action = {
 									return;
 								}
 
-								// wonder.jung11
 								var is_hover = _obj.is_hover(mousemove_event, cur_parent_sibling_action_obj.get_event_manager().get_element_jq());
 								if(is_hover) {
 
@@ -8298,17 +8390,6 @@ airborne.bootstrap.obj.__action = {
 						} else {
 							// LIST일 경우의 처리
 						}
-
-						// 이벤트 설정 - 아래 2가지 사항을 정의합니다.
-						// 1. 자기 자신 내부에서의 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행. 충돌한 element set을 리턴합니다.
-						// cur_parent_element_set_on_mouse_over = _self.get_parent_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
-
-
-
-
-						// wonder.jung11 - 요 부분을 만들어야 합니다. action obj로 작동하도록 변경.
-						// 2. 추가된 jump spot에 대한 이동 / 가지고 있는 엘리먼트에 대한 충돌 검사를 수행 충돌한 element set을 리턴합니다.
-						// cur_additional_element_set_on_mouse_over = _self.get_additional_element_set_on_mouse_over(mousemove_event, event_manager_on_mousemove);
 
 					}, this)); // end mouse move call back
 					
@@ -8431,6 +8512,9 @@ airborne.bootstrap.obj.__action = {
 
 						// 자식 객체를 보여줘야 함. 
 						target_element_set.get_event_manager().show_child();
+
+						// add on 자식 객체를 보여줘야 함. 
+						target_element_set.get_event_manager().show_child_add_on();
 
 						// shy 자식 객체는 가림.
 						target_element_set.get_event_manager().hide_shy_child();

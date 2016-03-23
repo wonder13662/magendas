@@ -13,7 +13,7 @@ $wdj_mysql_interface->close();
 // @ required
 include_once("../../../common.js.inc");
 $view_render_var_arr = array("[__ROOT_PATH__]"=>$service_root_path);
-ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.template",$view_render_var_arr);	
+ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.template",$view_render_var_arr);
 ?>
 </head>
 
@@ -64,12 +64,12 @@ echo "<img id=\"ealry_bird_head\" src=\"$service_root_path/images/event/D93_PREM
 		<!-- Q&A -->
 		<tr class="active" style="color:rgb(51, 51, 51);background-color:#004064;border-bottom:1px solid #ddd;">
 			<td class="text-center" style="border-top:0px;border-bottom: 1px solid #004064;background-color:#F2E074;color:#004064;">
-				<h5><span><strong>Do I can get group registration discount this time?</strong></span></h5>
+				<h5><span><strong>Can I get a group registration discount?</strong></span></h5>
 			</td>
 		</tr>
 		<tr id="test" style="color:#c0c0c0;background-color:#FFF;">
 			<td class="text-left" style="border-top:0px;background-color:#004064;color:#F2E074;">
-				<span style="font-size:13px;">Unfortunately we don't have group registration due to clarify financial status.</span>
+				<span style="font-size:13px;">Unfortunately we don't have group registration.</span>
 			</td>
 		</tr>
 
