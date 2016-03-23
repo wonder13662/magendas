@@ -1270,7 +1270,62 @@ class TCPDFManager{
 		return $parent_element_set;
 	}	
 
+	// @ Desc : 
+	private function draw_element_list_row_empty($parent_element_set=null, $simple_table_obj=null) {
 
+		$caller_name = __FUNCTION__;
+		// view 정보는 action_obj에 포함되어 있습니다.
+		if(is_null($parent_element_set)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$parent_element_set)<br/>";
+			return;
+		}
+		if(is_null($simple_table_obj)) {
+			echo "TCPDFManager\t$caller_name\tis_null(\$simple_table_obj)<br/>";
+			return;
+		}
+
+		$cell_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
+		// echo "\$cell_y_pos ::: $cell_y_pos<br/>";
+
+		$element_prop_simple_table_cell = 
+		TCPDFElement::GET_ELEMENT_PROP(
+			$this->pdf
+			// element type
+			, TCPDFElement::$ELEMENT_TYPE_CARD_BOARD_ROW_CONTENT_EMPTY
+			// element_name
+			, "row_empty"
+			// text
+			, ""
+			// text_color_arr
+			, TCPDFElement::$COLOR_DARK_GRAY_ARR
+			// text_size
+			, TCPDFElement::$CARD_BOARD_TITLE_FONT_SIZE
+			// cell_x_pos
+			, $parent_element_set->get_element_set_x_pos()
+			// cell_y_pos
+			, $parent_element_set->get_element_set_bottom_y_pos()
+			// cell_width / 
+			, $parent_element_set->get_element_set_width()
+			// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.
+			, $simple_table_obj->get_element_set_height()
+			// cell_color_arr
+			, TCPDFElement::$COLOR_MILK_GRAY_ARR
+			// depth
+			, 0
+			// is_first
+			, false
+			// is_last
+			, false
+			// is_bold
+			, false
+			// text_align
+			, TCPDFElement::$TEXT_ALIGN_LEFT
+			// caller_name
+			, $caller_name
+		);
+		$element_prop_simple_table_cell->draw();
+
+	}
 
 	// @ Desc : 테이블 열의 액션 객체를 그립니다.
 	private function draw_element_list_row_title($action_item_obj=null, $parent_element_set=null, $is_last=false) {
@@ -1544,31 +1599,21 @@ class TCPDFManager{
 				} // end for
 
 				// wonder.jung22
-
-				if($action_obj->is_last_add_on()) {
-					// 마지막 엘리먼트라면 아래의 여백을 추가한다.
-				}
-
-				// $parent_action_obj = $action_obj->get_parent();
-				// $cur_add_on_cnt = $parent_action_obj->get_add_on_cnt();
-
-				$cur_name = $action_obj->get_name();
-				$is_last = $action_obj->is_last();
-
-				echo "\$cur_name ::: $cur_name<br/>";
-				echo "\$is_last ::: $is_last<br/>";
-
-				//get_add_on_cnt
-
 				$parent_element_set->push_child_add_on_element_set($element_set_simple_table);
 
+				
+
+				// 마지막 엘리먼트라면 아래의 여백을 추가한다.
+				if($action_obj->is_last_add_on()) {
+					$parent_element_set->add_element_set_height($y_pos_offset);
+				}
+
 				// 배경 이미지를 먼저 만들어 준다.
+				$this->draw_element_list_row_empty($parent_element_set, $element_set_simple_table);
 
 				$element_set_simple_table->draw_table();
 
 			} // end outer if
-
-
 
 		} else if(ActionItemTitleNTimeHHMM::is_instance($action_obj)) {
 

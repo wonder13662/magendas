@@ -7477,7 +7477,8 @@ class MYSQLInterface{
 			}
 
 			$action_item->push_add_on($add_on_colllection_obj);
-			$add_on_colllection_obj->set_parent($action_item);
+			// REMOVE ME
+			// $add_on_colllection_obj->set_parent($action_item);
 		}		
 
 		return $action_item;

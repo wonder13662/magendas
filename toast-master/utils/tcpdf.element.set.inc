@@ -100,7 +100,7 @@ class TCPDFElementSet{
 		}
 		return $this->element_set_height;
 	}
-	private function add_element_set_height($offset_height) {
+	public function add_element_set_height($offset_height) {
 		if(is_null($this->element_set_height)) {
 			$this->element_set_height = 0;
 		}

@@ -707,8 +707,15 @@ class ActionObject implements Action{
 		}
 
 		if($this->has_parent()) {
+
 			$cur_parent = $this->get_parent();	
 			return $cur_parent->get_depth($depth + 1);
+
+		} else if($this->has_add_on_parent()) {
+
+			$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();	
+			return $cur_add_on_action_parent_obj->get_depth($depth + 1);
+			
 		}
 
 		return $depth;
@@ -875,6 +882,10 @@ class ActionCollection extends ActionObject{
 	}
 	public function is_last_add_on() {
 
+		if($this->has_no_add_on_parent()) {
+			return false;
+		}
+
 		$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();
 		if(ActionItem::is_not_instance($cur_add_on_action_parent_obj)) {
 			echo "!Error! / is_last_add_on / ActionItem::is_not_instance(\$cur_add_on_action_parent_obj)<br/>";
@@ -900,9 +911,10 @@ class ActionCollection extends ActionObject{
 		}
 
 		if(strcmp($last_add_on_action_obj->get_hash_key(),$this->get_hash_key()) == 0) {
-			
+			return true;
 		}
 
+		return false;
 	}
 
 
@@ -1096,12 +1108,9 @@ class ActionItem extends ActionObject{
 		}
 
 		if(!is_null($add_on_collection)) {
+			$add_on_collection->set_add_on_action_parent_obj($this);
 			array_push($this->add_on_action_object_list, $add_on_collection);
 		}
-
-		// add on object는 부모 객체를 가지고 있어야 할까?
-		// 가지고 있다면 parent <--> child와는 다르게 add on parent <--> add on child로 관계가 만들어 져야 하지 않을까?
-
 
 	}
 	public function has_add_on_list() {
