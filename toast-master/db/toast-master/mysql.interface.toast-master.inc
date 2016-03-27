@@ -401,6 +401,14 @@ class MYSQLInterface{
 
 		return gmdate("H:i", $seconds);
 	}
+	private function convert_seconds_to_YYYYMMHHMMSS($seconds) {
+
+		if($this->is_not_unsigned_number(null, $seconds)) {
+			return -1;
+		}
+
+		return gmdate("YmdHis", $seconds);
+	}
 
 
 	/*
@@ -560,32 +568,165 @@ class MYSQLInterface{
 	*/
 	public function get_meeting_agenda_id_upcoming($meeting_membership_id=-1){
 
-		$function_name = "get_meeting_agenda_id_upcoming";
-		if($this->isNotUnsignedNumber($meeting_membership_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
 		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"SELECT MA.id AS __meeting_id"
-			,"FROM MEETING_AGENDA AS MA"
-			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
-			,"WHERE MA.membership_id=$meeting_membership_id"
-			,"AND MA.`status`=\"A\""
-			,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= MA.startdttm"
-			,"ORDER BY MA.startdttm ASC LIMIT 1"
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.membership_id=$meeting_membership_id"
+				,"AND MA.`status`=\"A\""
+				,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= MA.startdttm"
+				,"ORDER BY MA.startdttm ASC LIMIT 1"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
-
-		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();		
 		$__meeting_id = -1;
 		if(!is_null($result)) {
 			$__meeting_id = intval($result->__meeting_id);	
 		}
 
+		// wonder.jung33
+		// 예정된 미팅이 없는 경우, 마지막 미팅 정보를 가져와서 이번주 미팅으로 추가합니다.
+
+
 		return $__meeting_id;
+	}
+
+	// @ Desc : 지난 미팅을 기준으로 최신 미팅을 1개 추가합니다.
+	public function add_meeting_agenda($meeting_membership_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+
+		// wonder.jung33
+		// 최신순으로 등록된 미팅을 10개 가져옵니다.
+		$recent_meeting_agenda_list =
+		$this->getMeetingAgendaList(
+			// meeting_membership_id
+			$meeting_membership_id
+			// page
+			, 1
+			// size
+			, 10
+		);
+
+		// 롤 사인업을 진행하기 위해서 지금으로부터 8주 뒤의 미팅 정보까지 미리 만들어 둡니다.
+		$recent_meeting_agenda_obj = null;
+		if(!empty($recent_meeting_agenda_list)) {
+			$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
+		}
+
+		if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__startdttm)) {
+
+			$recent_startdttm = $recent_meeting_agenda_obj->__startdttm;
+			$recent_round = intval($recent_meeting_agenda_obj->__round);	
+
+			$d = new DateTime( $recent_startdttm );
+			$d_now = new DateTime();
+			$diff_days = intval($d->diff($d_now)->days);
+
+			if(0 < $diff_days) {
+
+				$days_in_a_week = 7;
+				$past_weeks_cnt = intval($diff_days/$days_in_a_week);
+				$offset_days = ($days_in_a_week * ($past_weeks_cnt + 1));
+
+				// $d_msg = $d->format( 'Y-m-d H:i:s' );
+				$d->modify( "+$offset_days days" );
+				
+				// $d_msg = $d->format( 'Y-m-d H:i:s' );
+				$d_msg = $d->format( 'YmdHis' );
+
+				 // 'Y-m-d H:i:s'
+				echo "001 / \$d_msg ::: $d_msg<br/>";
+
+				// 새로운 아젠다를 새로운 시간에 등록해줍니다.
+
+			}
+
+
+
+
+
+			// 해당 날짜가 지금으로부터 며칠전인지 확인.
+			// 시간 차이를 구하는 연산은?
+
+
+			/*
+			$a_week_later_from_recent_meeting = date('Ymdhis', strtotime("+7 days", $recent_start_date));
+
+			// 지금으로부터 4주 - 1달 뒤의 미팅 날짜를 구합니다.(4 * 7 = 28일 뒤)
+			$today = time();
+			$twoMonthsLater_YYYYMMDDHHSSMM = date('Ymdhis', strtotime("+2 months", $today));
+			$today_YYYYMMDDHHSSMM = date('Ymdhis', $today);
+			*/
+
+			/*
+			$loop_max = 5;
+			$round_idx = 1;
+			$days_of_week = 7;
+			for($idx = 1; $idx < $loop_max;$idx++) {
+
+				$daysAfter = $days_of_week * $idx;
+				$weeksLaterFromLast = date('Ymdhis', strtotime("+".$daysAfter." days", $today));
+
+				// 다음주 일정부터 없다면  자동 등록됩니다.
+				if($a_week_later_from_recent_meeting < $weeksLaterFromLast) {
+
+					// 등록된 마지막 미팅 날짜가 2달
+					$next_round = $recent_round + $round_idx;
+					$round_idx += 1;
+
+					$result = 
+					$wdj_mysql_interface->insertMeetingAgenda(
+						// $round
+						$next_round
+						// $theme
+						, "No Theme"
+						// $start_dttm
+						, $weeksLaterFromLast
+						// $meeting_membership_id
+						, $MEETING_MEMBERSHIP_ID
+					);
+
+					// 새로 등록한 아젠다 정보를 가져옵니다.
+					$result = 
+					$wdj_mysql_interface->getMeetingAgendaByRound(
+						// $meeting_round
+						$next_round
+						// $startdttm
+						, $weeksLaterFromLast
+						// $meeting_membership_id
+						, $MEETING_MEMBERSHIP_ID
+					);
+					if(!empty($result)) {
+						$next_meeting_agenda_obj = $result[0];	
+					}
+					if(!is_null($next_meeting_agenda_obj)) {
+						// TIMELINE도 자동 등록됩니다. BASIC. 이 값은 다시 변경할 수 있습니다.
+						$wdj_mysql_interface->copyTimelineFromTemplate(
+							// $new_meeting_agenda_id
+							$next_meeting_agenda_obj->__meeting_id
+							// $meeting_template_id
+							, 1
+						);
+					}
+				}
+			}
+			*/
+		}		
+
 	}
 
 	/*
@@ -1750,8 +1891,10 @@ class MYSQLInterface{
 	}
 
 	public function getMembership($membership_id) {
-
-		if($this->isNotUnsignedNumber($membership_id)) return null;
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
 
 		$query = 
 		"SELECT id AS __membership_id"
@@ -1764,6 +1907,34 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
+	}
+
+	// @ Desc : 멤버쉽 정보를 가져옵니다.
+	public function get_membership($membership_id=-1) {
+
+		// wonder.jung
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT id AS __membership_id"
+				," , IFNULL(`name`, \"\") AS __membership_name"
+				," , IFNULL(`desc`, \"\") AS __membership_desc"
+				," FROM MEMBERSHIP"
+				," WHERE id=$membership_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+
+		return $result;
 	}
 
 	public function getAllMembership() {
@@ -5119,6 +5290,63 @@ class MYSQLInterface{
 			return;
 		}
 	}
+
+	// @ Desc : MEMBERSHIP ID로 가장 최근의 ACTION COLLECTION의 ID를 가져옵니다.
+	public function select_recent_action_id_collection_by_membership($membership_id) {
+		// wonder.jung11
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return -1;
+		}
+
+		// 가장 최근에 등록된 MEETING ID를 가져옵니다.
+		$latest_meeting_id = $this->get_meeting_agenda_id_upcoming($membership_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $latest_meeting_id)){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(action_collection_id, -1) AS __action_collection_id"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA"
+				," WHERE meeting_agenda_id=$latest_meeting_id"
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+
+		if(is_null($result)) {
+			return -1;
+		}
+
+		return $result->__action_collection_id;
+	}	
+
+	// @ Sample
+	/*
+	public function secondsToTime($seconds) {
+	    $dtF = new DateTime("@0");
+	    $dtT = new DateTime("@$seconds");
+	    return $dtF->diff($dtT)->format('%a days, %h hours, %i minutes and %s seconds');
+	}	
+	*/
+
+	public function seconds_to_days_ago($seconds) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $seconds)){
+			return -1;
+		}
+
+	    $dtF = new DateTime("@0");
+	    $dtT = new DateTime("@$seconds");
+	    return intval($dtF->diff($dtT)->format('%a'));
+	}	
+
 
 	/*
 		@ Public
@@ -10201,15 +10429,14 @@ class MYSQLInterface{
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40
 
-		$root_action_obj = $this->add_action($root_action_obj);
+		// DB update
+		// $root_action_obj = $this->add_action($root_action_obj);
+
+		// Refresh coordinate
 		$root_action_obj->set_coordinate();
 
 		return $root_action_obj;
 	}
-
-
-
-
 
 
 }

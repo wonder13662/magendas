@@ -54,8 +54,10 @@ wonglish.meeting_agenda_manager = {
 		// common props
 		var meeting_agenda_obj = meeting_agenda_data_set.meeting_agenda_obj;
 		var meeting_membership_id = meeting_agenda_data_set.meeting_membership_id;
+		var recent_action_collection_id = meeting_agenda_data_set.recent_action_collection_id
 
 		console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
+
 
 		var meeting_agenda_id = meeting_agenda_obj.__meeting_id;
 		var meeting_agenda_startdttm = meeting_agenda_obj.__startdttm;
@@ -107,11 +109,11 @@ wonglish.meeting_agenda_manager = {
 		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
 
 		// TEST
-		var new_action_list = meeting_agenda_data_obj.new_action_list;
+		var meeting_action_list = meeting_agenda_data_obj.meeting_action_list;
 		var new_action_element_collection_set = 
 		_action_list.add_editable_action_list(
 			// action_list
-			new_action_list
+			meeting_action_list
 			// parent_element_set
 			, null
 			// list_container_jq
@@ -470,6 +472,16 @@ wonglish.meeting_agenda_manager = {
 			*/
 
 		});
+
+		// SET TEMPLATE EVENT
+		var agenda_template_jq_list = $("a#agenda_template");
+		console.log(">>> agenda_template_jq_list ::: ",agenda_template_jq_list);
+		if(agenda_template_jq_list != undefined && 0 < agenda_template_jq_list.length) {
+			agenda_template_jq_list.click(function(e) {
+				console.log("this ::: ",this);
+			});
+		}
+
 		var init_meeting_modal = function(meeting_agenda_list, datepicker_jq) {
 
 			// 입력되었던 내역들을 모두 지웁니다.
@@ -501,6 +513,7 @@ wonglish.meeting_agenda_manager = {
 
 				meeting_date_recommend = weeks_later_yyyy_mm_dd;
 			}
+
 			// 2-2. 이전 미팅 정보가 없는 경우. 오늘 날짜를 추천
 			if(meeting_date_recommend == undefined) {
 				meeting_date_recommend = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD);
@@ -510,16 +523,8 @@ wonglish.meeting_agenda_manager = {
 				datepicker_jq.datepicker('update', meeting_date_recommend);
 			}
 
-			// 3. 미팅 템플릿 체크 버튼을 모두 초기화합니다.
-			var timeline_template_list_jq = $("li#timeline_template_row");
-			var btn_radios_jq = timeline_template_list_jq.find("input#radio_btn_meeting_template");
-			btn_radios_jq.removeAttr("checked");
-
-			// 3-1. 첫번째 버튼을 선택(기본 설정)
-			btn_radios_jq.first().prop('checked', true);
-
 			// 4. 이벤트 락을 해제합니다.
-			_obj.get_event_hierarchy_manager().release();
+			_action.get_event_hierarchy_manager().release();
 
 		};
 		init_meeting_modal(meeting_agenda_list, datepicker_jq);
@@ -550,340 +555,8 @@ wonglish.meeting_agenda_manager = {
 				input_meeting_date_jq.focus();
 				return;
 			}
-
-			// 선택한 미팅 템플릿을 가져옵니다.
-			var timeline_template_row_jq_arr = $("li#timeline_template_row");
-			var selected_template_id = -1;
-			for(var idx = 0;idx < timeline_template_row_jq_arr.length;idx++) {
-				var timeline_template_row_jq = $(timeline_template_row_jq_arr[idx]);
-				var btn_input_radio_jq = timeline_template_row_jq.find("input:checked#radio_btn_meeting_template");
-
-				if(	btn_input_radio_jq != undefined && 
-					btn_input_radio_jq.val() != undefined && 
-					btn_input_radio_jq.val() == "on" ) {
-
-					selected_template_id = parseInt(timeline_template_row_jq.attr("template_id"));
-					break;
-				}
-			}
-
-			var cur_meeting_id = parseInt($("div#modal-new-meeting-dialog").attr("cur-meeting-id"));
-			if(cur_meeting_id < 0 && selected_template_id < 0) {
-				alert("Please check your meeeting template.");
-				return;
-			}
-
-			// 새로운 미팅을 저장합니다.
-			var cur_meeting_membership_id = -1;
-			var cur_meeting_round = -1;
-			var is_new_meeting_header = _param.NO;
-			var is_update_meeting_header = _param.NO;
-			if(cur_meeting_id > 0 && meeting_agenda_obj != undefined) {
-				// 1. 이미 있던 미팅인 경우
-				//cur_meeting_membership_id = parseInt(meeting_agenda_obj.__membership_id);
-				cur_meeting_round = parseInt(meeting_agenda_obj.__round);
-				is_new_meeting_header = _param.NO;
-				is_update_meeting_header = _param.YES;
-			} else if(login_user_info != undefined && parseInt(login_user_info.__membership_id) > 0) {
-				// 2. 새로운 미팅인 경우
-				//cur_meeting_membership_id = parseInt(login_user_info.__membership_id);
-				is_new_meeting_header = _param.YES;
-				is_update_meeting_header = _param.NO;
-			} else {
-				// 3. 유효하지 않은 상황. 개발자에게 알림.
-				alert("!Error! Please let developer know Error - #531");
-				return;
-			}
-
-			var request_param_obj =
-			_param
-			.get(_param.IS_NEW_MEETING_HEADER,is_new_meeting_header)
-			.get(_param.IS_UPDATE_MEETING_HEADER,is_update_meeting_header)
-			.get(_param.MEETING_ID,cur_meeting_id)
-			.get(_param.ROUND,cur_meeting_round)
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-			.get(_param.MEETING_TEMPLATE_ID,selected_template_id)
-			.get(_param.THEME,cur_meeting_theme)
-			.get(_param.START_DATE,cur_input_meeting_date)
-			;
-
-			console.log(">>> request_param_obj : ",request_param_obj);
-
-			_ajax.send_simple_post(
-				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-				// _param_obj
-				,request_param_obj
-				// _delegate_after_job_done
-				,_obj.get_delegate(
-					// delegate_func
-					function(data){
-
-						console.log(">>> data : ",data);
-
-						var new_meeting_obj_json_str = "";
-						if(data.query_output_arr != undefined && data.query_output_arr.length > 0) {
-							new_meeting_obj_json_str = data.query_output_arr[1];
-						}
-
-						console.log(">>> new_meeting_obj_json_str : ",new_meeting_obj_json_str);
-
-						var new_meeting_obj_arr = null;
-						if(_v.is_valid_str(new_meeting_obj_json_str)) {
-							new_meeting_obj_arr = _json.parseJSON(new_meeting_obj_json_str);
-						}
-
-						console.log(">>> new_meeting_obj_arr : ",new_meeting_obj_arr);
-
-						_obj.get_event_hierarchy_manager().release();
-
-						if(	new_meeting_obj_arr != undefined && 
-							new_meeting_obj_arr.length > 0 &&
-							new_meeting_obj_arr[0].__meeting_id != undefined && 
-							parseInt(new_meeting_obj_arr[0].__meeting_id) > 0) {
-
-							// 미팅을 새로 생성한 경우.
-
-							_link.go_there(
-								_link.MEETING_AGENDA
-								,_param
-								.get(_param.MEETING_ID, parseInt(new_meeting_obj_arr[0].__meeting_id))
-								.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-							);
-
-						} else {
-
-							// 있던 미팅을 업데이트하는 경우.
-
-							_link.go_there(
-								_link.MEETING_AGENDA
-								,_param
-								.get(_param.MEETING_ID, parseInt(cur_meeting_id))
-								.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-							);
-						}
-
-					},
-					// delegate_scope
-					this
-				)
-			); // ajax done.
-
-
 		});
 
-
-
-		// timeline template event inits
-		//template_list_container
-		var template_list_container_jq = $("ul#template_list_container");
-		var schedule_timeline_template_list = meeting_agenda_data_set.schedule_timeline_template_list;
-
-		// 지난주의 미팅 아젠다도 가져옵니다.
-		var recent_club_schedule_timeline_list = meeting_agenda_data_set.recent_club_schedule_timeline_list;
-		// 템플릿 포맷으로 변환.
-		if(_v.is_valid_array(recent_club_schedule_timeline_list)) {
-
-			for(var idx = 0;idx < recent_club_schedule_timeline_list.length;idx++) {
-				var recent_club_schedule_obj = recent_club_schedule_timeline_list[idx];
-				var template_obj = {
-					__timeline_template_title:recent_club_schedule_obj.__meeting_agenda_startdttm + " " + recent_club_schedule_obj.__meeting_agenda_theme
-					, __timeline_template_json_str:recent_club_schedule_obj.__timeline_schedule_json_str
-				};
-				schedule_timeline_template_list.push(template_obj);
-			}
-
-		}
-
-
-		//var schedule_timeline_list_V2 = meeting_agenda_data_obj.schedule_timeline_list_V2[0];
-		// var testObj = _json.parseJSON(schedule_timeline_list_V2.__timeline_schedule_json_str);
-
-		console.log("지난주의 미팅 아젠다도 가져옵니다.");
-		console.log("recent_club_schedule_timeline_list :: ",recent_club_schedule_timeline_list);
-
-		// wonder.jung11
-		// TODO - 정보만 보여주는 리스트 형태를 만듭니다.
-		// timeline template event ends
-		var timeline_template_tag = "";
-		if(_v.is_valid_array(schedule_timeline_template_list)) {
-
-			for(var idx = 0;idx < schedule_timeline_template_list.length;idx++) {
-				var template_obj = schedule_timeline_template_list[idx];
-				var type = template_obj.__timeline_template_title;
-
-				var jsonObjList = _json.parseJSON(template_obj.__timeline_template_json_str);
-				if(jsonObjList == undefined) {
-					continue;
-				}
-
-				var checked = "";
-				if(idx == 0) {
-					checked = "checked";
-				}
-
-				timeline_template_tag += ""
-				+ "<li id=\"timeline_template_row\" template_id=\"<template_id>\" class=\"list-group-item\" style=\"color:#B1B1B1;background-color:#F1F1F1;\">".replace(/\<template_id\>/gi, template_obj.__timeline_template_id)				
-					
-					+ "<div class=\"radio\" style=\"margin-top:0px;margin-bottom:0px;\">"
-						+ "<label>"
-							+ "<input type=\"radio\" id=\"radio_btn_meeting_template\" <checked>><span id=\"title\"><strong><title></strong></span>".replace(/\<title\>/gi, type).replace(/\<checked\>/gi, checked)
-						+ "</label>"
-						+ "<button id=\"folder_open_n_close\" type=\"button\" class=\"btn btn-default btn-xs\" style=\"float:right;margin-right:0px;margin-top:-2px;\"><span class=\"glyphicon glyphicon-folder-close\" style=\"padding-top:3px;padding-bottom:5px;padding-left:3px;padding-right:3px;\"></span>&nbsp;</button>"
-					+ "</div>"
-
-					+ "<ul id=\"main_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
-				;
-
-				// main action
-				for(var idx_main_action = 0;idx_main_action < jsonObjList.length;idx_main_action++) {
-					var main_action_json_obj = jsonObjList[idx_main_action];
-
-					var __action_name = main_action_json_obj.__action_name;
-					var __action_list = main_action_json_obj.__action_list;
-					var __time_sec = main_action_json_obj.__prop_map.__time_sec;
-					var __time_hh_mm = _dates.get_hh_mm_from_seconds(__time_sec);
-
-					timeline_template_tag += ""
-						+ "<li id=\"main_action_row\" class=\"list-group-item\" style=\"color:rgb(138, 109, 59);background-color:rgb(252, 248, 227);padding-left:10px;\">"
-							+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;\"><time_hh_mm></span>".replace(/\<time_hh_mm\>/gi, __time_hh_mm)
-							+ "<span id=\"title\" style=\"padding-left:10px;\"><title></span>".replace(/\<title\>/gi, __action_name)
-					;
-
-					for(var idx_sub_action_list = 0;idx_sub_action_list < __action_list.length;idx_sub_action_list++) {
-						var sub_action_json_obj_list = __action_list[idx_sub_action_list];
-
-						timeline_template_tag += ""
-							+ "<ul id=\"sub_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
-						;
-
-						for(var idx_sub_action = 0;idx_sub_action < sub_action_json_obj_list.length;idx_sub_action++) {
-							var sub_action_json_obj = sub_action_json_obj_list[idx_sub_action];
-
-							var __sub_action_name = sub_action_json_obj.__action_name;
-							timeline_template_tag += ""
-							+ "<li class=\"list-group-item\">"
-								+ "<span id=\"title\"><title></span>".replace(/\<title\>/gi, __sub_action_name)
-							+ "</li>"
-							;
-
-						} // for sub action obj end
-
-						timeline_template_tag += ""
-							+ "</ul>"
-						;
-
-					} // for sub action list end
-
-					timeline_template_tag += ""
-						+ "</li>"
-						;
-
-				} // for main action list end
-
-				timeline_template_tag += ""
-					+ "</ul>"			
-				+ "</li>"
-				;
-
-			} // for template end
-
-		}
-
-		timeline_template_tag +=
-		"</ul>";
-
-		template_list_container_jq.append(timeline_template_tag);
-
-
-
-
-
-		// EVENT
-		var main_action_list_jq = $("ul#main_action_list");
-		main_action_list_jq.hide();
-		var main_action_list_row_jq = main_action_list_jq.find("li#main_action_row");
-		main_action_list_row_jq.find("ul#sub_action_list").hide();
-		main_action_list_row_jq.click(function(e){
-
-			e.stopPropagation();
-
-			var self_jq = $(this);
-			var child_sub_action_list_jq = self_jq.parent().find("ul#sub_action_list");
-
-			var is_show = child_sub_action_list_jq.attr("is_show");
-			if(is_show == null || is_show == "" || is_show == "false") {
-				child_sub_action_list_jq.attr("is_show","true");
-				child_sub_action_list_jq.show();
-			} else if(is_show == "true") {
-				child_sub_action_list_jq.attr("is_show","false");
-				child_sub_action_list_jq.hide();
-			}
-		});
-
-		var sub_action_list_jq = main_action_list_jq.find("ul#sub_action_list");
-		var timeline_template_list_jq = $("li#timeline_template_row");
-		timeline_template_list_jq.mouseenter(function(e){
-			var self_jq = $(this);
-			var cur_color = self_jq.css("color");
-			var cur_bg_color = self_jq.css("background-color");
-
-			self_jq.css("color",cur_bg_color);
-			self_jq.css("background-color",cur_color);
-		});
-		//radio
-		timeline_template_list_jq.find("input#radio_btn_meeting_template").click(function(){
-			// 한개의 라디오 버튼만 선택되도록 해줍니다.
-			var self_jq = $(this);
-
-			var radio_btn_jq_arr = timeline_template_list_jq.find("input#radio_btn_meeting_template");
-			for(var idx = 0; idx < radio_btn_jq_arr.length; idx++) {
-				var cur_radio_btn_jq = $(radio_btn_jq_arr[idx]);
-
-				if(self_jq[0] == cur_radio_btn_jq[0]) {
-					continue;
-				}
-
-				cur_radio_btn_jq.removeAttr("checked");
-			}
-
-		});
-		timeline_template_list_jq.mouseleave(function(e){
-			var self_jq = $(this);
-			var cur_color = self_jq.css("color");
-			var cur_bg_color = self_jq.css("background-color");
-
-			self_jq.css("color",cur_bg_color);
-			self_jq.css("background-color",cur_color);
-
-			self_jq.find("button#folder_open_n_close").blur();
-		});
-		timeline_template_list_jq.find("button#folder_open_n_close").click(function(e) {
-
-			e.stopPropagation();
-
-			var self_jq = $(this);
-			var child_main_action_list_jq = self_jq.parent().parent().find("ul#main_action_list").first();
-			var is_show = child_main_action_list_jq.attr("is_show");
-			if(is_show == null || is_show == "" || is_show == "false") {
-				child_main_action_list_jq.attr("is_show","true");
-				child_main_action_list_jq.show();
-				// 버튼의 모양을 close 로 바꿉니다.
-				var btn_glyps_jq = self_jq.find("span.glyphicon-folder-close");
-
-				btn_glyps_jq.removeClass("glyphicon-folder-close");
-				btn_glyps_jq.addClass("glyphicon-folder-open");
-
-			} else if(is_show == "true") {
-				child_main_action_list_jq.attr("is_show","false");
-				child_main_action_list_jq.hide();
-				// 버튼의 모양을 open 으로 바꿉니다.
-				var btn_glyps_jq = self_jq.find("span.glyphicon-folder-open");
-
-				btn_glyps_jq.removeClass("glyphicon-folder-open");
-				btn_glyps_jq.addClass("glyphicon-folder-close");
-			}
-		});
 
 
 
@@ -950,6 +623,7 @@ wonglish.meeting_agenda_manager = {
 
 				}, this));
 
+				/*
 				this._self.addExtraBtn(
 					// btn_title
 					"NEW"
@@ -959,16 +633,12 @@ wonglish.meeting_agenda_manager = {
 					, this
 					// delegate_btn_clicked
 					, function(selected_key, selected_value){	
-						_obj.get_event_hierarchy_manager().lock();
-
-						var timeline_template_container_jq = timeline_template_list_jq.parent().parent();
-						if(timeline_template_container_jq != undefined && timeline_template_container_jq.length > 0) {
-							timeline_template_container_jq.show();
-						}
+						_action.get_event_hierarchy_manager().lock();
 
 						$('#modal-new-meeting-dialog').modal('show');
 					}
 				);
+				*/
 
 				// edit meeting theme & date
 				this._self.addExtraBtn(
@@ -980,13 +650,7 @@ wonglish.meeting_agenda_manager = {
 					, this
 					// delegate_btn_clicked
 					, function(selected_key, selected_value){	
-						_obj.get_event_hierarchy_manager().lock();
-
-						// 수정할 미팅 정보를 전달합니다.
-						var timeline_template_container_jq = timeline_template_list_jq.parent().parent();
-						if(timeline_template_container_jq != undefined && timeline_template_container_jq.length > 0) {
-							timeline_template_container_jq.hide();
-						}
+						_action.get_event_hierarchy_manager().lock();
 
 						// 0. 수정할 미팅의 id를 등록합니다.
 						if(meeting_agenda_obj != undefined && parseInt(meeting_agenda_obj.__meeting_id) > 0) {
@@ -1011,7 +675,7 @@ wonglish.meeting_agenda_manager = {
 						// 3. meeting num
 						var modal_title_jq = $("h4#modal-title");
 						if(modal_title_jq != undefined && modal_title_jq.length > 0) {
-							modal_title_jq.html(meeting_agenda_obj.__round + "th");
+							modal_title_jq.html(meeting_agenda_obj.__membership_desc + " " + meeting_agenda_obj.__round + "th");
 						}
 
 						$('#modal-new-meeting-dialog').modal('show');
@@ -1039,7 +703,7 @@ wonglish.meeting_agenda_manager = {
 					}
 				);
 
-
+				/*
 				this._self.addExtraBtn(	
 					// btn_title
 					"PRINT LARGE"
@@ -1061,6 +725,7 @@ wonglish.meeting_agenda_manager = {
 
 					}
 				);
+				*/
 
 				// button setting end - common
 			}
@@ -1099,6 +764,7 @@ wonglish.meeting_agenda_manager = {
 
 
 		// EVENT - Documnet Ready
+		// TOASTMASTER 배너의 너비 조정을 하는데 사용합니다.
 		var on_resize_header = function() {
 		    var club_title_jq = $("div#club_title");
 		    if(club_title_jq == undefined || club_title_jq.length == 0) {

@@ -245,6 +245,9 @@ var param_manager = {
 	, ACTION_CONTEXT:"ACTION_CONTEXT"
 	, ACTION_COORDINATE:"ACTION_COORDINATE"
 
+	// ACTION TEMPLATE
+	, ACTION_TEMPLATE_BUNDANG:"ACTION_TEMPLATE_BUNDANG"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {
