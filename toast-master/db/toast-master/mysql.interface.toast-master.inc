@@ -595,15 +595,22 @@ class MYSQLInterface{
 			$__meeting_id = intval($result->__meeting_id);	
 		}
 
-		// wonder.jung33
 		// 예정된 미팅이 없는 경우, 마지막 미팅 정보를 가져와서 이번주 미팅으로 추가합니다.
-
+		$meeting_agenda_added = null;
+		if($__meeting_id == -1) {
+			$meeting_agenda_added = $this->add_meeting_agenda($meeting_membership_id);	
+		}
+		if(!is_null($meeting_agenda_added)) {
+			$__meeting_id = intval($meeting_agenda_added->__meeting_id);
+		}
 
 		return $__meeting_id;
 	}
 
 	// @ Desc : 지난 미팅을 기준으로 최신 미팅을 1개 추가합니다.
-	public function add_meeting_agenda($meeting_membership_id=-1) {
+	private function add_meeting_agenda($meeting_membership_id=-1) {
+
+		echo "add_meeting_agenda / \$meeting_membership_id ::: $meeting_membership_id<br/>";
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
 			return;
@@ -636,95 +643,46 @@ class MYSQLInterface{
 			$d_now = new DateTime();
 			$diff_days = intval($d->diff($d_now)->days);
 
-			if(0 < $diff_days) {
-
-				$days_in_a_week = 7;
-				$past_weeks_cnt = intval($diff_days/$days_in_a_week);
-				$offset_days = ($days_in_a_week * ($past_weeks_cnt + 1));
-
-				// $d_msg = $d->format( 'Y-m-d H:i:s' );
-				$d->modify( "+$offset_days days" );
-				
-				// $d_msg = $d->format( 'Y-m-d H:i:s' );
-				$d_msg = $d->format( 'YmdHis' );
-
-				 // 'Y-m-d H:i:s'
-				echo "001 / \$d_msg ::: $d_msg<br/>";
-
-				// 새로운 아젠다를 새로운 시간에 등록해줍니다.
-
+			if($diff_days <= 0) {
+				return;
 			}
 
+			$days_in_a_week = 7;
+			$past_weeks_cnt = intval($diff_days/$days_in_a_week);
+			$offset_days = ($days_in_a_week * ($past_weeks_cnt + 1));
+
+			$d->modify( "+$offset_days days" );
+			$d_next = $d->format( 'YmdHis' );
 
 
+			// 새로운 아젠다를 새로운 시간에 등록해줍니다.
+			$next_round = $recent_round + $round_idx;
+			$round_idx += 1;
 
+			$result = 
+			$this->insertMeetingAgenda(
+				// $round
+				$next_round
+				// $theme
+				, "No Theme"
+				// $start_dttm
+				, $d_next
+				// $meeting_membership_id
+				, $meeting_membership_id
+			);	
 
-			// 해당 날짜가 지금으로부터 며칠전인지 확인.
-			// 시간 차이를 구하는 연산은?
+			// 새로 등록한 아젠다 정보를 가져옵니다.
+			$result = 
+			$this->get_meeting_agenda_by_round(
+				// $meeting_round
+				$next_round
+				// $startdttm
+				, $d_next
+				// $meeting_membership_id
+				, $meeting_membership_id
+			);
 
-
-			/*
-			$a_week_later_from_recent_meeting = date('Ymdhis', strtotime("+7 days", $recent_start_date));
-
-			// 지금으로부터 4주 - 1달 뒤의 미팅 날짜를 구합니다.(4 * 7 = 28일 뒤)
-			$today = time();
-			$twoMonthsLater_YYYYMMDDHHSSMM = date('Ymdhis', strtotime("+2 months", $today));
-			$today_YYYYMMDDHHSSMM = date('Ymdhis', $today);
-			*/
-
-			/*
-			$loop_max = 5;
-			$round_idx = 1;
-			$days_of_week = 7;
-			for($idx = 1; $idx < $loop_max;$idx++) {
-
-				$daysAfter = $days_of_week * $idx;
-				$weeksLaterFromLast = date('Ymdhis', strtotime("+".$daysAfter." days", $today));
-
-				// 다음주 일정부터 없다면  자동 등록됩니다.
-				if($a_week_later_from_recent_meeting < $weeksLaterFromLast) {
-
-					// 등록된 마지막 미팅 날짜가 2달
-					$next_round = $recent_round + $round_idx;
-					$round_idx += 1;
-
-					$result = 
-					$wdj_mysql_interface->insertMeetingAgenda(
-						// $round
-						$next_round
-						// $theme
-						, "No Theme"
-						// $start_dttm
-						, $weeksLaterFromLast
-						// $meeting_membership_id
-						, $MEETING_MEMBERSHIP_ID
-					);
-
-					// 새로 등록한 아젠다 정보를 가져옵니다.
-					$result = 
-					$wdj_mysql_interface->getMeetingAgendaByRound(
-						// $meeting_round
-						$next_round
-						// $startdttm
-						, $weeksLaterFromLast
-						// $meeting_membership_id
-						, $MEETING_MEMBERSHIP_ID
-					);
-					if(!empty($result)) {
-						$next_meeting_agenda_obj = $result[0];	
-					}
-					if(!is_null($next_meeting_agenda_obj)) {
-						// TIMELINE도 자동 등록됩니다. BASIC. 이 값은 다시 변경할 수 있습니다.
-						$wdj_mysql_interface->copyTimelineFromTemplate(
-							// $new_meeting_agenda_id
-							$next_meeting_agenda_obj->__meeting_id
-							// $meeting_template_id
-							, 1
-						);
-					}
-				}
-			}
-			*/
+			return $result;
 		}		
 
 	}
@@ -807,6 +765,52 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	// wonder.jung33
+	private function get_meeting_agenda_by_round($meeting_round, $startdttm, $meeting_membership_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_round, "meeting_round")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $startdttm, "startdttm")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				," , MA.round AS __round"
+				," , MA.theme AS __theme"
+				," , MA.startdttm AS __startdttm"
+				," , MA.membership_id AS __membership_id"
+				," , MEMBERSHIP.name AS __membership_name"
+				," , MEMBERSHIP.desc AS __membership_desc"
+				," , IFNULL(QUOTE.content,\"\") AS __quote"
+				," , IFNULL(WORD.word,\"\") AS __word"
+				," , IFNULL(WORD.desc,\"\") AS __word_desc"
+				," FROM MEETING_AGENDA AS MA"
+				," LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+				," LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+				," LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				," WHERE MA.membership_id=" . $meeting_membership_id
+				," AND MA.round=" . $meeting_round
+				," AND MA.startdttm=" . $startdttm
+				," AND MA.`status`=\"A\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+
+		return $result;
+	}
+
 	public function getMeetingAgendaById($meeting_membership_id, $meeting_id){
 
 		if($this->isNotUnsignedNumber($meeting_membership_id)) return null;
@@ -885,6 +889,46 @@ class MYSQLInterface{
 		return null;
 	}
 
+	// @ desc : 가장 최신의 과거 미팅 정보를 가져옵니다.
+	public function get_immediate_past_meeting_agenda($meeting_membership_id){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,", MA.round AS __round"
+				,", MA.theme AS __theme"
+				,", MA.startdttm AS __startdttm"
+				,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"
+				,", MA.membership_id AS __membership_id"
+				,", MEMBERSHIP.name AS __membership_name"
+				,", MEMBERSHIP.desc AS __membership_desc"
+				,", IFNULL(QUOTE.content,\"\") AS __quote"
+				,", IFNULL(WORD.word,\"\") AS __word"
+				,", IFNULL(WORD.desc,\"\") AS __word_desc"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+				,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.membership_id=$meeting_membership_id"
+				,"AND MA.`status`=\"A\""
+				,"AND MA.startdttm <= DATE_FORMAT(NOW(), '%Y%m%d000000')"
+				,"ORDER BY MA.startdttm DESC LIMIT 1"			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();		
+
+		return $result;
+	}	
+
 	/*
 		@ Public
 		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
@@ -906,6 +950,7 @@ class MYSQLInterface{
 			,", MA.round AS __round"
 			,", MA.theme AS __theme"
 			,", MA.startdttm AS __startdttm"
+			,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
 			,", MA.membership_id AS __membership_id"
 			,", MEMBERSHIP.name AS __membership_name"
 			,", MEMBERSHIP.desc AS __membership_desc"
@@ -5269,7 +5314,7 @@ class MYSQLInterface{
 		@ Public
 		@ Desc : ACTION COLLECTION을 추가합니다. 새로 추가한 객체의 id를 돌려줍니다.
 	*/
-	private function insert_action_collection_n_meeting_agenda($action_collection_id, $meeting_agenda_id) {
+	public function insert_action_collection_n_meeting_agenda($action_collection_id, $meeting_agenda_id) {
 		
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -5290,16 +5335,28 @@ class MYSQLInterface{
 			return;
 		}
 	}
+	public function get_recent_action_collection_by_meeting_id($recent_meeting_id) {
 
-	// @ Desc : MEMBERSHIP ID로 가장 최근의 ACTION COLLECTION의 ID를 가져옵니다.
-	public function select_recent_action_id_collection_by_membership($membership_id) {
-		// wonder.jung11
-		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
-			return -1;
+		if($this->is_not_unsigned_number(__FUNCTION__, $recent_meeting_id)){
+			return null;
 		}
 
-		// 가장 최근에 등록된 MEETING ID를 가져옵니다.
-		$latest_meeting_id = $this->get_meeting_agenda_id_upcoming($membership_id);
+		$recent_action_id = $this->select_recent_action_id_collection_by_meeting_id($recent_meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $recent_action_id)){
+			return null;
+		}
+
+		$recent_root_action_collection = null;
+		if(0 < $recent_action_id) {
+			$recent_root_action_collection = $this->get_root_action_collection($recent_action_id, $recent_meeting_id);	
+		}
+
+		return $recent_root_action_collection;
+
+	}
+	// @ Desc : MEETING ID로 가장 최근의 ACTION COLLECTION의 ID를 가져옵니다.
+	public function select_recent_action_id_collection_by_meeting_id($latest_meeting_id) {
+
 		if($this->is_not_unsigned_number(__FUNCTION__, $latest_meeting_id)){
 			return -1;
 		}
@@ -5310,6 +5367,7 @@ class MYSQLInterface{
 				"SELECT IFNULL(action_collection_id, -1) AS __action_collection_id"
 				," FROM ACTION_COLLECTION_N_MEETING_AGENDA"
 				," WHERE meeting_agenda_id=$latest_meeting_id"
+				," ORDER BY action_collection_id DESC"
 				," LIMIT 1"
 			)
 		);
@@ -5325,7 +5383,42 @@ class MYSQLInterface{
 		}
 
 		return $result->__action_collection_id;
-	}	
+	}
+
+	// @ Desc : MEMBERSHIP ID로 과거의 것중, 가장 최근의 ACTION COLLECTION을 가져옵니다.
+	private function select_immediate_past_action_collection_by_membership_id($membership_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return null;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT ACNMA.action_collection_id AS __action_collection_id"
+				," , ACNMA.meeting_agenda_id AS __meeting_agenda_id"
+				," , ACNMA.regdttm AS __regdttm"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA AS ACNMA"
+				," LEFT JOIN MEETING_AGENDA AS MA ON MA.id=ACNMA.meeting_agenda_id"
+				," WHERE MA.membership_id=$membership_id"
+				," AND MA.regdttm < DATE_FORMAT(NOW(), '%Y%m%d000000')"
+				," ORDER BY ACNMA.action_collection_id DESC "
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+		$result = $query_manager->get_result();
+
+		if(is_null($result)) {
+			return null;
+		}
+
+		return $result;
+	}
 
 	// @ Sample
 	/*
@@ -5628,7 +5721,7 @@ class MYSQLInterface{
 			
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 
-		$target_action_obj->show_info();
+		// $target_action_obj->show_info();
 
 		// 어떤 타입인지 구분한다.
 		$action_obj_copy = null;
@@ -5657,7 +5750,7 @@ class MYSQLInterface{
 			return;
 		}
 
-		$action_obj_copy->show_info();
+		// $action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
 	}
@@ -5702,7 +5795,7 @@ class MYSQLInterface{
 			return;
 		}
 
-		$action_obj_copy->show_info();
+		// $action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
 	}	
@@ -7020,6 +7113,23 @@ class MYSQLInterface{
 		}
 
 		return $this->get_root_action_collection($root_action_id, $meeting_id);
+	}
+	// @ desc : meeting id로 최신 root aciton collection 을 가져옵니다.
+	public function get_immediate_past_root_action_collection_by_membership_id($membership_id=-1) {
+
+		// wonder.jung11
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+
+		$recent_action_collection_detail = $this->select_immediate_past_action_collection_by_membership_id($membership_id);
+
+		$recent_root_action_collection = null;
+		if(!is_null($recent_action_collection_detail)) {
+			$recent_root_action_collection = $this->get_root_action_collection($recent_action_collection_detail->__action_collection_id, $recent_action_collection_detail->__meeting_agenda_id);	
+		}
+
+		return $recent_root_action_collection;
 	}
 	public function get_root_action_collection($action_collection_id=-1, $meeting_id=-1) {
 
@@ -9055,18 +9165,22 @@ class MYSQLInterface{
 		@ Desc : BDTM Toastmaster timeline 템플릿을 만들어 봅니다. Action Obj로 구조를 만든 다음, 이 구조를 DB로 이전하는 과정을 검사합니다.
 		DB 업데이트 횟수를 최소한으로 줄입니다.
 	*/
-	public function get_template_meeting_timeline_BDTM($hh_mm_begins) {
+	public function get_template_meeting_timeline_BDTM($hh_mm_begins="", $meeting_agenda_id=-1, $root_action_obj_name="") {
 
 		if($this->is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
 			echo "\$this->is_not_valid_time_format_hh24_mm(\$hh_mm_begins)<br/>";
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $root_action_obj_name, "root_action_obj_name")){
 			return;
 		}
 
 		$params = new ToastMasterParamManager();
 
 		// 0. Action obj로 리스트를 구성합니다.
-		$root_action_obj_name = "Toastmaster Timeline";
-		$meeting_agenda_id = 134; // 243th Attitude of gratitude
 		$root_action_obj = 
 		new ActionCollection(
 			// $action_name=""
@@ -9098,7 +9212,7 @@ class MYSQLInterface{
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
-			"Greetings"
+			"Greetings for all"
 			// $time_str_hhmm_init=""
 			, $time_init_hh24_mm
 			// $time_str_hhmm_specific=""
@@ -9980,15 +10094,6 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-		// 5-1-4. Empty space
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			" "
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 20:25
 
 
@@ -10042,15 +10147,6 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-		// 6-1-2. Empty Space
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			" "
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:00
 
 

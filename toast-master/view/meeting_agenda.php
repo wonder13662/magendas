@@ -62,8 +62,6 @@
 		}
 	}
 
-
-
 	$meeting_agenda_obj = null;
 	if($meeting_id > 0) {
 
@@ -72,22 +70,15 @@
 		$meeting_agenda_obj = $meeting_agenda_arr[0];
 
 	}
+	// 과거의 가장 직전의 미팅 정보를 가져옵니다.
+	// $immediate_prev_meeting_obj = $wdj_mysql_interface->get_immediate_past_meeting_agenda($meeting_membership_id);
+	// $immediate_prev_meeting_startdate = "";
+	// $immediate_prev_meeting_id = -1;
+	// if(!is_null($immediate_prev_meeting_obj)) {
+	// 	$immediate_prev_meeting_id = $immediate_prev_meeting_obj->__meeting_id;
+	// 	$immediate_prev_meeting_startdate = $immediate_prev_meeting_obj->__startdate;
+	// }
 
-	// REMOVE ME
-	// $today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));
-	// $today_speech_speaker_v2_list = $wdj_mysql_interface->sel_speech_speaker($meeting_id);
-
-	// REMOVE ME
-	// $schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
-
-	// REMOVE ME
-	// $today_news_list = $wdj_mysql_interface->getNews($meeting_id);
-
-	// REMOVE ME
-	// $executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
-	// FIX ME - action type을 사용하는 템플릿으로 바꿉니다.
-	// $recent_club_schedule_timeline_list = $wdj_mysql_interface->getRecentClubTimelines($cookie_meeting_membership_id, 2);
-	// $schedule_timeline_template_list = $wdj_mysql_interface->getTimelineTemplateList();
 
 
 	$member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
@@ -98,30 +89,28 @@
 
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
-	// TEST
-	// test action list
-	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
-	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("19:40");
-
-	// 가장 최근의 ACTION COLLECTION을 가져옵니다.
-	$recent_action_collection_id = $wdj_mysql_interface->select_recent_action_id_collection_by_membership($meeting_membership_id);
-
-	$meeting_action_list = null;
-	if(!is_null($recent_action_collection_id) && (0 < $recent_action_collection_id)) {
-		$meeting_action_list = $wdj_mysql_interface->get_root_action_collection($recent_action_collection_id, $meeting_id);
+	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
+	$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
+	$action_collection_obj_immediate_past_std = null;
+	$meeting_obj_immediate_past = null;
+	if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
+		$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
+		$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
+		$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
 	}
+
+	// 화면에 표시할 action list.
+	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($meeting_id);
 	$meeting_action_list_std = null;
-	if(ActionCollection::is_instance($meeting_action_list)) {
-		$meeting_action_list_std = $meeting_action_list->get_std_obj();	
+	if(ActionCollection::is_instance($action_collection_obj_recent)) {
+		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
 	}
 
-
-
 	// TEST
-	$wdj_mysql_interface->add_meeting_agenda($meeting_membership_id, 1);
-
-
-
+	// $recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection(6669, 134);
+	// $recent_root_action_collection_std = $recent_root_action_collection->get_std_obj();
+	// $root_action_collection_copy = $wdj_mysql_interface->copy_action_obj($recent_root_action_collection);
+	// $root_action_collection_copy_std = $root_action_collection_copy->get_std_obj();
 
 	// NEXT 
 	// 1. IFRAME으로 PDF를 보여준다. 
@@ -242,20 +231,29 @@
 							<?php
 
 							// 지난번의 아젠다 정보
-							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
-							echo "<a id=\"agenda_template\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">2016-03-10<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
-							echo "</div>";
+							if(!is_null($action_collection_obj_immediate_past)) {
+
+								$immediate_prev_meeting_id = $action_collection_obj_immediate_past->get_meeting_agenda_id();
+								$immediate_prev_meeting_startdate = $meeting_obj_immediate_past->__startdate;
+
+								echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
+								echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"$immediate_prev_meeting_id\" action_template=\"$params->ACTION_TEMPLATE_PREV_MEETING\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">$immediate_prev_meeting_startdate<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+								echo "</div>";
+							}
 
 							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다.
 							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
-							echo "<a id=\"agenda_template\" action_template=\"ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+							echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
 							echo "</div>";
 
 							?>
 								</li>
 								<li class="list-group-item list-group-item-warning" style="padding-left:10px;padding-right:10px;">
 									<strong>THEME</strong>
-									<input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+									<!-- 
+									<input type="text" class="form-control" id="meeting-theme" aria-describedby="basic-addon3">
+									-->
+									<input type="text" class="form-control" id="meeting-theme">
 								</li>
 								<li class="list-group-item list-group-item-warning" style="padding-left:10px;padding-right:10px;">
 									<strong>DATE</strong>
@@ -345,10 +343,34 @@ var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
 var meeting_action_list_std = <?php echo json_encode($meeting_action_list_std);?>;
-var meeting_action_list = _action.get_action_obj(meeting_action_list_std);
+var meeting_action_list = undefined;
+if(meeting_action_list_std != undefined) {
+	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
+}
 
 console.log(">>> meeting_action_list_std ::: ",meeting_action_list_std);
 console.log(">>> meeting_action_list ::: ",meeting_action_list);
+
+// var immediate_prev_meeting_obj = <?php echo json_encode($immediate_prev_meeting_obj);?>;
+// console.log(">>> immediate_prev_meeting_obj ::: ",immediate_prev_meeting_obj);
+
+
+
+// TEST
+	// $recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection(6669, 134);
+	// $recent_root_action_collection_std = $recent_root_action_collection->get_std_obj();
+	// $root_action_collection_copy = $wdj_mysql_interface->copy_action_obj($recent_root_action_collection);
+	// $root_action_collection_copy_std = $root_action_collection_copy->get_std_obj();
+	// console.log(">>> root_action_collection_copy_std ::: ",root_action_collection_copy_std);
+	// var root_action_collection_copy_std = <?php echo json_encode($root_action_collection_copy_std);?>;
+
+// 과거의 직전 미팅 정보
+var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
+console.log(">>> action_collection_obj_immediate_past_std ::: ",action_collection_obj_immediate_past_std);
+var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_past);?>;
+console.log(">>> meeting_obj_immediate_past ::: ",meeting_obj_immediate_past);
+
+
 
 
 // recent_action_collection_id
@@ -376,6 +398,7 @@ var meeting_agenda_data_obj =
 {
 	meeting_agenda_list:meeting_agenda_list
 	, meeting_agenda_obj:meeting_agenda_obj
+	// , immediate_prev_meeting_obj:immediate_prev_meeting_obj
 	, meeting_membership_id:meeting_membership_id
 	, member_list:member_list
 	, member_role_cnt_list:member_role_cnt_list

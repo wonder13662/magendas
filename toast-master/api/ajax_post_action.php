@@ -40,10 +40,15 @@
 
 	// MEETING AGENDA COMMON
 	$MEETING_ID = $params->getParamNumber($params->MEETING_ID);
+	$MEETING_ID_SRC = $params->getParamNumber($params->MEETING_ID_SRC);
 
 	$result->MEETING_ID = $MEETING_ID;
+	$result->MEETING_ID_SRC = $MEETING_ID_SRC;
 
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
+	$ACTION_TEMPLATE_NAME = $params->getParamString($params->ACTION_TEMPLATE_NAME);
+	$ACTION_BEGIN_HH_MM = $params->getParamString($params->ACTION_BEGIN_HH_MM, "19:30");
+
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
 	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
 	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
@@ -58,6 +63,8 @@
 
 	// DEBUG
 	$result->ACTION_NAME = $ACTION_NAME;
+	$result->ACTION_TEMPLATE_NAME = $ACTION_TEMPLATE_NAME;
+	$result->ACTION_BEGIN_HH_MM = $ACTION_BEGIN_HH_MM;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
 	$result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR;
 	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
@@ -97,7 +104,52 @@
 
 	}
 
-	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
+	if( (strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) && (!empty($ACTION_TEMPLATE_NAME))) {
+
+		// TEMPLATE
+		// 템플릿을 적용합니다.
+		if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_BUNDANG) == 0) {
+
+			// 기본 템플릿 적용
+			$action_obj_BDTM = $wdj_mysql_interface->get_template_meeting_timeline_BDTM($ACTION_BEGIN_HH_MM, $MEETING_ID, $ACTION_NAME);
+			$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
+
+			// DB에서 다시 정보를 가져옴.
+			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection($root_action_obj->get_id(), $MEETING_ID);
+
+			$result->root_action_collection_updated = $root_action_obj->get_std_obj();
+
+		} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_PREV_MEETING) == 0) {
+
+			// 직전 미팅 템플릿 적용
+			// 1. 직전 미팅 템플릿 정보를 가져온다.
+			$recent_action_id = $wdj_mysql_interface->select_recent_action_id_collection_by_meeting_id($MEETING_ID_SRC);
+			// echo "\$recent_action_id ::: $recent_action_id<br/>";
+
+			$recent_root_action_collection = null;
+			if(0 < $recent_action_id) {
+				$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection($recent_action_id, $MEETING_ID_SRC);	
+			}
+			$root_action_collection_copy = null;
+			if(!is_null($recent_root_action_collection)) {
+				$root_action_collection_copy = $wdj_mysql_interface->add_action($recent_root_action_collection);
+			}
+			if(!is_null($root_action_collection_copy) && ($root_action_collection_copy->get_id() != $recent_action_id)) {
+
+				$root_action_collection_copy_id = $root_action_collection_copy->get_id();
+				$result->root_action_collection_copy_id = $root_action_collection_copy_id;
+
+				// 해당 액션을 다시 로딩.
+				$root_action_collection_copy = $wdj_mysql_interface->get_root_action_collection($root_action_collection_copy_id, $MEETING_ID);
+			}
+
+			if(!is_null($root_action_collection_copy)) {
+				$result->root_action_collection_updated = $root_action_collection_copy->get_std_obj();	
+			}
+
+		}		
+
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		// COPY
 		// LIST일 경우에는 action item이 1개만 추가. TABLE일 경우에는 이전 열의 모든 action item이 복사되어 열이 추가되어야 함.
@@ -135,7 +187,6 @@
 			return;
 		}
 		$result->root_action_collection_updated = $root_action_collection_updated->get_std_obj();
-
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 

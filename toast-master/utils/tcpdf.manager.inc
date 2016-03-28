@@ -1304,7 +1304,7 @@ class TCPDFManager{
 			// cell_x_pos
 			, $parent_element_set->get_element_set_x_pos()
 			// cell_y_pos
-			, $parent_element_set->get_element_set_bottom_y_pos() + 0.4
+			, $parent_element_set->get_element_set_bottom_y_pos() + 0.3
 			// cell_width / 
 			, $parent_element_set->get_element_set_width()
 			// cell_height / 테이블의 전체 높이를 조정해야 하므로 입력하지 않습니다.

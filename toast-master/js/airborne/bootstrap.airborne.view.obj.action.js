@@ -9256,7 +9256,11 @@ airborne.bootstrap.obj.__action = {
 		return element_set;
 	}
 	,event_hierarchy_manager:null
+	,remove_event_hierarchy_manager:function(){
+		this.event_hierarchy_manager = null;
+	}
 	,get_event_hierarchy_manager:function(){
+		
 		if(this.event_hierarchy_manager != null) return this.event_hierarchy_manager;
 
 		this.event_hierarchy_manager = {
