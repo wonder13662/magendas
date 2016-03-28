@@ -2519,8 +2519,6 @@ airborne.bootstrap.view.obj.__action_table = {
 					return;
 				}
 
-				console.log("HERE / set_delegate_btn_eject_click / ",clicked_action_item_obj.get_action_name());
-
 				var jsm = cur_event_manager.get_element_set().get_element_collection_set().jump_spot_manager;
 
 				// 클릭시의 델리게이트 정의
@@ -2619,7 +2617,7 @@ airborne.bootstrap.view.obj.__action_table = {
 							consoler.off();
 
 							consoler.say("");
-							consoler.say("HERE / action_item_obj_mouse_over ::: ",action_item_obj_mouse_over);
+							consoler.say("action_item_obj_mouse_over ::: ",action_item_obj_mouse_over);
 
 							// 포커싱된 테이블 열의 mouse over된 엘리먼트의 action item 참조.
 							var cur_sibling_action_item_obj_mouse_over = action_item_obj_mouse_over;
@@ -2668,25 +2666,25 @@ airborne.bootstrap.view.obj.__action_table = {
 							var clicked_action_item_obj_idx = clicked_action_item_obj.get_idx();
 
 							consoler.say("--------------------------------------------------------------------------------");
-							consoler.say("HERE / clicked_action_item_obj_idx :: ",clicked_action_item_obj_idx);
-							consoler.say("HERE / clicked_action_item_name :: ",clicked_action_item_obj.get_action_name());
-							consoler.say("HERE / clicked_action_item_coordinate :: ",clicked_action_item_obj.get_coordinate());
+							consoler.say("clicked_action_item_obj_idx :: ",clicked_action_item_obj_idx);
+							consoler.say("clicked_action_item_name :: ",clicked_action_item_obj.get_action_name());
+							consoler.say("clicked_action_item_coordinate :: ",clicked_action_item_obj.get_coordinate());
 							consoler.say("--------------------------------------------------------------------------------");
-							consoler.say("HERE / idx_cur_sibling_action_item_obj_mouse_over :: ",idx_cur_sibling_action_item_obj_mouse_over);
-							consoler.say("HERE / cur_sibling_action_item_name_mouse_over :: ",cur_sibling_action_item_obj_mouse_over.get_action_name());
-							consoler.say("HERE / cur_sibling_action_item_coordinate_mouse_over :: ",cur_sibling_action_item_obj_mouse_over.get_coordinate());
+							consoler.say("idx_cur_sibling_action_item_obj_mouse_over :: ",idx_cur_sibling_action_item_obj_mouse_over);
+							consoler.say("cur_sibling_action_item_name_mouse_over :: ",cur_sibling_action_item_obj_mouse_over.get_action_name());
+							consoler.say("cur_sibling_action_item_coordinate_mouse_over :: ",cur_sibling_action_item_obj_mouse_over.get_coordinate());
 							consoler.say("--------------------------------------------------------------------------------");
-							consoler.say("HERE / idx_cur_sibling_action_item_obj_mouse_over_before :: ",idx_cur_sibling_action_item_obj_mouse_over_before);
+							consoler.say("idx_cur_sibling_action_item_obj_mouse_over_before :: ",idx_cur_sibling_action_item_obj_mouse_over_before);
 							if(_action.is_valid_action_item_obj(cur_sibling_action_item_obj_mouse_over_before)) {
-								consoler.say("HERE / cur_sibling_action_item_name_mouse_over_before :: ",cur_sibling_action_item_obj_mouse_over_before.get_action_name());
-								consoler.say("HERE / cur_sibling_action_item_coordinate_mouse_over_before :: ",cur_sibling_action_item_obj_mouse_over_before.get_coordinate());
+								consoler.say("cur_sibling_action_item_name_mouse_over_before :: ",cur_sibling_action_item_obj_mouse_over_before.get_action_name());
+								consoler.say("cur_sibling_action_item_coordinate_mouse_over_before :: ",cur_sibling_action_item_obj_mouse_over_before.get_coordinate());
 							}
 							consoler.say("--------------------------------------------------------------------------------");
 
-							consoler.say("HERE / idx_cur_sibling_action_item_obj_mouse_over_after :: ",idx_cur_sibling_action_item_obj_mouse_over_after);
+							consoler.say("idx_cur_sibling_action_item_obj_mouse_over_after :: ",idx_cur_sibling_action_item_obj_mouse_over_after);
 							if(_action.is_valid_action_item_obj(cur_sibling_action_item_obj_mouse_over_after)) {
-								consoler.say("HERE / cur_sibling_action_item_name_mouse_over_after :: ",cur_sibling_action_item_obj_mouse_over_after.get_action_name());
-								consoler.say("HERE / cur_sibling_action_item_coordinate_mouse_over_after :: ",cur_sibling_action_item_obj_mouse_over_after.get_coordinate());
+								consoler.say("cur_sibling_action_item_name_mouse_over_after :: ",cur_sibling_action_item_obj_mouse_over_after.get_action_name());
+								consoler.say("cur_sibling_action_item_coordinate_mouse_over_after :: ",cur_sibling_action_item_obj_mouse_over_after.get_coordinate());
 							}
 
 

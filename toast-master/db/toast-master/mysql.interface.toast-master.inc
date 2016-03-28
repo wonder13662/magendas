@@ -309,6 +309,19 @@ class MYSQLInterface{
 
 	}
 
+	public function is_not_number($function_name="", $target, $param_name=""){
+
+		$is_not_number = !is_numeric($target);
+		if($is_not_number == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / \$this->is_not_number(\$$param_name)<br/>";
+		}
+
+		return $is_not_number;
+
+	}
+
+
+
 	private function is_not_valid_array($function_name="", $target, $param_name=""){
 		return !$this->is_valid_array($function_name, $target, $param_name);
 	}
@@ -616,7 +629,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung33
 		// 최신순으로 등록된 미팅을 10개 가져옵니다.
 		$recent_meeting_agenda_list =
 		$this->getMeetingAgendaList(
@@ -765,7 +777,6 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	// wonder.jung33
 	private function get_meeting_agenda_by_round($meeting_round, $startdttm, $meeting_membership_id=-1){
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_round, "meeting_round")){
@@ -1957,7 +1968,6 @@ class MYSQLInterface{
 	// @ Desc : 멤버쉽 정보를 가져옵니다.
 	public function get_membership($membership_id=-1) {
 
-		// wonder.jung
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
 			return;
 		}
@@ -6394,7 +6404,7 @@ class MYSQLInterface{
 		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
 			return;
 		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "action_item_order")){
+		if($this->is_not_number(__FUNCTION__, $action_item_order, "action_item_order")){
 			return;
 		}
 
@@ -6809,7 +6819,7 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
 			return;
 		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
+		if($this->is_not_number(__FUNCTION__, $order, "order")){
 			return;
 		}
 
@@ -6899,7 +6909,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung11
 		$parent_action_list_id = $this->get_action_collection_id($parent_action_list_hash_key);
 		$child_action_item_id = $this->get_action_item_id($child_action_item_hash_key);
 
@@ -7117,7 +7126,6 @@ class MYSQLInterface{
 	// @ desc : meeting id로 최신 root aciton collection 을 가져옵니다.
 	public function get_immediate_past_root_action_collection_by_membership_id($membership_id=-1) {
 
-		// wonder.jung11
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
 			return;
 		}
@@ -7431,7 +7439,7 @@ class MYSQLInterface{
 		return $action_item_copy;
 	}	
 	// @ desc : add row into table. it makes a copy previous row.
-	public function add_row_into_table($table_field_action_item_obj=null) {
+	public function add_row_into_table($table_field_action_item_obj=null, $action_name="", $action_context="") {
 		
 		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
 			return;
@@ -7451,7 +7459,9 @@ class MYSQLInterface{
 
 			// 엘리먼트를 복사합니다.
 			$is_shy = 0;
-			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);
+
+			// wonder.jung
+			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $action_context);
 		}
 
 		$table_field_action_item_obj_after = $table_field_action_item_obj->get_sibling_after();
@@ -7736,6 +7746,7 @@ class MYSQLInterface{
 				return;
 			}
 
+			// wonder.jung
 			$child_collection_obj = null;
 			if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
 				// 1. 리스트 형일 경우.  
@@ -7745,7 +7756,7 @@ class MYSQLInterface{
 					, $__item_child_collection_order
 					, $__item_child_collection_is_shy
 				);
-			} else if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
+			} else if($this->COLLECTION_TYPE_TABLE == $__item_child_collection_type) {
 				// 2. 테이블 형일 경우.
 				$child_collection_obj = 
 				$this->get_action_table_object(
@@ -8069,6 +8080,7 @@ class MYSQLInterface{
 			return;
 		}
 		
+		// wonder.jung
 		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before, $action_name, $action_context);
 		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
 			return;

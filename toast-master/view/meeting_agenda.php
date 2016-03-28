@@ -106,12 +106,6 @@
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
 	}
 
-	// TEST
-	// $recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection(6669, 134);
-	// $recent_root_action_collection_std = $recent_root_action_collection->get_std_obj();
-	// $root_action_collection_copy = $wdj_mysql_interface->copy_action_obj($recent_root_action_collection);
-	// $root_action_collection_copy_std = $root_action_collection_copy->get_std_obj();
-
 	// NEXT 
 	// 1. IFRAME으로 PDF를 보여준다. 
 	// 2. PDF 영역에 투명 DIV으로 클릭 범위를 나눈다.
@@ -295,18 +289,12 @@
 		</div>
 		<!-- meeting agenda creator modal ends-->
 
-
-
-
-
-
-
 	</div>
 	<!-- meeting agenda container ends -->
 
-
-
-
+	<!-- white space init-->
+	<div id="white_space" style="height:300px;"></div>
+	<!-- white space ends-->
 
 <script>
 

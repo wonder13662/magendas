@@ -163,8 +163,18 @@
 		$result->action_item_id_before_debug = $action_item_obj_before->get_id();
 
 		if($action_item_obj_before->is_table_field_item()) {
+
+			// wonder.jung
 			// 새로운 아이템 추가 - TABLE
-			$cur_table_row_field_action_item_list_after = $wdj_mysql_interface->add_row_into_table($action_item_obj_before);
+			$cur_table_row_field_action_item_list_after = 
+			$wdj_mysql_interface->add_row_into_table(
+				// $table_field_action_item_obj=null
+				$action_item_obj_before
+				// $action_name=""
+				, $params->NOT_ASSIGNED
+				// $action_context=""
+				, ""
+			);
 
 			$cur_table_row_field_action_item_list_after_std = array();
 			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {

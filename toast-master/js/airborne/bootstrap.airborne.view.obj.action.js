@@ -630,7 +630,6 @@ airborne.bootstrap.obj.__action = {
 				if(is_shy === true) {
 					// shy 모드일 경우는 복사하는 객체가 자식 객체를 가지고 있는 엘리먼트인 경우, 
 					// 초기값으로 1개의 자식 객체만 세팅해서 연결해줍니다.
-					console.log("HERE / COPY / STOP");
 					this.reset_root_coordinate();
 					return action_obj_copy;
 				}
@@ -640,9 +639,6 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("copy / 001-0-0 / src_action_obj.has_after() : ",src_action_obj.has_after());
 				consoler.say("copy / 001-0-0 / action_obj_copy.has_before() : ",action_obj_copy.has_before());
 
-				console.log("src_action_obj :: ",src_action_obj);
-				console.log("action_obj_copy :: ",action_obj_copy);
-				
 				var cur_sibling_action_obj_after = src_action_obj.get_sibling_action_obj_after();
 				// 다음 형제 객체는 없을 수도 있다. 있는 경우만 검사.
 				if(cur_sibling_action_obj_after != undefined && _action.is_not_valid_action_obj(cur_sibling_action_obj_after)) {
@@ -3003,14 +2999,14 @@ airborne.bootstrap.obj.__action = {
 			,rollback_title_jq_text:function(){
 				// 사용자가 입력한 값을 취소하고 최초 값으로 복원합니다.
 
-				var _obj = airborne.bootstrap.obj;
 				// not allowed search list type.
 				if(	_obj.ELEMENT_TYPE_SEARCH_LIST == this.get_element_type() || 
 					_obj.ELEMENT_TYPE_TABLE_SEARCH_LIST == this.get_element_type()) {
 					return;
 				}
 
-				var cur_prev_value = this.get_title_input_jq_prev_value();
+				// var cur_prev_value = this.get_title_input_jq_prev_value();
+				var cur_prev_value = this.get_title_jq_attr_tossed_value();
 				if(_v.isNotValidStr(cur_prev_value)) return;
 
 				this.set_title_jq_text(cur_prev_value, true);
@@ -4572,8 +4568,6 @@ airborne.bootstrap.obj.__action = {
 			}
 			,show_parent_view_mode:function(){
 
-				console.log("HERE / show_parent_view_mode");
-
 				var cur_element_set = this.get_element_set();
 				if(cur_element_set == null) return;
 
@@ -4702,7 +4696,7 @@ airborne.bootstrap.obj.__action = {
 
 				var cur_title = "";
 				if(cur_action_item_obj.get_action_is_not_shy()){
-					cur_title = this.get_title_jq_value();
+					cur_title = this.get_title_jq_attr_tossed_value();
 				}
 
 				if(cur_title === _action.PLACE_HOLDER_NOT_ASSIGNED) {
@@ -4917,7 +4911,6 @@ airborne.bootstrap.obj.__action = {
 				if(cur_action_item_obj.get_action_is_shy()) {
 
 					// 처음으로 자식 엘리먼트를 추가
-					console.log("처음으로 자식 엘리먼트를 추가");
 
 				} else {
 
@@ -4928,7 +4921,6 @@ airborne.bootstrap.obj.__action = {
 					cur_element_collection_set.add_element(this);
 
 					// 추가한 뒤에 사용자가 기본값인 "New Item"을 수정할 수 있도록 수정 창을 보여줍니다.
-					console.log("HERE / show_input_mode_add_row / cur_action_item_obj ::: ",cur_action_item_obj);
 					var cur_sibling_action_obj_after = cur_action_item_obj.get_sibling_action_obj_after();
 					if(_action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)) {
 						console.log("!Error! / show_input_mode_add_row / _action.is_not_valid_action_item_obj(cur_sibling_action_obj_after)");
@@ -5098,7 +5090,7 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				var decoded_title = _html.get_decode_text(this.title_jq.html());
+				var decoded_title = _html.get_decode_text(this.get_title_jq_attr_tossed_value());
 
 				if(_action.PLACE_HOLDER_NOT_ASSIGNED === decoded_title) {
 					decoded_title = "";
@@ -5142,7 +5134,6 @@ airborne.bootstrap.obj.__action = {
 				if(is_only_one) {
 					consoler.say("rr / 1-1 / 마지막 1개열이 삭제될 경우, shy row로 바꿉니다. / " + debug_msg);
 					cur_action_item_obj.set_action_is_shy(true);
-					console.log("HERE / XXX / 001");
 
 					var cur_parent_event_manager = this.get_parent_event_manager();
 					if(cur_parent_event_manager == undefined) {
@@ -5889,14 +5880,11 @@ airborne.bootstrap.obj.__action = {
 				
 				var cur_title_input_btn_ok_jq = this.get_title_input_btn_ok_jq();
 				if(cur_title_input_btn_ok_jq != undefined) {
-					console.log("HERE / CHECK / 003");
 					this.off_title_input_btn_ok_jq();
 				}
 
 			}
 			,set_event_btn_ok_on_input_group:function(cur_event_type){
-
-				console.log("HERE / set_event_btn_ok_on_input_group / cur_event_type ::: ",cur_event_type);
 
 				// TODO _obj.EVENT_TYPE_INSERT_ITEM 나 _action.EVENT_TYPE_ADD_ROW이 1개로 통합되어야 할 듯.
 				if( _obj.EVENT_TYPE_INSERT_ITEM !== cur_event_type && 
@@ -6340,7 +6328,6 @@ airborne.bootstrap.obj.__action = {
 
 				var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
 				this.show_input_mode(event_mode);
-
 
 			}
 			,get_element_area:function(){
