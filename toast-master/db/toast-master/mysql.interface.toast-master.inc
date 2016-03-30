@@ -938,13 +938,40 @@ class MYSQLInterface{
 		$result = $query_manager->get_result();		
 
 		return $result;
+	}
+
+	// @ Desc : meeting id로 membership id를 가져옵니다.
+	public function get_membership_id_by_meeting_id($meeting_id=-1){
+
+		// wonder.jung
+		if($this->is_empty(__FUNCTION__, $meeting_id, "meeting_id")){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.membership_id AS __membership_id"
+				,"FROM MEETING_AGENDA AS MA"
+				,"WHERE MA.id=$meeting_id"
+				,"AND MA.`status`=\"A\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result->__membership_id;
+
 	}	
 
 	/*
 		@ Public
 		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
 	*/
-	public function get_meeting_agenda_by_id($meeting_membership_id, $meeting_id){
+	public function get_meeting_agenda_by_id($meeting_membership_id=-1, $meeting_id=-1){
 
 		$function_name = "get_meeting_agenda_by_id";
 		if($this->isNotUnsignedNumber($meeting_membership_id)){
@@ -1921,6 +1948,30 @@ class MYSQLInterface{
 		return $__member_id;
 	}	
 
+	public function get_member_id_by_hash_key($member_hash_key=""){
+
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				," FROM `MEMBER`"
+				," WHERE `MEMBER`.`hash_key`=\"$member_hash_key\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result->__member_id;
+
+	}	
+
 	public function getMemberByMemberHashKey($member_hash_key){
 
 		$function_name = "getMemberByMemberHashKey";
@@ -2874,6 +2925,59 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function has_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return false;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return false;
+		}
+
+		return $this->has_meeting_role($meeting_agenda_id, $role_id, $member_id);
+
+	}
+	private function has_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(`id`) AS __today_role_cnt"
+				," FROM `MA_ROLE`"
+				," WHERE `meeting_agenda_id`=$meeting_agenda_id"
+				," AND `role_id`=$role_id"
+				," AND `member_id`=$member_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+
+		return (0 < $result)?true:false;
+
+	}
+	// REMOVE ME
 	private function hasTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
@@ -2887,15 +2991,116 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 		$today_role_cnt = $json_res_obj->result[0]->__today_role_cnt;
 
-		$has_today_role = false;//false
-		if($has_today_role > 0){
-			$has_today_role = true;
+		$has_meeting_role = false;//false
+		if($has_meeting_role > 0){
+			$has_meeting_role = true;
 		}
 
-		return $has_today_role;
+		return $has_meeting_role;
 	}
 
-	public function insertTodayRole($meeting_agenda_id, $role_id, $member_id){
+	public function set_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key="") {
+		$has_meeting_role_by_hash_key = $this->has_meeting_role_by_hash_key($meeting_agenda_id, $role_id, $member_hash_key);
+		if($has_meeting_role_by_hash_key) {
+			$this->update_meeting_role_by_hash_key($meeting_agenda_id, $role_id, $member_hash_key);
+		} else {
+			$this->insert_meeting_role_by_hash_key($meeting_agenda_id, $role_id, $member_hash_key);
+		}
+	}
+	private function insert_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$this->insert_meeting_role($meeting_agenda_id, $role_id, $member_id);
+
+	}
+	private function insert_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO MA_ROLE"
+				," (meeting_agenda_id, role_id, member_id, regdttm, updttm)"
+				," VALUES ($meeting_agenda_id, $role_id, $member_id, DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+	private function update_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$this->update_meeting_role($meeting_agenda_id, $role_id, $member_id);
+	}
+	private function update_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_ROLE`"
+				," SET `member_id`=$member_id,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE `role_id`=$role_id"
+				," AND `meeting_agenda_id`=$meeting_agenda_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}	
+	// REMOVE ME
+	/*
+	private function insertTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
 		"INSERT INTO MA_ROLE"
@@ -2911,14 +3116,16 @@ class MYSQLInterface{
 	}
 	public function updateTodayRole($meeting_agenda_id, $role_id, $member_id){
 		// 1. 
-		$has_today_role = $this->hasTodayRole($meeting_agenda_id, $role_id, $member_id);
 
-		if($has_today_role){
+		$has_meeting_role = $this->hasTodayRole($meeting_agenda_id, $role_id, $member_id);
+
+		if($has_meeting_role){
 			return $this->_updateTodayRole($meeting_agenda_id, $role_id, $member_id);
 		} else {
 			return $this->insertTodayRole($meeting_agenda_id, $role_id, $member_id);
 		}
 	}
+	// REMOVE ME
 	private function _updateTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
@@ -2932,23 +3139,7 @@ class MYSQLInterface{
 
 		return $this->getSimpleResult($json_res_obj);
 	}
-
-
-
-	public function deleteTodayRole($meeting_agenda_id, $role_id=null){
-
-		$query = 
-		"DELETE FROM MA_ROLE"
-		. " WHERE meeting_agenda_id=$meeting_agenda_id"
-		;
-		if($this->isUnsignedNumber($role_id)){
-			$query .= " AND role_id=$role_id";
-		}
-
-		$json_res_obj = $this->getModifyResult($query);
-
-		return $json_res_obj->result;
-	}
+	*/
 
 
 	public function getTodayRoleFixedList(){
@@ -5364,6 +5555,37 @@ class MYSQLInterface{
 		return $recent_root_action_collection;
 
 	}
+
+	// @ FOR DEBUG
+	// @ Desc : MEETING ID와 ACTION COLLECTION ID로 토스트마스터트 미팅에 할당된 ACTION COLLECTION이 있는지 확인합니다. 
+	private function has_action_collection_toastmasters_meeting($action_collection_id=-1, $meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(action_collection_id) AS __action_collection_cnt"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," AND action_collection_id=$action_collection_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return false;
+		}
+		$result = $query_manager->get_result();
+
+		return (0 < $result->__action_collection_cnt)?true:false;
+	}
+
 	// @ Desc : MEETING ID로 가장 최근의 ACTION COLLECTION의 ID를 가져옵니다.
 	public function select_recent_action_id_collection_by_meeting_id($latest_meeting_id) {
 
@@ -7139,12 +7361,102 @@ class MYSQLInterface{
 
 		return $recent_root_action_collection;
 	}
-	public function get_root_action_collection($action_collection_id=-1, $meeting_id=-1) {
+	// @ toastmasters에서 사용하는 action collection을 돌려줍니다.
+	public function get_root_action_collection_toastmasters($action_collection_id=-1, $meeting_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
 		}
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		// meeting id와 action collection id로 미팅에 연결된 action collection이 있는지 확인한다.
+		// 미팅과 연결이 되어 있지 않다면 존재하는 ACTION COLLECTION이라도 돌려주지 않습니다.
+		$has_action_collection_toastmasters_meeting = 
+		$this->has_action_collection_toastmasters_meeting($action_collection_id, $meeting_id);
+
+		if(!$has_action_collection_toastmasters_meeting) {
+			return;
+		}
+
+		$root_action_collection = $this->get_root_action_collection($action_collection_id);
+
+		// 스피치, 롤 등의 정보가 등록되었다면, DB에서 가져와 추가한다.
+		// 해당 미팅의 멤버쉽 정보를 가져옵니다.
+		$membership_id = $this->get_membership_id_by_meeting_id($meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+
+		// 1. 롤 정보
+		$meeting_role_list = $this->getTodayRoleList($membership_id, $meeting_id);
+
+		$action_item_toastmaster = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_TOASTMASTER);
+
+		// 현재 미팅의 토스트마스터의 역할 정보를 가져온다.
+
+		$action_item_word_n_quote = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_WORD_N_QUOTE_MASTER);
+
+		$action_item_table_topic = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_TABLE_TOPIC_MASTER);
+
+		$action_item_mini_debate_master = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_MINI_DEBATE_MASTER);
+
+		$action_item_general_evaluator = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_GENERAL_EVALUATOR);
+
+		$action_item_grammarian = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_GRAMMARIAN);
+
+		$action_item_ah_counter = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_AH_COUNTER);
+
+		$action_item_timer = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $params->ROLE_ID_TIMER);
+
+
+	// public $ROLE_ID_SPEAKER=111;
+	// public $ROLE_ID_EVALUATOR=222;
+	// public $ROLE_ID_TOASTMASTER=2;
+	// public $ROLE_ID_WORD_N_QUOTE_MASTER=4;
+	// public $ROLE_ID_TABLE_TOPIC_MASTER=5;
+	// public $ROLE_ID_MINI_DEBATE_MASTER=6;
+	// public $ROLE_ID_GENERAL_EVALUATOR=7;
+	// public $ROLE_ID_GRAMMARIAN=11;
+	// public $ROLE_ID_AH_COUNTER=10;
+	// public $ROLE_ID_TIMER=9;
+
+
+
+		// wonder.jung
+		// 1-1. 미팅 역할의 정보가 있는 ACTION ITEM을 검색한다. / 검색 기준은 무엇?
+
+		// public function getTodayRoleList($membership_id, $meeting_agenda_id, $role_id_order_arr=null){
+		// $today_role_obj = new stdClass();
+		// $today_role_obj->__meeting_agenda_id=$meeting_agenda_id;
+		// $today_role_obj->__role_id=$fixed_role_id;
+		// $today_role_obj->__role_name=$fixed_role_name;
+		// $today_role_obj->__member_id=$member_id;
+		// $today_role_obj->__member_first_name=$member_first_name;
+		// $today_role_obj->__member_last_name=$member_last_name;
+		// $today_role_obj->__member_name=$member_first_name . " " . $member_last_name;
+		// $today_role_obj->__member_membership_status=$member_membership_status;
+
+
+
+		// 2. 스피치 정보
+
+
+		return $root_action_collection;
+
+	}
+	public function get_root_action_collection($action_collection_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
 		}
 
@@ -7156,8 +7468,6 @@ class MYSQLInterface{
 			, 0
 			// $is_shy=0
 			, 0
-			// $meeting_id=-1		
-			, $meeting_id
 		);
 
 		$cur_context = new stdClass();
@@ -7460,7 +7770,6 @@ class MYSQLInterface{
 			// 엘리먼트를 복사합니다.
 			$is_shy = 0;
 
-			// wonder.jung
 			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $action_context);
 		}
 
@@ -7746,7 +8055,6 @@ class MYSQLInterface{
 				return;
 			}
 
-			// wonder.jung
 			$child_collection_obj = null;
 			if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
 				// 1. 리스트 형일 경우.  
@@ -8080,7 +8388,6 @@ class MYSQLInterface{
 			return;
 		}
 		
-		// wonder.jung
 		$action_item_copy = $this->copy_action_item_no_relation($action_item_target_before, $action_name, $action_context);
 		if($this->is_not_action_item(__FUNCTION__, $action_item_copy, "action_item_copy")){
 			return;
@@ -9224,7 +9531,7 @@ class MYSQLInterface{
 		$child_action_item =  
 		new ActionItemTitleNTimeHHMM(
 			// $action_name=""
-			"Greetings for all"
+			"Greetings"
 			// $time_str_hhmm_init=""
 			, $time_init_hh24_mm
 			// $time_str_hhmm_specific=""
@@ -9469,7 +9776,7 @@ class MYSQLInterface{
 			, ActionItem::$SELECT_BOX
 		);
 
-		// DB interface prop - Toastmaster
+		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음. / wonder.jung
 		$context = new stdClass();
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;

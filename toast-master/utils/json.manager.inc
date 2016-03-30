@@ -1598,6 +1598,7 @@ class JSONManager{
 		$hierarchy_str = self::make_hierarchy_str($datas);
 		echo "$hierarchy_str";
 	}
+	// REMOVE ME
 	private static function make_hierarchy_str($datas, $depth=0){
 
 	    if($depth > 1000) return ''; // Make sure not to have an endless recursion

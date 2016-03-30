@@ -123,10 +123,6 @@ wonglish.meeting_agenda_manager = {
 
 			_action.remove_event_hierarchy_manager();
 
-			// 타임라인을 지우게 될 경우, 현재 등록된 1. 스피치, 2. 롤, 3. 뉴스, 4. Word & Quote이 사라지게 된다.
-			// 1. 스피치, 2. 롤의 경우는 교육 통계를 위해 쌓아두어야 하는 중요한 자료.
-			// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
-
 		}
 		var activate_action_timeline = function(meeting_action_list, container_jq) {
 
@@ -202,7 +198,7 @@ wonglish.meeting_agenda_manager = {
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
 						// wonder.jung11
-						// return;
+						return;
 
 						_ajax.send_simple_post(
 							// _url
@@ -554,6 +550,13 @@ wonglish.meeting_agenda_manager = {
 							}
 							if(new_meeting_action_list != undefined) {
 								remove_action_timeline(container_jq);
+
+								// 타임라인을 지우게 될 경우, 현재 등록된 1. 스피치, 2. 롤, 3. 뉴스, 4. Word & Quote이 사라지게 된다.
+								// 1. 스피치, 2. 롤의 경우는 교육 통계를 위해 쌓아두어야 하는 중요한 자료.
+								// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
+
+
+								
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}
 

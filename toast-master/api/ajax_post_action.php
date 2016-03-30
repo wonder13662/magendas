@@ -128,7 +128,7 @@
 
 			$recent_root_action_collection = null;
 			if(0 < $recent_action_id) {
-				$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection($recent_action_id, $MEETING_ID_SRC);	
+				$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection_toastmasters($recent_action_id, $MEETING_ID_SRC);	
 			}
 			$root_action_collection_copy = null;
 			if(!is_null($recent_root_action_collection)) {
@@ -140,14 +140,14 @@
 				$result->root_action_collection_copy_id = $root_action_collection_copy_id;
 
 				// 해당 액션을 다시 로딩.
-				$root_action_collection_copy = $wdj_mysql_interface->get_root_action_collection($root_action_collection_copy_id, $MEETING_ID);
+				$root_action_collection_copy = $wdj_mysql_interface->get_root_action_collection_toastmasters($root_action_collection_copy_id, $MEETING_ID);
 			}
 
 			if(!is_null($root_action_collection_copy)) {
 				$result->root_action_collection_updated = $root_action_collection_copy->get_std_obj();	
 			}
 
-		}		
+		} // end inner if	
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
@@ -253,8 +253,6 @@
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
 				// 롤을 업데이트하는 경우.
-
-				// $MEETING_ID;
 				$ROLE_ID = $ACTION_CONTEXT_OBJ->ROLE_ID;
 				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;
 
@@ -262,10 +260,12 @@
 				$result->ROLE_ID = $ROLE_ID;
 				$result->SELECTED_VALUE = $SELECTED_VALUE;
 
-				// wonder.jung11
 				// 롤을 업데이트합니다.
+				$wdj_mysql_interface->set_meeting_role_by_hash_key($MEETING_ID, $ROLE_ID, $SELECTED_VALUE);
 
-				//
+				// CHECK - 실제로 DB에서 롤 데이터가 업데이트 되었는지 확인.
+				$has_meeting_role = $wdj_mysql_interface->has_meeting_role_by_hash_key($MEETING_ID, $ROLE_ID, $SELECTED_VALUE);
+				$result->has_meeting_role = $has_meeting_role;
 
 			}
 

@@ -362,15 +362,34 @@ class ActionObject implements Action{
 		if(is_null($cur_search_map)) {
 			return;
 		}
+
 		$children_action_list = $this->get_children();
 		for($idx=0;$idx < count($children_action_list);$idx++) {
 			$child_action_obj = $children_action_list[$idx];
 
-			$child_action_name = $child_action_obj->get_name();
+			// REMOVE ME
+			// $child_action_name = $child_action_obj->get_name();
+			// $child_has_parent = $child_action_obj->has_parent();
+
 			$child_action_coordinate = $cur_coordinate . "-" . $idx;
 
-			$child_has_parent = $child_action_obj->has_parent();
 			$cur_search_map = $child_action_obj->set_coordinate($child_action_coordinate, $cur_search_map);
+		}
+
+		// wonder.jung
+		if(ActionItem::is_instance($this)) {
+			$add_on_list = $this->get_add_on_list();
+			for($idx=0;$idx < count($add_on_list);$idx++) {
+				$add_on_action_obj = $add_on_list[$idx];
+
+				$add_on_action_coordinate = $cur_coordinate . "-A" . $idx;
+
+				// REMOVE ME
+				// echo "\$add_on_action_coordinate ::: $add_on_action_coordinate<br/>";
+
+				$cur_search_map = $add_on_action_obj->set_coordinate($add_on_action_coordinate, $cur_search_map);
+
+			}
 		}
 
 		return $cur_search_map;
@@ -423,6 +442,114 @@ class ActionObject implements Action{
 
 		return $action_obj_from_search;
 	}
+	// @ desc : action obj context의 일치된 속성을 가지고 있는 action obj을 돌려줍니다. root action obj부터 검색을 시작합니다.
+	public function search_by_context_from_root($context_key="", $context_value="") {
+
+		$cur_root_action_obj = $this;
+		if($this->is_not_root_collection()) {
+			$cur_root_action_obj = $this->get_root_action_obj();
+		}
+
+		if(ActionObject::is_not_action_obj($cur_root_action_obj)) {
+			echo "!Error! / search_by_context_from_root / ActionObject::is_not_action_obj($cur_root_action_obj)<br/>";
+			return;
+		}
+
+		return $cur_root_action_obj->search_by_context($context_key, $context_value);
+
+	}
+	private function search_by_context($context_key="", $context_value="") {
+
+
+		// ACTION ITEM인 경우만 진행합니다.
+		if(is_null($context_key) || empty($context_key)) {
+			return null;
+		}
+		if(is_null($context_value) || empty($context_value)) {
+			return null;
+		}
+
+		// DEBUG
+		$cur_actino_name = $this->get_name();
+
+		$cur_context_str = $this->get_context();
+		$cur_context_obj = json_decode($cur_context_str);
+		$cur_context_value = $cur_context_obj->{$context_key};
+
+		if(!is_null($cur_context_value) && (strcmp($cur_context_value , $context_value)) == 0) {
+			return $this;
+		}
+
+		if($this->has_children()) {
+			$cur_children = $this->get_children();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_child_action_obj = $cur_children[$idx];
+				$result = $cur_child_action_obj->search_by_context($context_key, $context_value);
+
+				if(ActionObject::is_action_obj($result)) {
+					return $result;
+				}
+			}
+		}
+
+		if(ActionItem::is_instance($this) && $this->has_add_on_list()) {
+			$cur_children = $this->get_add_on_list();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_add_on_action_obj = $cur_children[$idx];
+				$result = $cur_add_on_action_obj->search_by_context($context_key, $context_value);
+
+				if(ActionObject::is_action_obj($result)) {
+					return $result;
+				}
+			}
+		}
+		
+
+		/*
+		foreach($this->search_map as $coordinate => $action_obj) {
+
+			// $action_obj를 가져와 분석
+			if(ActionObject::is_not_action_obj($action_obj)) {
+				echo "!Error! / search_by_context_key / ActionObject::is_not_action_obj($action_obj)<br/>";
+				return;
+			}
+
+			// DEBUG
+			$action_name = $action_obj->get_name();
+			echo "search_by_context / \$action_name ::: $action_name<br/>";
+			echo "search_by_context / \$coordinate ::: $coordinate<br/>";
+
+
+			// echo "\$context_key ::: $context_key<br/>";
+
+			$cur_context_encoded_str = $action_obj->get_context();
+			// echo "\$cur_context_encoded_str ::: $cur_context_encoded_str<br/>";
+
+			$cur_context_obj = json_decode($cur_context_encoded_str);
+			$cur_context_value = "";
+
+			// REMOVE ME
+			// print_r($cur_context_obj);
+			// echo "<br/>";
+
+
+			if(!is_null($cur_context_obj->{$context_key})) {
+				$cur_context_value = $cur_context_obj->{$context_key};
+				echo "\$cur_context_value ::: $cur_context_value<br/>";
+			}
+
+			if(strcmp($cur_context_value,$context_value) == 0) {
+				echo "XXX - 001<br/>";
+				return $action_obj;
+			}
+
+
+		} // end foreach
+		*/
+
+	}
+
+
 	public function has_changed() {
 		if(is_null($this->has_changed)) {
 			$this->has_changed = false;
@@ -1003,6 +1130,29 @@ class ActionCollection extends ActionObject{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class ActionItem extends ActionObject{
 
 	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=true) {
@@ -1288,6 +1438,34 @@ class ActionItem extends ActionObject{
 		
 	}	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 	@ Desc : 제목과 시간을 나타내는 Action Item. 시작 시간을 정의할 수 있습니다. 시간 관련 메서드가 추가됩니다.

@@ -104,7 +104,7 @@
 	$meeting_action_list_std = null;
 	if(ActionCollection::is_instance($action_collection_obj_recent)) {
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
-	}
+	}	
 
 	// NEXT 
 	// 1. IFRAME으로 PDF를 보여준다. 
@@ -368,6 +368,12 @@ console.log(">>> recent_action_collection_id ::: ",recent_action_collection_id);
 
 var service_root_path = <?php echo json_encode($service_root_path);?>;
 console.log(">>> service_root_path ::: ",service_root_path);
+
+
+// TEST
+// $action_item_toastmaster_std
+var action_item_toastmaster_std = <?php echo json_encode($action_item_toastmaster_std);?>;
+console.log(">>> action_item_toastmaster_std ::: ",action_item_toastmaster_std);
 
 
 
