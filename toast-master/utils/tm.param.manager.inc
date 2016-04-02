@@ -1,10 +1,10 @@
 <?php
 
-class ToastMasterParamManager{
+class ToastmasterParamManager{
 
 	private $param_array;
 
-	public function ToastMasterParamManager(){
+	public function ToastmasterParamManager(){
 
 		// set param map
 		$this->param_array = array();
@@ -260,6 +260,7 @@ class ToastMasterParamManager{
 	public $ROLE_ID_GRAMMARIAN=11;
 	public $ROLE_ID_AH_COUNTER=10;
 	public $ROLE_ID_TIMER=9;
+	public $ROLE_TOTAL_CNT="ROLE_TOTAL_CNT";
 
 	// SHARE
 	public $IS_EXTERNAL_SHARE="IS_EXTERNAL_SHARE";
@@ -303,6 +304,7 @@ class ToastMasterParamManager{
 	public $ACTION_EVENT_DELETE="ACTION_EVENT_DELETE";
 
 	public $ACTION_ID="ACTION_ID";
+	public $NEW_ACTION_NAME="NEW_ACTION_NAME";
 	public $ACTION_NAME="ACTION_NAME";
 	
 	public $PARENT_ACTION_HASH_KEY="PARENT_ACTION_HASH_KEY";

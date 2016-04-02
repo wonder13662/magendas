@@ -115,7 +115,7 @@
 			$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
 
 			// DB에서 다시 정보를 가져옴.
-			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection($root_action_obj->get_id(), $MEETING_ID);
+			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection_toastmasters($root_action_obj->get_id(), $MEETING_ID);
 
 			$result->root_action_collection_updated = $root_action_obj->get_std_obj();
 
@@ -252,6 +252,8 @@
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
+				// wonder.jung
+
 				// 롤을 업데이트하는 경우.
 				$ROLE_ID = $ACTION_CONTEXT_OBJ->ROLE_ID;
 				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;
@@ -263,9 +265,37 @@
 				// 롤을 업데이트합니다.
 				$wdj_mysql_interface->set_meeting_role_by_hash_key($MEETING_ID, $ROLE_ID, $SELECTED_VALUE);
 
+				// 롤을 맡은 횟수를 가져옵니다.
+				$membership_id = $wdj_mysql_interface->get_membership_id_by_meeting_id($MEETING_ID);
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+					return;
+				}
+
+				$member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SELECTED_VALUE);
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+					return;
+				}
+
+				$role_total_cnt = $wdj_mysql_interface->get_member_total_role_cnt($membership_id, $ROLE_ID, $member_id);
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $role_total_cnt, "role_total_cnt")){
+					return;
+				}
+				$result->{$params->ROLE_TOTAL_CNT} = intval($role_total_cnt);
+
+				$member_obj = $wdj_mysql_interface->get_member($member_id);
+				$member_name = $member_obj->__member_name;
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $member_name, "member_name")){
+					return;
+				}
+
+				$new_action_name = $role_total_cnt . " " . $member_name;
+				$result->{$params->NEW_ACTION_NAME} = $new_action_name;
+
 				// CHECK - 실제로 DB에서 롤 데이터가 업데이트 되었는지 확인.
 				$has_meeting_role = $wdj_mysql_interface->has_meeting_role_by_hash_key($MEETING_ID, $ROLE_ID, $SELECTED_VALUE);
 				$result->has_meeting_role = $has_meeting_role;
+
+				$wdj_mysql_interface->update_action_item($cur_action_item_id, $new_action_name, $ACTION_CONTEXT);
 
 			}
 

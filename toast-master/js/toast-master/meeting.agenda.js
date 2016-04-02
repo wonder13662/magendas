@@ -169,8 +169,8 @@ wonglish.meeting_agenda_manager = {
 					var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
 
 					var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
-					if(_v.is_not_unsigned_number(MEETING_ID)) {
-						cur_action_obj_for_db_update["MEETING_ID"] = MEETING_ID;	
+					if(_v.is_unsigned_number(MEETING_ID)) {
+						cur_action_obj_for_db_update["MEETING_ID"] = parseInt(MEETING_ID);	
 					}				
 
 					if(_v.is_not_unsigned_number(action_item_obj.get_action_id())) {
@@ -196,9 +196,6 @@ wonglish.meeting_agenda_manager = {
 
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
-
-						// wonder.jung11
-						return;
 
 						_ajax.send_simple_post(
 							// _url
@@ -275,7 +272,19 @@ wonglish.meeting_agenda_manager = {
 
 										}
 
+									} else if(_action.EVENT_TYPE_UPDATE_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
+										
+										if(_action.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_TODAY_ROLE) {
+
+											// 역할을 업데이트 했을 경우의 화면 변경.
+											var NEW_ACTION_NAME = data.NEW_ACTION_NAME;
+											action_item_obj.set_action_name(NEW_ACTION_NAME);
+											cur_element_event_manager.set_title_jq_text(NEW_ACTION_NAME);
+
+										}
+
 									}
+
 
 									// 내용이 다른 경우 알려줍니다.
 									// _action.compare_root_action(cur_root_action_obj, new_root_action_obj);
@@ -300,12 +309,6 @@ wonglish.meeting_agenda_manager = {
 					
 				},this)	
 			);
-
-		}
-		if(meeting_action_list != undefined) {
-			activate_action_timeline(meeting_action_list, container_jq);
-		} else {
-			// action timeline이 없다면, EDIT Modal Window를 띄워서 사용자가 설정하도록 유도합니다.
 
 		}
 
@@ -556,7 +559,7 @@ wonglish.meeting_agenda_manager = {
 								// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
 
 
-								
+
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}
 
@@ -762,12 +765,6 @@ wonglish.meeting_agenda_manager = {
 
 						console.log("meeting_agenda_obj : ",meeting_agenda_obj);
 
-						// 3. meeting num
-						var modal_title_jq = $("h4#modal-title");
-						if(modal_title_jq != undefined && modal_title_jq.length > 0) {
-							modal_title_jq.html(meeting_agenda_obj.__membership_desc + " " + meeting_agenda_obj.__round + "th");
-						}
-
 						$('#modal-new-meeting-dialog').modal('show');
 					}
 				);
@@ -890,9 +887,21 @@ wonglish.meeting_agenda_manager = {
 		    on_resize_header();
 		});
 
+		// show action list
+		if(meeting_action_list != undefined) {
+			activate_action_timeline(meeting_action_list, container_jq);
+		} else {
+			// action timeline이 없다면, EDIT Modal Window를 띄워서 사용자가 설정하도록 유도합니다.
+			var target_modal = $("div#modal-new-meeting-dialog");
+			target_modal.modal('show');
+		}
+
+		console.log(">>>> meeting_agenda_obj ::: ",meeting_agenda_obj);
 
 		return obj;
 	}
+
+
 }
 
 

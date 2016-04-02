@@ -66,8 +66,11 @@
 	if($meeting_id > 0) {
 
 		// 지정한 meeting_id가 있는 경우.
-		$meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
-		$meeting_agenda_obj = $meeting_agenda_arr[0];
+		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id);
+
+		// REMOVE ME
+		// $meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
+		// $meeting_agenda_obj = $meeting_agenda_arr[0];
 
 	}
 	// 과거의 가장 직전의 미팅 정보를 가져옵니다.
@@ -104,7 +107,16 @@
 	$meeting_action_list_std = null;
 	if(ActionCollection::is_instance($action_collection_obj_recent)) {
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
-	}	
+	}
+
+	// TEST - 6458
+	$action_collection_id_test = 6229;
+	$meeting_id_test = 134;
+	$action_collection_obj_test = $wdj_mysql_interface->get_root_action_collection_toastmasters($action_collection_id_test, $meeting_id_test);
+	$action_collection_obj_test_std = null;
+	if(ActionCollection::is_instance($action_collection_obj_test)) {
+		$action_collection_obj_test_std = $action_collection_obj_test->get_std_obj();	
+	}
 
 	// NEXT 
 	// 1. IFRAME으로 PDF를 보여준다. 
@@ -211,7 +223,15 @@
 
 				<div class="modal-header">
 					<button id="meeting-agenda-cancel" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="modal-title" style="color:#8A6D65;">New meeting</h4>
+					
+					<?php
+						if(!is_null($meeting_agenda_obj) && !empty($meeting_agenda_obj->__theme)) {
+							$meeting_title = $meeting_agenda_obj->__round . "th / " . $meeting_agenda_obj->__startdate . " / " . $meeting_agenda_obj->__theme;
+							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">$meeting_title</h4>";
+						} else {
+							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">New meeting</h4>";
+						}
+					?>
 				</div>
 
 				<div class="modal-body" style="padding-top:0px;padding-bottom:0px;">
@@ -339,18 +359,15 @@ if(meeting_action_list_std != undefined) {
 console.log(">>> meeting_action_list_std ::: ",meeting_action_list_std);
 console.log(">>> meeting_action_list ::: ",meeting_action_list);
 
+// $action_collection_obj_test_std
+var action_collection_obj_test_std = <?php echo json_encode($action_collection_obj_test_std);?>;
+console.log(">>> action_collection_obj_test_std ::: ",action_collection_obj_test_std);
+
 // var immediate_prev_meeting_obj = <?php echo json_encode($immediate_prev_meeting_obj);?>;
 // console.log(">>> immediate_prev_meeting_obj ::: ",immediate_prev_meeting_obj);
 
 
 
-// TEST
-	// $recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection(6669, 134);
-	// $recent_root_action_collection_std = $recent_root_action_collection->get_std_obj();
-	// $root_action_collection_copy = $wdj_mysql_interface->copy_action_obj($recent_root_action_collection);
-	// $root_action_collection_copy_std = $root_action_collection_copy->get_std_obj();
-	// console.log(">>> root_action_collection_copy_std ::: ",root_action_collection_copy_std);
-	// var root_action_collection_copy_std = <?php echo json_encode($root_action_collection_copy_std);?>;
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
