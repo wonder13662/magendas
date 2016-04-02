@@ -941,7 +941,6 @@ class MYSQLInterface{
 	// @ Desc : meeting id로 membership id를 가져옵니다.
 	public function get_membership_id_by_meeting_id($meeting_id=-1){
 
-		// wonder.jung
 		if($this->is_empty(__FUNCTION__, $meeting_id, "meeting_id")){
 			return -1;
 		}
@@ -1684,7 +1683,6 @@ class MYSQLInterface{
 
 	// @ Desc : member id로 멤버 정보를 가져옵니다.
 	public function get_member($member_id=-1) {
-		// wonder.jung
 
 		if($this->is_empty(__FUNCTION__, $member_id, "member_id")){
 			return -1;
@@ -2603,7 +2601,6 @@ class MYSQLInterface{
 	}		
 
 	public function get_meeting_role($membership_id=-1, $meeting_id=1, $role_id=-1, $member_id=-1){
-		// wonder.jung
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
 			return false;
@@ -3861,52 +3858,48 @@ class MYSQLInterface{
 			return;
 		}
 
-		$result_set = new stdClass();
+		// REMOVE ME
+		// $result_set = new stdClass();
 
 		$result = $this->insert_speech($meeting_agenda_id, -1, 1, "No title");
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_id = $result;
-			$result_set->new_speech_id = $new_speech_id;
-		} else {
-			$result_set->insert_speech = $result;
-			return $result_set;
+
+		$new_speech_id = $wdj_mysql_interface->get_last_speech_id($meeting_agenda_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
+			return;
 		}
 
 		// SPEAKER
 		// 빈 speaker 값을 만들어 넣어줍니다.
 		$MEMBER_ID_NOT_ASSIGNED = -1;
 		$result = 
-		$this->insert_speech_speaker(	
+		$this->insert_speech_speaker(
 			// $speech_id
 			$new_speech_id
 			// $speech_speaker_member_id
 			, $MEMBER_ID_NOT_ASSIGNED
-		);
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_speaker_id = $result;
-			$result_set->new_speech_speaker_id = $new_speech_speaker_id;
-		} else {
-			$result_set->insert_speech_speaker = $result;
-			return $result_set;
+		); 
+		$new_speech_speaker_id = $this->select_speech_speaker_id($new_speech_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_speaker_id, "new_speech_speaker_id")){
+			return;
 		}
+
 
 		// 생성한 speaker에 넣을 timer를 만들어 추가해줍니다.
 		$TIMER_TYPE_ID_ICE_BREAK_SPEECH = $this->sel_default_speech_project_id();
 		$result = 
-		$this->insertTimer(
+		$this->insert_timer(
 			// $meeting_id
 			$meeting_agenda_id
 			// $timer_type_id
 			, $TIMER_TYPE_ID_ICE_BREAK_SPEECH
 			// $member_id
 			, $MEMBER_ID_NOT_ASSIGNED
+			// $time_record_milli_sec
+			, 0
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_timer_record_id_speaker = $result;
-			$result_set->new_timer_record_id_speaker = $new_timer_record_id_speaker;
-		} else {
-			$result_set->insertTimerSpeaker = $result;
-			return $result_set;
+		$new_timer_record_id_speaker = $this->select_timer_id($meeting_agenda_id, $TIMER_TYPE_ID_ICE_BREAK_SPEECH, $MEMBER_ID_NOT_ASSIGNED);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_timer_record_id_speaker, "new_timer_record_id_speaker")){
+			return;
 		}
 
 		// 추가한 TIMER의 아이디를 SPEECH_SPEAKER의 timer_record_id 컬럼에 추가합니다.
@@ -3917,7 +3910,6 @@ class MYSQLInterface{
 			// $timer_record_id
 			, $new_timer_record_id_speaker
 		);
-		$result_set->update_speech_speaker_timer = $query_output;
 
 
 		// EVALUATOR
@@ -3929,31 +3921,27 @@ class MYSQLInterface{
 			// $speech_evaluator_member_id
 			, $MEMBER_ID_NOT_ASSIGNED
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_evaluator_id = $result;
-			$result_set->new_speech_evaluator_id = $new_speech_evaluator_id;
-		} else {
-			$result_set->insert_speech_evaluator = $result;
-			return $result_set;
+		$new_speech_evaluator_id = $this->select_speech_evaluator_id($new_speech_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_evaluator_id, "new_speech_evaluator_id")){
+			return;
 		}
 
 		// 생성한 evaluator에 넣을 timer를 만들어 추가해줍니다.
 		$TIMER_TYPE_ID_EVALUATOR = 5;
 		$result = 
-		$this->insertTimer(
+		$this->insert_timer(
 			// $meeting_id
 			$meeting_agenda_id
 			// $timer_type_id
 			, $TIMER_TYPE_ID_EVALUATOR
 			// $member_id
 			, $MEMBER_ID_NOT_ASSIGNED
+			// $time_record_milli_sec
+			, 0
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_timer_record_id_evaluator = $result;
-			$result_set->new_timer_record_id_evaluator = $new_timer_record_id_evaluator;
-		} else {
-			$result_set->insertTimerEvaluator = $result;
-			return $result_set;
+		$new_timer_record_id_evaluator = $this->select_timer_id($meeting_agenda_id, $TIMER_TYPE_ID_ICE_BREAK_SPEECH, $MEMBER_ID_NOT_ASSIGNED);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_timer_record_id_evaluator, "new_timer_record_id_evaluator")){
+			return;
 		}
 
 		// 추가한 TIMER의 아이디를 SPEECH_SPEAKER의 timer_record_id 컬럼에 추가합니다.
@@ -3964,10 +3952,63 @@ class MYSQLInterface{
 			// $timer_record_id
 			, $new_timer_record_id_evaluator
 		);
-		$result_set->update_speech_evaluator_timer = $query_output;
 
-		return $result_set;
 	}
+	// @ 미팅에 등록된 마지막 스피치의 ID를 돌려줍니다.
+	public function get_last_speech_id($meeting_id){
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(id, -1) AS __speech_id"
+				," FROM MA_SPEECH"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," ORDER BY id DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return intval($result->__speech_id);
+
+	}
+	/*
+	// @ 내용이 없는 스피치를 추가합니다. 추가된 아이디를 돌려줍니다.
+	public function insert_speech_empty($meeting_id=-1){
+
+		// wonder.jung
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		$order_num = 0;
+		$speech_project_id = -1;
+		$speech_title = "";
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `MA_SPEECH`(`meeting_agenda_id`, `speech_project_id`, `title`, `order_num`,`updttm`, `regdttm`)"
+				," VALUES ($meeting_agenda_id,$speech_project_id,\"$speech_title\",$order_num, DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		// Get last speech ID in this meeting.
+		return $this->get_last_speech_id($meeting_id);
+	}
+	*/
 	private function insert_speech(	$meeting_agenda_id
 									, $order_num
 									, $speech_project_id
@@ -4004,6 +4045,34 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
+	public function update_speech_title($speech_id=-1, $speech_title="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $speech_title, "speech_title")){
+			return;
+		}
+
+		$order_num=-1;
+		$speech_project_id=-1;
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}
+	public function update_speech_project($speech_id=-1, $speech_project_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_project_id, "speech_project_id")){
+			return;
+		}
+
+		$order_num=-1;
+		$speech_title="";
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}	
 	public function update_speech(	$speech_id
 									, $order_num=-1
 									, $speech_project_id=-1
@@ -4100,51 +4169,143 @@ class MYSQLInterface{
 		
 		return $result_set;
 	}
-	public function upsert_speech_speaker(	$speech_id
-													, $speech_speaker_member_id ){
+	public function set_speech_speaker(	$speech_id=-1, $speech_speaker_member_id=-1 ){
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
+			return;
+		}
 
-		if($this->isNotUnsignedNumber($speech_id)) return null;
-		$result = $this->select_speech_speaker($speech_id);
+		$has_speech_speaker = $this->has_speech_speaker($speech_id);
+		if($has_speech_speaker) {
 
-		$query_result;
-		if(empty($result)){
-			// echo "2. 이전에 없는 스피커 정보인가?<br/>";
-			// echo "2-1. 이전에 없는 스피커 정보라면 인서트<br/>";
-			if(	$this->isNotUnsignedNumber($speech_speaker_member_id) ){
-				$speech_speaker_member_id = -1;
+			// We have a speaker. Update new speaker
+			$speech_speaker_id = $this->select_speech_speaker_id($speech_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+				return;
 			}
 
-			$query_result = 
-			$this->insert_speech_speaker(	
-				$speech_id
+			$this->update_speech_speaker(
+				$speech_speaker_id
 				, $speech_speaker_member_id
-			);
+			);			
 
 		} else {
 
-			$query_result = 
-			$this->update_speech_speaker(
-				$result[0]->__speech_speaker_id
-				, $speech_speaker_member_id
-			);
+			// No speaker. Add new speaker
+			$this->insert_speech_speaker($speech_id, $speech_speaker_member_id);
+
 		}
 
-		return $query_result;
+	}
+	private function has_speech_speaker($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MSS.`id`) AS __speech_speaker_cnt"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_speaker_cnt = $result->__speech_speaker_cnt;
+
+		return (0 < $__speech_speaker_cnt)?true:false;
+
+	}
+	private function has_speech_evaluator($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MSE.`id`) AS __speech_evaluator_cnt"
+				," FROM `MA_SPEECH_EVALUATOR` AS MSE"
+				," WHERE MSE.speech_id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_evaluator_cnt = $result->__speech_evaluator_cnt;
+
+		return (0 < $__speech_evaluator_cnt)?true:false;
+
 	}	
-	private function select_speech_speaker($speech_id){
+	private function select_speech_speaker_id($speech_id=-1){
 
-		if($this->isNotUnsignedNumber($speech_id)) return null;
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
 
-		$query = 
-		"SELECT MSS.`id` AS __speech_speaker_id"
-		. " , MSS.`speech_id` AS __speech_id"
-		. " , MSS.`speaker_member_id` AS __speech_speaker_member_id"
-		. " FROM `MA_SPEECH_SPEAKER` AS MSS"
-		. " WHERE MSS.speech_id=$speech_id"
-		;
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSS.`id` AS __speech_speaker_id"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+				," ORDER BY MSS.`id` DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
 
-		$json_res_obj = $this->getSelectResult($query);
-		return $json_res_obj->result;
+		$result = $query_manager->get_result();
+
+		$__speech_speaker_id = $result->__speech_speaker_id;
+		if($this->is_not_unsigned_number(__FUNCTION__, $__speech_speaker_id, "__speech_speaker_id")){
+			return -1;
+		}
+
+		return $__speech_speaker_id;
+	}
+	private function select_speech_speaker($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSS.`id` AS __speech_speaker_id"
+				," , MSS.`speech_id` AS __speech_id"
+				," , MSS.`speaker_member_id` AS __speech_speaker_member_id"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+				," ORDER BY MSS.`id` DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return $result;
 	}
 	private function select_recent_speech_speaker_id($speech_id){
 
@@ -4170,74 +4331,77 @@ class MYSQLInterface{
 		return $__speech_speaker_id;
 	}
 
-	private function insert_speech_speaker(	$speech_id, $speech_speaker_member_id ){
+	private function insert_speech_speaker( $speech_id=-1, $speech_speaker_member_id=-1 ){
 
-		if($this->isNotUnsignedNumber($speech_id)){
-			return "!Error! / insert_speech_speaker / \$this->isNotUnsignedNumber(\$speech_id)<br/>";
-		} 
-		if(is_null($speech_speaker_member_id)){
-			return "!Error! / insert_speech_speaker / is_null(\$speech_speaker_member_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
+			return;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"INSERT INTO `MA_SPEECH_SPEAKER`(`speech_id` ,`speaker_member_id` ,`updttm`, `regdttm`)"
-			,"VALUES ($speech_id,$speech_speaker_member_id,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		// wonder.jung
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `MA_SPEECH_SPEAKER`(`speech_id` ,`speaker_member_id` ,`updttm`, `regdttm`)"
+				,"VALUES ($speech_id,$speech_speaker_member_id,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
-
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-
-		return $this->getLastId($json_res_obj);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 	}
-	public function update_speech_speaker(	$speech_speaker_id, $speech_speaker_member_id ){
+	public function update_speech_speaker(	$speech_speaker_id=-1, $speech_speaker_member_id=-1 ){
 
-		if($this->isNotUnsignedNumber($speech_speaker_id)){
-			echo "!Error! / update_speech_speaker / \$this->isNotUnsignedNumber(\$speech_speaker_id)<br/>";
-			return null;
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
+			return;
 		}
 
-		if($this->isUnsignedNumber($speech_speaker_member_id)){
-			$query =
-			"UPDATE `MA_SPEECH_SPEAKER`"
-			. " SET `speaker_member_id`=$speech_speaker_member_id"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_speaker_id"
-			;
-		}
-
-		// echo "$query<br/>";
-		$json_res_obj = $this->getModifyResult($query);
-		return $this->getSimpleResult($json_res_obj);
-	}
-	private function update_speech_speaker_timer( $speech_speaker_id, $timer_record_id ){
-
-		$function_name = "update_speech_speaker_timer";
-		if($this->isNotUnsignedNumber($speech_speaker_id)){
-			echo "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_speaker_id)<br/>";
-			return null;
-		}
-
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			echo "!Error! / $function_name / \$this->isNotUnsignedNumber(\$timer_record_id)<br/>";
-			return null;
-		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"UPDATE `MA_SPEECH_SPEAKER`"
-			,"SET `timer_record_id`=$timer_record_id"
-			,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			,"WHERE id=$speech_speaker_id"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_SPEAKER`"
+				," SET `speaker_member_id`=$speech_speaker_member_id"
+				," ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE id=$speech_speaker_id"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
+	private function update_speech_speaker_timer( $speech_speaker_id=-1, $timer_record_id=-1 ){
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-		return $this->getSimpleResult($json_res_obj);
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_record_id, "timer_record_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_SPEAKER`"
+				,"SET `timer_record_id`=$timer_record_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_speaker_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
 	}
 
 	public function delete_speech_speaker($speech_id){
@@ -4363,30 +4527,108 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 
 	}	
-	public function insert_speech_evaluator($speech_id, $speech_evaluator_member_id, $order_num=-1){
+	public function select_speech_evaluator_id(){
 
-		$function_name = "insert_speech_evaluator";
-		if(empty($speech_id)){
-			return "!Error! / $function_name / empty(\$speech_id)";
-		} 
-		if(empty($speech_evaluator_member_id)){
-			return "!Error! / $function_name / empty(\$speech_evaluator_member_id)";
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"INSERT INTO `MA_SPEECH_EVALUATOR`(`speech_id`, `evaluator_member_id`, `order_num`, `updttm`, `regdttm`)"
-			,"VALUES ($speech_id,$speech_evaluator_member_id, $order_num ,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		// 해당 미팅이 역할을 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSE.`id` AS __speech_evaluator_id"
+				," FROM `MA_SPEECH_EVALUATOR` AS MSE"
+				," WHERE MSE.speech_id=$speech_id"
+				," ORDER BY MSE.`id` DESC"
+				," LIMIT 1"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
+		$result = $query_manager->get_result();
 
-		return $this->getLastId($json_res_obj);
+		return $result->__speech_evaluator_id;
 
 	}
+	public function insert_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1, $order_num=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order_num, "order_num")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `MA_SPEECH_EVALUATOR`(`speech_id`, `evaluator_member_id`, `order_num`, `updttm`, `regdttm`)"
+				,"VALUES ($speech_id,$speech_evaluator_member_id, $order_num ,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+
+	public function set_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1) {
+		// wonder.jung
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+			return;
+		}
+
+		$has_speech_evaluator = $this->has_speech_evaluator($speech_id);
+		if($has_speech_evaluator) {
+			// We have an evaluator. Update new evaluator.
+			$this->update_speech_evaluator($speech_id, $speech_evaluator_member_id);
+		} else {
+			// No evaluator. Add new evaluator.
+			$this->insert_speech_evaluator($speech_id, $speech_evaluator_member_id, 0);
+		}
+	}
+	private function update_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_EVALUATOR`"
+				," SET `evaluator_member_id`=$speech_evaluator_member_id"
+				," ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE speech_id=$speech_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+
+	// REMOVE ME
+
+	/*
 	public function update_speech_evaluator(	$speech_evaluator_id
 												, $speech_id=-1
 												, $speech_evaluator_member_id=-1
@@ -4430,30 +4672,31 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query);
 		return $this->getSimpleResult($json_res_obj);
 	}
-	private function update_speech_evaluator_timer( $speech_evaluator_id, $timer_record_id ){
+	*/
+	private function update_speech_evaluator_timer( $speech_evaluator_id=-1, $timer_record_id=-1 ){
 
-		$function_name = "update_speech_evaluator_timer";
-		if($this->isNotUnsignedNumber($speech_evaluator_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_evaluator_id)";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_id, "speech_evaluator_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_record_id, "timer_record_id")){
+			return;
 		}
 
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$timer_record_id)";
-		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"UPDATE `MA_SPEECH_EVALUATOR`"
-			,"SET `timer_record_id`=$timer_record_id"
-			,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			,"WHERE id=$speech_evaluator_id"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_EVALUATOR`"
+				,"SET `timer_record_id`=$timer_record_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_evaluator_id"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-		return $this->getSimpleResult($json_res_obj);
 	}	
 	public function delete_speech_evaluator($speech_evaluator_id){
 
@@ -5308,6 +5551,74 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
+	public function select_timer_id($meeting_id=-1, $timer_type_id=-1, $member_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_type_id, "timer_type_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT id AS __timer_id"
+				," FROM MA_TIMER_RECORD"
+				," WHERE meeting_id=0"
+				," AND timer_type_id=0"
+				," AND member_id=0"
+				," ORDER BY id DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$__timer_id = -1;
+		$result = $query_manager->get_result();
+		if(!is_null($result)) {
+			$__timer_id = $result->__timer_id;	
+		}
+
+		return $__timer_id;
+	}
+	public function insert_timer($meeting_id=-1, $timer_type_id=-1, $member_id=-1, $time_record_milli_sec=-1,$is_qualified=false){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_type_id, "timer_type_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $time_record_milli_sec, "time_record_milli_sec")){
+			return;
+		}
+
+		$is_qualified_num = ($is_qualified == true)?1:0;
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `magendas`.`MA_TIMER_RECORD`(`meeting_id`,`timer_type_id`,`member_id`,`time_record_milli_sec`,`is_qualified`)"
+				, "VALUES($meeting_id,$timer_type_id,$member_id,$time_record_milli_sec,$is_qualified_num)"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}	
 
 
 	public function updateTimerMember($timer_record_id, $member_id){
@@ -10009,7 +10320,7 @@ class MYSQLInterface{
 			, ActionItem::$SELECT_BOX
 		);
 
-		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음. / wonder.jung
+		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
 		$context = new stdClass();
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
@@ -10530,7 +10841,7 @@ class MYSQLInterface{
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_TITLE} = -1;
+		$context->{$params->SPEECH_TITLE} = "NO TITLE";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);

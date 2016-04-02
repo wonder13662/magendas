@@ -115,12 +115,12 @@
 			$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
 
 			// DB에서 다시 정보를 가져옴.
-			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection_toastmasters($root_action_obj->get_id(), $MEETING_ID);
+			$recent_root_action_collection = $wdj_mysql_interface-> ($root_action_obj->get_id(), $MEETING_ID);
 
 			$result->root_action_collection_updated = $root_action_obj->get_std_obj();
 
 		} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_PREV_MEETING) == 0) {
-
+ 
 			// 직전 미팅 템플릿 적용
 			// 1. 직전 미팅 템플릿 정보를 가져온다.
 			$recent_action_id = $wdj_mysql_interface->select_recent_action_id_collection_by_meeting_id($MEETING_ID_SRC);
@@ -252,8 +252,6 @@
 
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_TODAY_ROLE) == 0) {
 
-				// wonder.jung
-
 				// 롤을 업데이트하는 경우.
 				$ROLE_ID = $ACTION_CONTEXT_OBJ->ROLE_ID;
 				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;
@@ -297,7 +295,80 @@
 
 				$wdj_mysql_interface->update_action_item($cur_action_item_id, $new_action_name, $ACTION_CONTEXT);
 
-			}
+			} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH) == 0) {
+
+				// wonder.jung
+				// 스피치를 업데이트하는 경우.
+				$SPEECH_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_ID);
+
+				$SELECTED_KEY = $ACTION_CONTEXT_OBJ->SELECTED_KEY;
+				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;				
+
+				$SPEECH_SPEAKER_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY;
+				$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY;
+				$SPEECH_TITLE = $ACTION_CONTEXT_OBJ->SPEECH_TITLE;
+				$SPEECH_PROJECT_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID);
+
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_KEY, "SELECTED_KEY")){
+					return;
+				}
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_VALUE, "SELECTED_VALUE")){
+					return;
+				}
+
+				// DEBUG
+				$result->SPEECH_ID = $SPEECH_ID;
+				
+				$result->SELECTED_KEY = $SELECTED_KEY;
+				$result->SELECTED_VALUE = $SELECTED_VALUE;
+
+				$result->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
+				$result->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
+				$result->SPEECH_TITLE = $SPEECH_TITLE;
+				$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+
+
+				if($SPEECH_ID < 1) {
+					// 처음으로 열을 추가한다면, 같은 열의 ACTION ITEM의 CONTEXT에 speech id를 모두 업데이트 해줘야한다.
+					$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
+					$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
+					// insert_speech_empty_speaker_n_evaluator
+					$result->NEW_SPEECH_ID = $NEW_SPEECH_ID;
+					$SPEECH_ID = $NEW_SPEECH_ID;
+				}
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $SPEECH_ID, "SPEECH_ID")){
+					return;
+				}
+
+				if(!empty($SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
+					// speaker 정보를 업데이트 하는 경우.
+					// MEMBER_HASH_KEY --> MEMBER_KEY
+					$speech_speaker_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SPEECH_SPEAKER_MEMBER_HASH_KEY);
+					if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
+						return;
+					}
+
+					$wdj_mysql_interface->set_speech_speaker($SPEECH_ID, $speech_speaker_member_id);
+
+				} else if(!empty($SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
+					// evaluator 정보를 업데이트 하는 경우.
+					// MEMBER_HASH_KEY --> MEMBER_KEY
+					$speech_evaluator_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SPEECH_EVALUATOR_MEMBER_HASH_KEY);
+					if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+						return;
+					}
+
+					$wdj_mysql_interface->set_speech_evaluator($SPEECH_ID, $speech_evaluator_member_id);
+
+				} else if(!empty($SPEECH_TITLE)) {
+					// speech title을 업데이트 하는 경우.
+					$wdj_mysql_interface->update_speech_title($SPEECH_ID, $SPEECH_TITLE);
+				} else if(0 < $SPEECH_PROJECT_ID) {
+					// speech project를 업데이트 하는 경우.
+					$wdj_mysql_interface->update_speech_project($SPEECH_ID, $SPEECH_PROJECT_ID);
+				} 
+
+			} // end SPEECH UPDATE IF
 
 		}
 

@@ -197,6 +197,9 @@ wonglish.meeting_agenda_manager = {
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
+						// TEST
+						return;
+
 						_ajax.send_simple_post(
 							// _url
 							_link.get_link(_link.API_ACTION)
@@ -499,7 +502,6 @@ wonglish.meeting_agenda_manager = {
 
 		// SET TEMPLATE EVENT
 		var agenda_template_jq_list = $("a#agenda_template");
-		console.log(">>> agenda_template_jq_list ::: ",agenda_template_jq_list);
 		if(agenda_template_jq_list != undefined && 0 < agenda_template_jq_list.length) {
 			agenda_template_jq_list.click(function(e) {
 
