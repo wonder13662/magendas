@@ -115,7 +115,7 @@
 			$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
 
 			// DB에서 다시 정보를 가져옴.
-			$recent_root_action_collection = $wdj_mysql_interface-> ($root_action_obj->get_id(), $MEETING_ID);
+			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection_toastmasters($root_action_obj->get_id(), $MEETING_ID);
 
 			$result->root_action_collection_updated = $root_action_obj->get_std_obj();
 
@@ -295,19 +295,45 @@
 
 				$wdj_mysql_interface->update_action_item($cur_action_item_id, $new_action_name, $ACTION_CONTEXT);
 
-			} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH) == 0) {
+			}
+
+
+
+			if(!is_null($ACTION_CONTEXT_OBJ->SPEECH_ID)) {
+				$SPEECH_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_ID);
+				$SELECTED_KEY = $ACTION_CONTEXT_OBJ->SELECTED_KEY;
+				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;
+
+				if($SPEECH_ID < 1) {
+					// 처음으로 열을 추가한다면, 같은 열의 ACTION ITEM의 CONTEXT에 speech id를 모두 업데이트 해줘야한다.
+					$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
+					$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
+
+					// insert_speech_empty_speaker_n_evaluator
+					$result->NEW_SPEECH_ID = $NEW_SPEECH_ID;
+					$SPEECH_ID = $NEW_SPEECH_ID;
+				}
+
+				$result->SPEECH_ID = $SPEECH_ID;
+				$result->SELECTED_KEY = $SELECTED_KEY;
+				$result->SELECTED_VALUE = $SELECTED_VALUE;
+
+			}
+			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
 
 				// wonder.jung
-				// 스피치를 업데이트하는 경우.
-				$SPEECH_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_ID);
+				$SPEECH_TITLE = $ACTION_NAME;
 
-				$SELECTED_KEY = $ACTION_CONTEXT_OBJ->SELECTED_KEY;
-				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;				
+				$result->SPEECH_TITLE = $SPEECH_TITLE;
+				$ACTION_CONTEXT_OBJ->SPEECH_TITLE = $SPEECH_TITLE;
 
-				$SPEECH_SPEAKER_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY;
-				$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY;
-				$SPEECH_TITLE = $ACTION_CONTEXT_OBJ->SPEECH_TITLE;
-				$SPEECH_PROJECT_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID);
+				// speech title을 업데이트 하는 경우.
+				$wdj_mysql_interface->update_speech_title($SPEECH_ID, $ACTION_NAME);
+				$new_action_name = $ACTION_NAME;
+
+				$ACTION_CONTEXT_OBJ->SPEECH_TITLE = $ACTION_NAME;
+
+			} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_PROJECT) == 0) {
 
 				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_KEY, "SELECTED_KEY")){
 					return;
@@ -316,59 +342,84 @@
 					return;
 				}
 
-				// DEBUG
-				$result->SPEECH_ID = $SPEECH_ID;
-				
-				$result->SELECTED_KEY = $SELECTED_KEY;
-				$result->SELECTED_VALUE = $SELECTED_VALUE;
+				$SPEECH_PROJECT_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID);
+
+				$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+				$ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+
+				// speech project를 업데이트 하는 경우.
+				$SPEECH_PROJECT_ID = intval($SELECTED_VALUE);
+
+				$ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+				$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+				$wdj_mysql_interface->update_speech_project($SPEECH_ID, $SPEECH_PROJECT_ID);
+
+				$speech_project_obj = $wdj_mysql_interface->get_speech_project($SPEECH_PROJECT_ID);
+
+				$new_action_name = null;
+				if(!is_null($speech_project_obj)) {
+					$new_action_name = $speech_project_obj->__speech_project_title;	
+				}
+				$result->new_action_name = $new_action_name;
+
+			} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_SPEAKER) == 0) {
+
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_KEY, "SELECTED_KEY")){
+					return;
+				}
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_VALUE, "SELECTED_VALUE")){
+					return;
+				}	
+
+				$SPEECH_SPEAKER_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY;
 
 				$result->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
-				$result->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
-				$result->SPEECH_TITLE = $SPEECH_TITLE;
-				$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
+				$ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
 
-
-				if($SPEECH_ID < 1) {
-					// 처음으로 열을 추가한다면, 같은 열의 ACTION ITEM의 CONTEXT에 speech id를 모두 업데이트 해줘야한다.
-					$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
-					$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
-					// insert_speech_empty_speaker_n_evaluator
-					$result->NEW_SPEECH_ID = $NEW_SPEECH_ID;
-					$SPEECH_ID = $NEW_SPEECH_ID;
-				}
-				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $SPEECH_ID, "SPEECH_ID")){
+				// speaker 정보를 업데이트 하는 경우.
+				// MEMBER_HASH_KEY --> MEMBER_KEY
+				$speech_speaker_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SELECTED_VALUE);
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id)){
 					return;
 				}
 
-				if(!empty($SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
-					// speaker 정보를 업데이트 하는 경우.
-					// MEMBER_HASH_KEY --> MEMBER_KEY
-					$speech_speaker_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SPEECH_SPEAKER_MEMBER_HASH_KEY);
-					if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
-						return;
-					}
+				$wdj_mysql_interface->set_speech_speaker($SPEECH_ID, $speech_speaker_member_id);
+				$speech_obj = $wdj_mysql_interface->sel_speech($SPEECH_ID);
+				$new_action_name = $speech_obj->__speaker_member_name;
 
-					$wdj_mysql_interface->set_speech_speaker($SPEECH_ID, $speech_speaker_member_id);
+			} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_EVALUATOR) == 0) {
 
-				} else if(!empty($SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
-					// evaluator 정보를 업데이트 하는 경우.
-					// MEMBER_HASH_KEY --> MEMBER_KEY
-					$speech_evaluator_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SPEECH_EVALUATOR_MEMBER_HASH_KEY);
-					if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
-						return;
-					}
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_KEY, "SELECTED_KEY")){
+					return;
+				}
+				if($wdj_mysql_interface->is_empty(__FUNCTION__, $SELECTED_VALUE, "SELECTED_VALUE")){
+					return;
+				}
 
-					$wdj_mysql_interface->set_speech_evaluator($SPEECH_ID, $speech_evaluator_member_id);
+				$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY;			
 
-				} else if(!empty($SPEECH_TITLE)) {
-					// speech title을 업데이트 하는 경우.
-					$wdj_mysql_interface->update_speech_title($SPEECH_ID, $SPEECH_TITLE);
-				} else if(0 < $SPEECH_PROJECT_ID) {
-					// speech project를 업데이트 하는 경우.
-					$wdj_mysql_interface->update_speech_project($SPEECH_ID, $SPEECH_PROJECT_ID);
-				} 
+				$result->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
+				$ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
 
-			} // end SPEECH UPDATE IF
+				// evaluator 정보를 업데이트 하는 경우.
+				// MEMBER_HASH_KEY --> MEMBER_KEY
+				$speech_evaluator_member_id = $wdj_mysql_interface->get_member_id_by_hash_key($SELECTED_VALUE);
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+					return;
+				}
+
+				$wdj_mysql_interface->set_speech_evaluator($SPEECH_ID, $speech_evaluator_member_id);
+				$speech_obj = $wdj_mysql_interface->sel_speech($SPEECH_ID);
+				$new_action_name = $speech_obj->__evaluator_member_name;
+
+			}
+			if(!is_null($ACTION_CONTEXT_OBJ->SPEECH_ID)) {
+
+				$action_context_str = json_encode($ACTION_CONTEXT_OBJ);
+				$wdj_mysql_interface->update_action_item($cur_action_item_id, $new_action_name, $action_context_str);
+
+			}
+
 
 		}
 

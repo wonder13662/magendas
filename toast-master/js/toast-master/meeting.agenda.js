@@ -77,7 +77,20 @@ wonglish.meeting_agenda_manager = {
 
 			// 빈값으로 지정할 수 있는 필드를 추가한다.
 			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
-		}		
+		}	
+
+		var search_option_arr_speech_projects = [];
+		var speech_project_list = meeting_agenda_data_set.speech_project_list;
+		if(_v.isValidArray(speech_project_list)){
+			for (var idx = 0; idx < speech_project_list.length; idx++) {
+				var cur_speech_obj = speech_project_list[idx];
+				var cur_select_option = _obj.get_select_option(cur_speech_obj.__speech_project_title, cur_speech_obj.__speech_project_id);
+				search_option_arr_speech_projects.push(cur_select_option);
+			}
+		}	
+
+
+		//speech_project_list	
 
 
 
@@ -189,6 +202,8 @@ wonglish.meeting_agenda_manager = {
 						cur_outcome_obj._event = _action.EVENT_TYPE_INSERT_ITEM;
 					}
 
+					console.log("cur_outcome_obj._event ::: ",cur_outcome_obj._event);
+
 					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
@@ -277,12 +292,17 @@ wonglish.meeting_agenda_manager = {
 
 									} else if(_action.EVENT_TYPE_UPDATE_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
 										
-										if(_action.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_TODAY_ROLE) {
+										if(_action.IS_UPDATE_TODAY_ROLE === data.ACTION_DB_UPDATE_MSG) {
 
 											// 역할을 업데이트 했을 경우의 화면 변경.
 											var NEW_ACTION_NAME = data.NEW_ACTION_NAME;
 											action_item_obj.set_action_name(NEW_ACTION_NAME);
 											cur_element_event_manager.set_title_jq_text(NEW_ACTION_NAME);
+
+										} else if(_action.IS_UPDATE_SPEECH === data.ACTION_DB_UPDATE_MSG) {
+
+											var ACTION_NAME = data.ACTION_NAME;
+											action_item_obj.set_action_name(ACTION_NAME);
 
 										}
 
@@ -301,11 +321,27 @@ wonglish.meeting_agenda_manager = {
 					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
 						// SELECT BOX를 선택했을 때의 처리.
-						
-						console.log("Fetch select box data / action_item_obj :: ",action_item_obj);
-						console.log("Fetch select box data / search_option_arr_members :: ",search_option_arr_members);
 
-						return search_option_arr_members;
+						var cur_action_context_obj = action_item_obj.get_action_context_obj();
+						if(cur_action_context_obj == undefined) {
+
+							console.log("!Error! / cur_action_context_obj == undefined");
+							return;
+
+						} else if(cur_action_context_obj.SPEECH_PROJECT_ID != undefined) {
+
+							return search_option_arr_speech_projects;
+
+						} else if(cur_action_context_obj.SPEECH_SPEAKER_MEMBER_HASH_KEY != undefined) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.SPEECH_EVALUATOR_MEMBER_HASH_KEY != undefined) {
+
+							return search_option_arr_members;	
+
+						}
+						
 					}
 
 					cur_element_event_manager.release();
@@ -559,8 +595,6 @@ wonglish.meeting_agenda_manager = {
 								// 타임라인을 지우게 될 경우, 현재 등록된 1. 스피치, 2. 롤, 3. 뉴스, 4. Word & Quote이 사라지게 된다.
 								// 1. 스피치, 2. 롤의 경우는 교육 통계를 위해 쌓아두어야 하는 중요한 자료.
 								// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
-
-
 
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}
