@@ -407,8 +407,17 @@
 				}
 
 				$wdj_mysql_interface->set_speech_evaluator($SPEECH_ID, $speech_evaluator_member_id);
-				$speech_obj = $wdj_mysql_interface->sel_speech($SPEECH_ID);
-				$new_action_name = $speech_obj->__evaluator_member_name;
+				$check_speech_obj = $wdj_mysql_interface->sel_speech($SPEECH_ID);
+				if(is_null($check_speech_obj)) {
+					echo "!Error! / ajax_post_action / is_null($check_speech_obj)<br/>";
+					return;
+				}
+				$new_action_name = $check_speech_obj->__evaluator_member_name;
+
+				$result->speech_evaluator_member_id = $speech_evaluator_member_id;
+				$result->__evaluator_member_id = $check_speech_obj->__evaluator_member_id;
+				$result->__evaluator_member_hash_key = $check_speech_obj->__evaluator_member_hash_key;
+				$result->__evaluator_member_name = $check_speech_obj->__evaluator_member_name;
 
 			}
 			if(!is_null($ACTION_CONTEXT_OBJ->SPEECH_ID)) {

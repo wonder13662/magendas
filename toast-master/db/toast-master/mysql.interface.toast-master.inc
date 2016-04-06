@@ -204,7 +204,7 @@ class MYSQLInterface{
 	public function is_not_action_collection($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
-			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
+			echo "$function_name / \$this->is_not_action_collection(\$$param_name)<br/>";
 		}
 
 		return $is_not_instance;
@@ -215,7 +215,7 @@ class MYSQLInterface{
 	public function is_not_action_list($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
-			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
+			echo "$function_name / \$this->is_not_action_list(\$$param_name)<br/>";
 		}
 
 		if(is_null($target)) {
@@ -3614,6 +3614,7 @@ class MYSQLInterface{
 				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
 
 				," , IFNULL(MSE.`id`,-1) AS __evaluator_id"
+				," , IFNULL(EVALUATOR.id,\"\") AS __evaluator_member_id"
 				," , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
 				," , IFNULL(CONCAT(EVALUATOR.first_name,\" \",EVALUATOR.last_name), \"NOT ASSIGNED\") AS __evaluator_member_name"
 				," , 120 AS __evaluator_timer_green"
@@ -7949,9 +7950,7 @@ class MYSQLInterface{
 				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
 					break;
 				}
-
-				// wonder.jung
-
+				
 				$cur_table_row_field_action_item_list_after = 
 				$this->add_row_into_table(
 					// $table_field_action_item_obj=null
@@ -7961,8 +7960,19 @@ class MYSQLInterface{
 					// $action_context=""
 					, ""
 				);
-				if($this->is_not_action_collection(__FUNCTION__, $cur_table_row_field_action_item_list_after, "cur_table_row_field_action_item_list_after")) {
+				if(empty($cur_table_row_field_action_item_list_after)) {
+					echo "!Error! / update_action_context_about_toastmaster_speech / empty($cur_table_row_field_action_item_list_after)<br/>";
 					break;
+				}
+
+				$cur_speech_obj = $speech_list[$idx];
+				if(is_null($cur_speech_obj)) {
+					echo "!Error! / update_action_context_about_toastmaster_speech / is_null($cur_speech_obj)<br/>";
+					return;
+				}
+				$__speech_id = intval($cur_speech_obj->__speech_id);
+				if($this->is_not_unsigned_number(__FUNCTION__, $__speech_id, "__speech_id")){
+					return;
 				}
 
 				for($inner_idx = 0; $inner_idx < count($cur_table_row_field_action_item_list_after);$inner_idx++) {
@@ -7971,22 +7981,44 @@ class MYSQLInterface{
 						break;
 					}
 
-					
+					$cur_context_str = $table_field_action_item_obj->get_context();
+
+					$cur_context_obj = null;
+					if(empty($cur_context_str)) {
+						$cur_context_obj = new stdClass();
+					} else {
+						$cur_context_obj = json_decode($cur_context_str);
+					}
+
+					$cur_context_obj->{$params->SPEECH_ID} = $__speech_id;
+					$new_context_str = json_encode($cur_context_obj);
+
+					// 추가한 열의 정보를 업데이트. / SPEECH_ID
+					// 검색할때 키로 사용됩니다.
+					$this->update_action_item(
+						$table_field_action_item_obj->get_id()
+						, $table_field_action_item_obj->get_name()
+						, $new_context_str
+					);
 
 				}
 
 				$last_child_action_item = $cur_table_row_field_action_item_list_after->get_last_child();
-				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+				if($this->is_not_action_item(__FUNCTION__, $last_child_action_item, "last_child_action_item")) {
 					break;
 				}
 
 				$action_item_obj_before = $last_child_action_item;
 
-				// action item의 context에 speech id를 입력해줍니다.
-				// 검색할때 키로 사용됩니다.
 			}
-			// $cur_table_row_field_action_item_list_after = 
+
+			// wonder.jung
+			// root_action_collection을 다시 가져옵니다.
+
+
 		}
+
+		
 
 
 
@@ -8066,6 +8098,15 @@ class MYSQLInterface{
 			// root collection에서 speech 정보가 있는 action item을 검색합니다.
 			$action_item_speech = 
 			$root_action_collection->search_by_context_from_root($params->SPEECH_ID, $__speech_id);
+
+			// DEBUG
+			$action_item_speech_id = $action_item_speech->get_id();
+			echo "\$__speech_id ::: $__speech_id<br/>";
+			echo "\$action_item_speech_id ::: $action_item_speech_id<br/>";
+
+			// REMOVE ME
+			// 업데이트는 위에서 모두 완료되어야 한다. 
+			/*
 			if($this->is_not_action_item(__FUNCTION__, $action_item_speech)){
 
 				if($this->is_action_item(__FUNCTION__, $action_item_speech_no_speech)){
@@ -8096,8 +8137,10 @@ class MYSQLInterface{
 				$table_row_field_action_item_list = $action_item_speech->get_table_row_field_action_item_list();
 
 			}
+			*/
 
 			// update tabel row
+			$table_row_field_action_item_list = $action_item_speech->get_table_row_field_action_item_list();
 			if(!is_array($table_row_field_action_item_list) || empty($table_row_field_action_item_list)) {
 				echo "!Error! / " . __FUNCTION__ . " / \$table_row_field_action_item_list is not valid!<br/>";
 				return;
@@ -8108,6 +8151,10 @@ class MYSQLInterface{
 				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")){
 					return;
 				}
+
+				// DEBUG
+				$table_field_action_item_id = $table_field_action_item_obj->get_id();
+				echo "\$table_field_action_item_id ::: $table_field_action_item_id<br/>";
 
 				$cur_context_str = $table_field_action_item_obj->get_context();
 				$cur_context_obj = json_decode($cur_context_str);
@@ -8143,11 +8190,15 @@ class MYSQLInterface{
 					$cur_context_obj->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $__evaluator_member_hash_key;
 					$table_field_action_item_obj->set_name($__evaluator_member_name);
 
+					echo "\$__evaluator_member_name ::: $__evaluator_member_name<br/>";
+
 				} // inner if end
 
 			} // inner for end
 
 		} // outer for end
+
+		return $root_action_collection;
 
 	}
 
