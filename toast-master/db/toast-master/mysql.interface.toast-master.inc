@@ -3290,7 +3290,6 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	// wonder.jung
 	public function get_speech_project($project_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
@@ -7903,7 +7902,7 @@ class MYSQLInterface{
 		return $recent_root_action_collection;
 	}
 	// @ action에 role 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
-	public function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
+	private function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
 			return;
@@ -7918,6 +7917,93 @@ class MYSQLInterface{
 		if(!is_array($speech_list) || empty($speech_list)) {
 			return;
 		}
+		$speech_cnt = count($speech_list);
+
+		// speech list와 action list의 갯수가 일치해야 한다.
+		// 다르다면 업데이트!
+
+		$action_item_speech = 
+		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+
+		// 스피치 관련 테이블을 가져옵니다.
+		// DEBUG
+		$parent_action_list = null;
+		if($this->is_action_item(__FUNCTION__, $action_item_speech)) {
+			$parent_action_list = $action_item_speech->get_parent();
+		}
+		$cur_children_cnt = -1;
+		if($this->is_action_collection(__FUNCTION__, $parent_action_list)) {
+			// 제목 열도 갯수에 포함됩니다. 전체 열에서 제목 열 1개를 뺍니다.
+			$cur_children_cnt = $parent_action_list->get_children_cnt() - 1;
+		}
+		if((0 < $cur_children_cnt) && ($cur_children_cnt < count($speech_list))) {
+			// 액션 테이블과 스피치 리스트가 전체 갯수가 다릅니다.
+			// 스피치 리스트가 갯수가 더 많은 경우만 바꾸어 줍니다.
+
+			$diff_cnt = $speech_cnt - $cur_children_cnt;
+
+			// 열을 추가합니다.
+			$action_item_obj_before = $action_item_speech;
+			for($idx = 0; $idx < $diff_cnt;$idx++) {
+
+				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+					break;
+				}
+
+				// wonder.jung
+
+				$cur_table_row_field_action_item_list_after = 
+				$this->add_row_into_table(
+					// $table_field_action_item_obj=null
+					$action_item_obj_before
+					// $action_name=""
+					, $params->NOT_ASSIGNED
+					// $action_context=""
+					, ""
+				);
+				if($this->is_not_action_collection(__FUNCTION__, $cur_table_row_field_action_item_list_after, "cur_table_row_field_action_item_list_after")) {
+					break;
+				}
+
+				for($inner_idx = 0; $inner_idx < count($cur_table_row_field_action_item_list_after);$inner_idx++) {
+					$table_field_action_item_obj = $cur_table_row_field_action_item_list_after[$inner_idx];
+					if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+						break;
+					}
+
+					
+
+				}
+
+				$last_child_action_item = $cur_table_row_field_action_item_list_after->get_last_child();
+				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+					break;
+				}
+
+				$action_item_obj_before = $last_child_action_item;
+
+				// action item의 context에 speech id를 입력해줍니다.
+				// 검색할때 키로 사용됩니다.
+			}
+			// $cur_table_row_field_action_item_list_after = 
+		}
+
+
+
+
+		// 테이블의 열을 추가하는 경우의 로직은 어디에?
+		/*
+		$cur_table_row_field_action_item_list_after = 
+		$this->add_row_into_table(
+			// $table_field_action_item_obj=null
+			$action_item_obj_before
+			// $action_name=""
+			, $params->NOT_ASSIGNED
+			// $action_context=""
+			, ""
+		);
+		*/
+
 
 		// 스피치가 지정되지 않았을 경우의 action item.
 		$action_item_speech_no_speech = 
@@ -7983,21 +8069,21 @@ class MYSQLInterface{
 			if($this->is_not_action_item(__FUNCTION__, $action_item_speech)){
 
 				if($this->is_action_item(__FUNCTION__, $action_item_speech_no_speech)){
+
 					// 1-1. 최초의 table row를 추가하는 경우.
 					// action item은 이미 있음. DB에 추가된 정보를 UPDATE.
-
-					$table_row_field_action_item_list = $action_item_speech_no_speech->get_table_row_field_action_item_list();
+					$table_row_field_action_item_list = 
+					$action_item_speech_no_speech->get_table_row_field_action_item_list();
 
 				} else {
 					// 1-2. 다음 table row를 추가하는 경우.
 					// action item이 없음. DB에 추가된 정보를 INSERT.
 
 					// 직전의 action item을 가져와야 함.
-
 					$table_row_field_action_item_list = 
 					$this->add_row_into_table(
 						// $table_field_action_item_obj=null
-						$action_item_obj_before
+						$action_item_obj_before  // 이거 없네?
 						// $action_name=""
 						, $params->NOT_ASSIGNED
 						// $action_context=""
@@ -8028,22 +8114,31 @@ class MYSQLInterface{
 
 				$cur_context_obj->MEETING_ID = $meeting_id;
 
-				if(!is_null($cur_context_obj->SPEECH_PROJECT_ID)) {
+				print_r($cur_context_obj);
+				echo "<br/><br/>";
+
+				if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_PROJECT) == 0) {
+				// if(!is_null($cur_context_obj->SPEECH_PROJECT_ID)) {
 					// update speech project
 					$cur_context_obj->SPEECH_PROJECT_ID = $__speech_project_id;
 					$table_field_action_item_obj->set_name($__speech_project_title);
 
-				} else if(!is_null($cur_context_obj->SPEECH_TITLE)) {
+				// } else if(!is_null($cur_context_obj->SPEECH_TITLE)) {
+				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
 					// update speech title
 					$cur_context_obj->SPEECH_TITLE = $__title;
 					$table_field_action_item_obj->set_name($__title);
 
-				} else if(!is_null($cur_context_obj->SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
+				// } else if(!is_null($cur_context_obj->SPEECH_SPEAKER_MEMBER_HASH_KEY)) {
+				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_SPEAKER) == 0) {
 					// update speaker
 					$cur_context_obj->SPEECH_SPEAKER_MEMBER_HASH_KEY = $__speaker_member_hash_key;
 					$table_field_action_item_obj->set_name($__speaker_member_name);
 
-				} else if(!is_null($cur_context_obj->SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
+					echo "\$__speaker_member_name ::: $__speaker_member_name<br/>";
+
+				// } else if(!is_null($cur_context_obj->SPEECH_EVALUATOR_MEMBER_HASH_KEY)) {
+				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_EVALUATOR) == 0) {
 					// update speaker
 					$cur_context_obj->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $__evaluator_member_hash_key;
 					$table_field_action_item_obj->set_name($__evaluator_member_name);
@@ -11067,7 +11162,7 @@ class MYSQLInterface{
 		// DB interface prop
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER;
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;

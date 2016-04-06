@@ -110,6 +110,7 @@
 	}
 
 	// TEST - 6458
+	/*
 	$action_collection_id_test = 6229;
 	$meeting_id_test = 134;
 	$action_collection_obj_test = $wdj_mysql_interface->get_root_action_collection_toastmasters($action_collection_id_test, $meeting_id_test);
@@ -117,6 +118,7 @@
 	if(ActionCollection::is_instance($action_collection_obj_test)) {
 		$action_collection_obj_test_std = $action_collection_obj_test->get_std_obj();	
 	}
+	*/
 
 	// NEXT 
 	// 1. IFRAME으로 PDF를 보여준다. 

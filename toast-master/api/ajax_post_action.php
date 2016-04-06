@@ -164,7 +164,6 @@
 
 		if($action_item_obj_before->is_table_field_item()) {
 
-			// wonder.jung
 			// 새로운 아이템 추가 - TABLE
 			$cur_table_row_field_action_item_list_after = 
 			$wdj_mysql_interface->add_row_into_table(
@@ -312,6 +311,7 @@
 					// insert_speech_empty_speaker_n_evaluator
 					$result->NEW_SPEECH_ID = $NEW_SPEECH_ID;
 					$SPEECH_ID = $NEW_SPEECH_ID;
+					$ACTION_CONTEXT_OBJ->SPEECH_ID = $SPEECH_ID;
 				}
 
 				$result->SPEECH_ID = $SPEECH_ID;
@@ -371,8 +371,7 @@
 					return;
 				}	
 
-				$SPEECH_SPEAKER_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY;
-
+				$SPEECH_SPEAKER_MEMBER_HASH_KEY = $SELECTED_VALUE;
 				$result->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
 				$ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
 
@@ -396,8 +395,7 @@
 					return;
 				}
 
-				$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY;			
-
+				$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SELECTED_VALUE;
 				$result->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
 				$ACTION_CONTEXT_OBJ->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
 
@@ -414,8 +412,8 @@
 
 			}
 			if(!is_null($ACTION_CONTEXT_OBJ->SPEECH_ID)) {
-
 				$action_context_str = json_encode($ACTION_CONTEXT_OBJ);
+				$result->ACTION_CONTEXT = $action_context_str;
 				$wdj_mysql_interface->update_action_item($cur_action_item_id, $new_action_name, $action_context_str);
 
 			}

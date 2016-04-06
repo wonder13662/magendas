@@ -460,24 +460,37 @@ class ActionObject implements Action{
 	}
 	private function search_by_context($context_key="", $context_value="") {
 
-
 		// ACTION ITEM인 경우만 진행합니다.
 		if(is_null($context_key) || empty($context_key)) {
 			return null;
 		}
-		if(is_null($context_value) || empty($context_value)) {
-			return null;
-		}
+		// REMOVE ME
+		// if(is_null($context_value) || empty($context_value)) {
+		// 	return null;
+		// }
 
 		// DEBUG
-		$cur_actino_name = $this->get_name();
+		// $cur_actino_name = $this->get_name();
 
 		$cur_context_str = $this->get_context();
 		$cur_context_obj = json_decode($cur_context_str);
-		$cur_context_value = $cur_context_obj->{$context_key};
 
-		if(!is_null($cur_context_value) && (strcmp($cur_context_value , $context_value)) == 0) {
-			return $this;
+		if(!empty($context_value)) {
+
+			// context value가 유효한 경우
+			$cur_context_value = $cur_context_obj->{$context_key};
+			if(!is_null($cur_context_value) && (strcmp($cur_context_value , $context_value)) == 0) {
+				return $this;
+			}
+
+		} else {
+
+			// context value가 공백, null일 경우. key 값만 매칭되면 반환.
+			$cur_context_value = $cur_context_obj->{$context_key};
+			if(!is_null($cur_context_value)) {
+				return $this;
+			}
+			
 		}
 
 		if($this->has_children()) {
@@ -503,49 +516,10 @@ class ActionObject implements Action{
 				}
 			}
 		}
-		
-
-		/*
-		foreach($this->search_map as $coordinate => $action_obj) {
-
-			// $action_obj를 가져와 분석
-			if(ActionObject::is_not_action_obj($action_obj)) {
-				echo "!Error! / search_by_context_key / ActionObject::is_not_action_obj($action_obj)<br/>";
-				return;
-			}
-
-			// DEBUG
-			$action_name = $action_obj->get_name();
-			echo "search_by_context / \$action_name ::: $action_name<br/>";
-			echo "search_by_context / \$coordinate ::: $coordinate<br/>";
 
 
-			// echo "\$context_key ::: $context_key<br/>";
-
-			$cur_context_encoded_str = $action_obj->get_context();
-			// echo "\$cur_context_encoded_str ::: $cur_context_encoded_str<br/>";
-
-			$cur_context_obj = json_decode($cur_context_encoded_str);
-			$cur_context_value = "";
-
-			// REMOVE ME
-			// print_r($cur_context_obj);
-			// echo "<br/>";
 
 
-			if(!is_null($cur_context_obj->{$context_key})) {
-				$cur_context_value = $cur_context_obj->{$context_key};
-				echo "\$cur_context_value ::: $cur_context_value<br/>";
-			}
-
-			if(strcmp($cur_context_value,$context_value) == 0) {
-				echo "XXX - 001<br/>";
-				return $action_obj;
-			}
-
-
-		} // end foreach
-		*/
 
 	}
 
