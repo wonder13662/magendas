@@ -367,25 +367,17 @@ class ActionObject implements Action{
 		for($idx=0;$idx < count($children_action_list);$idx++) {
 			$child_action_obj = $children_action_list[$idx];
 
-			// REMOVE ME
-			// $child_action_name = $child_action_obj->get_name();
-			// $child_has_parent = $child_action_obj->has_parent();
-
 			$child_action_coordinate = $cur_coordinate . "-" . $idx;
 
 			$cur_search_map = $child_action_obj->set_coordinate($child_action_coordinate, $cur_search_map);
 		}
 
-		// wonder.jung
 		if(ActionItem::is_instance($this)) {
 			$add_on_list = $this->get_add_on_list();
 			for($idx=0;$idx < count($add_on_list);$idx++) {
 				$add_on_action_obj = $add_on_list[$idx];
 
 				$add_on_action_coordinate = $cur_coordinate . "-A" . $idx;
-
-				// REMOVE ME
-				// echo "\$add_on_action_coordinate ::: $add_on_action_coordinate<br/>";
 
 				$cur_search_map = $add_on_action_obj->set_coordinate($add_on_action_coordinate, $cur_search_map);
 
@@ -490,7 +482,7 @@ class ActionObject implements Action{
 			if(!is_null($cur_context_value)) {
 				return $this;
 			}
-			
+
 		}
 
 		if($this->has_children()) {
@@ -540,7 +532,6 @@ class ActionObject implements Action{
 
 		// set_parent_changed
 		$parent_action_obj = $this->get_parent();
-		// wonder.jung
 		if($this->has_parent()) {
 			$parent_action_obj->set_changed($has_changed);	
 		}
@@ -652,6 +643,65 @@ class ActionObject implements Action{
 	public function get_context() {
 		return $this->context;
 	}
+	public function get_context_obj() {
+
+		if(empty($this->context)) {
+			return new stdClass();
+		}
+
+		return json_decode($this->context);
+	}
+	public function set_context_obj($context_obj=null) {
+
+		if(is_null($context_obj)) {
+			$context_obj = new stdClass();
+		}
+
+		$this->context = json_encode($context_obj);
+	}
+	public function set_context_attr($key="", $value="") {
+
+		if(empty($key)) {
+			return;
+		}
+		if(is_null($value)) {
+			$value = "";
+		}
+
+		$cur_context_obj = $this->get_context_obj();
+		$cur_context_obj->{$key} = $value;
+
+		$cur_context_str = json_encode($cur_context_obj);
+
+		$this->context = $cur_context_str;
+	}
+	public function get_context_attr($key="") {
+
+		if(empty($key)) {
+			return;
+		}
+
+		$cur_context_obj = $this->get_context_obj();
+		return $cur_context_obj->{$key};
+	}	
+	public function has_context_attr($key="") {
+
+		if(empty($key)) {
+			return false;
+		}
+
+		$cur_context_obj = $this->get_context_obj();
+		if(is_null($cur_context_obj)) {
+			return false;
+		}
+
+		if(is_null($cur_context_obj->{$key})) {
+			return false;
+		}
+
+		return true;
+	}
+
 
 	// @ Desc : 자신과 파라미터로 넘어온 action obj가 동일한지 id, hash_key값을 비교해 알려줍니다.
 	public function is_equal($target_action_obj=null) {
@@ -993,7 +1043,6 @@ class ActionCollection extends ActionObject{
 			return;
 		}
 
-		// wonder.jung11
 		$cur_add_on_list = $cur_add_on_action_parent_obj->get_add_on_list();
 		if(!is_array($cur_add_on_list)) {
 			echo "!Error! / is_last_add_on / !is_array(\$cur_add_on_list)<br/>";
@@ -1029,7 +1078,6 @@ class ActionCollection extends ActionObject{
 			return $this;
 		}
 
-		// wonder.jung11
 		$children_action_list = $this->get_children();
 		for($idx = 0; $idx < count($children_action_list); $idx++) {
 			$child_action_object = $children_action_list[$idx];
@@ -1344,6 +1392,41 @@ class ActionItem extends ActionObject{
 	// @ Override
 	public function get_context() {
 		return parent::get_context();
+	}
+	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다. 이중 배열의 형태로 반환
+	public function get_table_row_list() {
+
+		if($this->is_not_table_field_item()) {
+			echo "!Error! / " . __FUNCTION__ . " / \$this->is_not_table_field_item()";
+			return;
+		}
+
+		$table_column_action_list = $this->get_parent();
+		if(ActionCollection::is_not_instance($table_column_action_list)) {
+			echo "!Error! / " . __FUNCTION__ . " / ActionCollection::is_not_instance(\$table_column_action_list)";
+			return;
+		}
+
+		$table_field_action_item_list = $table_column_action_list->get_children();
+		$table_row_list = array();
+		for($idx = 0; $idx < count($table_field_action_item_list); $idx++ ) {
+			$table_field_action_item = $table_field_action_item_list[$idx];
+			if(ActionItem::is_not_instance($table_field_action_item)) {
+				echo "!Error! / " . __FUNCTION__ . " / ActionItem::is_not_instance(\$table_field_action_item)";
+				return;
+			}
+
+			// 제목 표시 타입은 제거한다.
+			if(ActionItem::$TITLE_ONLY_FIXED == $table_field_action_item->get_item_type()) {
+				continue;
+			}
+
+			$cur_table_row_field_action_item_list = $table_field_action_item->get_table_row_field_action_item_list();
+			array_push($table_row_list, $cur_table_row_field_action_item_list);
+		}
+
+		return $table_row_list;
+
 	}
 
 	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다.

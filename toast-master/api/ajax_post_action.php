@@ -175,13 +175,54 @@
 				, ""
 			);
 
+			// SPEECH UPDATE
+			// SPEECH TABLE일 경우의 DB 업데이트
+			$is_speech_action_item = false;
+			if(	$action_item_obj_before->has_context_attr($params->IS_UPDATE_SPEECH) ||
+				$action_item_obj_before->has_context_attr($params->IS_UPDATE_SPEECH_PROJECT) || 
+				$action_item_obj_before->has_context_attr($params->IS_UPDATE_SPEECH_TITLE) || 
+				$action_item_obj_before->has_context_attr($params->IS_UPDATE_SPEECH_SPEAKER)) {
+
+				$is_speech_action_item = true;
+			}
+			$__speech_id = -1;
+			$__meeting_id = -1;
+			$__speech_project_id = -1;
+			if($is_speech_action_item) {
+
+				// 새로운 SPEECH 열을 추가합니다.
+				$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
+				$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
+
+				$new_speech_obj = $wdj_mysql_interface->sel_speech($NEW_SPEECH_ID);
+				$__speech_id = $new_speech_obj->__speech_id;
+				$__meeting_id = $new_speech_obj->__meeting_id;
+				$__speech_project_id = $new_speech_obj->__speech_project_id;
+
+			}
+
+			// DEBUG
 			$cur_table_row_field_action_item_list_after_std = array();
 			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
 				$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
+				
+				if($is_speech_action_item) {
+					// UPDATE CONTEXT
+					$cur_action_item_copy->set_context_attr($params->MEETING_ID, $__meeting_id);
+					$cur_action_item_copy->set_context_attr($params->SPEECH_ID, $__speech_id);
+					$cur_action_item_copy->set_context_attr($params->SPEECH_PROJECT_ID, $__speech_project_id);
+
+					// wonder.jung
+					$wdj_mysql_interface->update_action_item(
+						$cur_action_item_copy->get_id()
+						, $cur_action_item_copy->get_name()
+						, $cur_action_item_copy->get_context()
+					);
+				}
+
 				$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
 				array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
 			}
-
 			$result->cur_table_row_field_action_item_list_after_std = $cur_table_row_field_action_item_list_after_std;
 
 		} else {
@@ -303,6 +344,10 @@
 				$SELECTED_KEY = $ACTION_CONTEXT_OBJ->SELECTED_KEY;
 				$SELECTED_VALUE = $ACTION_CONTEXT_OBJ->SELECTED_VALUE;
 
+				echo "XXX - \$SPEECH_ID ::: $SPEECH_ID<br/>";
+
+				// REMOVE ME
+				/*
 				if($SPEECH_ID < 1) {
 					// 처음으로 열을 추가한다면, 같은 열의 ACTION ITEM의 CONTEXT에 speech id를 모두 업데이트 해줘야한다.
 					$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID);
@@ -313,6 +358,7 @@
 					$SPEECH_ID = $NEW_SPEECH_ID;
 					$ACTION_CONTEXT_OBJ->SPEECH_ID = $SPEECH_ID;
 				}
+				*/
 
 				$result->SPEECH_ID = $SPEECH_ID;
 				$result->SELECTED_KEY = $SELECTED_KEY;
@@ -321,7 +367,6 @@
 			}
 			if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
 
-				// wonder.jung
 				$SPEECH_TITLE = $ACTION_NAME;
 
 				$result->SPEECH_TITLE = $SPEECH_TITLE;
