@@ -2142,6 +2142,8 @@ airborne.bootstrap.view.obj.__action_table = {
 	// @ Desc : 화면에 테이블의 열을 추가합니다. 테이블 열을 구성하는 정보는 모두 action table 객체에서 가져옵니다. 각 필드는 기본값을 갖습니다.
 	,add_editable_table_row:function(action_item_obj, cur_table_element_collection_set) {
 
+		// wonder.jung
+
 		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
 			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;

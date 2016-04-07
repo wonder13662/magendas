@@ -461,6 +461,10 @@ airborne.bootstrap.obj.__action = {
 					action_hierarchy_search_map = {};
 				}
 				action_hierarchy_search_map[my_coordinate] = this;
+
+				var my_hash_key = this.get_action_hash_key();
+				action_hierarchy_search_map[my_hash_key] = this;
+
 				this.set_action_hierarchy_search_map(action_hierarchy_search_map);
 
 				// ACTION DEPTH
@@ -1784,6 +1788,10 @@ airborne.bootstrap.obj.__action = {
 				consoler.say("reset_search_map / cur_action_hierarchy_search_map :: ",cur_action_hierarchy_search_map);
 
 				cur_action_hierarchy_search_map[cur_coordinate] = this;
+
+				// 해시키 검색 맵 지정.
+				var cur_hash_key = this.get_action_hash_key();
+				cur_action_hierarchy_search_map[cur_hash_key] = this;
 			}
 			,set_external_select_box_option_list:function(external_select_box_option_list) {
 				this.external_select_box_option_list = external_select_box_option_list;
@@ -2294,8 +2302,8 @@ airborne.bootstrap.obj.__action = {
 				action_obj_for_db_update[_param.ACTION_ITEM_TYPE] = this.get_action_item_type();
 				action_obj_for_db_update[_param.ACTION_CONTEXT] = this.get_action_context();
 				action_obj_for_db_update[_param.ACTION_COORDINATE] = this.get_coordinate();
+				action_obj_for_db_update[_param.ACTION_ORDER] = this.get_idx();
 
-				// wonder.jung11
 				if(this.has_add_on_list()) {
 					var cur_add_on_list = this.get_add_on_list();
 
@@ -5974,9 +5982,7 @@ airborne.bootstrap.obj.__action = {
 						cur_delegate_show_view_mode_view_control._apply([_self]);	
 					}
 
-					console.log("TEST / call_delegate_save_n_reload / event_type ::: ",event_type);
 					_self.call_delegate_save_n_reload(_obj.ELEMENT_TYPE_INPUT_TEXT, event_type);
-
 					_self.call_delegate_show_view_mode_view_control(_self);
 				}
 

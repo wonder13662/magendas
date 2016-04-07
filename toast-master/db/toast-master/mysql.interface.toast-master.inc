@@ -3951,13 +3951,22 @@ class MYSQLInterface{
 
 
 
-	public function insert_speech_empty_speaker_n_evaluator($meeting_agenda_id=-1){
+	public function insert_speech_empty_speaker_n_evaluator($meeting_agenda_id=-1, $order_num=-1){
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
 			return;
 		}
 
-		$result = $this->insert_speech($meeting_agenda_id, -1, 1, "No title");
+		$result = $this->insert_speech(
+			// $meeting_agenda_id
+			$meeting_agenda_id
+			// $order_num
+			, $order_num
+			// $speech_project_id
+			, 1
+			// $speech_title
+			, "No title"
+		);
 
 		$new_speech_id = $this->get_last_speech_id($meeting_agenda_id);
 		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
@@ -6978,14 +6987,14 @@ class MYSQLInterface{
 			return;
 		}
 
-		$context_mysql_safe = $this->mysql_manager->escape_json_str($action_item_context);
+		// $context_mysql_safe = $this->mysql_manager->escape_json_str($action_item_context);
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
 				"UPDATE `magendas`.`ACTION_ITEM`"
 				," SET `name` = \"$action_name\""
-				," ,`context` = \"$context_mysql_safe\""
+				," ,`context` = '$action_item_context'"
 				," WHERE `id` = $action_item_id"
 			)
 		);
@@ -7848,7 +7857,7 @@ class MYSQLInterface{
 				$query_manager->addQueryLineArr(
 					array(
 						"UPDATE ACTION_ITEM"
-						, "SET `context` = \"$action_item_context\""
+						, "SET `context` = '$action_item_context'"
 						, "WHERE `id` = $action_item_id"
 					)
 				);
@@ -8045,10 +8054,6 @@ class MYSQLInterface{
 
 			}
 
-			// wonder.jung
-			// root_action_collection을 다시 가져옵니다.
-
-
 		}
 
 		// 각 테이블 열을 가져와 배열로 만들어야 합니다.
@@ -8063,6 +8068,8 @@ class MYSQLInterface{
 		$root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
 
 		for($idx = 0; $idx < count($speech_list);$idx++) {
+
+			echo "TEST X - 000<br/>";
 
 			// DB에서 가져온 스피치 정보
 			$speech_obj = $speech_list[$idx];
@@ -8127,22 +8134,33 @@ class MYSQLInterface{
 				}
 
 				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
-				if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_PROJECT) == 0) {
+
+				$ACTION_DB_UPDATE_MSG = $table_field_action_item_obj->get_context_attr($params->ACTION_DB_UPDATE_MSG);
+				if(empty($ACTION_DB_UPDATE_MSG)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$ACTION_DB_UPDATE_MSG)<br/>";
+					return;
+				}
+
+				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_PROJECT) == 0) {
+
 					// update speech project
 					$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $__speech_project_id);
 					$table_field_action_item_obj->set_name($__speech_project_title);
 
-				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
+
 					// update speech title
 					$table_field_action_item_obj->set_context_attr($params->SPEECH_TITLE, $__title);
 					$table_field_action_item_obj->set_name($__title);
 
-				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_SPEAKER) == 0) {
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_SPEAKER) == 0) {
+
 					// update speaker
 					$table_field_action_item_obj->set_context_attr($params->SPEECH_SPEAKER_MEMBER_HASH_KEY, $__speaker_member_hash_key);
 					$table_field_action_item_obj->set_name($__speaker_member_name);
 
-				} else if(strcmp($cur_context_obj->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_EVALUATOR) == 0) {
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_EVALUATOR) == 0) {
+
 					// update speaker
 					$table_field_action_item_obj->set_context_attr($params->SPEECH_EVALUATOR_MEMBER_HASH_KEY, $__evaluator_member_hash_key);
 					$table_field_action_item_obj->set_name($__evaluator_member_name);
@@ -8210,8 +8228,6 @@ class MYSQLInterface{
 	}
 	// @ toastmasters에서 사용하는 action collection을 돌려줍니다.
 	public function get_root_action_collection_toastmasters($action_collection_id=-1, $meeting_id=-1) {
-
-		echo "TEST - 0000<br/>";
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -8595,6 +8611,8 @@ class MYSQLInterface{
 			return;
 		}
 
+		$params = new ToastmasterParamManager();
+
 		$cur_table_row_field_action_item_list = $table_field_action_item_obj->get_table_row_field_action_item_list();
 		for($idx = 0;$idx < count($cur_table_row_field_action_item_list);$idx++) {
 			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
@@ -8603,29 +8621,12 @@ class MYSQLInterface{
 			}
 
 			// 엘리먼트를 복사합니다.
-			$is_shy = 0;
-
-			// $action_context
 			// 1. 외부에서 지정된 값이 없다면, 이전 객체의 $action_context를 빈값으로 만들어서 내립니다. 
 			// 결과는 동일한 KEY, 기본 VALUE를 가지게 됩니다.
+			$copy_context_str = $table_row_field_action_item_obj->copy_context();
 
-			$cur_context_str = $table_row_field_action_item_obj->get_context();
-			$cur_context_obj = null;
-			if(!empty($cur_context_str)) {
-				$cur_context_obj = json_decode($cur_context_str);	
-			}
-			
-			$toss_context_str = "";
-			if(!is_null($cur_context_obj)) {
-				$toss_context_obj = new stdClass();
-				foreach($cur_context_obj as $key => $value) {
-		           $toss_context_obj->{$key} = "";
-				}
-				$toss_context_str = json_encode($toss_context_obj);
-				$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $toss_context_str);
-			} else {
-				$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $action_context);
-			}
+			$is_shy = 0;
+			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $copy_context_str);
 			
 		}
 
@@ -8634,7 +8635,18 @@ class MYSQLInterface{
 			return;
 		}
 
-		$cur_table_row_field_action_item_list_after = $table_field_action_item_obj_after->get_table_row_field_action_item_list();
+		$cur_table_row_field_action_item_list_after = 
+		$table_field_action_item_obj_after->get_table_row_field_action_item_list();
+
+		// DEBUG
+		/*
+		for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after);$idx++) {
+			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list_after[$idx];
+
+			$cur_context = $table_row_field_action_item_obj->get_context();
+			echo "copy / \$cur_context ::: $cur_context<br/>";
+		}
+		*/		
 
 		return $cur_table_row_field_action_item_list_after;
 	}
@@ -9303,12 +9315,10 @@ class MYSQLInterface{
 			return;
 		}
 
-		if(empty($action_context)) {
-			$context = $action_item_target->get_context();	
-		} else {
-			$context = $action_context;
-		}
-		$context_mysql_safe = $this->mysql_manager->escape_json_str($context);
+		$cur_context = $action_item_target->get_context();
+
+		// action obj에 포함된 context와 context str을 조합합니다.
+		$context = $action_item_target->copy_context($action_context);
 
 		$hash_key = $this->get_hash_key("$type $name $context");
 
@@ -9316,7 +9326,7 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"INSERT INTO `magendas`.`ACTION_ITEM`(`hash_key`,`type`,`name`,`context`)"
-				,"VALUES(\"$hash_key\",$type,\"$name\",\"$context_mysql_safe\")"
+				,"VALUES(\"$hash_key\",$type,\"$name\",'$context')"
 			)
 		);
 		$query_manager->modify();
@@ -9351,7 +9361,7 @@ class MYSQLInterface{
 		$action_item_copy->set_id($__action_item_id);
 		$action_item_copy->set_hash_key($hash_key);
 		$action_item_copy->set_name($name);
-		$action_item_copy->set_context($context_mysql_safe);
+		$action_item_copy->set_context($context);
 
 		return $action_item_copy;
 	}	

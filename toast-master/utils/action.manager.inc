@@ -651,6 +651,63 @@ class ActionObject implements Action{
 
 		return json_decode($this->context);
 	}
+	// @ Desc : 모든 키를 복사합니다. 값은 공백으로 채워집니다. json 문자열을 돌려줍니다.
+	public function copy_context($new_context_str = "") {
+		
+		$copy_context_obj = $this->copy_context_obj();
+		if(is_null($copy_context_obj)) {
+			return "";
+		}
+
+		if(!empty($new_context_str)) {
+
+			// 복사된 컨텍스트에 추가되는 내용이 있는 경우. 
+			$new_context_obj = json_decode($new_context_str);
+			if(is_null($new_context_obj)) {
+				return json_encode($copy_context_obj);
+			}
+
+			foreach($new_context_obj as $key => $value) {
+
+				if(is_null($value)) {
+					$value = "";
+				}
+
+				$copy_context_obj->{$key} = $value;
+				
+			} // end foreach
+			
+		} // end if
+
+		return json_encode($copy_context_obj);
+	}
+	// @ Desc : 모든 키를 복사합니다. 값은 공백으로 채워집니다.
+	public function copy_context_obj() {
+
+		$params = new ToastmasterParamManager();
+
+		$cur_context_obj = $this->get_context_obj();
+		$context_obj_copy = new stdClass();
+		foreach($cur_context_obj as $key => $value) {
+
+			// ACTION_DB_INSERT_MSG, ACTION_DB_UPDATE_MSG, ACTION_DB_DELETE_MSG는 옮겨줍니다.
+			if(	strcmp($key, $params->ACTION_DB_INSERT_MSG) == 0 ||
+				strcmp($key, $params->ACTION_DB_UPDATE_MSG) == 0 ||
+				strcmp($key, $params->ACTION_DB_DELETE_MSG) == 0 ) {
+
+				$context_obj_copy->{$key} = $value;	
+
+			} else {
+
+				$context_obj_copy->{$key} = "";	
+
+			} // end if
+           	
+		} // end for
+
+		return $context_obj_copy;
+
+	}
 	public function set_context_obj($context_obj=null) {
 
 		if(is_null($context_obj)) {
@@ -659,7 +716,7 @@ class ActionObject implements Action{
 
 		$this->context = json_encode($context_obj);
 	}
-	public function set_context_attr($key="", $value="") {
+	public function set_context_attr($key="", $value="", $debug_obj=null) {
 
 		if(empty($key)) {
 			return;
@@ -668,12 +725,23 @@ class ActionObject implements Action{
 			$value = "";
 		}
 
-		$cur_context_obj = $this->get_context_obj();
-		$cur_context_obj->{$key} = $value;
+		$cur_context_str = $this->get_context();
+		$debug_obj->cur_context_str = $cur_context_str;
+		// $cur_context_str_length = count($cur_context_str);
 
-		$cur_context_str = json_encode($cur_context_obj);
+		$next_context_obj = $this->get_context_obj();
+		$debug_obj->next_context_str = json_encode($next_context_obj);
+		// $next_context_str = json_encode($next_context_obj);
+		// $next_context_str_length = count($cur_context_str);
 
-		$this->context = $cur_context_str;
+		// if($next_context_str_length < $cur_context_str_length);
+
+		$next_context_obj->{$key} = $value;
+
+
+		$next_context_str = json_encode($next_context_obj);
+
+		$this->context = $next_context_str;
 	}
 	public function get_context_attr($key="") {
 
@@ -684,7 +752,7 @@ class ActionObject implements Action{
 		$cur_context_obj = $this->get_context_obj();
 		return $cur_context_obj->{$key};
 	}	
-	public function has_context_attr($key="") {
+	public function has_context_attr($key="", $value="") {
 
 		if(empty($key)) {
 			return false;
@@ -694,12 +762,49 @@ class ActionObject implements Action{
 		if(is_null($cur_context_obj)) {
 			return false;
 		}
-
 		if(is_null($cur_context_obj->{$key})) {
 			return false;
 		}
 
-		return true;
+		if(!empty($value)) {
+
+			// key, value를 같이 검사해야 하는 경우.
+			if(strcmp($cur_context_obj->{$key},$value) == 0) {
+				return true;
+			}
+			return false;
+
+		} else {
+
+			// key를 가지고 있는지 여부만 검사하는 경우.
+			return true;
+
+		}
+
+		
+	}
+	// @ desc : 새로 들어온 context의 속성으로 추가 및 업데이트를 해줍니다.
+	public function add_context_attr($new_context_str="") {
+
+		if(empty($new_context_str)) {
+			return;
+		}
+
+		$new_context_obj = json_decode($new_context_str);
+		if(is_null($new_context_obj)) {
+			return;
+		}
+
+		foreach($new_context_obj as $key => $value) {
+
+			if(is_null($value)) {
+				$value = "";
+			}
+
+			
+			$this->set_context_attr($key, $value);
+		} // end for
+
 	}
 
 

@@ -109,6 +109,56 @@
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
 	}
 
+	// TEST
+	/*
+	echo "<br/>";
+	$ROOT_ACTION_HASH_KEY = "0b1cab50917bbb50a3b6bb9bbc85570c";
+	$ACTION_HASH_KEY_BEFORE = "c8e37118422974445909a1589459e4f3";
+	$action_item_obj_before = 
+	$wdj_mysql_interface->get_action_item_obj_with_relation(
+		// $root_action_hash_key=""
+		$ROOT_ACTION_HASH_KEY
+		// $action_item_hash_key=""
+		, $ACTION_HASH_KEY_BEFORE
+	);
+
+	$action_item_id_before = $action_item_obj_before->get_id();
+	echo "\$action_item_id_before ::: $action_item_id_before<br/>";
+
+	// 새로운 아이템 추가 - TABLE
+	$cur_table_row_field_action_item_list_after = 
+	$wdj_mysql_interface->add_row_into_table(
+		// $table_field_action_item_obj=null
+		$action_item_obj_before
+		// $action_name=""
+		, $params->NOT_ASSIGNED
+		// $action_context=""
+		, ""
+	);
+
+	// $cur_table_row_field_action_item_list_after_std = array();
+	for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
+		$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
+		
+		if($is_speech_action_item) {
+
+			// UPDATE CONTEXT
+			$cur_action_item_copy->set_context_attr($params->MEETING_ID, -111);
+			$cur_action_item_copy->set_context_attr($params->SPEECH_ID, -111);
+			$cur_action_item_copy->set_context_attr($params->SPEECH_PROJECT_ID, -111);
+
+		}
+
+		$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
+
+		print_r($cur_action_item_copy_std);
+		echo "<br/>";
+
+		// array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
+	}
+	*/	
+
+
 	// TEST - 6458
 	/*
 	$action_collection_id_test = 6229;
