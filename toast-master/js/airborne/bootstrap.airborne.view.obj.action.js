@@ -1553,7 +1553,7 @@ airborne.bootstrap.obj.__action = {
 					return _json.parseJSON(this.action_context);
 				}
 
-				return undefined;
+				return {};
 			}
 			,set_action_id:function(action_id, is_update_coordinate_n_search_map) {
 				this.action_id = action_id;

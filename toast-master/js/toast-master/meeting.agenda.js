@@ -160,6 +160,7 @@ wonglish.meeting_agenda_manager = {
 					}
 
 					var action_item_obj = cur_outcome_obj._action_item_obj;
+					var action_context_obj = action_item_obj.get_action_context_obj();
 					var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 					if(_v.is_not_unsigned_number(MEETING_ID)) {
 						console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
@@ -208,17 +209,78 @@ wonglish.meeting_agenda_manager = {
 					*/
 
 					console.log("cur_outcome_obj._event ::: ",cur_outcome_obj._event);
+					console.log("action_context_obj ::: ",action_context_obj);
 
-					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
-						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
-						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
-						_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
+					if( _action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE ) {
+
+						// TM ROLE UPDATE
+						console.log("TM ROLE UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_ROLE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+									
+									if( data.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE ) {
+
+										// 역할을 업데이트 했을 경우의 화면 변경.
+										var NEW_ACTION_NAME = data.NEW_ACTION_NAME;
+										action_item_obj.set_action_name(NEW_ACTION_NAME);
+										cur_element_event_manager.set_title_jq_text(NEW_ACTION_NAME);
+
+									}
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
+
+						console.log("TM SCHEDULE UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+						
+
+						// API_UPDATE_TOASTMASTER_SCHEDULE
+
+					} else if( 	_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
+								_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
+								_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
+								_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
 
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
+						/*
 						// TEST
-						// return;
+						return;
 
 						_ajax.send_simple_post(
 							// _url
@@ -332,23 +394,14 @@ wonglish.meeting_agenda_manager = {
 										}
 										console.log("*** ACTION_CONTEXT_OBJ ::: ",ACTION_CONTEXT_OBJ);
 										
-										if( data.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_TODAY_ROLE ) {
-
-											// 역할을 업데이트 했을 경우의 화면 변경.
-											var NEW_ACTION_NAME = data.NEW_ACTION_NAME;
-											action_item_obj.set_action_name(NEW_ACTION_NAME);
-											cur_element_event_manager.set_title_jq_text(NEW_ACTION_NAME);
-
-										} else if( 	ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_TITLE || 
-													ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_PROJECT || 
-													ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_SPEAKER || 
-													ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_EVALUATOR ) {
+										if( ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_TITLE || 
+											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_PROJECT || 
+											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_SPEAKER || 
+											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_EVALUATOR ) {
 
 											// 스피치를 업데이트 했을 경우의 화면 변경.
 											var ACTION_NAME = data.ACTION_NAME;
 											action_item_obj.set_action_name(ACTION_NAME);
-
-											console.log("XXX -- 11");
 
 										}
 
@@ -363,6 +416,7 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.
+						*/
 
 					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
@@ -383,6 +437,10 @@ wonglish.meeting_agenda_manager = {
 							return search_option_arr_members;	
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
 
 							return search_option_arr_members;	
 
@@ -618,7 +676,7 @@ wonglish.meeting_agenda_manager = {
 
 				_ajax.send_simple_post(
 					// _url
-					_link.get_link(_link.API_ACTION)
+					_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE)
 					// _param_obj
 					,request_param_obj
 					// _delegate_after_job_done
@@ -643,6 +701,7 @@ wonglish.meeting_agenda_manager = {
 								// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
 
 								activate_action_timeline(new_meeting_action_list, container_jq);
+
 							}
 
 						}, // delegate_func end

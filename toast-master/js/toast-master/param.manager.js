@@ -262,6 +262,8 @@ var param_manager = {
 	, ACTION_TEMPLATE_PREV_MEETING:"ACTION_TEMPLATE_PREV_MEETING"
 	, ACTION_BEGIN_HH_MM:"ACTION_BEGIN_HH_MM"
 
+	, SELECTED_VALUE:"SELECTED_VALUE"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {

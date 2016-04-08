@@ -390,12 +390,12 @@ class MYSQLInterface{
 
 		return ($is_over_20h || $is_under_20h);
 	}
-	private function is_not_valid_time_format_hh24_mm($target){
+	public function is_not_valid_time_format_hh24_mm($target){
 		return !$this->is_valid_time_format_hh24_mm($target);
 	}
 	// @ Private
 	// @ Desc : "19:20" 형식의 시간:분을 초단위로 바꾸어 줍니다.
-	private function convert_hh24_mm_to_seconds($str_time){
+	public function convert_hh24_mm_to_seconds($str_time){
 
 		if($this->is_not_valid_time_format_hh24_mm($str_time)) {
 			return -1;
@@ -406,7 +406,7 @@ class MYSQLInterface{
 
 		return $time_seconds;
 	}
-	private function convert_seconds_to_hh24_mm($seconds) {
+	public function convert_seconds_to_hh24_mm($seconds) {
 
 		if($this->is_not_unsigned_number(null, $seconds)) {
 			return -1;
@@ -7947,7 +7947,8 @@ class MYSQLInterface{
 		if((1 == $cur_children_cnt) && ($speech_cnt == 0)) {
 
 			// 스피치 데이터가 DB에는 없고, action table에만 있는 경우.
-			$this->insert_speech_empty_speaker_n_evaluator($meeting_id);
+			$order_num = 0;
+			$this->insert_speech_empty_speaker_n_evaluator($meeting_id, $order_num);
 			$new_speech_id = $this->get_last_speech_id($meeting_id);
 			if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
 				return;
@@ -8068,8 +8069,6 @@ class MYSQLInterface{
 		$root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
 
 		for($idx = 0; $idx < count($speech_list);$idx++) {
-
-			echo "TEST X - 000<br/>";
 
 			// DB에서 가져온 스피치 정보
 			$speech_obj = $speech_list[$idx];
@@ -11709,9 +11708,6 @@ class MYSQLInterface{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 		// 21:40
-
-		// DB update
-		// $root_action_obj = $this->add_action($root_action_obj);
 
 		// Refresh coordinate
 		$root_action_obj->set_coordinate();

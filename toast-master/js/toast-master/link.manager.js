@@ -69,6 +69,11 @@ var link_manager = {
 	,API_COOKIE:"/api/ajax_post_cookie.php"
 	,API_UPDATE_MEETING_AGENDA:"/api/ajax_post_update_meeting_agenda.php"
 	,API_UPDATE_MEMBER:"/api/ajax_post_update_member.php"
+	
+	,API_UPDATE_TOASTMASTER_ROLE:"/api/v1/action/toast-master/role/update.php"
+	,API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE:"/api/v1/action/toast-master/schedule/template/update.php"
+	,API_UPDATE_TOASTMASTER_SCHEDULE:"/api/v1/action/toast-master/schedule/update.php"
+	
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"
 	,API_JESSIE:"/api/ajax_post_jessie.php"
