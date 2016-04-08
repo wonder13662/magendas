@@ -716,7 +716,7 @@ class ActionObject implements Action{
 
 		$this->context = json_encode($context_obj);
 	}
-	public function set_context_attr($key="", $value="", $debug_obj=null) {
+	public function set_context_attr($key="", $value="") {
 
 		if(empty($key)) {
 			return;
@@ -726,18 +726,10 @@ class ActionObject implements Action{
 		}
 
 		$cur_context_str = $this->get_context();
-		$debug_obj->cur_context_str = $cur_context_str;
-		// $cur_context_str_length = count($cur_context_str);
 
 		$next_context_obj = $this->get_context_obj();
-		$debug_obj->next_context_str = json_encode($next_context_obj);
-		// $next_context_str = json_encode($next_context_obj);
-		// $next_context_str_length = count($cur_context_str);
-
-		// if($next_context_str_length < $cur_context_str_length);
 
 		$next_context_obj->{$key} = $value;
-
 
 		$next_context_str = json_encode($next_context_obj);
 

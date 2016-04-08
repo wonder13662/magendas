@@ -7965,9 +7965,12 @@ class MYSQLInterface{
 					break;
 				}
 
+				// REMOVE ME
+				/*
 				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $new_speech_obj->__meeting_id);
 				$table_field_action_item_obj->set_context_attr($params->SPEECH_ID, $new_speech_obj->__speech_id);
 				$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $new_speech_obj->__speech_project_id);
+				*/
 
 				// 스피치 타입마다 업데이트
 
@@ -8165,6 +8168,10 @@ class MYSQLInterface{
 					$table_field_action_item_obj->set_name($__evaluator_member_name);
 
 				} // inner if end
+
+				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+				$table_field_action_item_obj->set_context_attr($params->SPEECH_ID, $__speech_id);
+				$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $__speech_project_id);
 
 			} // inner for end
 
