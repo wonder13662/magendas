@@ -3583,6 +3583,31 @@ class MYSQLInterface{
 		return $result;
 	}
 
+	public function has_speech($speech_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id)){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MS.`id`) AS __speech_cnt"
+				," FROM `MA_SPEECH` AS MS"
+				," WHERE MS.id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_cnt = $result->__speech_cnt;
+
+		return (0 < $__speech_cnt)?true:false;
+	}
+
 	public function sel_speech($speech_id=-1){
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
@@ -3949,7 +3974,66 @@ class MYSQLInterface{
 
 	}
 
+	public function sel_speech_by_meeting_id($meeting_id=-1) {
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
 
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MS.meeting_agenda_id AS __meeting_id"
+				,", MS.`id` AS __speech_id"
+				,", MS.speech_project_id AS __speech_project_id"
+				,", MS.title AS __speech_title"
+				,", MS.`order_num` AS __speech_order_num"
+				," FROM MA_SPEECH AS MS"
+				," WHERE MS.meeting_agenda_id=$meeting_id"
+				," ORDER BY MS.`order_num` ASC"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+		if(empty($result) || (count($result) == 1)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			// 아이템이 1개인 경우도 진행하지 않습니다.
+			return;
+		}
+
+		return $result;		
+	}
+
+	// @ Desc : speech를 재정렬합니다.
+	private function reorder_speech($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		// wonder.jung
+		// 모든 스피치 리스트를 가져옵니다.
+		$speech_list = $this->sel_speech_by_meeting_id($meeting_id);
+		if(empty($speech_list)) {
+			return;
+		}
+
+		for($idx=0;$idx < count($speech_list);$idx++) {
+			$speech_obj = $speech_list[$idx];
+
+			$__speech_id = intval($speech_obj->__speech_id);
+			$new_speech_order = $idx * 100;
+
+			// 새로운 order로 업데이트.
+			$this->update_speech_order($__speech_id, $new_speech_order);
+		}
+
+	}
 
 	public function insert_speech_empty_speaker_n_evaluator($meeting_agenda_id=-1, $order_num=-1){
 
@@ -3968,10 +4052,13 @@ class MYSQLInterface{
 			, "No title"
 		);
 
+
 		$new_speech_id = $this->get_last_speech_id($meeting_agenda_id);
 		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
 			return;
 		}
+
+		$this->reorder_speech($meeting_agenda_id);
 
 		// SPEAKER
 		// 빈 speaker 값을 만들어 넣어줍니다.
@@ -4123,6 +4210,20 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
+	private function update_speech_order($speech_id=-1, $order_num=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order_num, "order_num")){
+			return;
+		}
+
+		$speech_title="";
+		$speech_project_id=-1;
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}
 	public function update_speech_title($speech_id=-1, $speech_title="") {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
@@ -4151,14 +4252,10 @@ class MYSQLInterface{
 
 		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
 	}	
-	public function update_speech(	$speech_id
-									, $order_num=-1
-									, $speech_project_id=-1
-									, $speech_title="" ){
+	public function update_speech(	$speech_id=-1, $order_num=-1, $speech_project_id=-1, $speech_title="" ){
 
-		$function_name = "update_speech";
-		if($this->isNotUnsignedNumber($speech_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
 		}
 
 		$query_manager = new MYSQLQueryManager();
@@ -4200,9 +4297,13 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		return $this->getSimpleResult($json_res_obj);
 	}	
-	public function delete_speech($speech_id){
+	public function delete_speech($speech_id=-1){
 
 		if($this->isNotUnsignedNumber($speech_id)) return null;
+
+		// speech obj
+		$speech_obj = $this->sel_speech($speech_id);
+		$__meeting_id = $speech_obj->__meeting_id;
 
 		$result_set = new stdClass();
 
@@ -4244,6 +4345,9 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		$result = $this->getSimpleResult($json_res_obj);
 		$result_set->delete_speech = $result;
+
+		// reorder speech
+		$this->reorder_speech($__meeting_id);
 		
 		return $result_set;
 	}

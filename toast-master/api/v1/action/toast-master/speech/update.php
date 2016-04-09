@@ -327,16 +327,6 @@
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
-		if(empty($SELECTED_KEY)) {
-			$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_empty(__FUNCTION__, \$SELECTED_KEY)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-		if(empty($SELECTED_VALUE)) {
-			$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_empty(__FUNCTION__, \$SELECTED_VALUE)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
 		$cur_action_item_id = $wdj_mysql_interface->get_action_item_id($ACTION_HASH_KEY);
 		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $cur_action_item_id)){
 			$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$cur_action_item_id)";
@@ -422,6 +412,23 @@
 		} else if($IS_UPDATE_SPEECH_PROJECT) {
 
 
+
+
+
+
+
+			if(empty($SELECTED_VALUE)) {
+				$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_empty(__FUNCTION__, \$SELECTED_VALUE)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+
+
+
+
+
+
 			$SPEECH_PROJECT_ID = intval($ACTION_CONTEXT_OBJ->SPEECH_PROJECT_ID);
 
 			$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
@@ -444,6 +451,26 @@
 
 		} else if($IS_UPDATE_SPEECH_SPEAKER) {
 
+
+
+
+
+
+
+			if(empty($SELECTED_VALUE)) {
+				$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_empty(__FUNCTION__, \$SELECTED_VALUE)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+
+
+
+
+
+
+
+
 			$SPEECH_SPEAKER_MEMBER_HASH_KEY = $SELECTED_VALUE;
 			$result->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
 			$ACTION_CONTEXT_OBJ->SPEECH_SPEAKER_MEMBER_HASH_KEY = $SPEECH_SPEAKER_MEMBER_HASH_KEY;
@@ -462,6 +489,25 @@
 			$new_action_name = $speech_obj->__speaker_member_name;
 
 		} else if($IS_UPDATE_SPEECH_EVALUATOR) {
+
+
+
+
+
+
+
+			if(empty($SELECTED_VALUE)) {
+				$result->error = "EVENT_TYPE_UPDATE_ITEM / \$wdj_mysql_interface->is_empty(__FUNCTION__, \$SELECTED_VALUE)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+
+
+
+
+
+
 
 			$SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SELECTED_VALUE;
 			$result->SPEECH_EVALUATOR_MEMBER_HASH_KEY = $SPEECH_EVALUATOR_MEMBER_HASH_KEY;
@@ -509,7 +555,6 @@
 	} else if((strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) && !empty($ACTION_HASH_KEY)) {
 
 		// 아이템을 삭제합니다. 실제로 데이터를 지웁니다.
-
 		$action_item_obj_delete = 
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
 			// $root_action_hash_key=""
@@ -523,7 +568,6 @@
 			return;
 		}
 
-
 		if($action_item_obj_delete->is_table_field_item()) {
 			// 실제 DB의 데이터도 제거 - TABLE
 			$cur_table_row_field_action_item_list_delete = $action_item_obj_delete->get_table_row_field_action_item_list();
@@ -533,14 +577,7 @@
 				$wdj_mysql_interface->delete_action_item_relation($cur_action_item_delete);
 			}
 
-			$result->TABLE_FIELD_ACTION_ITEM_LIST_STD = $TABLE_FIELD_ACTION_ITEM_LIST_STD;
-
-		} else {
-			// 실제 DB의 데이터도 제거 - LIST	
-			$wdj_mysql_interface->delete_action_item_relation($action_item_obj_delete);
-
 		}
-
 		
 		// 업데이트된 root_action_list를 가져옵니다.
 		$root_action_list = $wdj_mysql_interface->get_root_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY, $MEETING_ID);
@@ -550,6 +587,12 @@
 			return;
 		}
 		$result->root_action_list_deleted = $root_action_list->get_std_obj();
+
+		// SPEECH 정보를 DB에서 삭제합니다.
+		$wdj_mysql_interface->delete_speech($SPEECH_ID);
+		// 삭제되었는지 확인합니다.
+		$has_speech = $wdj_mysql_interface->has_speech($SPEECH_ID);
+		$result->speech_has_deleted = (!$has_speech)?true:false;
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_TABLE_ROW_ORDER) == 0) {
 

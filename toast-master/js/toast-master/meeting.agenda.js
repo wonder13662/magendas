@@ -172,6 +172,8 @@ wonglish.meeting_agenda_manager = {
 						)
 					)?true:false;
 
+					console.log("is_speech_update ::: ",is_speech_update);
+
 					var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 					if(_v.is_not_unsigned_number(MEETING_ID)) {
 						console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
@@ -277,7 +279,7 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.
-						
+
 
 
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_speech_update) {
@@ -330,7 +332,32 @@ wonglish.meeting_agenda_manager = {
 						); // ajax done.
 						
 
-						// API_UPDATE_TOASTMASTER_SCHEDULE
+						// EVENT_TYPE_DELETE_ITEM
+
+					} else if(_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event && is_speech_update) {
+
+						console.log("TM SCHEDULE DELETE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.						
+
 
 					} else if( 	_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 								_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
