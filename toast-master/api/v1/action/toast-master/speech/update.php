@@ -176,7 +176,7 @@
 
 
 		// COPY
-		// LIST일 경우에는 action item이 1개만 추가. TABLE일 경우에는 이전 열의 모든 action item이 복사되어 열이 추가되어야 함.
+		// TABLE일 경우에는 이전 열의 모든 action item이 복사되어 열이 추가되어야 함.
 		$action_item_obj_before = 
 		$wdj_mysql_interface->get_action_item_obj_with_relation(
 			// $root_action_hash_key=""
@@ -220,11 +220,29 @@
 		$__meeting_id = -1;
 		$__speech_project_id = -1;
 		$new_speech_obj = null;
-		$new_order = ($action_item_obj_before->get_idx() * 100) + 50;
+
+		// public function get_context_attr($key="") {
+		$speech_id_before = $action_item_obj_before->get_context_attr($params->SPEECH_ID);
+		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $speech_id_before)){
+			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$speech_id_before)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$speech_obj_before = $wdj_mysql_interface->sel_speech($speech_id_before);
+		if(is_null($speech_obj_before)){
+			$result->error = "is_null(\$speech_obj_before)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$__order_num = intval($speech_obj_before->__order_num);
+
+		$new_order_num = $__order_num + 50;
+		$result->prev_order_num = $__order_num;
+		$result->new_order_num = $new_order_num;
 
 		// 새로운 SPEECH 열을 추가합니다.
 		// 몇번째 순서인지 넣을수 있도록! - wonder.jung
-		$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID, $new_order);
+		$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID, $new_order_num);
 		$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
 
 		$new_speech_obj = $wdj_mysql_interface->sel_speech($NEW_SPEECH_ID);

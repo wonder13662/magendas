@@ -262,6 +262,12 @@ wonglish.meeting_agenda_manager = {
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
+						// wonder.jung
+						// 1. 다른 객체 사이에 추가를 하게 되면, before, after 관계가 늘 마지막에 추가되는 것으로 업데이트하는 결과 확인. 수정할 것.
+
+						// TEST
+						return;
+
 						_ajax.send_simple_post(
 							// _url
 							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
@@ -273,6 +279,32 @@ wonglish.meeting_agenda_manager = {
 								function(data){
 
 									console.log(">>> data ::: ",data);
+
+									var TABLE_FIELD_ACTION_ITEM_LIST_STD = data.TABLE_FIELD_ACTION_ITEM_LIST_STD;
+									if(TABLE_FIELD_ACTION_ITEM_LIST_STD == undefined) {
+										return;
+									}
+
+									// 테이블의 열이 추가된 경우의 데이터 업데이트
+									var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+
+									for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
+
+										var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
+										var cur_context_obj = JSON.parse(cur_action_item_std.context);
+										var cur_action_hash_key = cur_action_item_std.action_hash_key;
+										var cur_action_name = cur_action_item_std.action_name;
+
+										var cur_table_field_item_obj = cur_table_row_sibling_arr[idx];
+										var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
+
+										if(cur_table_field_item_obj != undefined) {
+											cur_table_field_item_obj.set_action_name(cur_action_name);
+											cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
+											cur_table_field_event_manager.set_title_jq_text(cur_action_name);
+										}	// end if
+
+									} // end for								
 
 								},
 								// delegate_scope
@@ -299,6 +331,11 @@ wonglish.meeting_agenda_manager = {
 								function(data){
 
 									console.log(">>> data ::: ",data);
+
+									// 스피치를 업데이트 했을 경우의 화면 변경.
+									var ACTION_NAME = data.ACTION_NAME;
+									action_item_obj.set_action_name(ACTION_NAME);
+									cur_element_event_manager.set_title_jq_text(ACTION_NAME);
 
 								},
 								// delegate_scope
