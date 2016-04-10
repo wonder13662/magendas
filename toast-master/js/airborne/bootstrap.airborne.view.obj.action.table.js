@@ -2142,8 +2142,6 @@ airborne.bootstrap.view.obj.__action_table = {
 	// @ Desc : 화면에 테이블의 열을 추가합니다. 테이블 열을 구성하는 정보는 모두 action table 객체에서 가져옵니다. 각 필드는 기본값을 갖습니다.
 	,add_editable_table_row:function(action_item_obj, cur_table_element_collection_set) {
 
-		// wonder.jung
-
 		if(_action.is_not_valid_action_item_obj(action_item_obj)) {
 			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_item_obj(action_item_obj)");
 			return;
@@ -2289,8 +2287,19 @@ airborne.bootstrap.view.obj.__action_table = {
 			return;
 		}
 
-		// 뷰가 추가되었습니다. 
-		var cur_table_field_action_item_obj = action_table_obj.get_first_child().get_last_child();
+		// 뷰가 추가되었습니다.
+		var cur_selected_child_idx = action_item_obj.get_idx();
+		if(_v.is_not_unsigned_number(cur_selected_child_idx)) {
+			console.log("!Error! / add_editable_table_row / _v.is_not_unsigned_number(cur_selected_child_idx)");
+			return;
+		}
+
+		var cur_table_field_action_item_obj = action_table_obj.get_first_child().get_child(cur_selected_child_idx);
+		if(_action.is_not_valid_action_item_obj(cur_table_field_action_item_obj)) {
+			console.log("!Error! / add_editable_table_row / _action.is_not_valid_action_item_obj(cur_table_field_action_item_obj)");
+			return;
+		}
+
 		var cur_event_manager = cur_table_field_action_item_obj.get_event_manager();
 		var cur_delegate_save_n_reload = cur_event_manager.get_delegate_save_n_reload();
 
@@ -2303,9 +2312,20 @@ airborne.bootstrap.view.obj.__action_table = {
 				return;
 			}
 
+			// wonder.jung
+			// 마지막 엘리먼트가 아닌 자신이 선택한 열의 엘리먼트를 복제해야 함.
+			var cur_selected_child = child_column_action_list.get_child(cur_selected_child_idx);
+			if(cur_selected_child == undefined) {
+				console.log("!Error! / add_editable_table_row / cur_selected_child == undefined");
+				return;
+			}
+			cur_selected_child.copy();
+
+			// REMOVE ME
 			// 마지막 엘리먼트를 복제합니다.
-			var cur_last_child = child_column_action_list.get_last_child();
-			cur_last_child.copy();
+			// console.log("마지막 엘리먼트를 복제합니다.");
+			// var cur_last_child = child_column_action_list.get_last_child();
+			// cur_last_child.copy();
 		}
 
 
@@ -2315,7 +2335,8 @@ airborne.bootstrap.view.obj.__action_table = {
 			// action_table_obj
 			, action_table_obj
 			// idx_row
-			, action_table_obj.get_first_child().get_children_cnt() - 1
+			// , action_table_obj.get_first_child().get_children_cnt() - 1
+			, cur_selected_child_idx + 1
 			// cur_table_element_collection_set
 			, cur_table_element_collection_set
 			// delegate_on_event
@@ -3172,7 +3193,10 @@ airborne.bootstrap.view.obj.__action_table = {
 	// @ private
 	// @ Desc : 테이블 컬럼 - 필드의 아이디를 가져옵니다.
 	,get_table_field_id:function(table_id, column_idx, row_idx){
-		return "table_" + table_id + "_column_" + column_idx + "_row_" + row_idx;
+		var cur_table_field_id = "table_" + table_id + "_column_" + column_idx + "_row_" + row_idx;
+		cur_table_field_id = _html.get_id_auto_increase(cur_table_field_id);
+
+		return cur_table_field_id;
 	}
 }
 

@@ -4016,7 +4016,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung
 		// 모든 스피치 리스트를 가져옵니다.
 		$speech_list = $this->sel_speech_by_meeting_id($meeting_id);
 		if(empty($speech_list)) {
@@ -8064,17 +8063,16 @@ class MYSQLInterface{
 			// 새로 지정된 SPEECH_ID 데이터를 CONTEXT 업데이트.
 			$cur_table_row_field_action_item_list = $action_item_speech->get_table_row_field_action_item_list();
 			for($idx = 0; $idx < count($cur_table_row_field_action_item_list);$idx++) {
+
 				$table_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
 				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
 					break;
 				}
 
-				// REMOVE ME
-				/*
+				// wonder.jung
 				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $new_speech_obj->__meeting_id);
 				$table_field_action_item_obj->set_context_attr($params->SPEECH_ID, $new_speech_obj->__speech_id);
 				$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $new_speech_obj->__speech_project_id);
-				*/
 
 				// 스피치 타입마다 업데이트
 

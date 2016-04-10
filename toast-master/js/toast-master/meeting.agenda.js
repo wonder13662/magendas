@@ -266,7 +266,7 @@ wonglish.meeting_agenda_manager = {
 						// 1. 다른 객체 사이에 추가를 하게 되면, before, after 관계가 늘 마지막에 추가되는 것으로 업데이트하는 결과 확인. 수정할 것.
 
 						// TEST
-						return;
+						// return;
 
 						_ajax.send_simple_post(
 							// _url

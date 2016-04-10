@@ -6257,6 +6257,8 @@ airborne.bootstrap.obj.__action = {
 			// @ Scope : Event manager
 			,on_add_btn_click:function(){
 
+				// wonder.jung
+
 				var cur_action_item_obj = this.get_action_item_obj();
 				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
 					console.log("!Error! / on_add_btn_click / _v.is_not_valid_action_item_obj(cur_action_item_obj)");
