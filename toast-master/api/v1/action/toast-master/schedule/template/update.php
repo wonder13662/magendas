@@ -109,6 +109,25 @@
 		// 기본 템플릿 적용
 		$action_obj_BDTM = ActionTemplate::get_BDTM($wdj_mysql_interface, $ACTION_BEGIN_HH_MM, $MEETING_ID, $ACTION_NAME);
 		$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
+		if(ActionCollection::is_not_instance($root_action_obj)) {
+			$result->error = "ActionCollection::is_not_instance(\$root_action_obj)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+
+		}
+
+		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
+		$root_action_obj = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($MEETING_ID);
+		$meeting_action_list_std = null;
+		if(ActionCollection::is_not_instance($root_action_obj)) {
+			$result->error = "ActionCollection::is_not_instance(\$root_action_obj)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+
+		}
+		$result->root_action_obj_std = $root_action_obj->get_std_obj();
+
+
 
 	} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_PREV_MEETING) == 0) {
 

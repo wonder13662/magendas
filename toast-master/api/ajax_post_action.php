@@ -1,5 +1,6 @@
 <?php
-
+// REMOVE ME
+/*
 	// common setting
 	include_once("../common.inc");
 	include_once("../db/toast-master/mysql.interface.toast-master.inc");
@@ -110,8 +111,9 @@
 		// 템플릿을 적용합니다.
 		if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_BUNDANG) == 0) {
 
+			// REMOVE ME
 			// 기본 템플릿 적용
-			$action_obj_BDTM = $wdj_mysql_interface->get_template_meeting_timeline_BDTM($ACTION_BEGIN_HH_MM, $MEETING_ID, $ACTION_NAME);
+			// $action_obj_BDTM = $wdj_mysql_interface->get_template_meeting_timeline_BDTM($ACTION_BEGIN_HH_MM, $MEETING_ID, $ACTION_NAME);
 			$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
 
 			// DB에서 다시 정보를 가져옴.
@@ -626,5 +628,6 @@
 	}
 
 	terminate($wdj_mysql_interface, $result, $debug_stack_array, $debug);
+*/
 ?>
 

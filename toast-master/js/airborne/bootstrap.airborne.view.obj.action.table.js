@@ -2320,12 +2320,6 @@ airborne.bootstrap.view.obj.__action_table = {
 				return;
 			}
 			cur_selected_child.copy();
-
-			// REMOVE ME
-			// 마지막 엘리먼트를 복제합니다.
-			// console.log("마지막 엘리먼트를 복제합니다.");
-			// var cur_last_child = child_column_action_list.get_last_child();
-			// cur_last_child.copy();
 		}
 
 

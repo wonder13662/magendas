@@ -200,26 +200,7 @@ wonglish.meeting_agenda_manager = {
 					var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 					if(_v.is_unsigned_number(MEETING_ID)) {
 						cur_action_obj_for_db_update["MEETING_ID"] = parseInt(MEETING_ID);	
-					}				
-
-					// REMOVE ME
-					/*
-					if(_v.is_not_unsigned_number(action_item_obj.get_action_id())) {
-						// 전달 파라미터 내용 중에 자신의 앞,뒤의 형제 정보를 추가한다.
-						var cur_sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
-						if(_action.is_valid_action_item_obj(cur_sibling_action_obj_before)) {
-							cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = cur_sibling_action_obj_before.get_action_hash_key();
-						}
-
-						var cur_sibling_action_obj_after = action_item_obj.get_sibling_action_obj_after();
-						if(_action.is_valid_action_item_obj(cur_sibling_action_obj_after)) {
-							cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = cur_sibling_action_obj_after.get_action_hash_key();
-						}
-
-						// id가 없는 엘리먼트는 새로 만들어진 엘리먼트.
-						cur_outcome_obj._event = _action.EVENT_TYPE_INSERT_ITEM;
 					}
-					*/
 
 					console.log("cur_outcome_obj._event ::: ",cur_outcome_obj._event);
 					console.log("action_context_obj ::: ",action_context_obj);
@@ -262,12 +243,6 @@ wonglish.meeting_agenda_manager = {
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
-						// wonder.jung
-						// 1. 다른 객체 사이에 추가를 하게 되면, before, after 관계가 늘 마지막에 추가되는 것으로 업데이트하는 결과 확인. 수정할 것.
-
-						// TEST
-						// return;
-
 						_ajax.send_simple_post(
 							// _url
 							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
@@ -291,7 +266,7 @@ wonglish.meeting_agenda_manager = {
 									for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
 
 										var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
-										var cur_context_obj = JSON.parse(cur_action_item_std.context);
+										var cur_context_str = cur_action_item_std.context;
 										var cur_action_hash_key = cur_action_item_std.action_hash_key;
 										var cur_action_name = cur_action_item_std.action_name;
 
@@ -299,9 +274,13 @@ wonglish.meeting_agenda_manager = {
 										var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
 
 										if(cur_table_field_item_obj != undefined) {
+
 											cur_table_field_item_obj.set_action_name(cur_action_name);
 											cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
+											cur_table_field_item_obj.set_action_context(cur_context_str);
 											cur_table_field_event_manager.set_title_jq_text(cur_action_name);
+											cur_table_field_event_manager.set_title_jq_attr_tossed_value(cur_action_name);
+
 										}	// end if
 
 									} // end for								
@@ -344,6 +323,33 @@ wonglish.meeting_agenda_manager = {
 						); // ajax done.
 
 
+					} else if(_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event && is_speech_update) {
+
+						console.log("TM SPEECH ORDER UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+									// Do nothing.
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.						
+
+
+
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
 
 						console.log("TM SCHEDULE UPDATE");
@@ -367,9 +373,6 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.
-						
-
-						// EVENT_TYPE_DELETE_ITEM
 
 					} else if(_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event && is_speech_update) {
 
@@ -404,145 +407,9 @@ wonglish.meeting_agenda_manager = {
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
-						/*
-						// TEST
-						return;
-
-						_ajax.send_simple_post(
-							// _url
-							_link.get_link(_link.API_ACTION)
-							// _param_obj
-							,cur_action_obj_for_db_update
-							// _delegate_after_job_done
-							,_obj.get_delegate(
-								// delegate_func
-								function(data){
-									
-									console.log(">>> data : ",data);
-
-									// TODO - 테이블에서 열을 추가한 경우, 열의 모든 엘리먼트의 정보를 돌려받아 업데이트를 해줘야 합니다.
-
-									// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
-									if(_action.EVENT_TYPE_INSERT_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
-
-										// 새로운 엘리먼트를 추가한 경우라면 해당되는 action item 정보(id, hash key)도 같이 업데이트 해줍니다.
-										console.log("FIN / action_item_obj :: ",action_item_obj);
-
-										var ACTION_CONTEXT_OBJ = undefined;
-										if(data.ACTION_CONTEXT != undefined) {
-											ACTION_CONTEXT_OBJ = JSON.parse(data.ACTION_CONTEXT);
-										}
-										var TABLE_FIELD_ACTION_ITEM_LIST_STD = data.TABLE_FIELD_ACTION_ITEM_LIST_STD;
-										if(TABLE_FIELD_ACTION_ITEM_LIST_STD != undefined && 0 < TABLE_FIELD_ACTION_ITEM_LIST_STD.length) {
-
-											// 테이블의 열이 추가된 경우의 데이터 업데이트
-											var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
-
-											for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
-
-												var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
-												var cur_context_obj = JSON.parse(cur_action_item_std.context);
-												var cur_action_hash_key = cur_action_item_std.action_hash_key;
-												var cur_action_name = cur_action_item_std.action_name;
-
-												var cur_table_field_item_obj = cur_table_row_sibling_arr[idx];
-												var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
-
-												if(cur_table_field_item_obj != undefined) {
-													cur_table_field_item_obj.set_action_name(cur_action_name);
-													cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
-													cur_table_field_event_manager.set_title_jq_text(cur_action_name);
-												}
-
-											}
-
-										} else if(action_item_obj.is_table_child_column_list_field_item()) {
-											// TABLE FIELD ITEM
-											var cur_table_row_field_action_item_list_after_std = data.cur_table_row_field_action_item_list_after_std;
-											if(cur_table_row_field_action_item_list_after_std == undefined) {
-												console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_list_after_std == undefined");
-												return;
-											}
-
-											var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
-											if(_v.is_not_valid_array(cur_table_row_sibling_arr)) {
-												console.log("!Error! / _delegate_after_job_done / _v.is_not_valid_array(cur_table_row_sibling_arr)");
-												return;
-											}
-
-											if(cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length) {
-												console.log("!Error! / _delegate_after_job_done / cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length");
-												return;
-											}
-
-											for(var idx=0; idx < cur_table_row_field_action_item_list_after_std.length; idx++) {
-
-												var cur_table_row_field_action_item_obj_copy = cur_table_row_field_action_item_list_after_std[idx];
-												if(cur_table_row_field_action_item_obj_copy == undefined) {
-													console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_obj_copy == undefined");
-													return;
-												}
-												var cur_table_row_field_action_item_obj_src = cur_table_row_sibling_arr[idx];
-												if(_action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)) {
-													console.log("!Error! / _delegate_after_job_done / _action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)");
-													return;
-												}
-
-												var is_update_coordinate_n_search_map = true;
-												cur_table_row_field_action_item_obj_src.set_action_id(cur_table_row_field_action_item_obj_copy.action_id, is_update_coordinate_n_search_map);
-												cur_table_row_field_action_item_obj_src.set_action_hash_key(cur_table_row_field_action_item_obj_copy.action_hash_key);
-
-											}
-
-											console.log(">>> cur_table_row_sibling_arr ::: ",cur_table_row_sibling_arr);
+						// REMOVE ME
 
 
-										} else {
-											// LIST ROW ITEM
-
-											var action_item_copy = data.action_item_copy;
-											if(action_item_copy == undefined) {
-												console.log("!Error! / _delegate_after_job_done / action_item_copy == undefined");
-												return;
-											}
-
-											var is_update_coordinate_n_search_map = true;
-											action_item_obj.set_action_id(action_item_copy.action_id, is_update_coordinate_n_search_map);
-											action_item_obj.set_action_hash_key(action_item_copy.action_hash_key);
-
-										}
-
-									} else if( data.ACTION_DB_UPDATE_MSG === _action.EVENT_TYPE_UPDATE_ITEM ) {
-
-										var ACTION_CONTEXT_OBJ = undefined;
-										if(data.ACTION_CONTEXT != undefined) {
-											ACTION_CONTEXT_OBJ = JSON.parse(data.ACTION_CONTEXT);
-										}
-										console.log("*** ACTION_CONTEXT_OBJ ::: ",ACTION_CONTEXT_OBJ);
-										
-										if( ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_TITLE || 
-											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_PROJECT || 
-											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_SPEAKER || 
-											ACTION_CONTEXT_OBJ.ACTION_DB_UPDATE_MSG === _action.IS_UPDATE_SPEECH_EVALUATOR ) {
-
-											// 스피치를 업데이트 했을 경우의 화면 변경.
-											var ACTION_NAME = data.ACTION_NAME;
-											action_item_obj.set_action_name(ACTION_NAME);
-
-										}
-
-									}
-
-
-									// 내용이 다른 경우 알려줍니다.
-									// _action.compare_root_action(cur_root_action_obj, new_root_action_obj);
-
-								},
-								// delegate_scope
-								this
-							)
-						); // ajax done.
-						*/
 
 					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
@@ -811,23 +678,21 @@ wonglish.meeting_agenda_manager = {
 						function(data){
 							
 							// wonder.jung
+							console.log("API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE");
 							console.log(">>> data : ",data);
 
 							// 새로운 템플릿으로 화면 내용을 변경합니다.
-							var root_action_collection_updated = data.root_action_collection_updated;
+							var root_action_obj_std = data.root_action_obj_std;
 							var new_meeting_action_list = undefined;
-							if(root_action_collection_updated != undefined) {
-								new_meeting_action_list = _action.get_action_obj(root_action_collection_updated);
+							if(root_action_obj_std != undefined) {
+								new_meeting_action_list = _action.get_action_obj(root_action_obj_std);
 							}
 							if(new_meeting_action_list != undefined) {
 								remove_action_timeline(container_jq);
 
-								// 타임라인을 지우게 될 경우, 현재 등록된 1. 스피치, 2. 롤, 3. 뉴스, 4. Word & Quote이 사라지게 된다.
-								// 1. 스피치, 2. 롤의 경우는 교육 통계를 위해 쌓아두어야 하는 중요한 자료.
-								// 타임 라인을 덮어 쓰게 될 경우는 위 2개 데이터를 가져와서 타임 라인에 반영하는 과정이 필요하다.
+								console.log("new_meeting_action_list ::: ",new_meeting_action_list);
 
 								activate_action_timeline(new_meeting_action_list, container_jq);
-
 							}
 
 						}, // delegate_func end

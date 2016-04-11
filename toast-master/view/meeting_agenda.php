@@ -68,21 +68,7 @@
 		// 지정한 meeting_id가 있는 경우.
 		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id);
 
-		// REMOVE ME
-		// $meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
-		// $meeting_agenda_obj = $meeting_agenda_arr[0];
-
 	}
-	// 과거의 가장 직전의 미팅 정보를 가져옵니다.
-	// $immediate_prev_meeting_obj = $wdj_mysql_interface->get_immediate_past_meeting_agenda($meeting_membership_id);
-	// $immediate_prev_meeting_startdate = "";
-	// $immediate_prev_meeting_id = -1;
-	// if(!is_null($immediate_prev_meeting_obj)) {
-	// 	$immediate_prev_meeting_id = $immediate_prev_meeting_obj->__meeting_id;
-	// 	$immediate_prev_meeting_startdate = $immediate_prev_meeting_obj->__startdate;
-	// }
-
-
 
 	$member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
 	$member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
@@ -108,72 +94,6 @@
 	if(ActionCollection::is_instance($action_collection_obj_recent)) {
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
 	}
-
-	// TEST
-	/*
-	echo "<br/>";
-	$ROOT_ACTION_HASH_KEY = "0b1cab50917bbb50a3b6bb9bbc85570c";
-	$ACTION_HASH_KEY_BEFORE = "c8e37118422974445909a1589459e4f3";
-	$action_item_obj_before = 
-	$wdj_mysql_interface->get_action_item_obj_with_relation(
-		// $root_action_hash_key=""
-		$ROOT_ACTION_HASH_KEY
-		// $action_item_hash_key=""
-		, $ACTION_HASH_KEY_BEFORE
-	);
-
-	$action_item_id_before = $action_item_obj_before->get_id();
-	echo "\$action_item_id_before ::: $action_item_id_before<br/>";
-
-	// 새로운 아이템 추가 - TABLE
-	$cur_table_row_field_action_item_list_after = 
-	$wdj_mysql_interface->add_row_into_table(
-		// $table_field_action_item_obj=null
-		$action_item_obj_before
-		// $action_name=""
-		, $params->NOT_ASSIGNED
-		// $action_context=""
-		, ""
-	);
-
-	// $cur_table_row_field_action_item_list_after_std = array();
-	for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after); $idx++) {
-		$cur_action_item_copy = $cur_table_row_field_action_item_list_after[$idx];
-		
-		if($is_speech_action_item) {
-
-			// UPDATE CONTEXT
-			$cur_action_item_copy->set_context_attr($params->MEETING_ID, -111);
-			$cur_action_item_copy->set_context_attr($params->SPEECH_ID, -111);
-			$cur_action_item_copy->set_context_attr($params->SPEECH_PROJECT_ID, -111);
-
-		}
-
-		$cur_action_item_copy_std = $cur_action_item_copy->get_std_obj();
-
-		print_r($cur_action_item_copy_std);
-		echo "<br/>";
-
-		// array_push($cur_table_row_field_action_item_list_after_std, $cur_action_item_copy_std);
-	}
-	*/	
-
-
-	// TEST - 6458
-	/*
-	$action_collection_id_test = 6229;
-	$meeting_id_test = 134;
-	$action_collection_obj_test = $wdj_mysql_interface->get_root_action_collection_toastmasters($action_collection_id_test, $meeting_id_test);
-	$action_collection_obj_test_std = null;
-	if(ActionCollection::is_instance($action_collection_obj_test)) {
-		$action_collection_obj_test_std = $action_collection_obj_test->get_std_obj();	
-	}
-	*/
-
-	// NEXT 
-	// 1. IFRAME으로 PDF를 보여준다. 
-	// 2. PDF 영역에 투명 DIV으로 클릭 범위를 나눈다.
-	// 3. 사용자는 해당 영역을 클릭해서 편집 팝업 화면을 확인한다.
 
 	// @ required
 	$wdj_mysql_interface->close();

@@ -78,7 +78,8 @@ var link_manager = {
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"
 	,API_JESSIE:"/api/ajax_post_jessie.php"
-	,API_ACTION:"/api/ajax_post_action.php"
+	// REMOVE ME
+	// ,API_ACTION:"/api/ajax_post_action.php"
 
 	,IMG_TM_MY_BANNER:"/images/MaroonandYellowBanner.jpg"
 	,IMG_SHARE_KAKAO_TM_LONG_BANNER:"/images/Share_kakao_TMBanner_200_200.png"
