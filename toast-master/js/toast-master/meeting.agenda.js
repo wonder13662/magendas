@@ -340,7 +340,11 @@ wonglish.meeting_agenda_manager = {
 								function(data){
 
 									console.log(">>> data ::: ",data);
-									// Do nothing.
+									// 업데이트된 order_num의 값을 뷰 데이터에 적용합니다.
+									// 이 order_num의 값을 기준으로 사용하기 때문입니다.
+
+									var updated_table_row_field_std_list_list = data.updated_table_row_field_std_list_list
+									console.log(">>> updated_table_row_field_std_list_list ::: ",updated_table_row_field_std_list_list);
 
 								},
 								// delegate_scope

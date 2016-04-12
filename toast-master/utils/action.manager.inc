@@ -309,6 +309,9 @@ class ActionObject implements Action{
 		$this->action_order = $action_order;
 	}
 	public function get_order() {
+		if(is_null($this->action_order)) {
+			return -1;
+		}
 		return $this->action_order;
 	}
 

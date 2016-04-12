@@ -694,8 +694,10 @@
 		}
 		// 테이블 컬럼의 이전 아이템의 다음 순서로 지정.
 		$action_item_order = -1;
+		$action_item_before_order = -1;
 		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_before)) {
-			$action_item_order = $table_field_action_item_obj_update_before->get_order() + 50;
+			$action_item_before_order = intval($table_field_action_item_obj_update_before->get_order());
+			$action_item_order = $action_item_before_order + 50;
 		}
 
 		$table_field_action_item_obj_update_after = null;
@@ -718,16 +720,29 @@
 			}
 			$result->target_speech_after_id = $table_field_action_item_obj_update_after->get_context_attr($params->SPEECH_ID);
 		}
+
+
 		// 테이블 컬럼의 다음 아이템의 이전 순서로 지정.
+		$action_item_after_order = -1;
 		if($wdj_mysql_interface->is_action_item(__FUNCTION__, $table_field_action_item_obj_update_after)){
-			$action_item_order = $table_field_action_item_obj_update_after->get_order() - 50;
+			$action_item_after_order = intval($table_field_action_item_obj_update_after->get_order());
+			$action_item_order = $action_item_after_order - 50;
+		}
+		
+
+		// 앞,뒤에 형제 객체가 모두 있는 경우, 순서 값을 두 객체 사이 값으로 지정해줍니다.
+		if(!empty($ACTION_HASH_KEY_BEFORE) && !empty($ACTION_HASH_KEY_AFTER)) {
+			$action_item_order = intval(($table_field_action_item_obj_update_before->get_order() + $table_field_action_item_obj_update_after->get_order()) / 2);
 		}
 		$result->table_row_action_item_order = $action_item_order;
 
+
 		if($table_field_action_item_obj_update->is_table_field_item()) {
-			// 실제 DB의 데이터도 제거 - TABLE
+			// 실제 DB의 데이터도 바꿉니다. - TABLE
 			$cur_table_row_field_action_item_list_update = $table_field_action_item_obj_update->get_table_row_field_action_item_list();
-			$cur_table_row_field_action_hash_key_list_update = array();
+			// $cur_table_row_field_action_hash_key_list_update = array();
+			$updated_table_row_field_std_list_list = array();
+
 			for($idx = 0;$idx < count($cur_table_row_field_action_item_list_update); $idx++) {
 				$cur_action_item_update = $cur_table_row_field_action_item_list_update[$idx];
 
@@ -765,13 +780,28 @@
 					, $action_item_order
 				);
 
+				// order가 변경되었으므로 다시 DB에서 업데이트된 action obj를 가져와야 합니다.
+				$root_action_collection_updated = $wdj_mysql_interface->get_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY);
+				if(ActionCollection::is_not_instance($root_action_collection_updated)) {
+					$result->error = "ActionCollection::is_not_instance(\$root_action_collection_updated)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+				$table_row_field_list = $root_action_collection_updated->search($parent_action_hash_key);
+				if(ActionCollection::is_not_instance($table_row_field_list)) {
+					$result->error = "ActionCollection::is_not_instance(\$table_row_field_list)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+				$table_row_field_list_std = $table_row_field_list->get_std_obj();
 
-
-				array_push($cur_table_row_field_action_hash_key_list_update, $cur_action_item_update->get_hash_key());
+				// array_push($cur_table_row_field_action_hash_key_list_update, $cur_action_item_update->get_hash_key());
+				array_push($updated_table_row_field_std_list_list, $table_row_field_list_std);
 				
 			}
 
-			$result->cur_table_row_field_action_hash_key_list_update = $cur_table_row_field_action_hash_key_list_update;
+			// $result->cur_table_row_field_action_hash_key_list_update = $cur_table_row_field_action_hash_key_list_update;
+			$result->updated_table_row_field_std_list_list = $updated_table_row_field_std_list_list;
 
 			// DB UPDATE - SPEECH ORDER
 			$wdj_mysql_interface->update_speech_order($target_speech_id, $action_item_order);
