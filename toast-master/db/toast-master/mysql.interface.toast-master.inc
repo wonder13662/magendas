@@ -2854,6 +2854,42 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	private function get_tm_officer($membership_id=-1, $officer_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $officer_id, "officer_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MNO`.member_id AS __officer_member_id"
+				," , `MNO`.officer_id AS __officer_id"
+				," , `MEMBER`.id AS __member_id"
+				," , CONCAT(`MEMBER`.first_name, ' ', `MEMBER`.last_name) AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(OFFICER.name,\"\") AS __officer_name"
+				," , IFNULL(OFFICER.desc,\"\") AS __officer_desc"
+				," FROM `MEMBER_N_OFFICER` AS MNO"
+				," LEFT JOIN MEMBER ON MEMBER.id=`MNO`.member_id"
+				," LEFT JOIN OFFICER ON OFFICER.id=`MNO`.officer_id"
+				," WHERE `MNO`.membership_id=$membership_id"
+				," AND `MNO`.officer_id=$officer_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+		
+		return $result;
+	}
+
 	private function getExecutiveMember($membership_id, $officer_id){
 
 		if($this->isNotUnsignedNumber($membership_id)) return null;
@@ -6256,7 +6292,178 @@ class MYSQLInterface{
 			return;
 		}
 	}
-	public function get_recent_action_collection_by_meeting_id($recent_meeting_id) {
+	private function update_officer_action_obj($tm_officers_action_table=null, $membership_id=-1, $officer_id=-1) {
+
+		if(is_null($tm_officers_action_table)) {
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $officer_id)){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+
+		$officer_action_obj = 
+		$tm_officers_action_table->search_by_context_from_root($params->OFFICER_ID, $officer_id);
+		if($this->is_not_action_item(__FUNCTION__, $officer_action_obj, "officer_action_obj")) {
+			return;
+		}
+		$officer_obj = $this->get_tm_officer($membership_id, $officer_id);
+
+		$__member_name = $officer_obj->__member_name;
+		if($this->is_empty(__FUNCTION__, $__member_name, "__member_name")){
+			return;
+		}
+		$__member_hash_key = $officer_obj->__member_hash_key;
+		if($this->is_empty(__FUNCTION__, $__member_hash_key, "__member_hash_key")){
+			return;
+		}
+
+		$officer_action_obj->set_context_attr($params->MEMBER_HASH_KEY, $__member_hash_key);
+		$officer_action_obj->set_name($__member_name);
+
+	}
+	public function get_toastmaster_officer_by_meeting_id($membership_id=-1) {
+
+		$params = new ToastmasterParamManager();
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return;
+		}
+
+		// wonder.jung
+		$tm_officers_action_table = ActionTemplate::get_TOASTMASTER_OFFICERS();
+		if($this->is_not_action_collection(__FUNCTION__, $tm_officers_action_table, "tm_officers_action_table")) {
+			return;
+		}
+
+		// officer 정보를 모두 가져옵니다.
+		// 1. President
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_PRESIDENT
+		);
+
+		// 2. Immediate Past President
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_IMMEDIATE_PAST_PRESIDENT
+		);
+
+		// 3. VPE
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPE
+		);	
+
+		// 4. VPE Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPE_DEPUTY
+		);
+
+		// 5. VPM
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPM
+		);
+
+		// 6. VPM Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPM_DEPUTY
+		);
+	
+		// 7. VPPR
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPPR
+		);
+
+		// 8. VPPR Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPPR_DEPUTY
+		);
+
+		// 9. Secretary
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SECRETARY
+		);
+
+		// 10. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_TREASURER
+		);
+
+		// 11. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SAA
+		);
+
+		// 12. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SAA_DEPUTY
+		);
+
+		return $tm_officers_action_table;
+	}
+	public function get_recent_action_collection_by_meeting_id($recent_meeting_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $recent_meeting_id)){
 			return null;
@@ -9626,7 +9833,6 @@ class MYSQLInterface{
 		$action_item_copy->set_name($name);
 		$action_item_copy->set_context($context);
 
-		// wonder.jung - 여기서 item type name을 가져와야 합니다.
 		$cur_action_item_type_name = $this->get_action_item_type_name($type);
 		if($this->is_empty(__FUNCTION__, $cur_action_item_type_name, "cur_action_item_type_name")){
 			return;

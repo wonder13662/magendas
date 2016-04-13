@@ -87,9 +87,7 @@ wonglish.meeting_agenda_manager = {
 				var cur_select_option = _obj.get_select_option(cur_speech_obj.__speech_project_title, cur_speech_obj.__speech_project_id);
 				search_option_arr_speech_projects.push(cur_select_option);
 			}
-		}	
-
-
+		}
 		//speech_project_list	
 
 
@@ -97,9 +95,6 @@ wonglish.meeting_agenda_manager = {
 
 
 
-		// wonder.jung11
-		// var pdf_url = service_root_path + "/images/test_show_pdf.pdf";
-		// _print.draw_grid_view(container_jq, _print.PRINT_FORMAT_A4_LANDSCAPE, pdf_url);
 
 
 
@@ -517,13 +512,40 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
 		//     dMMMMMP dMP dMP dMMMMMP .aMMMb  dMP dMP dMMMMMMP dMP dMP dMP dMMMMMP         dMMMMMMMMb dMMMMMP dMMMMMMMMb dMMMMb  dMMMMMP dMMMMb  .dMMMb 
 		//    dMP     dMK.dMP dMP     dMP"VMP dMP dMP    dMP   amr dMP dMP dMP             dMP"dMP"dMPdMP     dMP"dMP"dMPdMP"dMP dMP     dMP.dMP dMP" VP 
 		//   dMMMP   .dMMMK" dMMMP   dMP     dMP dMP    dMP   dMP dMP dMP dMMMP           dMP dMP dMPdMMMP   dMP dMP dMPdMMMMK" dMMMP   dMMMMK"  VMMMb   
 		//  dMP     dMP"AMF dMP     dMP.aMP dMP.aMP    dMP   dMP  YMvAP" dMP             dMP dMP dMPdMP     dMP dMP dMPdMP.aMF dMP     dMP"AMF dP .dMP   
 		// dMMMMMP dMP dMP dMMMMMP  VMMMP"  VMMMP"    dMP   dMP    VP"  dMMMMMP         dMP dMP dMPdMMMMMP dMP dMP dMPdMMMMP" dMMMMMP dMP dMP  VMMMP"    
+
+		var tm_officer_action_list = meeting_agenda_data_obj.tm_officer_action_list;
+
+		// wonder.jung
+		/*
+		_action_table.add_editable_table_from_action_table(
+			// parent_jq
+			container_jq
+			// action_table_obj
+			, tm_officer_action_list
+			// delegate_on_event
+			, _obj.get_delegate(function(cur_outcome_obj){
+
+				console.log("cur_outcome_obj ::: ",cur_outcome_obj);
+
+			},this)
+		);
+		*/
+
+
+
+
+
+
+
+
+
+
+
 
 		// REMOVE ME LATER
 /*
@@ -691,7 +713,6 @@ wonglish.meeting_agenda_manager = {
 						// delegate_func
 						function(data){
 							
-							// wonder.jung
 							console.log("API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE");
 							console.log(">>> data : ",data);
 
@@ -703,9 +724,6 @@ wonglish.meeting_agenda_manager = {
 							}
 							if(new_meeting_action_list != undefined) {
 								remove_action_timeline(container_jq);
-
-								console.log("root_action_obj_std ::: ",root_action_obj_std);
-
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}
 

@@ -88,12 +88,17 @@
 		$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
 	}
 
-	// wonder.jung - 스피치가 기본값보다 많은 경우, item type 정보가 빠짐.
 	// 화면에 표시할 action list.
 	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($meeting_id);
 	$meeting_action_list_std = null;
 	if(ActionCollection::is_instance($action_collection_obj_recent)) {
 		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
+	}
+
+	$tm_officer_table_obj = $wdj_mysql_interface->get_toastmaster_officer_by_meeting_id($meeting_membership_id);
+	$tm_officer_std = null;
+	if(ActionCollection::is_instance($tm_officer_table_obj)) {
+		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
 	}
 
 	// @ required
@@ -297,29 +302,15 @@ var member_list = <?php echo json_encode($member_list);?>;
 var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var role_list = <?php echo json_encode($role_list);?>;
-// REMOVE ME
-// var today_role_list = <?php echo json_encode($today_role_list);?>;
-// var today_speech_speaker_v2_list = <?php echo json_encode($today_speech_speaker_v2_list);?>;
-
-// var executive_member_list = <?php echo json_encode($executive_member_list);?>;
 var meeting_id = <?php echo json_encode($meeting_id);?>;
-// REMOVE ME
-// var schedule_timeline_list_V2 = <?php echo json_encode($schedule_timeline_list_V2);?>;
 var recent_club_schedule_timeline_list = <?php echo json_encode($recent_club_schedule_timeline_list);?>;
 var schedule_timeline_template_list = <?php echo json_encode($schedule_timeline_template_list);?>;
-
-// var time_guide_line = <?php echo json_encode($time_guide_line);?>;
 var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?>;
 var speech_evaluator_cnt_list = <?php echo json_encode($speech_evaluator_cnt_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
-// REMOVE ME
-// var today_news_list = <?php echo json_encode($today_news_list);?>;
 var is_expired = <?php echo json_encode($is_expired);?>;
 var is_editable = <?php echo json_encode($is_editable);?>;
 var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
-	
-// REMOVE ME
-// var is_update_timeline_after_job = <?php echo json_encode($is_update_timeline_after_job);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
 var meeting_action_list_std = <?php echo json_encode($meeting_action_list_std);?>;
@@ -328,35 +319,19 @@ if(meeting_action_list_std != undefined) {
 	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
 }
 
-console.log(">>> meeting_action_list_std ::: ",meeting_action_list_std);
-console.log(">>> meeting_action_list ::: ",meeting_action_list);
-
-// $action_collection_obj_test_std
-var action_collection_obj_test_std = <?php echo json_encode($action_collection_obj_test_std);?>;
-console.log(">>> action_collection_obj_test_std ::: ",action_collection_obj_test_std);
-
-// var immediate_prev_meeting_obj = <?php echo json_encode($immediate_prev_meeting_obj);?>;
-// console.log(">>> immediate_prev_meeting_obj ::: ",immediate_prev_meeting_obj);
-
-
-
+var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
+var tm_officer_action_list = undefined;
+if(tm_officer_std != undefined) {
+	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
+}
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
-console.log(">>> action_collection_obj_immediate_past_std ::: ",action_collection_obj_immediate_past_std);
 var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_past);?>;
-console.log(">>> meeting_obj_immediate_past ::: ",meeting_obj_immediate_past);
-
-
-
-
-// recent_action_collection_id
 
 var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
-console.log(">>> recent_action_collection_id ::: ",recent_action_collection_id);
-
 var service_root_path = <?php echo json_encode($service_root_path);?>;
-console.log(">>> service_root_path ::: ",service_root_path);
+
 
 
 // 로그인 여부를 확인하기 위해 
@@ -368,49 +343,31 @@ if(_v.is_valid_str(cookie_login_user)) {
 	is_log_in_user = true;
 }
 
-console.log(">>> login_user_info : ",login_user_info);
-
 var meeting_agenda_data_obj = 
 {
 	meeting_agenda_list:meeting_agenda_list
 	, meeting_agenda_obj:meeting_agenda_obj
-	// , immediate_prev_meeting_obj:immediate_prev_meeting_obj
 	, meeting_membership_id:meeting_membership_id
 	, member_list:member_list
 	, member_role_cnt_list:member_role_cnt_list
 	, role_list:role_list
-	// REMOVE ME
-	// , today_role_list:today_role_list
-	// , today_speech_speaker_v2_list:today_speech_speaker_v2_list
-
-	// , executive_member_list:executive_member_list
 	, meeting_id:meeting_id
-	// REMOVE ME
-	// , schedule_timeline_list_V2:schedule_timeline_list_V2
 	, recent_club_schedule_timeline_list:recent_club_schedule_timeline_list
 	, schedule_timeline_template_list:schedule_timeline_template_list
-	// , time_guide_line:time_guide_line
 	, speech_speaker_cnt_list:speech_speaker_cnt_list
 	, speech_evaluator_cnt_list:speech_evaluator_cnt_list
 	, speech_project_list:speech_project_list
-	// REMOVE ME
-	// , today_news_list:today_news_list
-	// , is_update_timeline_after_job:is_update_timeline_after_job
-
 	, window_scroll_y:window_scroll_y
 	, is_log_in_user:is_log_in_user 
 	, login_user_info:login_user_info
-
 	, meeting_action_list:meeting_action_list
+	, tm_officer_action_list:tm_officer_action_list
 	, service_root_path:service_root_path
 	, recent_action_collection_id:recent_action_collection_id
 };
 
-console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);
-
 // 편집에 필요한 모든 데이터가 전송되면, 실제 편집 객체를 만듭니다.
 var meeting_agenda_manager = wonglish.meeting_agenda_manager.getObj("meeting_agenda_container", meeting_agenda_data_obj, is_editable);
-
 
 // https://developers.google.com/web/fundamentals/native-hardware/user-location/obtain-location
 // check for Geolocation support

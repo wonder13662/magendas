@@ -1372,6 +1372,467 @@ class ActionTemplate{
 		return $root_action_obj;
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// ActionTemplate::get_TOASTMASTER_OFFICERS();
+	public static function get_TOASTMASTER_OFFICERS() {
+
+		$params = new ToastmasterParamManager();
+
+		// add_on inner table
+		// 1-1. Today's Role
+		$table_club_officer = 
+		new ActionCollection(
+			// $action_name=""
+			"Club Officers"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
+		);
+
+
+
+
+		// 1-1-1. Column List - Right Role Name List
+		$table_club_officer_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Officer Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$table_club_officer->add_child($table_club_officer_column_list);
+
+		// 1-1-1-1. Column List Field - President
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"President"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-2. Column List Field - Immediate Past President 
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Immediate Past President"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-3. Column List Field - Vice president education (VPE)
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president education (VPE)"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-4. Column List Field - Vice president education (VPE) Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president education (VPE) Deputy"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-5. Column List Field - Vice president membership (VPM)
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president membership (VPM)"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-6. Column List Field - Vice president membership (VPM) Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president membership (VPM) Deputy"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-7. Column List Field - Table Topic Master
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president public relations (VPPR)"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-8. Column List Field - Vice president public relations (VPPR) Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Vice president public relations (VPPR) Deputy"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-9. Column List Field - Secretary
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Secretary"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-10. Column List Field - Treasurer
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Treasurer"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-11. Column List Field - Sergeant at arms (S.A.A)
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Sergeant at arms (S.A.A)"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+		// 1-1-1-12. Column List Field - Sergeant at arms (S.A.A) Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"Sergeant at arms (S.A.A) Deputy"
+			// $action_item_type=1
+			, ActionItem::$TITLE_ONLY_FIXED
+		);
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+
+
+
+		// 1-1-2. Column List - Right Role Name List
+		$table_club_officer_column_list = 
+		new ActionCollection(
+			// $action_name=""
+			"Officer Member Name"
+			// $action_collection_type=1
+			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
+		);
+		$table_club_officer->add_child($table_club_officer_column_list);
+
+		// 1-1-2-1. Column List Field - President
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_PRESIDENT;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+		// 1-1-2-2. Column List Field - Immediate Past President
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - Immediate Past President
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_IMMEDIATE_PAST_PRESIDENT;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+		// 1-1-2-3. Column List Field - VPE
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPE
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPE;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-4. Column List Field - VPE Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPE Deputy
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPE_DEPUTY;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-5. Column List Field - VPM
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM
+		$context = new stdClass();
+
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPM;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-6. Column List Field - VPM Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPM_DEPUTY;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-7. Column List Field - VPPR
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPPR;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-8. Column List Field - VPPR Deputy
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPPR_DEPUTY;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-9. Column List Field - Secretary
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SECRETARY;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+		// 1-1-2-10. Column List Field - Treasurer
+		$table_club_officer_column_list_field =  
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - VPM Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_TREASURER;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+
+		// 1-1-2-11. Column List Field - SAA
+		$table_club_officer_column_list_field = 
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - SAA
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SAA;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+
+
+		// 1-1-2-12. Column List Field - SAA Deputy
+		$table_club_officer_column_list_field = 
+		new ActionItem(
+			// $action_name="New Item"
+			"NOT ASSIGNED"
+			// $action_item_type=1
+			, ActionItem::$SELECT_BOX
+		);
+
+		// DB interface prop - SAA Deputy
+		$context = new stdClass();
+		
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
+		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SAA_DEPUTY;
+		$context->{$params->MEMBER_HASH_KEY} = "";
+		$table_club_officer_column_list_field->set_context(json_encode($context));
+
+		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
+
+
+
+
+		// Refresh coordinate
+		$table_club_officer->set_coordinate();
+
+		return $table_club_officer;
+
+	}
+
 }
 
 ?>
