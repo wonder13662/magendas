@@ -2065,7 +2065,16 @@ airborne.bootstrap.obj.__action = {
 
 						var cur_column_child_action_list_field_child_action_item_obj = cur_column_child_action_list_obj.get_child(idx_row);
 						if(_action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)) {
+
+							// wonder.jung - action type의 이슈가 발생.
+
 							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj) / idx_row ::: ",idx_row);
+							console.log("!Error! / get_table_action_item_obj_list / action id ::: ",cur_column_child_action_list_field_child_action_item_obj.get_action_id());
+							console.log("!Error! / get_table_action_item_obj_list / action item type ::: ",cur_column_child_action_list_field_child_action_item_obj.get_action_item_type());
+							console.log("!Error! / get_table_action_item_obj_list / action item type name ::: ",cur_column_child_action_list_field_child_action_item_obj.get_action_item_type_name());
+							console.log("!Error! / get_table_action_item_obj_list / table_action_id ::: ",table_action_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_list_id ::: ",table_column_list_id);
+							console.log("!Error! / get_table_action_item_obj_list / table_column_field_children_cnt ::: ",table_column_field_children_cnt);
 							return;
 						}
 

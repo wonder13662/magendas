@@ -88,6 +88,7 @@
 		$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
 	}
 
+	// wonder.jung - 스피치가 기본값보다 많은 경우, item type 정보가 빠짐.
 	// 화면에 표시할 action list.
 	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($meeting_id);
 	$meeting_action_list_std = null;
@@ -112,7 +113,6 @@
 ?>
 <!-- view controller -->
 <script src="../js/toast-master/meeting.agenda.js"></script>
-<script src="../js/toast-master/action.manager.js"></script>
 </head>
 
 
@@ -357,13 +357,6 @@ console.log(">>> recent_action_collection_id ::: ",recent_action_collection_id);
 
 var service_root_path = <?php echo json_encode($service_root_path);?>;
 console.log(">>> service_root_path ::: ",service_root_path);
-
-
-// TEST
-// $action_item_toastmaster_std
-var action_item_toastmaster_std = <?php echo json_encode($action_item_toastmaster_std);?>;
-console.log(">>> action_item_toastmaster_std ::: ",action_item_toastmaster_std);
-
 
 
 // 로그인 여부를 확인하기 위해 

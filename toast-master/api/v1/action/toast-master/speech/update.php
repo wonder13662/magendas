@@ -65,27 +65,22 @@
 	$result->MEETING_ID_SRC = $MEETING_ID_SRC;
 
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
-	// $ACTION_TEMPLATE_NAME = $params->getParamString($params->ACTION_TEMPLATE_NAME);
 	$ACTION_BEGIN_HH_MM = $params->getParamString($params->ACTION_BEGIN_HH_MM, "19:30");
 
 	$ACTION_HASH_KEY = $params->getParamString($params->ACTION_HASH_KEY);
 	$ACTION_HASH_KEY_BEFORE = $params->getParamString($params->ACTION_HASH_KEY_BEFORE);
 	$ACTION_HASH_KEY_AFTER = $params->getParamString($params->ACTION_HASH_KEY_AFTER);
-	// $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $params->getParamString($params->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR);
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$PARENT_ACTION_HASH_KEY_DELETE = $params->getParamString($params->PARENT_ACTION_HASH_KEY_DELETE);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_ITEM_TYPE = $params->getParamNumber($params->ACTION_ITEM_TYPE);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
-	// $ACTION_COORDINATE = $params->getParamString($params->ACTION_COORDINATE);
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 
 	// DEBUG
 	$result->ACTION_NAME = $ACTION_NAME;
-	// $result->ACTION_TEMPLATE_NAME = $ACTION_TEMPLATE_NAME;
 	$result->ACTION_BEGIN_HH_MM = $ACTION_BEGIN_HH_MM;
 	$result->ACTION_HASH_KEY = $ACTION_HASH_KEY;
-	// $result->CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR = $CHILD_ADD_ON_ACTION_HASH_KEY_ARRAY_JSON_STR;
 	$result->ACTION_HASH_KEY_BEFORE = $ACTION_HASH_KEY_BEFORE;
 	$result->ACTION_HASH_KEY_AFTER = $ACTION_HASH_KEY_AFTER;
 	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
@@ -93,7 +88,6 @@
 	$result->ROOT_ACTION_HASH_KEY = $ROOT_ACTION_HASH_KEY;
 	$result->ACTION_ITEM_TYPE = $ACTION_ITEM_TYPE;
 	$result->ACTION_CONTEXT = $ACTION_CONTEXT;
-	// $result->ACTION_COORDINATE = $ACTION_COORDINATE;
 	$result->EVENT_PARAM_EVENT_TYPE = $EVENT_PARAM_EVENT_TYPE;
 
 	$ACTION_CONTEXT_OBJ = json_decode($result->ACTION_CONTEXT);
@@ -241,9 +235,18 @@
 		$result->new_order_num = $new_order_num;
 
 		// 새로운 SPEECH 열을 추가합니다.
-		// 몇번째 순서인지 넣을수 있도록! - wonder.jung
+		// 몇번째 순서인지 넣을수 있도록!
 		$wdj_mysql_interface->insert_speech_empty_speaker_n_evaluator($MEETING_ID, $new_order_num);
 		$NEW_SPEECH_ID = $wdj_mysql_interface->get_last_speech_id($MEETING_ID);
+
+		$target_speech_before_id = $speech_id_before;
+		$target_speech_id = $NEW_SPEECH_ID;
+		$target_speech_after_id = -1;
+		$wdj_mysql_interface->update_speech_sibling_relation($target_speech_before_id, $target_speech_id, $target_speech_after_id);
+
+		$result->target_speech_before_id = $target_speech_before_id;
+		$result->target_speech_id = $target_speech_id;
+		$result->target_speech_after_id = $target_speech_after_id;
 
 		$new_speech_obj = $wdj_mysql_interface->sel_speech($NEW_SPEECH_ID);
 		$__speech_id = $new_speech_obj->__speech_id;
@@ -398,7 +401,6 @@
 			);
 
 		}
-		// wonder.jung
 
 		$IS_UPDATE_SPEECH_TITLE = 
 		$cur_action_item_obj->has_context_attr($params->ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE);
@@ -661,14 +663,17 @@
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
-		$target_speech_id = $table_field_action_item_obj_update->get_context_attr($params->SPEECH_ID);
-		$target_speech_id = intval($target_speech_id);
+		$target_speech_id = -1;
+		if($table_field_action_item_obj_update->has_context_attr($params->SPEECH_ID)) {
+			$target_speech_id = $table_field_action_item_obj_update->get_context_attr($params->SPEECH_ID);
+			$target_speech_id = intval($target_speech_id);
+		}
 		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $target_speech_id)){
 			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$target_speech_id)";
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
-		$result->target_speech_id = $table_field_action_item_obj_update->get_context_attr($params->SPEECH_ID);
+		$result->target_speech_id = $target_speech_id;
 
 
 		$table_field_action_item_obj_update_before = null;
@@ -682,16 +687,19 @@
 				, $ACTION_HASH_KEY_BEFORE
 			);
 
-			$target_speech_before_id = $table_field_action_item_obj_update_before->get_context_attr($params->SPEECH_ID);
-			$target_speech_before_id = intval($target_speech_before_id);
-			if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $target_speech_before_id)){
-				$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$target_speech_before_id)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-			$result->target_speech_before_id = $table_field_action_item_obj_update_before->get_context_attr($params->SPEECH_ID);
+			$has_context_attr = $table_field_action_item_obj_update_before->has_context_attr($params->SPEECH_ID);
+			if($has_context_attr) {
+				$target_speech_before_id = $table_field_action_item_obj_update_before->get_context_attr($params->SPEECH_ID);
+				$target_speech_before_id = intval($target_speech_before_id);
 
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $target_speech_before_id)){
+					$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$target_speech_before_id)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+			} // end inner if
 		}
+		$result->target_speech_before_id = $target_speech_before_id;
 		// 테이블 컬럼의 이전 아이템의 다음 순서로 지정.
 		$action_item_order = -1;
 		$action_item_before_order = -1;
@@ -711,15 +719,19 @@
 				, $ACTION_HASH_KEY_AFTER
 			);
 
-			$target_speech_after_id = $table_field_action_item_obj_update_after->get_context_attr($params->SPEECH_ID);
-			$target_speech_after_id = intval($target_speech_after_id);
-			if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $target_speech_after_id)){
-				$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$target_speech_after_id)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-			$result->target_speech_after_id = $table_field_action_item_obj_update_after->get_context_attr($params->SPEECH_ID);
+			$has_context_attr = $table_field_action_item_obj_update_after->has_context_attr($params->SPEECH_ID);
+			if($has_context_attr) {
+				$target_speech_after_id = $table_field_action_item_obj_update_after->get_context_attr($params->SPEECH_ID);
+				$target_speech_after_id = intval($target_speech_after_id);
+
+				if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $target_speech_after_id)){
+					$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$target_speech_after_id)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+			} // end inner if
 		}
+		$result->target_speech_after_id = $target_speech_after_id;
 
 
 		// 테이블 컬럼의 다음 아이템의 이전 순서로 지정.
@@ -738,6 +750,7 @@
 
 
 		if($table_field_action_item_obj_update->is_table_field_item()) {
+
 			// 실제 DB의 데이터도 바꿉니다. - TABLE
 			$cur_table_row_field_action_item_list_update = $table_field_action_item_obj_update->get_table_row_field_action_item_list();
 			// $cur_table_row_field_action_hash_key_list_update = array();
@@ -758,10 +771,21 @@
 					return;
 				}
 
+				$cur_parent_action_obj = null;
 				$parent_action_hash_key = "";
 				if($cur_action_item_update->has_parent()) {
 					$cur_parent_action_obj = $cur_action_item_update->get_parent();
 					$parent_action_hash_key = $cur_parent_action_obj->get_hash_key();
+				}
+				if(is_null($cur_parent_action_obj)) {
+					$result->error = "is_null(\$cur_parent_action_obj)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+				if(empty($parent_action_hash_key)) {
+					$result->error = "empty(\$parent_action_hash_key)";
+					terminate($wdj_mysql_interface, $result);
+					return;
 				}
 
 				// wonder.jung
@@ -781,13 +805,7 @@
 				);
 
 				// order가 변경되었으므로 다시 DB에서 업데이트된 action obj를 가져와야 합니다.
-				$root_action_collection_updated = $wdj_mysql_interface->get_action_collection_by_hash_key($ROOT_ACTION_HASH_KEY);
-				if(ActionCollection::is_not_instance($root_action_collection_updated)) {
-					$result->error = "ActionCollection::is_not_instance(\$root_action_collection_updated)";
-					terminate($wdj_mysql_interface, $result);
-					return;
-				}
-				$table_row_field_list = $root_action_collection_updated->search($parent_action_hash_key);
+				$table_row_field_list = $wdj_mysql_interface->get_action_collection_by_hash_key($parent_action_hash_key);
 				if(ActionCollection::is_not_instance($table_row_field_list)) {
 					$result->error = "ActionCollection::is_not_instance(\$table_row_field_list)";
 					terminate($wdj_mysql_interface, $result);
@@ -797,16 +815,23 @@
 
 				// array_push($cur_table_row_field_action_hash_key_list_update, $cur_action_item_update->get_hash_key());
 				array_push($updated_table_row_field_std_list_list, $table_row_field_list_std);
-				
+
 			}
 
-			// $result->cur_table_row_field_action_hash_key_list_update = $cur_table_row_field_action_hash_key_list_update;
 			$result->updated_table_row_field_std_list_list = $updated_table_row_field_std_list_list;
 
+			$wdj_mysql_interface->update_speech_sibling_relation($target_speech_before_id, $target_speech_id, $target_speech_after_id);
+
+			// CHECK - 업데이트한 순서대로 정렬되었는지 확인합니다.
+
+
+			// REMOVE ME
+			// wonder.jung - speech의 앞뒤 관계를 speech id로 전달해줘야 함. 앞의 스피치id, 뒤의 스피치id.
 			// DB UPDATE - SPEECH ORDER
-			$wdj_mysql_interface->update_speech_order($target_speech_id, $action_item_order);
+			// $wdj_mysql_interface->update_speech_order($target_speech_id, $action_item_order);
+
 			// reorder speech
-			$wdj_mysql_interface->reorder_speech($MEETING_ID);
+			// $wdj_mysql_interface->reorder_speech($MEETING_ID);
 
 		}		
 

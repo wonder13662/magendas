@@ -630,6 +630,7 @@ class ActionObject implements Action{
 		$this->set_collection_type($action_obj->get_collection_type());
 		$this->set_collection_type_name($action_obj->get_collection_type_name());
 		$this->set_item_type($action_obj->get_item_type());
+
 		$this->set_item_type_name($action_obj->get_item_type_name());
 		$this->set_context($action_obj->get_context());
 
@@ -1474,7 +1475,7 @@ class ActionItem extends ActionObject{
 
 		return false;
 	}
-
+	
 	// @ Override
 	public function get_meeting_agenda_id() {
 		return -1;

@@ -189,7 +189,7 @@ wonglish.meeting_agenda_manager = {
 
 					// DEBUG
 					var cur_root_action_obj = action_item_obj.get_root_action_obj();
-					var cur_root_action_context_obj = action_item_obj.get_action_context_obj();
+					var cur_root_action_context_obj = cur_root_action_obj.get_action_context_obj();
 					if(cur_root_action_context_obj != undefined && cur_root_action_context_obj.meeting_id != undefined) {
 						MEETING_ID = cur_root_action_context_obj.meeting_id;
 					}
@@ -242,6 +242,16 @@ wonglish.meeting_agenda_manager = {
 						console.log("TM SPEECH INSERT");
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						// CHECK
+						var sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
+						console.log("sibling_action_obj_before ::: ",sibling_action_obj_before);
+
+						var sibling_action_hash_key_before = sibling_action_obj_before.get_action_hash_key();
+						var ACTION_HASH_KEY_BEFORE = cur_action_obj_for_db_update.ACTION_HASH_KEY_BEFORE;
+
+						console.log("sibling_action_hash_key_before ::: ",sibling_action_hash_key_before);
+						console.log("ACTION_HASH_KEY_BEFORE ::: ",ACTION_HASH_KEY_BEFORE);
 
 						_ajax.send_simple_post(
 							// _url
@@ -694,7 +704,7 @@ wonglish.meeting_agenda_manager = {
 							if(new_meeting_action_list != undefined) {
 								remove_action_timeline(container_jq);
 
-								console.log("new_meeting_action_list ::: ",new_meeting_action_list);
+								console.log("root_action_obj_std ::: ",root_action_obj_std);
 
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}

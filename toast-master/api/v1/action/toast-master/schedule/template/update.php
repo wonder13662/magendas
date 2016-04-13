@@ -118,7 +118,6 @@
 
 		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
 		$root_action_obj = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($MEETING_ID);
-		$meeting_action_list_std = null;
 		if(ActionCollection::is_not_instance($root_action_obj)) {
 			$result->error = "ActionCollection::is_not_instance(\$root_action_obj)";
 			terminate($wdj_mysql_interface, $result);
