@@ -279,6 +279,12 @@ class ActionObject implements Action{
 
 	public function set_item_type($action_item_type) {
 		$this->action_item_type = $action_item_type;
+
+		// action item type name
+		$action_item_type_name = ActionItem::get_action_item_type_name($action_item_type);
+		if(!empty($action_item_type_name)) {
+			$this->set_item_type_name($action_item_type_name);
+		}
 	}
 	public function get_item_type() {
 		return $this->action_item_type;
@@ -1451,11 +1457,9 @@ class ActionItem extends ActionObject{
 	public static $TITLE_ONLY_ADDABLE=6;	// ActionItem::$TITLE_ONLY_ADDABLE
 	public static $SELECT_BOX_ADDABLE=7;	// ActionItem::$SELECT_BOX_ADDABLE
 
-	/*
-		@ Public
-		@ Usage : ActionItem::is_valid_action_item_type($action_item_type);
-	*/
-
+	
+	// @ Public
+	// @ Usage : ActionItem::is_valid_action_item_type($action_item_type);
 	public static function is_valid_action_item_type($action_item_type) {
 
 		if(is_null($action_item_type) || !is_numeric($action_item_type)) {
@@ -1474,6 +1478,33 @@ class ActionItem extends ActionObject{
 		}
 
 		return false;
+	}
+
+	// @ Public
+	// @ Usage : ActionItem::get_action_item_type_name($action_item_type);
+	public static function get_action_item_type_name($action_item_type=-1) {
+
+		if(is_null($action_item_type) || $action_item_type < 1) {
+			return "";
+		}
+
+		if(ActionItem::$TITLE_ONLY == $action_item_type) {
+			return "TITLE_ONLY";
+		} else if(ActionItem::$TITLE_N_TIME_HH_MM == $action_item_type) {
+			return "TITLE_N_TIME_HH_MM";
+		} else if(ActionItem::$TITLE_N_TIME_MM_SS == $action_item_type) {
+			return "TITLE_N_TIME_MM_SS";
+		} else if(ActionItem::$SELECT_BOX == $action_item_type) {
+			return "SELECT_BOX";
+		} else if(ActionItem::$TITLE_ONLY_FIXED == $action_item_type) {
+			return "TITLE_ONLY_FIXED";
+		} else if(ActionItem::$TITLE_ONLY_ADDABLE == $action_item_type) {
+			return "TITLE_ONLY_ADDABLE";
+		} else if(ActionItem::$SELECT_BOX_ADDABLE == $action_item_type) {
+			return "SELECT_BOX_ADDABLE";
+		}
+
+		return "";
 	}
 	
 	// @ Override

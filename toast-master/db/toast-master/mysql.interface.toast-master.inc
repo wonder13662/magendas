@@ -6313,13 +6313,21 @@ class MYSQLInterface{
 		}
 		$officer_obj = $this->get_tm_officer($membership_id, $officer_id);
 
-		$__member_name = $officer_obj->__member_name;
-		if($this->is_empty(__FUNCTION__, $__member_name, "__member_name")){
-			return;
-		}
-		$__member_hash_key = $officer_obj->__member_hash_key;
-		if($this->is_empty(__FUNCTION__, $__member_hash_key, "__member_hash_key")){
-			return;
+		$__member_name = $params->NOT_ASSIGNED;
+		$__member_hash_key = "";
+		$__officer_member_id = intval($officer_obj->__officer_member_id);
+
+		if(0 < $__officer_member_id){
+
+			$__member_name = $officer_obj->__member_name;
+			if($this->is_empty(__FUNCTION__, $__member_name, "__member_name")){
+				return;
+			}
+			$__member_hash_key = $officer_obj->__member_hash_key;
+			if($this->is_empty(__FUNCTION__, $__member_hash_key, "__member_hash_key")){
+				return;
+			}
+
 		}
 
 		$officer_action_obj->set_context_attr($params->MEMBER_HASH_KEY, $__member_hash_key);
@@ -6334,7 +6342,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung
 		$tm_officers_action_table = ActionTemplate::get_TOASTMASTER_OFFICERS();
 		if($this->is_not_action_collection(__FUNCTION__, $tm_officers_action_table, "tm_officers_action_table")) {
 			return;

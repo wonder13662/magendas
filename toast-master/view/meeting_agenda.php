@@ -289,6 +289,13 @@
 	</div>
 	<!-- meeting agenda container ends -->
 
+
+	<!-- officer list container begins -->
+	<div id="officer_list_container" class="container" role="main" data-toggle="modal" data-target="#row_modal">
+	</div>
+	<!-- officer list container ends -->
+
+
 	<!-- white space init-->
 	<div id="white_space" style="height:300px;"></div>
 	<!-- white space ends-->
@@ -322,6 +329,7 @@ if(meeting_action_list_std != undefined) {
 var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
 var tm_officer_action_list = undefined;
 if(tm_officer_std != undefined) {
+	console.log("TEST - 001 / tm_officer_std ::: ",tm_officer_std);
 	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
 }
 

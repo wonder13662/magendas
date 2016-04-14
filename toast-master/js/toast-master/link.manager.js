@@ -74,6 +74,7 @@ var link_manager = {
 	,API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE:"/api/v1/action/toast-master/schedule/template/update.php"
 	,API_UPDATE_TOASTMASTER_SCHEDULE:"/api/v1/action/toast-master/schedule/update.php"
 	,API_UPDATE_TOASTMASTER_SPEECH:"/api/v1/action/toast-master/speech/update.php"
+	,API_UPDATE_TOASTMASTER_OFFICER:"/api/v1/action/toast-master/officer/update.php"
 	
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"

@@ -48,6 +48,9 @@ wonglish.meeting_agenda_manager = {
 		obj.meeting_agenda_container_id = meeting_agenda_container_id;
 		var container_jq = $("div#"+meeting_agenda_container_id);
 
+		//officer_list_container
+		var container_jq_officer_list = $("div#officer_list_container");
+
 
 
 
@@ -89,6 +92,45 @@ wonglish.meeting_agenda_manager = {
 			}
 		}
 		//speech_project_list	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -405,20 +447,7 @@ wonglish.meeting_agenda_manager = {
 								// delegate_scope
 								this
 							)
-						); // ajax done.						
-
-
-					} else if( 	_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
-								_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
-								_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
-								_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
-
-						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
-						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
-
-						// REMOVE ME
-
-
+						); // ajax done.
 
 					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
@@ -488,30 +517,6 @@ wonglish.meeting_agenda_manager = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		//     dMMMMMP dMP dMP dMMMMMP .aMMMb  dMP dMP dMMMMMMP dMP dMP dMP dMMMMMP         dMMMMMMMMb dMMMMMP dMMMMMMMMb dMMMMb  dMMMMMP dMMMMb  .dMMMb 
 		//    dMP     dMK.dMP dMP     dMP"VMP dMP dMP    dMP   amr dMP dMP dMP             dMP"dMP"dMPdMP     dMP"dMP"dMPdMP"dMP dMP     dMP.dMP dMP" VP 
 		//   dMMMP   .dMMMK" dMMMP   dMP     dMP dMP    dMP   dMP dMP dMP dMMMP           dMP dMP dMPdMMMP   dMP dMP dMPdMMMMK" dMMMP   dMMMMK"  VMMMb   
@@ -519,101 +524,123 @@ wonglish.meeting_agenda_manager = {
 		// dMMMMMP dMP dMP dMMMMMP  VMMMP"  VMMMP"    dMP   dMP    VP"  dMMMMMP         dMP dMP dMPdMMMMMP dMP dMP dMPdMMMMP" dMMMMMP dMP dMP  VMMMP"    
 
 		var tm_officer_action_list = meeting_agenda_data_obj.tm_officer_action_list;
+		console.log(">>> tm_officer_action_list ::: ",tm_officer_action_list);
 
-		// wonder.jung
-		/*
-		_action_table.add_editable_table_from_action_table(
-			// parent_jq
-			container_jq
-			// action_table_obj
-			, tm_officer_action_list
-			// delegate_on_event
-			, _obj.get_delegate(function(cur_outcome_obj){
+		var activate_officer_list = function(tm_officer_action_list, container_jq) {
 
-				console.log("cur_outcome_obj ::: ",cur_outcome_obj);
+			// wonder.jung
+			_action_table.add_editable_table_from_action_table(
+				// parent_jq
+				container_jq
+				// action_table_obj
+				, tm_officer_action_list
+				// delegate_on_event
+				, _obj.get_delegate(function(cur_outcome_obj){
 
-			},this)
-		);
-		*/
+					console.log("cur_outcome_obj ::: ",cur_outcome_obj);
+					var action_item_obj = cur_outcome_obj._action_item_obj;
 
+					var cur_element_event_manager = action_item_obj.get_event_manager();
+					if(cur_element_event_manager == undefined) {
+						console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
+						return;
+					}
 
+					var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 
+					//EVENT_TYPE_UPDATE_ITEM
+					if( _action.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
 
+						console.log("UPDATE OFFICERS");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 
+						if(_v.is_not_unsigned_number(meeting_membership_id)) {
+							console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(meeting_membership_id)");
+							return;
+						}
 
+						cur_action_obj_for_db_update[_param.MEETING_MEMBERSHIP_ID] = parseInt(meeting_membership_id);	
 
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_OFFICER)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
 
+									console.log(">>> data ::: ",data);
 
+								},
+								// delegate_scope
+								this
+							) // end delegate
+						); // end ajax
 
+					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
+						// SELECT BOX를 선택했을 때의 처리.
 
-		// REMOVE ME LATER
-/*
-		// executive member list
-		var table_row_data_list_executive_member = meeting_agenda_data_set.executive_member_list;
+						var cur_action_context_obj = action_item_obj.get_action_context_obj();
+						if(cur_action_context_obj == undefined) {
 
-		// set table row element type
-		var last_json_for_executive_members = 
-		_action_table.add_title_type({
+							console.log("!Error! / cur_action_context_obj == undefined");
+							return;
 
-			key_access_prop_name:"__officer_name"
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_OFFICER_ROLE) {
 
-		}).add_search_list_type({
-			
-			key_access_prop_name:"__member_name"
-			, value_access_prop_name:"__member_id"
-			, search_option_arr:search_option_arr_members
+							return search_option_arr_members;	
 
-		});	
+						} // end inner if
 
-		// create table
-		var element_collection_set_executive_members =
-		_action_table.add_editable_table_V2(
-			// parent_jq
-			container_jq
-			// table_title
-			, "Executive Members"
-			// table_column_json_format_obj
-			, last_json_for_executive_members
-			// table_raw_data
-			, table_row_data_list_executive_member
-			// delegate_save_n_reload
-			, _obj.get_delegate(function(cur_outcome_obj){
+					} // end if	
 
-				var meeting_id = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
-				var cur_element_event_manager = cur_outcome_obj._prop_map.__element_event_manager;
-				var request_param_obj = null;
+					cur_element_event_manager.release();
 
-				// @ custom codes inits
-				if(_obj.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
+				},this) // end delegate
 
-					request_param_obj =
-					_param
-					.get(_param.IS_UPDATE_EXECUTIVE_MEMBER,_param.YES)
-					.get(_param.MEETING_ID,meeting_id)
-					.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-					.get(_param.EXECUTIVE_OFFICER_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__officer_id"))
-					.get(_param.EXECUTIVE_MEMBER_ID,cur_outcome_obj._value)
-					;
+			); // end table
 
-				}
-				// @ custom codes ends
-
-				_ajax.send_simple_post(
-					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-					// _param_obj
-					,request_param_obj
-					// _delegate_after_job_done
-					,_obj.get_delegate(function(data){
+		}
 
 
-					},this)
-				); // ajax done.		        
 
-			},this)
-		);
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1054,13 +1081,12 @@ wonglish.meeting_agenda_manager = {
 		// show action list
 		if(meeting_action_list != undefined) {
 			activate_action_timeline(meeting_action_list, container_jq);
+			activate_officer_list(tm_officer_action_list, container_jq_officer_list);
 		} else {
 			// action timeline이 없다면, EDIT Modal Window를 띄워서 사용자가 설정하도록 유도합니다.
 			var target_modal = $("div#modal-new-meeting-dialog");
 			target_modal.modal('show');
 		}
-
-		console.log(">>>> meeting_agenda_obj ::: ",meeting_agenda_obj);
 
 		return obj;
 	}

@@ -108,17 +108,24 @@ airborne.bootstrap.obj.__action = {
 	,is_valid_action_data_obj:function(action_data_obj) {
 
 		if(action_data_obj == undefined) {
+			console.log("!Error! / is_valid_action_data_obj / action_data_obj == undefined");
 			return false;
 		}
 		if(_v.is_not_unsigned_number(action_data_obj.action_id)) {
+			console.log("!Error! / is_valid_action_data_obj / _v.is_not_unsigned_number(action_data_obj.action_id)");
 			return false;
 		}
 		if(_v.is_not_valid_str(action_data_obj.action_name)) {
+			console.log("!Error! / is_valid_action_data_obj / _v.is_not_valid_str(action_data_obj.action_name)");
 			return false;
 		}
-		if(_v.is_not_valid_str(action_data_obj.action_hash_key)) {
-			return false;
-		}
+
+		// REMOVE ME
+
+		// if(_v.is_not_valid_str(action_data_obj.action_hash_key)) {
+		// 	console.log("!Error! / is_valid_action_data_obj / _v.is_not_valid_str(action_data_obj.action_hash_key)");
+		// 	return false;
+		// }
 
 		return true;
 	}
@@ -2376,10 +2383,6 @@ airborne.bootstrap.obj.__action = {
 		}
 
  		var copy_action_obj = this.get_action_obj();
- 		
-
-
-
 
 	}
 
@@ -6698,43 +6701,50 @@ airborne.bootstrap.obj.__action = {
 						console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_parent_action_table_obj)");
 						return;
 					}
-					var cur_parent_action_object_add_on = cur_parent_action_table_obj.get_parent_add_on();
-					if(_action.is_not_valid_action_obj(cur_parent_action_object_add_on)) {
-						console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_parent_action_object_add_on)");
-						return;
-					}
-					var cur_parent_action_object_add_on_event_manager = cur_parent_action_object_add_on.get_event_manager();
+					
+					var has_parent_add_on = cur_parent_action_table_obj.has_parent_add_on();
+					var cur_parent_action_object_add_on = undefined;
+					if(has_parent_add_on) {
 
-					if(is_hover_element_set) {
+						// 테이블이 부모를 가지고 있는 경우의 처리.
+						cur_parent_action_object_add_on = cur_parent_action_table_obj.get_parent_add_on();
 
-						// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
-						// 부모 item의 버튼은 모두 가립니다.
-						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
-						cur_parent_action_object_add_on_event_manager.show_child_focusing_mode(event_manager_on_mousemove.get_element_color());
-
-
-
-					} else {
-
-						// 자신의 테두리 색은 원래대로 되돌려 놓습니다.
-						cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
-
-						if(cur_parent_action_object_add_on_event_manager.get_is_child_focusing_mode()) {
-							// console.log("자신 말고 다른 자식 객체에 마우스 커서가 올라가 있어 부모 item이 색상이 이미 변한경우의 처리");
+						if(_action.is_not_valid_action_obj(cur_parent_action_object_add_on)) {
+							console.log("!Error! / add_mousemove_callback_set / _action.is_not_valid_action_obj(cur_parent_action_object_add_on)");
 							return;
 						}
+						var cur_parent_action_object_add_on_event_manager = cur_parent_action_object_add_on.get_event_manager();
 
-						// 부모 item이 있다면 원래 배경색으로 돌려놓습니다.
-						// 부모 item의 버튼은 모두 보여줍니다.
-						var parent_action_object_add_on_element_jq = cur_parent_action_object_add_on_event_manager.get_element_jq();
-						var is_hover_parent_action_object_add_on = _obj.is_hover(mousemove_event, parent_action_object_add_on_element_jq);
-						if(is_hover_parent_action_object_add_on) {
-							cur_parent_action_object_add_on_event_manager.show_edit_mode();
+						if(is_hover_element_set) {
+
+							// 변경된 색상을 부모 item이 있다면 같은 배경색으로 바꿉니다.
+							// 부모 item의 버튼은 모두 가립니다.
+							cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_color());
+							cur_parent_action_object_add_on_event_manager.show_child_focusing_mode(event_manager_on_mousemove.get_element_color());
+
 						} else {
-							cur_parent_action_object_add_on_event_manager.show_view_mode();
-						}
 
-					} // end inner if
+							// 자신의 테두리 색은 원래대로 되돌려 놓습니다.
+							cur_element_collection_container_jq.css("border-color",event_manager_on_mousemove.get_element_border_color());
+
+							if(cur_parent_action_object_add_on_event_manager.get_is_child_focusing_mode()) {
+								// console.log("자신 말고 다른 자식 객체에 마우스 커서가 올라가 있어 부모 item이 색상이 이미 변한경우의 처리");
+								return;
+							}
+
+							// 부모 item이 있다면 원래 배경색으로 돌려놓습니다.
+							// 부모 item의 버튼은 모두 보여줍니다.
+							var parent_action_object_add_on_element_jq = cur_parent_action_object_add_on_event_manager.get_element_jq();
+							var is_hover_parent_action_object_add_on = _obj.is_hover(mousemove_event, parent_action_object_add_on_element_jq);
+							if(is_hover_parent_action_object_add_on) {
+								cur_parent_action_object_add_on_event_manager.show_edit_mode();
+							} else {
+								cur_parent_action_object_add_on_event_manager.show_view_mode();
+							}
+
+						} // end inner if						
+					}
+
 
 				} // end outer if
 
