@@ -48,14 +48,19 @@ wonglish.meeting_agenda_manager = {
 		obj.meeting_agenda_container_id = meeting_agenda_container_id;
 		var container_jq = $("div#"+meeting_agenda_container_id);
 
+		//officer_list_container
+		var container_jq_officer_list = $("div#officer_list_container");
+
 
 
 
 		// common props
 		var meeting_agenda_obj = meeting_agenda_data_set.meeting_agenda_obj;
 		var meeting_membership_id = meeting_agenda_data_set.meeting_membership_id;
+		var recent_action_collection_id = meeting_agenda_data_set.recent_action_collection_id
 
 		console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
+
 
 		var meeting_agenda_id = meeting_agenda_obj.__meeting_id;
 		var meeting_agenda_startdttm = meeting_agenda_obj.__startdttm;
@@ -75,16 +80,63 @@ wonglish.meeting_agenda_manager = {
 
 			// 빈값으로 지정할 수 있는 필드를 추가한다.
 			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
-		}		
+		}	
+
+		var search_option_arr_speech_projects = [];
+		var speech_project_list = meeting_agenda_data_set.speech_project_list;
+		if(_v.isValidArray(speech_project_list)){
+			for (var idx = 0; idx < speech_project_list.length; idx++) {
+				var cur_speech_obj = speech_project_list[idx];
+				var cur_select_option = _obj.get_select_option(cur_speech_obj.__speech_project_title, cur_speech_obj.__speech_project_id);
+				search_option_arr_speech_projects.push(cur_select_option);
+			}
+		}
+		//speech_project_list	
 
 
 
 
 
 
-		// wonder.jung11
-		// var pdf_url = service_root_path + "/images/test_show_pdf.pdf";
-		// _print.draw_grid_view(container_jq, _print.PRINT_FORMAT_A4_LANDSCAPE, pdf_url);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -107,210 +159,332 @@ wonglish.meeting_agenda_manager = {
 		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
 
 		// TEST
-		var new_action_list = meeting_agenda_data_obj.new_action_list;
-		var new_action_element_collection_set = 
-		_action_list.add_editable_action_list(
-			// action_list
-			new_action_list
-			// parent_element_set
-			, null
-			// list_container_jq
-			, container_jq
-			// delegate_save_n_reload
-			, _obj.get_delegate(function(cur_outcome_obj){
+		var meeting_action_list = meeting_agenda_data_obj.meeting_action_list;
+		var new_action_element_collection_set = undefined;
+		var remove_action_timeline = function(container_jq) {
 
-				if(	cur_outcome_obj == undefined ) {
-					console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
-					return;
-				}
-				if(	_action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj) ) {
-					console.log("!Error! / delegate_save_n_reload / _action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj)");
-					return;
-				}
+			var cur_element_collection_container_jq = undefined;
+			if(new_action_element_collection_set != undefined) {
+				cur_element_collection_container_jq = new_action_element_collection_set.get_element_collection_container_jq();
+			}
+			if(cur_element_collection_container_jq != undefined) {
+				cur_element_collection_container_jq.remove();
+			}
 
-				console.log("HERE / cur_outcome_obj :: ",cur_outcome_obj);
+			_action.remove_event_hierarchy_manager();
 
-				var action_item_obj = cur_outcome_obj._action_item_obj;
-				console.log("HERE / action_item_obj :: ",action_item_obj);
+		}
+		var activate_action_timeline = function(meeting_action_list, container_jq) {
 
-				var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
-				if(_v.is_not_unsigned_number(MEETING_ID)) {
-					console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
-					return;
-				}
-				var cur_element_event_manager = action_item_obj.get_event_manager();
-				if(cur_element_event_manager == undefined) {
-					console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
-					return;
-				}
+			new_action_element_collection_set = 
+			_action_list.add_editable_action_list(
+				// action_list
+				meeting_action_list
+				// parent_element_set
+				, null
+				// list_container_jq
+				, container_jq
+				// delegate_save_n_reload
+				, _obj.get_delegate(function(cur_outcome_obj){
 
-				// DEBUG
-				var cur_root_action_obj = action_item_obj.get_root_action_obj();
-				var cur_root_action_context_obj = action_item_obj.get_action_context_obj();
-				if(cur_root_action_context_obj != undefined && cur_root_action_context_obj.meeting_id != undefined) {
-					MEETING_ID = cur_root_action_context_obj.meeting_id;
-				}
-
-				// DEBUG
-				var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
-
-				var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
-				if(_v.is_not_unsigned_number(MEETING_ID)) {
-					cur_action_obj_for_db_update["MEETING_ID"] = MEETING_ID;	
-				}				
-
-				if(_v.is_not_unsigned_number(action_item_obj.get_action_id())) {
-					// 전달 파라미터 내용 중에 자신의 앞,뒤의 형제 정보를 추가한다.
-					var cur_sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
-					if(_action.is_valid_action_item_obj(cur_sibling_action_obj_before)) {
-						cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_BEFORE] = cur_sibling_action_obj_before.get_action_hash_key();
+					if(	cur_outcome_obj == undefined ) {
+						console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
+						return;
+					}
+					if(	_action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj) ) {
+						console.log("!Error! / delegate_save_n_reload / _action.is_not_valid_action_item_obj(cur_outcome_obj._action_item_obj)");
+						return;
 					}
 
-					var cur_sibling_action_obj_after = action_item_obj.get_sibling_action_obj_after();
-					if(_action.is_valid_action_item_obj(cur_sibling_action_obj_after)) {
-						cur_action_obj_for_db_update[_param.ACTION_HASH_KEY_AFTER] = cur_sibling_action_obj_after.get_action_hash_key();
+					var action_item_obj = cur_outcome_obj._action_item_obj;
+					var action_context_obj = action_item_obj.get_action_context_obj();
+
+					var is_speech_update = 
+					(
+						action_context_obj != undefined && (
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_TITLE ||
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT ||
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER ||
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR
+						)
+					)?true:false;
+
+					console.log("is_speech_update ::: ",is_speech_update);
+
+					var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
+					if(_v.is_not_unsigned_number(MEETING_ID)) {
+						console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
+						return;
+					}
+					var cur_element_event_manager = action_item_obj.get_event_manager();
+					if(cur_element_event_manager == undefined) {
+						console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
+						return;
 					}
 
-					// id가 없는 엘리먼트는 새로 만들어진 엘리먼트.
-					cur_outcome_obj._event = _action.EVENT_TYPE_INSERT_ITEM;
-				}
+					console.log("action_item_obj ::: ",action_item_obj);
 
-				if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
-					_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
-					_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
-					_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
+					// DEBUG
+					var cur_root_action_obj = action_item_obj.get_root_action_obj();
+					var cur_root_action_context_obj = cur_root_action_obj.get_action_context_obj();
+					if(cur_root_action_context_obj != undefined && cur_root_action_context_obj.meeting_id != undefined) {
+						MEETING_ID = cur_root_action_context_obj.meeting_id;
+					}
 
-					console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
-					cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+					// DEBUG
+					var obj_tree = cur_root_action_obj.convert_action_hierarchy_to_obj_tree();
 
-					// wonder.jung11
-					// return;
+					var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
+					if(_v.is_unsigned_number(MEETING_ID)) {
+						cur_action_obj_for_db_update["MEETING_ID"] = parseInt(MEETING_ID);	
+					}
 
-					_ajax.send_simple_post(
-						// _url
-						_link.get_link(_link.API_ACTION)
-						// _param_obj
-						,cur_action_obj_for_db_update
-						// _delegate_after_job_done
-						,_obj.get_delegate(
-							// delegate_func
-							function(data){
-								
-								console.log(">>> data : ",data);
+					console.log("cur_outcome_obj._event ::: ",cur_outcome_obj._event);
+					console.log("action_context_obj ::: ",action_context_obj);
 
-								// TODO - 테이블에서 열을 추가한 경우, 열의 모든 엘리먼트의 정보를 돌려받아 업데이트를 해줘야 합니다.
+					if( _action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE ) {
 
-								// 업데이트한 내역을 가져와 화면에 표시된 데이터와 비교합니다.
-								if(_action.EVENT_TYPE_INSERT_ITEM === data.EVENT_PARAM_EVENT_TYPE) {
+						// TM ROLE UPDATE
+						console.log("TM ROLE UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
-									// 새로운 엘리먼트를 추가한 경우라면 해당되는 action item 정보(id, hash key)도 같이 업데이트 해줍니다.
-									console.log("FIN / action_item_obj :: ",action_item_obj);
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_ROLE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+									
+									if( data.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE ) {
 
-									if(action_item_obj.is_table_child_column_list_field_item()) {
-										// TABLE FIELD ITEM
-										var cur_table_row_field_action_item_list_after_std = data.cur_table_row_field_action_item_list_after_std;
-										if(cur_table_row_field_action_item_list_after_std == undefined) {
-											console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_list_after_std == undefined");
-											return;
-										}
-
-										var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
-										if(_v.is_not_valid_array(cur_table_row_sibling_arr)) {
-											console.log("!Error! / _delegate_after_job_done / _v.is_not_valid_array(cur_table_row_sibling_arr)");
-											return;
-										}
-
-										if(cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length) {
-											console.log("!Error! / _delegate_after_job_done / cur_table_row_sibling_arr.length != cur_table_row_field_action_item_list_after_std.length");
-											return;
-										}
-
-										for(var idx=0; idx < cur_table_row_field_action_item_list_after_std.length; idx++) {
-
-											var cur_table_row_field_action_item_obj_copy = cur_table_row_field_action_item_list_after_std[idx];
-											if(cur_table_row_field_action_item_obj_copy == undefined) {
-												console.log("!Error! / _delegate_after_job_done / cur_table_row_field_action_item_obj_copy == undefined");
-												return;
-											}
-											var cur_table_row_field_action_item_obj_src = cur_table_row_sibling_arr[idx];
-											if(_action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)) {
-												console.log("!Error! / _delegate_after_job_done / _action.is_not_valid_action_item_obj(cur_table_row_field_action_item_obj_src)");
-												return;
-											}
-
-											var is_update_coordinate_n_search_map = true;
-											cur_table_row_field_action_item_obj_src.set_action_id(cur_table_row_field_action_item_obj_copy.action_id, is_update_coordinate_n_search_map);
-											cur_table_row_field_action_item_obj_src.set_action_hash_key(cur_table_row_field_action_item_obj_copy.action_hash_key);
-
-										}
-
-										console.log(">>> cur_table_row_sibling_arr ::: ",cur_table_row_sibling_arr);
-
-									} else {
-										// LIST ROW ITEM
-
-										var action_item_copy = data.action_item_copy;
-										if(action_item_copy == undefined) {
-											console.log("!Error! / _delegate_after_job_done / action_item_copy == undefined");
-											return;
-										}
-
-										var is_update_coordinate_n_search_map = true;
-										action_item_obj.set_action_id(action_item_copy.action_id, is_update_coordinate_n_search_map);
-										action_item_obj.set_action_hash_key(action_item_copy.action_hash_key);
+										// 역할을 업데이트 했을 경우의 화면 변경.
+										var NEW_ACTION_NAME = data.NEW_ACTION_NAME;
+										action_item_obj.set_action_name(NEW_ACTION_NAME);
+										cur_element_event_manager.set_title_jq_text(NEW_ACTION_NAME);
 
 									}
 
-								}
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
 
-								// 내용이 다른 경우 알려줍니다.
-								// _action.compare_root_action(cur_root_action_obj, new_root_action_obj);
+					} else if(_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event && is_speech_update) {
 
-							},
-							// delegate_scope
-							this
-						)
-					); // ajax done.
+						console.log("TM SPEECH INSERT");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
-				} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+						// CHECK
+						var sibling_action_obj_before = action_item_obj.get_sibling_action_obj_before();
+						console.log("sibling_action_obj_before ::: ",sibling_action_obj_before);
 
-					// SELECT BOX를 선택했을 때의 처리.
+						var sibling_action_hash_key_before = sibling_action_obj_before.get_action_hash_key();
+						var ACTION_HASH_KEY_BEFORE = cur_action_obj_for_db_update.ACTION_HASH_KEY_BEFORE;
+
+						console.log("sibling_action_hash_key_before ::: ",sibling_action_hash_key_before);
+						console.log("ACTION_HASH_KEY_BEFORE ::: ",ACTION_HASH_KEY_BEFORE);
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+									var TABLE_FIELD_ACTION_ITEM_LIST_STD = data.TABLE_FIELD_ACTION_ITEM_LIST_STD;
+									if(TABLE_FIELD_ACTION_ITEM_LIST_STD == undefined) {
+										return;
+									}
+
+									// 테이블의 열이 추가된 경우의 데이터 업데이트
+									var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+
+									for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
+
+										var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
+										var cur_context_str = cur_action_item_std.context;
+										var cur_action_hash_key = cur_action_item_std.action_hash_key;
+										var cur_action_name = cur_action_item_std.action_name;
+
+										var cur_table_field_item_obj = cur_table_row_sibling_arr[idx];
+										var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
+
+										if(cur_table_field_item_obj != undefined) {
+
+											cur_table_field_item_obj.set_action_name(cur_action_name);
+											cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
+											cur_table_field_item_obj.set_action_context(cur_context_str);
+											cur_table_field_event_manager.set_title_jq_text(cur_action_name);
+											cur_table_field_event_manager.set_title_jq_attr_tossed_value(cur_action_name);
+
+										}	// end if
+
+									} // end for								
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_speech_update) {
+
+						console.log("TM SPEECH UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+									// 스피치를 업데이트 했을 경우의 화면 변경.
+									var ACTION_NAME = data.ACTION_NAME;
+									action_item_obj.set_action_name(ACTION_NAME);
+									cur_element_event_manager.set_title_jq_text(ACTION_NAME);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+
+					} else if(_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event && is_speech_update) {
+
+						console.log("TM SPEECH ORDER UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+									// 업데이트된 order_num의 값을 뷰 데이터에 적용합니다.
+									// 이 order_num의 값을 기준으로 사용하기 때문입니다.
+
+									var updated_table_row_field_std_list_list = data.updated_table_row_field_std_list_list
+									console.log(">>> updated_table_row_field_std_list_list ::: ",updated_table_row_field_std_list_list);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.						
+
+
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
+
+						console.log("TM SCHEDULE UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if(_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event && is_speech_update) {
+
+						console.log("TM SCHEDULE DELETE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+
+						// SELECT BOX를 선택했을 때의 처리.
+
+						var cur_action_context_obj = action_item_obj.get_action_context_obj();
+						if(cur_action_context_obj == undefined) {
+
+							console.log("!Error! / cur_action_context_obj == undefined");
+							return;
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
+
+							return search_option_arr_speech_projects;
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
+
+							return search_option_arr_members;	
+
+						}
+
+					}
+
+					cur_element_event_manager.release();
 					
-					console.log("Fetch select box data / action_item_obj :: ",action_item_obj);
-					console.log("Fetch select box data / search_option_arr_members :: ",search_option_arr_members);
+				},this)	
+			);
 
-					return search_option_arr_members;
-				}
-
-				cur_element_event_manager.release();
-				
-			},this)	
-		);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		}
 
 
 
@@ -349,73 +523,124 @@ wonglish.meeting_agenda_manager = {
 		//  dMP     dMP"AMF dMP     dMP.aMP dMP.aMP    dMP   dMP  YMvAP" dMP             dMP dMP dMPdMP     dMP dMP dMPdMP.aMF dMP     dMP"AMF dP .dMP   
 		// dMMMMMP dMP dMP dMMMMMP  VMMMP"  VMMMP"    dMP   dMP    VP"  dMMMMMP         dMP dMP dMPdMMMMMP dMP dMP dMPdMMMMP" dMMMMMP dMP dMP  VMMMP"    
 
-		// REMOVE ME LATER
-/*
-		// executive member list
-		var table_row_data_list_executive_member = meeting_agenda_data_set.executive_member_list;
+		var tm_officer_action_list = meeting_agenda_data_obj.tm_officer_action_list;
+		console.log(">>> tm_officer_action_list ::: ",tm_officer_action_list);
 
-		// set table row element type
-		var last_json_for_executive_members = 
-		_action_table.add_title_type({
+		var activate_officer_list = function(tm_officer_action_list, container_jq) {
 
-			key_access_prop_name:"__officer_name"
+			// wonder.jung
+			_action_table.add_editable_table_from_action_table(
+				// parent_jq
+				container_jq
+				// action_table_obj
+				, tm_officer_action_list
+				// delegate_on_event
+				, _obj.get_delegate(function(cur_outcome_obj){
 
-		}).add_search_list_type({
-			
-			key_access_prop_name:"__member_name"
-			, value_access_prop_name:"__member_id"
-			, search_option_arr:search_option_arr_members
+					console.log("cur_outcome_obj ::: ",cur_outcome_obj);
+					var action_item_obj = cur_outcome_obj._action_item_obj;
 
-		});	
+					var cur_element_event_manager = action_item_obj.get_event_manager();
+					if(cur_element_event_manager == undefined) {
+						console.log("!Error! / delegate_save_n_reload / cur_element_event_manager == undefined");
+						return;
+					}
 
-		// create table
-		var element_collection_set_executive_members =
-		_action_table.add_editable_table_V2(
-			// parent_jq
-			container_jq
-			// table_title
-			, "Executive Members"
-			// table_column_json_format_obj
-			, last_json_for_executive_members
-			// table_raw_data
-			, table_row_data_list_executive_member
-			// delegate_save_n_reload
-			, _obj.get_delegate(function(cur_outcome_obj){
+					var cur_action_obj_for_db_update = action_item_obj.get_action_obj_for_db_update();
 
-				var meeting_id = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
-				var cur_element_event_manager = cur_outcome_obj._prop_map.__element_event_manager;
-				var request_param_obj = null;
+					//EVENT_TYPE_UPDATE_ITEM
+					if( _action.EVENT_TYPE_UPDATE_ITEM == cur_outcome_obj._event ) {
 
-				// @ custom codes inits
-				if(_obj.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
+						console.log("UPDATE OFFICERS");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 
-					request_param_obj =
-					_param
-					.get(_param.IS_UPDATE_EXECUTIVE_MEMBER,_param.YES)
-					.get(_param.MEETING_ID,meeting_id)
-					.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-					.get(_param.EXECUTIVE_OFFICER_ID,cur_outcome_obj._prop_map.get_raw_map_prop("__officer_id"))
-					.get(_param.EXECUTIVE_MEMBER_ID,cur_outcome_obj._value)
-					;
+						if(_v.is_not_unsigned_number(meeting_membership_id)) {
+							console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(meeting_membership_id)");
+							return;
+						}
 
-				}
-				// @ custom codes ends
+						cur_action_obj_for_db_update[_param.MEETING_MEMBERSHIP_ID] = parseInt(meeting_membership_id);	
 
-				_ajax.send_simple_post(
-					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-					// _param_obj
-					,request_param_obj
-					// _delegate_after_job_done
-					,_obj.get_delegate(function(data){
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_OFFICER)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							) // end delegate
+						); // end ajax
+
+					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+
+						// SELECT BOX를 선택했을 때의 처리.
+
+						var cur_action_context_obj = action_item_obj.get_action_context_obj();
+						if(cur_action_context_obj == undefined) {
+
+							console.log("!Error! / cur_action_context_obj == undefined");
+							return;
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_OFFICER_ROLE) {
+
+							return search_option_arr_members;	
+
+						} // end inner if
+
+					} // end if	
+
+					cur_element_event_manager.release();
+
+				},this) // end delegate
+
+			); // end table
+
+		}
 
 
-					},this)
-				); // ajax done.		        
 
-			},this)
-		);
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -470,6 +695,75 @@ wonglish.meeting_agenda_manager = {
 			*/
 
 		});
+
+		// SET TEMPLATE EVENT
+		var agenda_template_jq_list = $("a#agenda_template");
+		if(agenda_template_jq_list != undefined && 0 < agenda_template_jq_list.length) {
+			agenda_template_jq_list.click(function(e) {
+
+				console.log("this ::: ",this);
+
+				var self_jq = $(this);
+				var action_template = self_jq.attr("action_template");
+				var src_meeting_id = parseInt(self_jq.attr("src_meeting_id"));
+				var meeting_id = parseInt(self_jq.attr("meeting_id"));
+				var action_name = "action_timelne";
+
+				var request_param_obj =
+				_param
+				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.EVENT_TYPE_INSERT_ITEM)
+				.get(_param.MEETING_ID_SRC,src_meeting_id)
+				.get(_param.MEETING_ID,meeting_id)
+				.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+				.get(_param.ACTION_TEMPLATE_NAME,action_template)
+				.get(_param.ACTION_NAME,action_name)
+				;
+
+				var msg_confirm = "WARNING!\nAre you sure overwriting timeline?\nCurrent timeline will be removed.";
+				if(!confirm(msg_confirm)) {
+					return;
+				}
+
+				console.log(">>> request_param_obj ::: ",request_param_obj);
+
+				// 모달 창을 닫습니다.
+				var target_modal = $("div#modal-new-meeting-dialog");
+				target_modal.modal('hide');
+
+				_ajax.send_simple_post(
+					// _url
+					_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE)
+					// _param_obj
+					,request_param_obj
+					// _delegate_after_job_done
+					,_obj.get_delegate(
+						// delegate_func
+						function(data){
+							
+							console.log("API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE");
+							console.log(">>> data : ",data);
+
+							// 새로운 템플릿으로 화면 내용을 변경합니다.
+							var root_action_obj_std = data.root_action_obj_std;
+							var new_meeting_action_list = undefined;
+							if(root_action_obj_std != undefined) {
+								new_meeting_action_list = _action.get_action_obj(root_action_obj_std);
+							}
+							if(new_meeting_action_list != undefined) {
+								remove_action_timeline(container_jq);
+								activate_action_timeline(new_meeting_action_list, container_jq);
+							}
+
+						}, // delegate_func end
+						// delegate_scope
+						this
+					)
+				); // ajax done.				
+
+
+			});
+		}
+
 		var init_meeting_modal = function(meeting_agenda_list, datepicker_jq) {
 
 			// 입력되었던 내역들을 모두 지웁니다.
@@ -501,6 +795,7 @@ wonglish.meeting_agenda_manager = {
 
 				meeting_date_recommend = weeks_later_yyyy_mm_dd;
 			}
+
 			// 2-2. 이전 미팅 정보가 없는 경우. 오늘 날짜를 추천
 			if(meeting_date_recommend == undefined) {
 				meeting_date_recommend = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD);
@@ -510,16 +805,8 @@ wonglish.meeting_agenda_manager = {
 				datepicker_jq.datepicker('update', meeting_date_recommend);
 			}
 
-			// 3. 미팅 템플릿 체크 버튼을 모두 초기화합니다.
-			var timeline_template_list_jq = $("li#timeline_template_row");
-			var btn_radios_jq = timeline_template_list_jq.find("input#radio_btn_meeting_template");
-			btn_radios_jq.removeAttr("checked");
-
-			// 3-1. 첫번째 버튼을 선택(기본 설정)
-			btn_radios_jq.first().prop('checked', true);
-
 			// 4. 이벤트 락을 해제합니다.
-			_obj.get_event_hierarchy_manager().release();
+			_action.get_event_hierarchy_manager().release();
 
 		};
 		init_meeting_modal(meeting_agenda_list, datepicker_jq);
@@ -550,340 +837,8 @@ wonglish.meeting_agenda_manager = {
 				input_meeting_date_jq.focus();
 				return;
 			}
-
-			// 선택한 미팅 템플릿을 가져옵니다.
-			var timeline_template_row_jq_arr = $("li#timeline_template_row");
-			var selected_template_id = -1;
-			for(var idx = 0;idx < timeline_template_row_jq_arr.length;idx++) {
-				var timeline_template_row_jq = $(timeline_template_row_jq_arr[idx]);
-				var btn_input_radio_jq = timeline_template_row_jq.find("input:checked#radio_btn_meeting_template");
-
-				if(	btn_input_radio_jq != undefined && 
-					btn_input_radio_jq.val() != undefined && 
-					btn_input_radio_jq.val() == "on" ) {
-
-					selected_template_id = parseInt(timeline_template_row_jq.attr("template_id"));
-					break;
-				}
-			}
-
-			var cur_meeting_id = parseInt($("div#modal-new-meeting-dialog").attr("cur-meeting-id"));
-			if(cur_meeting_id < 0 && selected_template_id < 0) {
-				alert("Please check your meeeting template.");
-				return;
-			}
-
-			// 새로운 미팅을 저장합니다.
-			var cur_meeting_membership_id = -1;
-			var cur_meeting_round = -1;
-			var is_new_meeting_header = _param.NO;
-			var is_update_meeting_header = _param.NO;
-			if(cur_meeting_id > 0 && meeting_agenda_obj != undefined) {
-				// 1. 이미 있던 미팅인 경우
-				//cur_meeting_membership_id = parseInt(meeting_agenda_obj.__membership_id);
-				cur_meeting_round = parseInt(meeting_agenda_obj.__round);
-				is_new_meeting_header = _param.NO;
-				is_update_meeting_header = _param.YES;
-			} else if(login_user_info != undefined && parseInt(login_user_info.__membership_id) > 0) {
-				// 2. 새로운 미팅인 경우
-				//cur_meeting_membership_id = parseInt(login_user_info.__membership_id);
-				is_new_meeting_header = _param.YES;
-				is_update_meeting_header = _param.NO;
-			} else {
-				// 3. 유효하지 않은 상황. 개발자에게 알림.
-				alert("!Error! Please let developer know Error - #531");
-				return;
-			}
-
-			var request_param_obj =
-			_param
-			.get(_param.IS_NEW_MEETING_HEADER,is_new_meeting_header)
-			.get(_param.IS_UPDATE_MEETING_HEADER,is_update_meeting_header)
-			.get(_param.MEETING_ID,cur_meeting_id)
-			.get(_param.ROUND,cur_meeting_round)
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
-			.get(_param.MEETING_TEMPLATE_ID,selected_template_id)
-			.get(_param.THEME,cur_meeting_theme)
-			.get(_param.START_DATE,cur_input_meeting_date)
-			;
-
-			console.log(">>> request_param_obj : ",request_param_obj);
-
-			_ajax.send_simple_post(
-				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-				// _param_obj
-				,request_param_obj
-				// _delegate_after_job_done
-				,_obj.get_delegate(
-					// delegate_func
-					function(data){
-
-						console.log(">>> data : ",data);
-
-						var new_meeting_obj_json_str = "";
-						if(data.query_output_arr != undefined && data.query_output_arr.length > 0) {
-							new_meeting_obj_json_str = data.query_output_arr[1];
-						}
-
-						console.log(">>> new_meeting_obj_json_str : ",new_meeting_obj_json_str);
-
-						var new_meeting_obj_arr = null;
-						if(_v.is_valid_str(new_meeting_obj_json_str)) {
-							new_meeting_obj_arr = _json.parseJSON(new_meeting_obj_json_str);
-						}
-
-						console.log(">>> new_meeting_obj_arr : ",new_meeting_obj_arr);
-
-						_obj.get_event_hierarchy_manager().release();
-
-						if(	new_meeting_obj_arr != undefined && 
-							new_meeting_obj_arr.length > 0 &&
-							new_meeting_obj_arr[0].__meeting_id != undefined && 
-							parseInt(new_meeting_obj_arr[0].__meeting_id) > 0) {
-
-							// 미팅을 새로 생성한 경우.
-
-							_link.go_there(
-								_link.MEETING_AGENDA
-								,_param
-								.get(_param.MEETING_ID, parseInt(new_meeting_obj_arr[0].__meeting_id))
-								.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-							);
-
-						} else {
-
-							// 있던 미팅을 업데이트하는 경우.
-
-							_link.go_there(
-								_link.MEETING_AGENDA
-								,_param
-								.get(_param.MEETING_ID, parseInt(cur_meeting_id))
-								.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-							);
-						}
-
-					},
-					// delegate_scope
-					this
-				)
-			); // ajax done.
-
-
 		});
 
-
-
-		// timeline template event inits
-		//template_list_container
-		var template_list_container_jq = $("ul#template_list_container");
-		var schedule_timeline_template_list = meeting_agenda_data_set.schedule_timeline_template_list;
-
-		// 지난주의 미팅 아젠다도 가져옵니다.
-		var recent_club_schedule_timeline_list = meeting_agenda_data_set.recent_club_schedule_timeline_list;
-		// 템플릿 포맷으로 변환.
-		if(_v.is_valid_array(recent_club_schedule_timeline_list)) {
-
-			for(var idx = 0;idx < recent_club_schedule_timeline_list.length;idx++) {
-				var recent_club_schedule_obj = recent_club_schedule_timeline_list[idx];
-				var template_obj = {
-					__timeline_template_title:recent_club_schedule_obj.__meeting_agenda_startdttm + " " + recent_club_schedule_obj.__meeting_agenda_theme
-					, __timeline_template_json_str:recent_club_schedule_obj.__timeline_schedule_json_str
-				};
-				schedule_timeline_template_list.push(template_obj);
-			}
-
-		}
-
-
-		//var schedule_timeline_list_V2 = meeting_agenda_data_obj.schedule_timeline_list_V2[0];
-		// var testObj = _json.parseJSON(schedule_timeline_list_V2.__timeline_schedule_json_str);
-
-		console.log("지난주의 미팅 아젠다도 가져옵니다.");
-		console.log("recent_club_schedule_timeline_list :: ",recent_club_schedule_timeline_list);
-
-		// wonder.jung11
-		// TODO - 정보만 보여주는 리스트 형태를 만듭니다.
-		// timeline template event ends
-		var timeline_template_tag = "";
-		if(_v.is_valid_array(schedule_timeline_template_list)) {
-
-			for(var idx = 0;idx < schedule_timeline_template_list.length;idx++) {
-				var template_obj = schedule_timeline_template_list[idx];
-				var type = template_obj.__timeline_template_title;
-
-				var jsonObjList = _json.parseJSON(template_obj.__timeline_template_json_str);
-				if(jsonObjList == undefined) {
-					continue;
-				}
-
-				var checked = "";
-				if(idx == 0) {
-					checked = "checked";
-				}
-
-				timeline_template_tag += ""
-				+ "<li id=\"timeline_template_row\" template_id=\"<template_id>\" class=\"list-group-item\" style=\"color:#B1B1B1;background-color:#F1F1F1;\">".replace(/\<template_id\>/gi, template_obj.__timeline_template_id)				
-					
-					+ "<div class=\"radio\" style=\"margin-top:0px;margin-bottom:0px;\">"
-						+ "<label>"
-							+ "<input type=\"radio\" id=\"radio_btn_meeting_template\" <checked>><span id=\"title\"><strong><title></strong></span>".replace(/\<title\>/gi, type).replace(/\<checked\>/gi, checked)
-						+ "</label>"
-						+ "<button id=\"folder_open_n_close\" type=\"button\" class=\"btn btn-default btn-xs\" style=\"float:right;margin-right:0px;margin-top:-2px;\"><span class=\"glyphicon glyphicon-folder-close\" style=\"padding-top:3px;padding-bottom:5px;padding-left:3px;padding-right:3px;\"></span>&nbsp;</button>"
-					+ "</div>"
-
-					+ "<ul id=\"main_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
-				;
-
-				// main action
-				for(var idx_main_action = 0;idx_main_action < jsonObjList.length;idx_main_action++) {
-					var main_action_json_obj = jsonObjList[idx_main_action];
-
-					var __action_name = main_action_json_obj.__action_name;
-					var __action_list = main_action_json_obj.__action_list;
-					var __time_sec = main_action_json_obj.__prop_map.__time_sec;
-					var __time_hh_mm = _dates.get_hh_mm_from_seconds(__time_sec);
-
-					timeline_template_tag += ""
-						+ "<li id=\"main_action_row\" class=\"list-group-item\" style=\"color:rgb(138, 109, 59);background-color:rgb(252, 248, 227);padding-left:10px;\">"
-							+ "<span id=\"time\" class=\"badge airborne_add_on\" style=\"float:left;\"><time_hh_mm></span>".replace(/\<time_hh_mm\>/gi, __time_hh_mm)
-							+ "<span id=\"title\" style=\"padding-left:10px;\"><title></span>".replace(/\<title\>/gi, __action_name)
-					;
-
-					for(var idx_sub_action_list = 0;idx_sub_action_list < __action_list.length;idx_sub_action_list++) {
-						var sub_action_json_obj_list = __action_list[idx_sub_action_list];
-
-						timeline_template_tag += ""
-							+ "<ul id=\"sub_action_list\" class=\"list-group\" style=\"margin-top:10px;margin-bottom:5px !important;\">"
-						;
-
-						for(var idx_sub_action = 0;idx_sub_action < sub_action_json_obj_list.length;idx_sub_action++) {
-							var sub_action_json_obj = sub_action_json_obj_list[idx_sub_action];
-
-							var __sub_action_name = sub_action_json_obj.__action_name;
-							timeline_template_tag += ""
-							+ "<li class=\"list-group-item\">"
-								+ "<span id=\"title\"><title></span>".replace(/\<title\>/gi, __sub_action_name)
-							+ "</li>"
-							;
-
-						} // for sub action obj end
-
-						timeline_template_tag += ""
-							+ "</ul>"
-						;
-
-					} // for sub action list end
-
-					timeline_template_tag += ""
-						+ "</li>"
-						;
-
-				} // for main action list end
-
-				timeline_template_tag += ""
-					+ "</ul>"			
-				+ "</li>"
-				;
-
-			} // for template end
-
-		}
-
-		timeline_template_tag +=
-		"</ul>";
-
-		template_list_container_jq.append(timeline_template_tag);
-
-
-
-
-
-		// EVENT
-		var main_action_list_jq = $("ul#main_action_list");
-		main_action_list_jq.hide();
-		var main_action_list_row_jq = main_action_list_jq.find("li#main_action_row");
-		main_action_list_row_jq.find("ul#sub_action_list").hide();
-		main_action_list_row_jq.click(function(e){
-
-			e.stopPropagation();
-
-			var self_jq = $(this);
-			var child_sub_action_list_jq = self_jq.parent().find("ul#sub_action_list");
-
-			var is_show = child_sub_action_list_jq.attr("is_show");
-			if(is_show == null || is_show == "" || is_show == "false") {
-				child_sub_action_list_jq.attr("is_show","true");
-				child_sub_action_list_jq.show();
-			} else if(is_show == "true") {
-				child_sub_action_list_jq.attr("is_show","false");
-				child_sub_action_list_jq.hide();
-			}
-		});
-
-		var sub_action_list_jq = main_action_list_jq.find("ul#sub_action_list");
-		var timeline_template_list_jq = $("li#timeline_template_row");
-		timeline_template_list_jq.mouseenter(function(e){
-			var self_jq = $(this);
-			var cur_color = self_jq.css("color");
-			var cur_bg_color = self_jq.css("background-color");
-
-			self_jq.css("color",cur_bg_color);
-			self_jq.css("background-color",cur_color);
-		});
-		//radio
-		timeline_template_list_jq.find("input#radio_btn_meeting_template").click(function(){
-			// 한개의 라디오 버튼만 선택되도록 해줍니다.
-			var self_jq = $(this);
-
-			var radio_btn_jq_arr = timeline_template_list_jq.find("input#radio_btn_meeting_template");
-			for(var idx = 0; idx < radio_btn_jq_arr.length; idx++) {
-				var cur_radio_btn_jq = $(radio_btn_jq_arr[idx]);
-
-				if(self_jq[0] == cur_radio_btn_jq[0]) {
-					continue;
-				}
-
-				cur_radio_btn_jq.removeAttr("checked");
-			}
-
-		});
-		timeline_template_list_jq.mouseleave(function(e){
-			var self_jq = $(this);
-			var cur_color = self_jq.css("color");
-			var cur_bg_color = self_jq.css("background-color");
-
-			self_jq.css("color",cur_bg_color);
-			self_jq.css("background-color",cur_color);
-
-			self_jq.find("button#folder_open_n_close").blur();
-		});
-		timeline_template_list_jq.find("button#folder_open_n_close").click(function(e) {
-
-			e.stopPropagation();
-
-			var self_jq = $(this);
-			var child_main_action_list_jq = self_jq.parent().parent().find("ul#main_action_list").first();
-			var is_show = child_main_action_list_jq.attr("is_show");
-			if(is_show == null || is_show == "" || is_show == "false") {
-				child_main_action_list_jq.attr("is_show","true");
-				child_main_action_list_jq.show();
-				// 버튼의 모양을 close 로 바꿉니다.
-				var btn_glyps_jq = self_jq.find("span.glyphicon-folder-close");
-
-				btn_glyps_jq.removeClass("glyphicon-folder-close");
-				btn_glyps_jq.addClass("glyphicon-folder-open");
-
-			} else if(is_show == "true") {
-				child_main_action_list_jq.attr("is_show","false");
-				child_main_action_list_jq.hide();
-				// 버튼의 모양을 open 으로 바꿉니다.
-				var btn_glyps_jq = self_jq.find("span.glyphicon-folder-open");
-
-				btn_glyps_jq.removeClass("glyphicon-folder-open");
-				btn_glyps_jq.addClass("glyphicon-folder-close");
-			}
-		});
 
 
 
@@ -950,6 +905,7 @@ wonglish.meeting_agenda_manager = {
 
 				}, this));
 
+				/*
 				this._self.addExtraBtn(
 					// btn_title
 					"NEW"
@@ -959,16 +915,12 @@ wonglish.meeting_agenda_manager = {
 					, this
 					// delegate_btn_clicked
 					, function(selected_key, selected_value){	
-						_obj.get_event_hierarchy_manager().lock();
-
-						var timeline_template_container_jq = timeline_template_list_jq.parent().parent();
-						if(timeline_template_container_jq != undefined && timeline_template_container_jq.length > 0) {
-							timeline_template_container_jq.show();
-						}
+						_action.get_event_hierarchy_manager().lock();
 
 						$('#modal-new-meeting-dialog').modal('show');
 					}
 				);
+				*/
 
 				// edit meeting theme & date
 				this._self.addExtraBtn(
@@ -979,14 +931,10 @@ wonglish.meeting_agenda_manager = {
 					// delegate_scope
 					, this
 					// delegate_btn_clicked
-					, function(selected_key, selected_value){	
-						_obj.get_event_hierarchy_manager().lock();
+					// , function(selected_key, selected_value){	// REMOVE ME
+					, function(){
 
-						// 수정할 미팅 정보를 전달합니다.
-						var timeline_template_container_jq = timeline_template_list_jq.parent().parent();
-						if(timeline_template_container_jq != undefined && timeline_template_container_jq.length > 0) {
-							timeline_template_container_jq.hide();
-						}
+						_action.get_event_hierarchy_manager().lock();
 
 						// 0. 수정할 미팅의 id를 등록합니다.
 						if(meeting_agenda_obj != undefined && parseInt(meeting_agenda_obj.__meeting_id) > 0) {
@@ -1007,12 +955,6 @@ wonglish.meeting_agenda_manager = {
 						}
 
 						console.log("meeting_agenda_obj : ",meeting_agenda_obj);
-
-						// 3. meeting num
-						var modal_title_jq = $("h4#modal-title");
-						if(modal_title_jq != undefined && modal_title_jq.length > 0) {
-							modal_title_jq.html(meeting_agenda_obj.__round + "th");
-						}
 
 						$('#modal-new-meeting-dialog').modal('show');
 					}
@@ -1039,7 +981,7 @@ wonglish.meeting_agenda_manager = {
 					}
 				);
 
-
+				/*
 				this._self.addExtraBtn(	
 					// btn_title
 					"PRINT LARGE"
@@ -1061,6 +1003,7 @@ wonglish.meeting_agenda_manager = {
 
 					}
 				);
+				*/
 
 				// button setting end - common
 			}
@@ -1099,6 +1042,7 @@ wonglish.meeting_agenda_manager = {
 
 
 		// EVENT - Documnet Ready
+		// TOASTMASTER 배너의 너비 조정을 하는데 사용합니다.
 		var on_resize_header = function() {
 		    var club_title_jq = $("div#club_title");
 		    if(club_title_jq == undefined || club_title_jq.length == 0) {
@@ -1134,9 +1078,20 @@ wonglish.meeting_agenda_manager = {
 		    on_resize_header();
 		});
 
+		// show action list
+		if(meeting_action_list != undefined) {
+			activate_action_timeline(meeting_action_list, container_jq);
+			activate_officer_list(tm_officer_action_list, container_jq_officer_list);
+		} else {
+			// action timeline이 없다면, EDIT Modal Window를 띄워서 사용자가 설정하도록 유도합니다.
+			var target_modal = $("div#modal-new-meeting-dialog");
+			target_modal.modal('show');
+		}
 
 		return obj;
 	}
+
+
 }
 
 

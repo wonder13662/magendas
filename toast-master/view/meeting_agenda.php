@@ -41,14 +41,10 @@
 	}
 
 	$meeting_id = $params->getParamNumber($params->MEETING_ID, 0);
-	$membership_arr = $wdj_mysql_interface->getMembership($meeting_membership_id);
-	if(!empty($membership_arr)) {
-		$membership = $membership_arr[0];
-	}
-
+	$membership = $wdj_mysql_interface->get_membership($meeting_membership_id);
 	$window_scroll_y = $params->getParamNumber($params->WINDOW_SCROLL_Y);
 
-	// 가장 마지막 등록된 미팅 ID를 가져옵니다.
+	// 미래의 가장 가까운 미팅 ID를 가져옵니다.
 	$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
 	if((0 == $meeting_id) && (0 < $latest_meeting_id)) {
 		// 외부로 받은 미팅 아이디가 정상적인 값이 아닐 경우, upcoming meeting id를 사용합니다.
@@ -70,29 +66,9 @@
 	if($meeting_id > 0) {
 
 		// 지정한 meeting_id가 있는 경우.
-		$meeting_agenda_arr = $wdj_mysql_interface->getMeetingAgendaById($meeting_membership_id, $meeting_id);
-		$meeting_agenda_obj = $meeting_agenda_arr[0];
+		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id);
 
 	}
-
-	// REMOVE ME
-	// $today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(2,7,11,10,9,4,5,6));
-	// $today_speech_speaker_v2_list = $wdj_mysql_interface->sel_speech_speaker($meeting_id);
-
-	// REMOVE ME
-	// $schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
-
-	// REMOVE ME
-	// $today_news_list = $wdj_mysql_interface->getNews($meeting_id);
-
-	// REMOVE ME
-	// $executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
-
-
-	// FIX ME - action type을 사용하는 템플릿으로 바꿉니다.
-	// $recent_club_schedule_timeline_list = $wdj_mysql_interface->getRecentClubTimelines($cookie_meeting_membership_id, 2);
-	// $schedule_timeline_template_list = $wdj_mysql_interface->getTimelineTemplateList();
-
 
 	$member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
 	$member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
@@ -102,19 +78,28 @@
 
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
-	// TEST
-	// test action list
-	// $new_action_list = $wdj_mysql_interface->get_template_meeting_timeline_BDTM("07:40");
-	$new_action_list = $wdj_mysql_interface->get_root_action_collection(6229, 134); 	// 용인
-	// $new_action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
-	$new_action_list_std = $new_action_list->get_std_obj();
+	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
+	$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
+	$action_collection_obj_immediate_past_std = null;
+	$meeting_obj_immediate_past = null;
+	if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
+		$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
+		$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
+		$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
+	}
 
-	// 1. IFRAME으로 PDF를 보여준다. 
-	// 2. PDF 영역에 투명 DIV으로 클릭 범위를 나눈다.
-	// 3. 사용자는 해당 영역을 클릭해서 편집 팝업 화면을 확인한다.
+	// 화면에 표시할 action list.
+	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($meeting_id);
+	$meeting_action_list_std = null;
+	if(ActionCollection::is_instance($action_collection_obj_recent)) {
+		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
+	}
 
-
-
+	$tm_officer_table_obj = $wdj_mysql_interface->get_toastmaster_officer_by_meeting_id($meeting_membership_id);
+	$tm_officer_std = null;
+	if(ActionCollection::is_instance($tm_officer_table_obj)) {
+		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
+	}
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -133,7 +118,6 @@
 ?>
 <!-- view controller -->
 <script src="../js/toast-master/meeting.agenda.js"></script>
-<script src="../js/toast-master/action.manager.js"></script>
 </head>
 
 
@@ -216,32 +200,79 @@
 
 				<div class="modal-header">
 					<button id="meeting-agenda-cancel" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="modal-title">New meeting</h4>
+					
+					<?php
+						if(!is_null($meeting_agenda_obj) && !empty($meeting_agenda_obj->__theme)) {
+							$meeting_title = $meeting_agenda_obj->__round . "th / " . $meeting_agenda_obj->__startdate . " / " . $meeting_agenda_obj->__theme;
+							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">$meeting_title</h4>";
+						} else {
+							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">New meeting</h4>";
+						}
+					?>
 				</div>
 
-				<div class="modal-body">
+				<div class="modal-body" style="padding-top:0px;padding-bottom:0px;">
 					<form>
 						<div class="form-group">
-							<label for="meeting-template" class="control-label">Template</label>
 
-							<!-- template init -->
-							<ul id="template_list_container" class="list-group">
-								<!--
-									timeline table is here!
-								-->
+							<ul class="list-group">
+								<li class="list-group-item list-group-item-warning" style="margin-top:20px;"><strong>TEMPLATE</strong></li>
+								<li class="list-group-item list-group-item-warning" style="height:180px;padding:10px;">
+
+							<?php
+
+							// 지난번의 아젠다 정보
+							if(!is_null($action_collection_obj_immediate_past)) {
+
+								$immediate_prev_meeting_id = $action_collection_obj_immediate_past->get_meeting_agenda_id();
+								$immediate_prev_meeting_startdate = $meeting_obj_immediate_past->__startdate;
+
+								echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
+								echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"$immediate_prev_meeting_id\" action_template=\"$params->ACTION_TEMPLATE_PREV_MEETING\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">$immediate_prev_meeting_startdate<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+								echo "</div>";
+							}
+
+							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다.
+							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
+							echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+							echo "</div>";
+
+							?>
+								</li>
+								<li class="list-group-item list-group-item-warning" style="padding-left:10px;padding-right:10px;">
+									<strong>THEME</strong>
+									<!-- 
+									<input type="text" class="form-control" id="meeting-theme" aria-describedby="basic-addon3">
+									-->
+									<input type="text" class="form-control" id="meeting-theme">
+								</li>
+								<li class="list-group-item list-group-item-warning" style="padding-left:10px;padding-right:10px;">
+									<strong>DATE</strong>
+									<input type="text" class="span2 datepicker center-block" data-date-format="yyyy-mm-dd" readonly="" id="meeting-date" style="margin-left:0px;">
+								</li>
+
 							</ul>
-							<!-- template ends -->
 
 						</div>
-						<div class="form-group">
-							<label for="meeting-theme" class="control-label">Theme</label>
-							<input type="text" class="form-control" id="meeting-theme">
-						</div>
-						<!-- http://vitalets.github.io/bootstrap-datepicker/ -->
-						<div class="form-group">
-							<label for="meeting-date" class="control-label">Meeting Date</label>
+
+						<!--
+						<div class="input-group">
 							<input type="text" class="span2 datepicker center-block" data-date-format="yyyy-mm-dd" readonly="" id="meeting-date" style="margin-left:0px;">
 						</div>
+						-->
+
+						<!--
+						<div class="form-group">
+							<input type="text" class="form-control" id="meeting-theme">
+						</div>
+						-->
+
+						<!-- http://vitalets.github.io/bootstrap-datepicker/ -->
+						<!--
+						<div class="form-group">
+							<input type="text" class="span2 datepicker center-block" data-date-format="yyyy-mm-dd" readonly="" id="meeting-date" style="margin-left:0px;">
+						</div>
+						-->
 					</form>
 				</div>
 
@@ -255,18 +286,19 @@
 		</div>
 		<!-- meeting agenda creator modal ends-->
 
-
-
-
-
-
-
 	</div>
 	<!-- meeting agenda container ends -->
 
 
+	<!-- officer list container begins -->
+	<div id="officer_list_container" class="container" role="main" data-toggle="modal" data-target="#row_modal">
+	</div>
+	<!-- officer list container ends -->
 
 
+	<!-- white space init-->
+	<div id="white_space" style="height:300px;"></div>
+	<!-- white space ends-->
 
 <script>
 
@@ -277,38 +309,38 @@ var member_list = <?php echo json_encode($member_list);?>;
 var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var role_list = <?php echo json_encode($role_list);?>;
-// REMOVE ME
-// var today_role_list = <?php echo json_encode($today_role_list);?>;
-// var today_speech_speaker_v2_list = <?php echo json_encode($today_speech_speaker_v2_list);?>;
-
-// var executive_member_list = <?php echo json_encode($executive_member_list);?>;
 var meeting_id = <?php echo json_encode($meeting_id);?>;
-// REMOVE ME
-// var schedule_timeline_list_V2 = <?php echo json_encode($schedule_timeline_list_V2);?>;
 var recent_club_schedule_timeline_list = <?php echo json_encode($recent_club_schedule_timeline_list);?>;
 var schedule_timeline_template_list = <?php echo json_encode($schedule_timeline_template_list);?>;
-
-// var time_guide_line = <?php echo json_encode($time_guide_line);?>;
 var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?>;
 var speech_evaluator_cnt_list = <?php echo json_encode($speech_evaluator_cnt_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
-// REMOVE ME
-// var today_news_list = <?php echo json_encode($today_news_list);?>;
 var is_expired = <?php echo json_encode($is_expired);?>;
 var is_editable = <?php echo json_encode($is_editable);?>;
 var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
-	
-// REMOVE ME
-// var is_update_timeline_after_job = <?php echo json_encode($is_update_timeline_after_job);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
-var new_action_list_std = <?php echo json_encode($new_action_list_std);?>;
-var new_action_list = _action.get_action_obj(new_action_list_std);
+var meeting_action_list_std = <?php echo json_encode($meeting_action_list_std);?>;
+var meeting_action_list = undefined;
+if(meeting_action_list_std != undefined) {
+	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
+}
 
+var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
+var tm_officer_action_list = undefined;
+if(tm_officer_std != undefined) {
+	console.log("TEST - 001 / tm_officer_std ::: ",tm_officer_std);
+	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
+}
+
+// 과거의 직전 미팅 정보
+var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
+var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_past);?>;
+
+var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
-console.log(">>> service_root_path ::: ",service_root_path);
 
-console.log(">>> new_action_list_std ::: ",new_action_list_std);
+
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -319,8 +351,6 @@ if(_v.is_valid_str(cookie_login_user)) {
 	is_log_in_user = true;
 }
 
-console.log(">>> login_user_info : ",login_user_info);
-
 var meeting_agenda_data_obj = 
 {
 	meeting_agenda_list:meeting_agenda_list
@@ -329,39 +359,23 @@ var meeting_agenda_data_obj =
 	, member_list:member_list
 	, member_role_cnt_list:member_role_cnt_list
 	, role_list:role_list
-	// REMOVE ME
-	// , today_role_list:today_role_list
-	// , today_speech_speaker_v2_list:today_speech_speaker_v2_list
-
-	// , executive_member_list:executive_member_list
 	, meeting_id:meeting_id
-	// REMOVE ME
-	// , schedule_timeline_list_V2:schedule_timeline_list_V2
 	, recent_club_schedule_timeline_list:recent_club_schedule_timeline_list
 	, schedule_timeline_template_list:schedule_timeline_template_list
-	// , time_guide_line:time_guide_line
 	, speech_speaker_cnt_list:speech_speaker_cnt_list
 	, speech_evaluator_cnt_list:speech_evaluator_cnt_list
 	, speech_project_list:speech_project_list
-	// REMOVE ME
-	// , today_news_list:today_news_list
-	// , is_update_timeline_after_job:is_update_timeline_after_job
-
 	, window_scroll_y:window_scroll_y
 	, is_log_in_user:is_log_in_user 
 	, login_user_info:login_user_info
-
-	// TEST
-	, new_action_list:new_action_list
-	// , new_action_list_v2:new_action_list_v2
+	, meeting_action_list:meeting_action_list
+	, tm_officer_action_list:tm_officer_action_list
 	, service_root_path:service_root_path
+	, recent_action_collection_id:recent_action_collection_id
 };
-
-console.log(">>> schedule_timeline_template_list : ",schedule_timeline_template_list);
 
 // 편집에 필요한 모든 데이터가 전송되면, 실제 편집 객체를 만듭니다.
 var meeting_agenda_manager = wonglish.meeting_agenda_manager.getObj("meeting_agenda_container", meeting_agenda_data_obj, is_editable);
-
 
 // https://developers.google.com/web/fundamentals/native-hardware/user-location/obtain-location
 // check for Geolocation support

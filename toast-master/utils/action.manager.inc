@@ -96,7 +96,6 @@ class ActionObject implements Action{
 			return;
 		}
 
-		// wonder.jung11
 		$child_action_obj_list = $this->get_children();
 		$child_action_obj_list_next = array();
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
@@ -280,6 +279,12 @@ class ActionObject implements Action{
 
 	public function set_item_type($action_item_type) {
 		$this->action_item_type = $action_item_type;
+
+		// action item type name
+		$action_item_type_name = ActionItem::get_action_item_type_name($action_item_type);
+		if(!empty($action_item_type_name)) {
+			$this->set_item_type_name($action_item_type_name);
+		}
 	}
 	public function get_item_type() {
 		return $this->action_item_type;
@@ -310,6 +315,9 @@ class ActionObject implements Action{
 		$this->action_order = $action_order;
 	}
 	public function get_order() {
+		if(is_null($this->action_order)) {
+			return -1;
+		}
 		return $this->action_order;
 	}
 
@@ -363,15 +371,26 @@ class ActionObject implements Action{
 		if(is_null($cur_search_map)) {
 			return;
 		}
+
 		$children_action_list = $this->get_children();
 		for($idx=0;$idx < count($children_action_list);$idx++) {
 			$child_action_obj = $children_action_list[$idx];
 
-			$child_action_name = $child_action_obj->get_name();
 			$child_action_coordinate = $cur_coordinate . "-" . $idx;
 
-			$child_has_parent = $child_action_obj->has_parent();
 			$cur_search_map = $child_action_obj->set_coordinate($child_action_coordinate, $cur_search_map);
+		}
+
+		if(ActionItem::is_instance($this)) {
+			$add_on_list = $this->get_add_on_list();
+			for($idx=0;$idx < count($add_on_list);$idx++) {
+				$add_on_action_obj = $add_on_list[$idx];
+
+				$add_on_action_coordinate = $cur_coordinate . "-A" . $idx;
+
+				$cur_search_map = $add_on_action_obj->set_coordinate($add_on_action_coordinate, $cur_search_map);
+
+			}
 		}
 
 		return $cur_search_map;
@@ -424,6 +443,88 @@ class ActionObject implements Action{
 
 		return $action_obj_from_search;
 	}
+	// @ desc : action obj context의 일치된 속성을 가지고 있는 action obj을 돌려줍니다. root action obj부터 검색을 시작합니다.
+	public function search_by_context_from_root($context_key="", $context_value="") {
+
+		$cur_root_action_obj = $this;
+		if($this->is_not_root_collection()) {
+			$cur_root_action_obj = $this->get_root_action_obj();
+		}
+
+		if(ActionObject::is_not_action_obj($cur_root_action_obj)) {
+			echo "!Error! / search_by_context_from_root / ActionObject::is_not_action_obj($cur_root_action_obj)<br/>";
+			return;
+		}
+
+		return $cur_root_action_obj->search_by_context($context_key, $context_value);
+
+	}
+	private function search_by_context($context_key="", $context_value="") {
+
+		// ACTION ITEM인 경우만 진행합니다.
+		if(is_null($context_key) || empty($context_key)) {
+			return null;
+		}
+		// REMOVE ME
+		// if(is_null($context_value) || empty($context_value)) {
+		// 	return null;
+		// }
+
+		// DEBUG
+		// $cur_actino_name = $this->get_name();
+
+		$cur_context_str = $this->get_context();
+		$cur_context_obj = json_decode($cur_context_str);
+
+		if(!empty($context_value)) {
+
+			// context value가 유효한 경우
+			$cur_context_value = $cur_context_obj->{$context_key};
+			if(!is_null($cur_context_value) && (strcmp($cur_context_value , $context_value)) == 0) {
+				return $this;
+			}
+
+		} else {
+
+			// context value가 공백, null일 경우. key 값만 매칭되면 반환.
+			$cur_context_value = $cur_context_obj->{$context_key};
+			if(!is_null($cur_context_value)) {
+				return $this;
+			}
+
+		}
+
+		if($this->has_children()) {
+			$cur_children = $this->get_children();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_child_action_obj = $cur_children[$idx];
+				$result = $cur_child_action_obj->search_by_context($context_key, $context_value);
+
+				if(ActionObject::is_action_obj($result)) {
+					return $result;
+				}
+			}
+		}
+
+		if(ActionItem::is_instance($this) && $this->has_add_on_list()) {
+			$cur_children = $this->get_add_on_list();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_add_on_action_obj = $cur_children[$idx];
+				$result = $cur_add_on_action_obj->search_by_context($context_key, $context_value);
+
+				if(ActionObject::is_action_obj($result)) {
+					return $result;
+				}
+			}
+		}
+
+
+
+
+
+	}
+
+
 	public function has_changed() {
 		if(is_null($this->has_changed)) {
 			$this->has_changed = false;
@@ -440,7 +541,6 @@ class ActionObject implements Action{
 
 		// set_parent_changed
 		$parent_action_obj = $this->get_parent();
-		// wonder.jung
 		if($this->has_parent()) {
 			$parent_action_obj->set_changed($has_changed);	
 		}
@@ -536,6 +636,7 @@ class ActionObject implements Action{
 		$this->set_collection_type($action_obj->get_collection_type());
 		$this->set_collection_type_name($action_obj->get_collection_type_name());
 		$this->set_item_type($action_obj->get_item_type());
+
 		$this->set_item_type_name($action_obj->get_item_type_name());
 		$this->set_context($action_obj->get_context());
 
@@ -552,6 +653,162 @@ class ActionObject implements Action{
 	public function get_context() {
 		return $this->context;
 	}
+	public function get_context_obj() {
+
+		if(empty($this->context)) {
+			return new stdClass();
+		}
+
+		return json_decode($this->context);
+	}
+	// @ Desc : 모든 키를 복사합니다. 값은 공백으로 채워집니다. json 문자열을 돌려줍니다.
+	public function copy_context($new_context_str = "") {
+		
+		$copy_context_obj = $this->copy_context_obj();
+		if(is_null($copy_context_obj)) {
+			return "";
+		}
+
+		if(!empty($new_context_str)) {
+
+			// 복사된 컨텍스트에 추가되는 내용이 있는 경우. 
+			$new_context_obj = json_decode($new_context_str);
+			if(is_null($new_context_obj)) {
+				return json_encode($copy_context_obj);
+			}
+
+			foreach($new_context_obj as $key => $value) {
+
+				if(is_null($value)) {
+					$value = "";
+				}
+
+				$copy_context_obj->{$key} = $value;
+				
+			} // end foreach
+			
+		} // end if
+
+		return json_encode($copy_context_obj);
+	}
+	// @ Desc : 모든 키를 복사합니다. 값은 공백으로 채워집니다.
+	public function copy_context_obj() {
+
+		$params = new ToastmasterParamManager();
+
+		$cur_context_obj = $this->get_context_obj();
+		$context_obj_copy = new stdClass();
+		foreach($cur_context_obj as $key => $value) {
+
+			// ACTION_DB_INSERT_MSG, ACTION_DB_UPDATE_MSG, ACTION_DB_DELETE_MSG는 옮겨줍니다.
+			if(	strcmp($key, $params->ACTION_DB_INSERT_MSG) == 0 ||
+				strcmp($key, $params->ACTION_DB_UPDATE_MSG) == 0 ||
+				strcmp($key, $params->ACTION_DB_DELETE_MSG) == 0 ) {
+
+				$context_obj_copy->{$key} = $value;	
+
+			} else {
+
+				$context_obj_copy->{$key} = "";	
+
+			} // end if
+           	
+		} // end for
+
+		return $context_obj_copy;
+
+	}
+	public function set_context_obj($context_obj=null) {
+
+		if(is_null($context_obj)) {
+			$context_obj = new stdClass();
+		}
+
+		$this->context = json_encode($context_obj);
+	}
+	public function set_context_attr($key="", $value="") {
+
+		if(empty($key)) {
+			return;
+		}
+		if(is_null($value)) {
+			$value = "";
+		}
+
+		$cur_context_str = $this->get_context();
+
+		$next_context_obj = $this->get_context_obj();
+
+		$next_context_obj->{$key} = $value;
+
+		$next_context_str = json_encode($next_context_obj);
+
+		$this->context = $next_context_str;
+	}
+	public function get_context_attr($key="") {
+
+		if(empty($key)) {
+			return;
+		}
+
+		$cur_context_obj = $this->get_context_obj();
+		return $cur_context_obj->{$key};
+	}	
+	public function has_context_attr($key="", $value="") {
+
+		if(empty($key)) {
+			return false;
+		}
+
+		$cur_context_obj = $this->get_context_obj();
+		if(is_null($cur_context_obj)) {
+			return false;
+		}
+		if(is_null($cur_context_obj->{$key})) {
+			return false;
+		}
+
+		if(!empty($value)) {
+
+			// key, value를 같이 검사해야 하는 경우.
+			if(strcmp($cur_context_obj->{$key},$value) == 0) {
+				return true;
+			}
+			return false;
+
+		} else {
+
+			// key를 가지고 있는지 여부만 검사하는 경우.
+			return true;
+
+		}
+
+		
+	}
+	// @ desc : 새로 들어온 context의 속성으로 추가 및 업데이트를 해줍니다.
+	public function add_context_attr($new_context_str="") {
+
+		if(empty($new_context_str)) {
+			return;
+		}
+
+		$new_context_obj = json_decode($new_context_str);
+		if(is_null($new_context_obj)) {
+			return;
+		}
+
+		foreach($new_context_obj as $key => $value) {
+
+			if(is_null($value)) {
+				$value = "";
+			}
+
+			
+			$this->set_context_attr($key, $value);
+		} // end for
+
+	}
+
 
 	// @ Desc : 자신과 파라미터로 넘어온 action obj가 동일한지 id, hash_key값을 비교해 알려줍니다.
 	public function is_equal($target_action_obj=null) {
@@ -708,8 +965,15 @@ class ActionObject implements Action{
 		}
 
 		if($this->has_parent()) {
+
 			$cur_parent = $this->get_parent();	
 			return $cur_parent->get_depth($depth + 1);
+
+		} else if($this->has_add_on_parent()) {
+
+			$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();	
+			return $cur_add_on_action_parent_obj->get_depth($depth + 1);
+			
 		}
 
 		return $depth;
@@ -874,6 +1138,42 @@ class ActionCollection extends ActionObject{
 		}
 		return false;
 	}
+	public function is_last_add_on() {
+
+		if($this->has_no_add_on_parent()) {
+			return false;
+		}
+
+		$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();
+		if(ActionItem::is_not_instance($cur_add_on_action_parent_obj)) {
+			echo "!Error! / is_last_add_on / ActionItem::is_not_instance(\$cur_add_on_action_parent_obj)<br/>";
+			return;
+		}
+
+		$cur_add_on_list = $cur_add_on_action_parent_obj->get_add_on_list();
+		if(!is_array($cur_add_on_list)) {
+			echo "!Error! / is_last_add_on / !is_array(\$cur_add_on_list)<br/>";
+			return;
+		}
+		if(empty($cur_add_on_list)) {
+			echo "!Error! / is_last_add_on / empty(\$cur_add_on_list)<br/>";
+			return;
+		}
+		$last_idx = (count($cur_add_on_list) - 1);
+		$last_add_on_action_obj = $cur_add_on_list[$last_idx];
+
+		if(ActionCollection::is_not_instance($last_add_on_action_obj)) {
+			echo "!Error! / is_last_add_on / ActionCollection::is_not_instance(\$last_add_on_action_obj)<br/>";
+			return;
+		}
+
+		if(strcmp($last_add_on_action_obj->get_hash_key(),$this->get_hash_key()) == 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 
 	public function search_hash_key($hash_key) {
 
@@ -885,7 +1185,6 @@ class ActionCollection extends ActionObject{
 			return $this;
 		}
 
-		// wonder.jung11
 		$children_action_list = $this->get_children();
 		for($idx = 0; $idx < count($children_action_list); $idx++) {
 			$child_action_object = $children_action_list[$idx];
@@ -956,6 +1255,29 @@ class ActionCollection extends ActionObject{
 	}	
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1065,18 +1387,21 @@ class ActionItem extends ActionObject{
 		}
 
 		if(!is_null($add_on_collection)) {
+			$add_on_collection->set_add_on_action_parent_obj($this);
 			array_push($this->add_on_action_object_list, $add_on_collection);
 		}
-
-		// wonder.jung11
-		// add on object는 부모 객체를 가지고 있어야 할까?
-		// 가지고 있다면 parent <--> child와는 다르게 add on parent <--> add on child로 관계가 만들어 져야 하지 않을까?
-
 
 	}
 	public function has_add_on_list() {
 		$cur_add_on_list = $this->get_add_on_list();
 		return !empty($cur_add_on_list)?true:false;
+	}
+	public function get_add_on_cnt() {
+		if(is_null($this->add_on_action_object_list) || !is_array($this->add_on_action_object_list)) {
+			return 0;
+		}
+
+		return count($this->add_on_action_object_list);
 	}
 	public function get_add_on_list() {
 		if(is_null($this->add_on_action_object_list)) {
@@ -1110,7 +1435,6 @@ class ActionItem extends ActionObject{
 			}
 		}
 
-		// wonder.jung11
 		$children_add_on_action_list = $this->get_add_on_list();
 		for($idx = 0; $idx < count($children_add_on_action_list); $idx++) {
 			$child_add_on_action_object = $children_add_on_action_list[$idx];
@@ -1133,11 +1457,9 @@ class ActionItem extends ActionObject{
 	public static $TITLE_ONLY_ADDABLE=6;	// ActionItem::$TITLE_ONLY_ADDABLE
 	public static $SELECT_BOX_ADDABLE=7;	// ActionItem::$SELECT_BOX_ADDABLE
 
-	/*
-		@ Public
-		@ Usage : ActionItem::is_valid_action_item_type($action_item_type);
-	*/
-
+	
+	// @ Public
+	// @ Usage : ActionItem::is_valid_action_item_type($action_item_type);
 	public static function is_valid_action_item_type($action_item_type) {
 
 		if(is_null($action_item_type) || !is_numeric($action_item_type)) {
@@ -1158,6 +1480,33 @@ class ActionItem extends ActionObject{
 		return false;
 	}
 
+	// @ Public
+	// @ Usage : ActionItem::get_action_item_type_name($action_item_type);
+	public static function get_action_item_type_name($action_item_type=-1) {
+
+		if(is_null($action_item_type) || $action_item_type < 1) {
+			return "";
+		}
+
+		if(ActionItem::$TITLE_ONLY == $action_item_type) {
+			return "TITLE_ONLY";
+		} else if(ActionItem::$TITLE_N_TIME_HH_MM == $action_item_type) {
+			return "TITLE_N_TIME_HH_MM";
+		} else if(ActionItem::$TITLE_N_TIME_MM_SS == $action_item_type) {
+			return "TITLE_N_TIME_MM_SS";
+		} else if(ActionItem::$SELECT_BOX == $action_item_type) {
+			return "SELECT_BOX";
+		} else if(ActionItem::$TITLE_ONLY_FIXED == $action_item_type) {
+			return "TITLE_ONLY_FIXED";
+		} else if(ActionItem::$TITLE_ONLY_ADDABLE == $action_item_type) {
+			return "TITLE_ONLY_ADDABLE";
+		} else if(ActionItem::$SELECT_BOX_ADDABLE == $action_item_type) {
+			return "SELECT_BOX_ADDABLE";
+		}
+
+		return "";
+	}
+	
 	// @ Override
 	public function get_meeting_agenda_id() {
 		return -1;
@@ -1176,6 +1525,41 @@ class ActionItem extends ActionObject{
 	public function get_context() {
 		return parent::get_context();
 	}
+	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다. 이중 배열의 형태로 반환
+	public function get_table_row_list() {
+
+		if($this->is_not_table_field_item()) {
+			echo "!Error! / " . __FUNCTION__ . " / \$this->is_not_table_field_item()";
+			return;
+		}
+
+		$table_column_action_list = $this->get_parent();
+		if(ActionCollection::is_not_instance($table_column_action_list)) {
+			echo "!Error! / " . __FUNCTION__ . " / ActionCollection::is_not_instance(\$table_column_action_list)";
+			return;
+		}
+
+		$table_field_action_item_list = $table_column_action_list->get_children();
+		$table_row_list = array();
+		for($idx = 0; $idx < count($table_field_action_item_list); $idx++ ) {
+			$table_field_action_item = $table_field_action_item_list[$idx];
+			if(ActionItem::is_not_instance($table_field_action_item)) {
+				echo "!Error! / " . __FUNCTION__ . " / ActionItem::is_not_instance(\$table_field_action_item)";
+				return;
+			}
+
+			// 제목 표시 타입은 제거한다.
+			if(ActionItem::$TITLE_ONLY_FIXED == $table_field_action_item->get_item_type()) {
+				continue;
+			}
+
+			$cur_table_row_field_action_item_list = $table_field_action_item->get_table_row_field_action_item_list();
+			array_push($table_row_list, $cur_table_row_field_action_item_list);
+		}
+
+		return $table_row_list;
+
+	}
 
 	// @ desc : 자신이 속한 테이블의 열의 모든 아이템의 배열을 돌려줍니다.
 	public function get_table_row_field_action_item_list() {
@@ -1191,7 +1575,6 @@ class ActionItem extends ActionObject{
 			return;
 		}
 
-		// wonder.jung11
 		$table_column_action_list = $this->get_parent();
 		if(ActionCollection::is_not_instance($table_column_action_list)) {
 			echo "!Error! / get_table_row_field_action_item_list / ActionCollection::is_not_instance(\$table_column_action_list)";
@@ -1244,6 +1627,34 @@ class ActionItem extends ActionObject{
 		
 	}	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 	@ Desc : 제목과 시간을 나타내는 Action Item. 시작 시간을 정의할 수 있습니다. 시간 관련 메서드가 추가됩니다.

@@ -18,6 +18,8 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	$membership_obj = $membership_obj_arr[0];
 }
 
+// REMOVE ME
+/*
 // 최신순으로 등록된 미팅을 10개 가져옵니다.
 $recent_meeting_agenda_list =
 $wdj_mysql_interface->getMeetingAgendaList(
@@ -99,6 +101,8 @@ if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__
 		}
 	}
 }
+*/
+
 // 최신순으로 등록된 미팅을 10개 가져옵니다.(업데이트 반영된 것으로 다시 가져옴)
 $recent_meeting_agenda_list =
 $wdj_mysql_interface->getMeetingAgendaListUpcoming(

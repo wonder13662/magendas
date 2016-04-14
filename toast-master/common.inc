@@ -16,13 +16,14 @@ include_once(__DIR__."/db/toast-master/mysql.interface.toast-master.inc");
 include_once(__DIR__."/utils/mysql.manager.inc");
 include_once(__DIR__."/utils/mysql.query.manager.inc");
 include_once(__DIR__."/utils/action.manager.inc");
+include_once(__DIR__."/utils/action.template.manager.inc");
 
 // @ requried - DB Setting
 
 $wdj_mysql_config = MYSQLConfig::getConfig(MYSQLConfig::$MYSQL_CONFIG_TOAST_MASTER_DEV);
 $wdj_mysql_manager = new MYSQLManager($wdj_mysql_config);
 $wdj_mysql_interface = new MYSQLInterface($wdj_mysql_manager);
-$params = new ToastMasterParamManager();
+$params = new ToastmasterParamManager();
 
 // get service root path
 //$path_arr = (explode("/",__DIR__));

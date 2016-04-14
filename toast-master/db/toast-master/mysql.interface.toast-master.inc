@@ -204,7 +204,7 @@ class MYSQLInterface{
 	public function is_not_action_collection($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
-			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
+			echo "$function_name / \$this->is_not_action_collection(\$$param_name)<br/>";
 		}
 
 		return $is_not_instance;
@@ -215,7 +215,7 @@ class MYSQLInterface{
 	public function is_not_action_list($function_name="", $target, $param_name=""){
 		$is_not_instance = ActionCollection::is_not_instance($target);
 		if($is_not_instance == true && !empty($function_name) && !empty($param_name)) {
-			echo "$function_name / \$this->is_not_instance(\$$param_name)<br/>";
+			echo "$function_name / \$this->is_not_action_list(\$$param_name)<br/>";
 		}
 
 		if(is_null($target)) {
@@ -297,7 +297,9 @@ class MYSQLInterface{
 
 		return $is_action_item;
 	}
-
+	public function is_unsigned_number($function_name="", $target){
+		return !$this->is_not_unsigned_number($function_name, $target);
+	}
 	public function is_not_unsigned_number($function_name="", $target, $param_name=""){
 
 		$is_not_unsigned_number = !$this->isUnsignedNumber($target);
@@ -308,6 +310,19 @@ class MYSQLInterface{
 		return $is_not_unsigned_number;
 
 	}
+
+	public function is_not_number($function_name="", $target, $param_name=""){
+
+		$is_not_number = !is_numeric($target);
+		if($is_not_number == true && !empty($function_name) && !empty($param_name)) {
+			echo "$function_name / \$this->is_not_number(\$$param_name)<br/>";
+		}
+
+		return $is_not_number;
+
+	}
+
+
 
 	private function is_not_valid_array($function_name="", $target, $param_name=""){
 		return !$this->is_valid_array($function_name, $target, $param_name);
@@ -377,12 +392,12 @@ class MYSQLInterface{
 
 		return ($is_over_20h || $is_under_20h);
 	}
-	private function is_not_valid_time_format_hh24_mm($target){
+	public function is_not_valid_time_format_hh24_mm($target){
 		return !$this->is_valid_time_format_hh24_mm($target);
 	}
 	// @ Private
 	// @ Desc : "19:20" 형식의 시간:분을 초단위로 바꾸어 줍니다.
-	private function convert_hh24_mm_to_seconds($str_time){
+	public function convert_hh24_mm_to_seconds($str_time){
 
 		if($this->is_not_valid_time_format_hh24_mm($str_time)) {
 			return -1;
@@ -393,13 +408,21 @@ class MYSQLInterface{
 
 		return $time_seconds;
 	}
-	private function convert_seconds_to_hh24_mm($seconds) {
+	public function convert_seconds_to_hh24_mm($seconds) {
 
 		if($this->is_not_unsigned_number(null, $seconds)) {
 			return -1;
 		}
 
 		return gmdate("H:i", $seconds);
+	}
+	private function convert_seconds_to_YYYYMMHHMMSS($seconds) {
+
+		if($this->is_not_unsigned_number(null, $seconds)) {
+			return -1;
+		}
+
+		return gmdate("YmdHis", $seconds);
 	}
 
 
@@ -560,32 +583,120 @@ class MYSQLInterface{
 	*/
 	public function get_meeting_agenda_id_upcoming($meeting_membership_id=-1){
 
-		$function_name = "get_meeting_agenda_id_upcoming";
-		if($this->isNotUnsignedNumber($meeting_membership_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
 		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"SELECT MA.id AS __meeting_id"
-			,"FROM MEETING_AGENDA AS MA"
-			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
-			,"WHERE MA.membership_id=$meeting_membership_id"
-			,"AND MA.`status`=\"A\""
-			,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= MA.startdttm"
-			,"ORDER BY MA.startdttm ASC LIMIT 1"
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.membership_id=$meeting_membership_id"
+				,"AND MA.`status`=\"A\""
+				,"AND DATE_FORMAT(NOW(), '%Y%m%d000000') <= DATE_FORMAT(MA.startdttm, '%Y%m%d000000')"
+				,"ORDER BY MA.startdttm ASC LIMIT 1"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
-
-		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();		
 		$__meeting_id = -1;
 		if(!is_null($result)) {
 			$__meeting_id = intval($result->__meeting_id);	
 		}
 
+		// 예정된 미팅이 없는 경우, 이번주 미팅을 추가합니다.
+		$meeting_agenda_added = null;
+		if($__meeting_id == -1) {
+			$meeting_agenda_added = $this->add_meeting_agenda($meeting_membership_id);	
+		}
+		if(!is_null($meeting_agenda_added)) {
+			$__meeting_id = intval($meeting_agenda_added->__meeting_id);
+		}
+
 		return $__meeting_id;
+	}
+
+	// @ Desc : 지난 미팅을 기준으로 최신 미팅을 1개 추가합니다.
+	private function add_meeting_agenda($meeting_membership_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+
+		// 최신순으로 등록된 미팅을 10개 가져옵니다.
+		$recent_meeting_agenda_list =
+		$this->getMeetingAgendaList(
+			// meeting_membership_id
+			$meeting_membership_id
+			// page
+			, 1
+			// size
+			, 10
+		);
+
+		$recent_meeting_agenda_obj = null;
+		if(!empty($recent_meeting_agenda_list)) {
+			$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
+		}
+
+		if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__startdttm)) {
+
+			$recent_startdttm = $recent_meeting_agenda_obj->__startdttm;
+			$recent_round = intval($recent_meeting_agenda_obj->__round);	
+
+			$d = new DateTime( $recent_startdttm );
+			$d_now = new DateTime();
+			$diff_days = intval($d->diff($d_now)->days);
+
+			if($diff_days < 0) {
+				return;
+			}
+
+			$days_in_a_week = 7;
+			$past_weeks_cnt = intval($diff_days/$days_in_a_week);
+			$offset_days = ($days_in_a_week * ($past_weeks_cnt + 1));
+
+			$d->modify( "+$offset_days days" );
+			$d_next = $d->format( 'YmdHis' );
+
+
+			// 새로운 아젠다를 새로운 시간에 등록해줍니다.
+			$next_round = $recent_round + $round_idx;
+			$round_idx += 1;
+
+			$result = 
+			$this->insertMeetingAgenda(
+				// $round
+				$next_round
+				// $theme
+				, "No Theme"
+				// $start_dttm
+				, $d_next
+				// $meeting_membership_id
+				, $meeting_membership_id
+			);	
+
+			// 새로 등록한 아젠다 정보를 가져옵니다.
+			$result = 
+			$this->get_meeting_agenda_by_round(
+				// $meeting_round
+				$next_round
+				// $startdttm
+				, $d_next
+				// $meeting_membership_id
+				, $meeting_membership_id
+			);
+
+			return $result;
+		}		
+
 	}
 
 	/*
@@ -666,6 +777,51 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	private function get_meeting_agenda_by_round($meeting_round, $startdttm, $meeting_membership_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_round, "meeting_round")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $startdttm, "startdttm")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				," , MA.round AS __round"
+				," , MA.theme AS __theme"
+				," , MA.startdttm AS __startdttm"
+				," , MA.membership_id AS __membership_id"
+				," , MEMBERSHIP.name AS __membership_name"
+				," , MEMBERSHIP.desc AS __membership_desc"
+				," , IFNULL(QUOTE.content,\"\") AS __quote"
+				," , IFNULL(WORD.word,\"\") AS __word"
+				," , IFNULL(WORD.desc,\"\") AS __word_desc"
+				," FROM MEETING_AGENDA AS MA"
+				," LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+				," LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+				," LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				," WHERE MA.membership_id=" . $meeting_membership_id
+				," AND MA.round=" . $meeting_round
+				," AND MA.startdttm=" . $startdttm
+				," AND MA.`status`=\"A\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+
+		return $result;
+	}
+
 	public function getMeetingAgendaById($meeting_membership_id, $meeting_id){
 
 		if($this->isNotUnsignedNumber($meeting_membership_id)) return null;
@@ -744,11 +900,77 @@ class MYSQLInterface{
 		return null;
 	}
 
+	// @ desc : 가장 최신의 과거 미팅 정보를 가져옵니다.
+	public function get_immediate_past_meeting_agenda($meeting_membership_id){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_membership_id, "meeting_membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,", MA.round AS __round"
+				,", MA.theme AS __theme"
+				,", MA.startdttm AS __startdttm"
+				,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"
+				,", MA.membership_id AS __membership_id"
+				,", MEMBERSHIP.name AS __membership_name"
+				,", MEMBERSHIP.desc AS __membership_desc"
+				,", IFNULL(QUOTE.content,\"\") AS __quote"
+				,", IFNULL(WORD.word,\"\") AS __word"
+				,", IFNULL(WORD.desc,\"\") AS __word_desc"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
+				,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.membership_id=$meeting_membership_id"
+				,"AND MA.`status`=\"A\""
+				,"AND MA.startdttm <= DATE_FORMAT(NOW(), '%Y%m%d000000')"
+				,"ORDER BY MA.startdttm DESC LIMIT 1"			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();		
+
+		return $result;
+	}
+
+	// @ Desc : meeting id로 membership id를 가져옵니다.
+	public function get_membership_id_by_meeting_id($meeting_id=-1){
+
+		if($this->is_empty(__FUNCTION__, $meeting_id, "meeting_id")){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.membership_id AS __membership_id"
+				,"FROM MEETING_AGENDA AS MA"
+				,"WHERE MA.id=$meeting_id"
+				,"AND MA.`status`=\"A\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result->__membership_id;
+
+	}	
+
 	/*
 		@ Public
 		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
 	*/
-	public function get_meeting_agenda_by_id($meeting_membership_id, $meeting_id){
+	public function get_meeting_agenda_by_id($meeting_membership_id=-1, $meeting_id=-1){
 
 		$function_name = "get_meeting_agenda_by_id";
 		if($this->isNotUnsignedNumber($meeting_membership_id)){
@@ -765,6 +987,7 @@ class MYSQLInterface{
 			,", MA.round AS __round"
 			,", MA.theme AS __theme"
 			,", MA.startdttm AS __startdttm"
+			,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
 			,", MA.membership_id AS __membership_id"
 			,", MEMBERSHIP.name AS __membership_name"
 			,", MEMBERSHIP.desc AS __membership_desc"
@@ -1460,6 +1683,36 @@ class MYSQLInterface{
 
 	}
 
+	// @ Desc : member id로 멤버 정보를 가져옵니다.
+	public function get_member($member_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $member_id, "member_id")){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				," , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				," , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				," , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				," FROM `MEMBER`"
+				," WHERE `MEMBER`.id=\"$member_id\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;
+
+	}
+
 	public function getSleepingMember($expire_date=180, $membership_id=1) {
 
 		if($this->isNotUnsignedNumber($expire_date)) return null;
@@ -1724,6 +1977,30 @@ class MYSQLInterface{
 		return $__member_id;
 	}	
 
+	public function get_member_id_by_hash_key($member_hash_key=""){
+
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				," FROM `MEMBER`"
+				," WHERE `MEMBER`.`hash_key`=\"$member_hash_key\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result->__member_id;
+
+	}	
+
 	public function getMemberByMemberHashKey($member_hash_key){
 
 		$function_name = "getMemberByMemberHashKey";
@@ -1750,8 +2027,10 @@ class MYSQLInterface{
 	}
 
 	public function getMembership($membership_id) {
-
-		if($this->isNotUnsignedNumber($membership_id)) return null;
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
 
 		$query = 
 		"SELECT id AS __membership_id"
@@ -1764,6 +2043,33 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
+	}
+
+	// @ Desc : 멤버쉽 정보를 가져옵니다.
+	public function get_membership($membership_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT id AS __membership_id"
+				," , IFNULL(`name`, \"\") AS __membership_name"
+				," , IFNULL(`desc`, \"\") AS __membership_desc"
+				," FROM MEMBERSHIP"
+				," WHERE id=$membership_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+
+		return $result;
 	}
 
 	public function getAllMembership() {
@@ -2296,6 +2602,93 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}		
 
+	public function get_meeting_role($membership_id=-1, $meeting_id=1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+
+				"SELECT `MEMBER`.id AS __member_id"
+				," , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				," , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				," , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(`ROLE`.`id`,\"\") AS __role_id"
+				," , IFNULL(`ROLE`.`name`,\"\") AS __role_name"
+
+				," FROM MEETING_AGENDA AS MA"
+				," LEFT JOIN MA_ROLE ON MA_ROLE.meeting_agenda_id=MA.id"
+				," LEFT JOIN ROLE ON ROLE.id=MA_ROLE.role_id"
+				," LEFT JOIN MEMBER ON MEMBER.id=MA_ROLE.member_id"
+				," WHERE MA.id=$meeting_id"
+				," AND ROLE.id=$role_id"
+				," AND MEMBER.id=$member_id"
+				," LIMIT 1"
+			
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();	
+
+		// 해당 유저의 롤을 맡은 횟수를 가져옴.
+		$role_total_cnt = $this->get_member_total_role_cnt($membership_id, $role_id, $member_id);
+		$result->role_total_cnt = $role_total_cnt;
+
+		return $result;
+	}
+
+	public function get_member_total_role_cnt($membership_id=-1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MA_ROLE.role_id) AS __role_cnt"
+				," FROM `MEMBER`"
+				," JOIN MA_ROLE ON MA_ROLE.member_id=`MEMBER`.id"
+				," LEFT JOIN `ROLE` ON `ROLE`.id=MA_ROLE.role_id"
+				," LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				," WHERE MNM.membership_id=$membership_id"
+				," AND `MEMBER`.id=$member_id"
+				," AND `MA_ROLE`.role_id=$role_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+
+		return $result->__role_cnt;
+	}
+
 	public function getMemberRoleCntList($membership_id=1, $role_id=-1, $member_id=-1, $member_status="A"){
 
 		$function_name = "getMemberRoleCntList";
@@ -2459,6 +2852,42 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
+	}
+
+	private function get_tm_officer($membership_id=-1, $officer_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $officer_id, "officer_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MNO`.member_id AS __officer_member_id"
+				," , `MNO`.officer_id AS __officer_id"
+				," , `MEMBER`.id AS __member_id"
+				," , CONCAT(`MEMBER`.first_name, ' ', `MEMBER`.last_name) AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(OFFICER.name,\"\") AS __officer_name"
+				," , IFNULL(OFFICER.desc,\"\") AS __officer_desc"
+				," FROM `MEMBER_N_OFFICER` AS MNO"
+				," LEFT JOIN MEMBER ON MEMBER.id=`MNO`.member_id"
+				," LEFT JOIN OFFICER ON OFFICER.id=`MNO`.officer_id"
+				," WHERE `MNO`.membership_id=$membership_id"
+				," AND `MNO`.officer_id=$officer_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+		
+		return $result;
 	}
 
 	private function getExecutiveMember($membership_id, $officer_id){
@@ -2648,6 +3077,76 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	// 특정 유저로 롤이 지정되었는지 확인.
+	public function has_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return false;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(`id`) AS __meeting_role_cnt"
+				," FROM `MA_ROLE`"
+				," WHERE `meeting_agenda_id`=$meeting_agenda_id"
+				," AND `role_id`=$role_id"
+				," AND `member_id`=$member_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+		$__meeting_role_cnt = intval($result->__meeting_role_cnt);
+
+		return (0 < $__meeting_role_cnt)?true:false;
+	}
+
+	// 미팅의 롤이 업데이트 되었는지 확인.
+	private function has_meeting_role($meeting_agenda_id=-1, $role_id=-1){
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(`id`) AS __meeting_role_cnt"
+				," FROM `MA_ROLE`"
+				," WHERE `meeting_agenda_id`=$meeting_agenda_id"
+				," AND `role_id`=$role_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+		$__meeting_role_cnt = intval($result->__meeting_role_cnt);
+
+		return (0 < $__meeting_role_cnt)?true:false;
+
+	}
+	// REMOVE ME
 	private function hasTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
@@ -2661,15 +3160,118 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 		$today_role_cnt = $json_res_obj->result[0]->__today_role_cnt;
 
-		$has_today_role = false;//false
-		if($has_today_role > 0){
-			$has_today_role = true;
+		$has_meeting_role = false;//false
+		if($has_meeting_role > 0){
+			$has_meeting_role = true;
 		}
 
-		return $has_today_role;
+		return $has_meeting_role;
 	}
 
-	public function insertTodayRole($meeting_agenda_id, $role_id, $member_id){
+	public function set_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key="") {
+
+		$has_meeting_role = $this->has_meeting_role($meeting_agenda_id, $role_id);
+
+		if($has_meeting_role) {
+			$this->update_meeting_role_by_hash_key($meeting_agenda_id, $role_id, $member_hash_key);
+		} else {
+			$this->insert_meeting_role_by_hash_key($meeting_agenda_id, $role_id, $member_hash_key);
+		}
+	}
+	private function insert_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$this->insert_meeting_role($meeting_agenda_id, $role_id, $member_id);
+
+	}
+	private function insert_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO MA_ROLE"
+				," (meeting_agenda_id, role_id, member_id, regdttm, updttm)"
+				," VALUES ($meeting_agenda_id, $role_id, $member_id, DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+	private function update_meeting_role_by_hash_key($meeting_agenda_id=-1, $role_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$this->update_meeting_role($meeting_agenda_id, $role_id, $member_id);
+	}
+	private function update_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_ROLE`"
+				," SET `member_id`=$member_id,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE `role_id`=$role_id"
+				," AND `meeting_agenda_id`=$meeting_agenda_id"
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}	
+	// REMOVE ME
+	/*
+	private function insertTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
 		"INSERT INTO MA_ROLE"
@@ -2685,14 +3287,16 @@ class MYSQLInterface{
 	}
 	public function updateTodayRole($meeting_agenda_id, $role_id, $member_id){
 		// 1. 
-		$has_today_role = $this->hasTodayRole($meeting_agenda_id, $role_id, $member_id);
 
-		if($has_today_role){
+		$has_meeting_role = $this->hasTodayRole($meeting_agenda_id, $role_id, $member_id);
+
+		if($has_meeting_role){
 			return $this->_updateTodayRole($meeting_agenda_id, $role_id, $member_id);
 		} else {
 			return $this->insertTodayRole($meeting_agenda_id, $role_id, $member_id);
 		}
 	}
+	// REMOVE ME
 	private function _updateTodayRole($meeting_agenda_id, $role_id, $member_id){
 
 		$query = 
@@ -2706,23 +3310,7 @@ class MYSQLInterface{
 
 		return $this->getSimpleResult($json_res_obj);
 	}
-
-
-
-	public function deleteTodayRole($meeting_agenda_id, $role_id=null){
-
-		$query = 
-		"DELETE FROM MA_ROLE"
-		. " WHERE meeting_agenda_id=$meeting_agenda_id"
-		;
-		if($this->isUnsignedNumber($role_id)){
-			$query .= " AND role_id=$role_id";
-		}
-
-		$json_res_obj = $this->getModifyResult($query);
-
-		return $json_res_obj->result;
-	}
+	*/
 
 
 	public function getTodayRoleFixedList(){
@@ -2738,6 +3326,32 @@ class MYSQLInterface{
 		$json_res_obj = $this->getSelectResult($query);
 
 		return $json_res_obj->result;
+	}
+
+	public function get_speech_project($project_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT id AS __speech_project_id"
+				,", title AS __speech_project_title"
+				,", ordernum AS __speech_project_ordernum"
+				,"FROM SPEECH_PROJECT"
+				,"WHERE id=$project_id"				
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return $result;
 	}
 
 
@@ -2940,61 +3554,163 @@ class MYSQLInterface{
 
 
 	// speech list version 2
-	public function sel_speech_speaker($meeting_agenda_id){
+	public function sel_speech_speaker($meeting_agenda_id=-1){
 
-		$function_name = "sel_speech_speaker";
-		if($this->isNotUnsignedNumber($meeting_agenda_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$membership_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
 			return;
 		}
 
-		$query = ""
-		. "SELECT MSV2.`id` AS __speech_id"
-		. " , MSV2.`meeting_agenda_id` AS __meeting_id"
-		. " , MSV2.`speech_project_id` AS __speech_project_id"
-		. " , SP.`title` AS __speech_project_title"
-		. " , MSV2.`title` AS __title"
-		. " , MSV2.`order_num` AS __order_num"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSV2.`id` AS __speech_id"
+				," , MSV2.`meeting_agenda_id` AS __meeting_id"
+				," , MSV2.`speech_project_id` AS __speech_project_id"
+				," , SP.`title` AS __speech_project_title"
+				," , MSV2.`title` AS __title"
+				," , MSV2.`order_num` AS __order_num"
 
-		. " , IFNULL(MSS.`id`,-1) AS __speaker_id"
-		. " , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
-		. " , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
+				," , IFNULL(MSS.`id`,-1) AS __speaker_id"
+				," , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
+				," , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
 
-		. " , IFNULL(MTGL.`sec_green`,0) AS __speaker_timer_green"
-		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speaker_timer_green_mm_ss"
- 
-		. " , IFNULL(MTGL.`sec_yellow`,0) AS __speaker_timer_yellow"
-		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speaker_timer_yellow_mm_ss"
+				," , IFNULL(MTGL.`sec_green`,0) AS __speaker_timer_green"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speaker_timer_green_mm_ss"
+		 
+				," , IFNULL(MTGL.`sec_yellow`,0) AS __speaker_timer_yellow"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speaker_timer_yellow_mm_ss"
 
-		. " , IFNULL(MTGL.`sec_red`,0) AS __speaker_timer_red"
-		. " , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
+				," , IFNULL(MTGL.`sec_red`,0) AS __speaker_timer_red"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
 
-		. " , IFNULL(MSE.`id`,-1) AS __evaluator_id"
-		. " , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
-		. " , IFNULL(CONCAT(EVALUATOR.first_name,\" \",EVALUATOR.last_name), \"NOT ASSIGNED\") AS __evaluator_member_name"
-		. " , 120 AS __evaluator_timer_green"
-		. " , 150 AS __evaluator_timer_yellow"
-		. " , 180 AS __evaluator_timer_red"
+				," , IFNULL(MSE.`id`,-1) AS __evaluator_id"
+				," , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
+				," , IFNULL(CONCAT(EVALUATOR.first_name,\" \",EVALUATOR.last_name), \"NOT ASSIGNED\") AS __evaluator_member_name"
+				," , 120 AS __evaluator_timer_green"
+				," , 150 AS __evaluator_timer_yellow"
+				," , 180 AS __evaluator_timer_red"
 
-		. " , MSV2.`updttm` AS __updttm"
-		. " , MSV2.`regdttm` AS __regdttm"
-		. " FROM `MA_SPEECH` AS MSV2"
-		. " LEFT JOIN `MA_SPEECH_SPEAKER` AS MSS ON MSS.speech_id=MSV2.id"
-		. " LEFT JOIN `MA_SPEECH_EVALUATOR` AS MSE ON MSE.speech_id=MSV2.id"
-		. " LEFT JOIN `SPEECH_PROJECT` AS SP ON SP.id=MSV2.speech_project_id"
-		. " LEFT JOIN MEMBER AS SPEAKER ON SPEAKER.id = MSS.`speaker_member_id`"
-		. " LEFT JOIN MEMBER AS EVALUATOR ON EVALUATOR.id = MSE.`evaluator_member_id`"
-		. " LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=MSV2.speech_project_id"
-		. " LEFT JOIN SPEECH_MANUAL_PROJECT AS SMP ON SMP.id=SMPNTGL.speech_manual_project_id"
-		. " LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
+				," , MSV2.`updttm` AS __updttm"
+				," , MSV2.`regdttm` AS __regdttm"
+				," FROM `MA_SPEECH` AS MSV2"
+				," LEFT JOIN `MA_SPEECH_SPEAKER` AS MSS ON MSS.speech_id=MSV2.id"
+				," LEFT JOIN `MA_SPEECH_EVALUATOR` AS MSE ON MSE.speech_id=MSV2.id"
+				," LEFT JOIN `SPEECH_PROJECT` AS SP ON SP.id=MSV2.speech_project_id"
+				," LEFT JOIN MEMBER AS SPEAKER ON SPEAKER.id = MSS.`speaker_member_id`"
+				," LEFT JOIN MEMBER AS EVALUATOR ON EVALUATOR.id = MSE.`evaluator_member_id`"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=MSV2.speech_project_id"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT AS SMP ON SMP.id=SMPNTGL.speech_manual_project_id"
+				," LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
 
-		. " WHERE MSV2.`meeting_agenda_id`=$meeting_agenda_id"
-		. " ORDER BY MSV2.`order_num`, MSV2.`id` DESC"
-		;
+				," WHERE MSV2.`meeting_agenda_id`=$meeting_agenda_id"
+				," ORDER BY MSV2.`order_num` ASC"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
 
-		$json_res_obj = $this->getSelectResult($query);
-		return $json_res_obj->result;
+		$result = $query_manager->get_result();
+		if(empty($result)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			return array();
+		}
+
+		return $result;
 	}
+
+	public function has_speech($speech_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id)){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MS.`id`) AS __speech_cnt"
+				," FROM `MA_SPEECH` AS MS"
+				," WHERE MS.id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_cnt = $result->__speech_cnt;
+
+		return (0 < $__speech_cnt)?true:false;
+	}
+
+	public function sel_speech($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSV2.`id` AS __speech_id"
+				," , MSV2.`meeting_agenda_id` AS __meeting_id"
+				," , MSV2.`speech_project_id` AS __speech_project_id"
+				," , SP.`title` AS __speech_project_title"
+				," , MSV2.`title` AS __title"
+				," , MSV2.`order_num` AS __order_num"
+
+				," , IFNULL(MSS.`id`,-1) AS __speaker_id"
+				," , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
+				," , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
+
+				," , IFNULL(MTGL.`sec_green`,0) AS __speaker_timer_green"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speaker_timer_green_mm_ss"
+		 
+				," , IFNULL(MTGL.`sec_yellow`,0) AS __speaker_timer_yellow"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speaker_timer_yellow_mm_ss"
+
+				," , IFNULL(MTGL.`sec_red`,0) AS __speaker_timer_red"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
+
+				," , IFNULL(MSE.`id`,-1) AS __evaluator_id"
+				," , IFNULL(EVALUATOR.id,\"\") AS __evaluator_member_id"
+				," , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
+				," , IFNULL(CONCAT(EVALUATOR.first_name,\" \",EVALUATOR.last_name), \"NOT ASSIGNED\") AS __evaluator_member_name"
+				," , 120 AS __evaluator_timer_green"
+				," , 150 AS __evaluator_timer_yellow"
+				," , 180 AS __evaluator_timer_red"
+
+				," , MSV2.`updttm` AS __updttm"
+				," , MSV2.`regdttm` AS __regdttm"
+				," FROM `MA_SPEECH` AS MSV2"
+				," LEFT JOIN `MA_SPEECH_SPEAKER` AS MSS ON MSS.speech_id=MSV2.id"
+				," LEFT JOIN `MA_SPEECH_EVALUATOR` AS MSE ON MSE.speech_id=MSV2.id"
+				," LEFT JOIN `SPEECH_PROJECT` AS SP ON SP.id=MSV2.speech_project_id"
+				," LEFT JOIN MEMBER AS SPEAKER ON SPEAKER.id = MSS.`speaker_member_id`"
+				," LEFT JOIN MEMBER AS EVALUATOR ON EVALUATOR.id = MSE.`evaluator_member_id`"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=MSV2.speech_project_id"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT AS SMP ON SMP.id=SMPNTGL.speech_manual_project_id"
+				," LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
+
+				," WHERE MSV2.`id`=$speech_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+		if(is_null($result)) {
+			return;
+		}
+
+		return $result;
+	}	
 
 	/*
 		@ Public
@@ -3002,9 +3718,7 @@ class MYSQLInterface{
 	*/
 	public function sel_speaker_n_timer($meeting_agenda_id){
 
-		$function_name = "sel_speaker_n_timer";
-		if($this->isNotUnsignedNumber($meeting_agenda_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$membership_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
 			return;
 		}
 
@@ -3298,62 +4012,123 @@ class MYSQLInterface{
 
 	}
 
-
-
-	public function insert_speech_empty_speaker_n_evaluator($meeting_agenda_id){
-
-		$function_name = "insert_speech_empty_speaker_n_evaluator";
-		if($this->isNotUnsignedNumber($meeting_agenda_id)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$meeting_agenda_id)<br/>";
+	public function sel_speech_by_meeting_id($meeting_id=-1) {
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
 			return;
 		}
 
-		$result_set = new stdClass();
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MS.meeting_agenda_id AS __meeting_id"
+				,", MS.`id` AS __speech_id"
+				,", MS.speech_project_id AS __speech_project_id"
+				,", MS.title AS __speech_title"
+				,", MS.`order_num` AS __speech_order_num"
+				," FROM MA_SPEECH AS MS"
+				," WHERE MS.meeting_agenda_id=$meeting_id"
+				," ORDER BY MS.`order_num` ASC"
+			)
+		);
+		// $query_manager->printFormattedQuery();
 
-		$result = $this->insert_speech($meeting_agenda_id, -1, 1, "No title");
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_id = $result;
-			$result_set->new_speech_id = $new_speech_id;
-		} else {
-			$result_set->insert_speech = $result;
-			return $result_set;
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
 		}
+
+		$result = $query_manager->get_result();
+		if(empty($result) || (count($result) == 1)) {
+			// 빈 리스트라면 더 이상 진행하지 않습니다.
+			// 아이템이 1개인 경우도 진행하지 않습니다.
+			return;
+		}
+
+		return $result;		
+	}
+
+	// @ Desc : speech를 재정렬합니다.
+	public function reorder_speech($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		// 모든 스피치 리스트를 가져옵니다.
+		$speech_list = $this->sel_speech_by_meeting_id($meeting_id);
+		if(empty($speech_list)) {
+			return;
+		}
+
+		for($idx=0;$idx < count($speech_list);$idx++) {
+			$speech_obj = $speech_list[$idx];
+
+			$__speech_id = intval($speech_obj->__speech_id);
+			$new_speech_order = $idx * 100;
+
+			// 새로운 order로 업데이트.
+			$this->update_speech_order($__speech_id, $new_speech_order);
+		}
+
+	}
+
+	public function insert_speech_empty_speaker_n_evaluator($meeting_agenda_id=-1, $order_num=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+
+		$result = $this->insert_speech(
+			// $meeting_agenda_id
+			$meeting_agenda_id
+			// $order_num
+			, $order_num
+			// $speech_project_id
+			, 1
+			// $speech_title
+			, "No title"
+		);
+
+
+		$new_speech_id = $this->get_last_speech_id($meeting_agenda_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
+			return;
+		}
+
+		$this->reorder_speech($meeting_agenda_id);
 
 		// SPEAKER
 		// 빈 speaker 값을 만들어 넣어줍니다.
 		$MEMBER_ID_NOT_ASSIGNED = -1;
 		$result = 
-		$this->insert_speech_speaker(	
+		$this->insert_speech_speaker(
 			// $speech_id
 			$new_speech_id
 			// $speech_speaker_member_id
 			, $MEMBER_ID_NOT_ASSIGNED
-		);
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_speaker_id = $result;
-			$result_set->new_speech_speaker_id = $new_speech_speaker_id;
-		} else {
-			$result_set->insert_speech_speaker = $result;
-			return $result_set;
+		); 
+		$new_speech_speaker_id = $this->select_speech_speaker_id($new_speech_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_speaker_id, "new_speech_speaker_id")){
+			return;
 		}
+
 
 		// 생성한 speaker에 넣을 timer를 만들어 추가해줍니다.
 		$TIMER_TYPE_ID_ICE_BREAK_SPEECH = $this->sel_default_speech_project_id();
 		$result = 
-		$this->insertTimer(
+		$this->insert_timer(
 			// $meeting_id
 			$meeting_agenda_id
 			// $timer_type_id
 			, $TIMER_TYPE_ID_ICE_BREAK_SPEECH
 			// $member_id
 			, $MEMBER_ID_NOT_ASSIGNED
+			// $time_record_milli_sec
+			, 0
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_timer_record_id_speaker = $result;
-			$result_set->new_timer_record_id_speaker = $new_timer_record_id_speaker;
-		} else {
-			$result_set->insertTimerSpeaker = $result;
-			return $result_set;
+		$new_timer_record_id_speaker = $this->select_timer_id($meeting_agenda_id, $TIMER_TYPE_ID_ICE_BREAK_SPEECH, $MEMBER_ID_NOT_ASSIGNED);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_timer_record_id_speaker, "new_timer_record_id_speaker")){
+			return;
 		}
 
 		// 추가한 TIMER의 아이디를 SPEECH_SPEAKER의 timer_record_id 컬럼에 추가합니다.
@@ -3364,7 +4139,6 @@ class MYSQLInterface{
 			// $timer_record_id
 			, $new_timer_record_id_speaker
 		);
-		$result_set->update_speech_speaker_timer = $query_output;
 
 
 		// EVALUATOR
@@ -3375,32 +4149,30 @@ class MYSQLInterface{
 			$new_speech_id
 			// $speech_evaluator_member_id
 			, $MEMBER_ID_NOT_ASSIGNED
+			// $order
+			, 0
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_speech_evaluator_id = $result;
-			$result_set->new_speech_evaluator_id = $new_speech_evaluator_id;
-		} else {
-			$result_set->insert_speech_evaluator = $result;
-			return $result_set;
+		$new_speech_evaluator_id = $this->select_speech_evaluator_id($new_speech_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_evaluator_id, "new_speech_evaluator_id")){
+			return;
 		}
 
 		// 생성한 evaluator에 넣을 timer를 만들어 추가해줍니다.
 		$TIMER_TYPE_ID_EVALUATOR = 5;
 		$result = 
-		$this->insertTimer(
+		$this->insert_timer(
 			// $meeting_id
 			$meeting_agenda_id
 			// $timer_type_id
 			, $TIMER_TYPE_ID_EVALUATOR
 			// $member_id
 			, $MEMBER_ID_NOT_ASSIGNED
+			// $time_record_milli_sec
+			, 0
 		);
-		if(is_int($result) && (0 < $result)) {
-			$new_timer_record_id_evaluator = $result;
-			$result_set->new_timer_record_id_evaluator = $new_timer_record_id_evaluator;
-		} else {
-			$result_set->insertTimerEvaluator = $result;
-			return $result_set;
+		$new_timer_record_id_evaluator = $this->select_timer_id($meeting_agenda_id, $TIMER_TYPE_ID_EVALUATOR, $MEMBER_ID_NOT_ASSIGNED);
+		if($this->is_not_unsigned_number(__FUNCTION__, $new_timer_record_id_evaluator, "new_timer_record_id_evaluator")){
+			return;
 		}
 
 		// 추가한 TIMER의 아이디를 SPEECH_SPEAKER의 timer_record_id 컬럼에 추가합니다.
@@ -3411,9 +4183,33 @@ class MYSQLInterface{
 			// $timer_record_id
 			, $new_timer_record_id_evaluator
 		);
-		$result_set->update_speech_evaluator_timer = $query_output;
 
-		return $result_set;
+	}
+	// @ 미팅에 등록된 마지막 스피치의 ID를 돌려줍니다.
+	public function get_last_speech_id($meeting_id){
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(id, -1) AS __speech_id"
+				," FROM MA_SPEECH"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," ORDER BY id DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return intval($result->__speech_id);
+
 	}
 	private function insert_speech(	$meeting_agenda_id
 									, $order_num
@@ -3451,14 +4247,123 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
-	public function update_speech(	$speech_id
-									, $order_num=-1
-									, $speech_project_id=-1
-									, $speech_title="" ){
+	public function update_speech_sibling_relation($speech_id_prev=-1, $speech_id=-1, $speech_id_next=-1) {
 
-		$function_name = "update_speech";
-		if($this->isNotUnsignedNumber($speech_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_project_id)<br/>";
+		if( $this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id") ){
+			return;
+		}
+		if( $this->is_not_unsigned_number(__FUNCTION__, $speech_id_prev) && 
+			$this->is_not_unsigned_number(__FUNCTION__, $speech_id_next)){
+			echo "!Error! / update_speech_sibling_relation / \$speech_id_prev & \$speech_id_next is not valid!<br/>";
+			return;
+		}
+
+		// CHECK - 같은 미팅인지 확인해야 합니다.
+		$speech_obj = $this->sel_speech($speech_id);
+		$speech_obj_prev = null;
+		$speech_meeting_id = intval($speech_obj->__meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_meeting_id, "speech_meeting_id")){
+			return;
+		}
+		if($this->is_unsigned_number(__FUNCTION__, $speech_id_prev)) {
+			$speech_obj_prev = $this->sel_speech($speech_id_prev);
+			$speech_meeting_id_prev = intval($speech_obj_prev->__meeting_id);
+			if( $this->is_not_unsigned_number(__FUNCTION__, $speech_meeting_id_prev, "speech_meeting_id_prev") ){
+				return;
+			}
+
+			if($speech_meeting_id_prev != $speech_meeting_id) {
+				echo "!Error! / update_speech_sibling_relation / \$speech_meeting_id_prev != \$speech_meeting_id<br/>";
+				return;
+			}
+		}
+		$speech_obj_next = null;
+		if($this->is_unsigned_number(__FUNCTION__, $speech_id_next)) {
+			$speech_obj_next = $this->sel_speech($speech_id_next);
+			$speech_meeting_id_next = intval($speech_obj_next->__meeting_id);
+			if( $this->is_not_unsigned_number(__FUNCTION__, $speech_meeting_id_next, "speech_meeting_id_next") ){
+				return;
+			}
+
+			if($speech_meeting_id_next != $speech_meeting_id) {
+				echo "!Error! / update_speech_sibling_relation / \$speech_meeting_id_next != \$speech_meeting_id<br/>";
+				return;
+			}
+		}
+
+		// 1. 각각의 speech의 정보를 가져와 order num을 변경해줍니다.
+		if(!is_null($speech_obj_prev)) {
+
+			$speech_order_num_prev = $speech_obj_prev->__order_num;
+
+			// 다음 순서로 내립니다.
+			$speech_order_num_updated = $speech_order_num_prev + 1;
+			$this->update_speech_order($speech_id, $speech_order_num_updated);
+
+			// 재정렬
+			$this->reorder_speech($speech_meeting_id);
+
+		} else if(!is_null($speech_obj_next)) {
+
+			$speech_order_num_next = $speech_obj_next->__order_num + 1;
+
+			// 다음 순서로 올립니다.
+			$speech_order_num_updated = $speech_order_num_next - 1;
+			$this->update_speech_order($speech_id_next, $speech_order_num_next);
+			$this->update_speech_order($speech_id, $speech_order_num_updated);
+
+			// 재정렬
+			$this->reorder_speech($speech_meeting_id);
+
+		} // end if
+
+	}
+	public function update_speech_order($speech_id=-1, $order_num=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order_num, "order_num")){
+			return;
+		}
+
+		$speech_title="";
+		$speech_project_id=-1;
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}
+	public function update_speech_title($speech_id=-1, $speech_title="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $speech_title, "speech_title")){
+			return;
+		}
+
+		$order_num=-1;
+		$speech_project_id=-1;
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}
+	public function update_speech_project($speech_id=-1, $speech_project_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_project_id, "speech_project_id")){
+			return;
+		}
+
+		$order_num=-1;
+		$speech_title="";
+
+		$this->update_speech($speech_id, $order_num, $speech_project_id, $speech_title);
+	}	
+	public function update_speech(	$speech_id=-1, $order_num=-1, $speech_project_id=-1, $speech_title="" ){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
 		}
 
 		$query_manager = new MYSQLQueryManager();
@@ -3500,9 +4405,13 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		return $this->getSimpleResult($json_res_obj);
 	}	
-	public function delete_speech($speech_id){
+	public function delete_speech($speech_id=-1){
 
 		if($this->isNotUnsignedNumber($speech_id)) return null;
+
+		// speech obj
+		$speech_obj = $this->sel_speech($speech_id);
+		$__meeting_id = $speech_obj->__meeting_id;
 
 		$result_set = new stdClass();
 
@@ -3544,54 +4453,149 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
 		$result = $this->getSimpleResult($json_res_obj);
 		$result_set->delete_speech = $result;
+
+		// reorder speech
+		$this->reorder_speech($__meeting_id);
 		
 		return $result_set;
 	}
-	public function upsert_speech_speaker(	$speech_id
-													, $speech_speaker_member_id ){
+	public function set_speech_speaker(	$speech_id=-1, $speech_speaker_member_id=-1 ){
+		
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_member_id, "speech_speaker_member_id")){
+			return;
+		}
 
-		if($this->isNotUnsignedNumber($speech_id)) return null;
-		$result = $this->select_speech_speaker($speech_id);
+		$has_speech_speaker = $this->has_speech_speaker($speech_id);
+		if($has_speech_speaker) {
 
-		$query_result;
-		if(empty($result)){
-			// echo "2. 이전에 없는 스피커 정보인가?<br/>";
-			// echo "2-1. 이전에 없는 스피커 정보라면 인서트<br/>";
-			if(	$this->isNotUnsignedNumber($speech_speaker_member_id) ){
-				$speech_speaker_member_id = -1;
+			// We have a speaker. Update new speaker
+			$speech_speaker_id = $this->select_speech_speaker_id($speech_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+				return;
 			}
 
-			$query_result = 
-			$this->insert_speech_speaker(	
-				$speech_id
+			$this->update_speech_speaker(
+				$speech_speaker_id
 				, $speech_speaker_member_id
-			);
+			);			
 
 		} else {
 
-			$query_result = 
-			$this->update_speech_speaker(
-				$result[0]->__speech_speaker_id
-				, $speech_speaker_member_id
-			);
+			// No speaker. Add new speaker
+			$this->insert_speech_speaker($speech_id, $speech_speaker_member_id);
+
 		}
 
-		return $query_result;
+	}
+	private function has_speech_speaker($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MSS.`id`) AS __speech_speaker_cnt"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_speaker_cnt = $result->__speech_speaker_cnt;
+
+		return (0 < $__speech_speaker_cnt)?true:false;
+
+	}
+	private function has_speech_evaluator($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(MSE.`id`) AS __speech_evaluator_cnt"
+				," FROM `MA_SPEECH_EVALUATOR` AS MSE"
+				," WHERE MSE.speech_id=$speech_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+		$__speech_evaluator_cnt = $result->__speech_evaluator_cnt;
+
+		return (0 < $__speech_evaluator_cnt)?true:false;
+
 	}	
-	private function select_speech_speaker($speech_id){
+	private function select_speech_speaker_id($speech_id=-1){
 
-		if($this->isNotUnsignedNumber($speech_id)) return null;
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
 
-		$query = 
-		"SELECT MSS.`id` AS __speech_speaker_id"
-		. " , MSS.`speech_id` AS __speech_id"
-		. " , MSS.`speaker_member_id` AS __speech_speaker_member_id"
-		. " FROM `MA_SPEECH_SPEAKER` AS MSS"
-		. " WHERE MSS.speech_id=$speech_id"
-		;
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSS.`id` AS __speech_speaker_id"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+				," ORDER BY MSS.`id` DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
 
-		$json_res_obj = $this->getSelectResult($query);
-		return $json_res_obj->result;
+		$result = $query_manager->get_result();
+
+		$__speech_speaker_id = $result->__speech_speaker_id;
+		if($this->is_not_unsigned_number(__FUNCTION__, $__speech_speaker_id, "__speech_speaker_id")){
+			return -1;
+		}
+
+		return $__speech_speaker_id;
+	}
+	private function select_speech_speaker($speech_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSS.`id` AS __speech_speaker_id"
+				," , MSS.`speech_id` AS __speech_id"
+				," , MSS.`speaker_member_id` AS __speech_speaker_member_id"
+				," FROM `MA_SPEECH_SPEAKER` AS MSS"
+				," WHERE MSS.speech_id=$speech_id"
+				," ORDER BY MSS.`id` DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return $result;
 	}
 	private function select_recent_speech_speaker_id($speech_id){
 
@@ -3617,74 +4621,70 @@ class MYSQLInterface{
 		return $__speech_speaker_id;
 	}
 
-	private function insert_speech_speaker(	$speech_id, $speech_speaker_member_id ){
+	private function insert_speech_speaker( $speech_id=-1, $speech_speaker_member_id=-1 ){
 
-		if($this->isNotUnsignedNumber($speech_id)){
-			return "!Error! / insert_speech_speaker / \$this->isNotUnsignedNumber(\$speech_id)<br/>";
-		} 
-		if(is_null($speech_speaker_member_id)){
-			return "!Error! / insert_speech_speaker / is_null(\$speech_speaker_member_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"INSERT INTO `MA_SPEECH_SPEAKER`(`speech_id` ,`speaker_member_id` ,`updttm`, `regdttm`)"
-			,"VALUES ($speech_id,$speech_speaker_member_id,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `MA_SPEECH_SPEAKER`(`speech_id` ,`speaker_member_id` ,`updttm`, `regdttm`)"
+				,"VALUES ($speech_id,$speech_speaker_member_id,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
-
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-
-		return $this->getLastId($json_res_obj);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 	}
-	public function update_speech_speaker(	$speech_speaker_id, $speech_speaker_member_id ){
+	public function update_speech_speaker(	$speech_speaker_id=-1, $speech_speaker_member_id=-1 ){
 
-		if($this->isNotUnsignedNumber($speech_speaker_id)){
-			echo "!Error! / update_speech_speaker / \$this->isNotUnsignedNumber(\$speech_speaker_id)<br/>";
-			return null;
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+			return;
 		}
 
-		if($this->isUnsignedNumber($speech_speaker_member_id)){
-			$query =
-			"UPDATE `MA_SPEECH_SPEAKER`"
-			. " SET `speaker_member_id`=$speech_speaker_member_id"
-			. " ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			. " WHERE id=$speech_speaker_id"
-			;
-		}
-
-		// echo "$query<br/>";
-		$json_res_obj = $this->getModifyResult($query);
-		return $this->getSimpleResult($json_res_obj);
-	}
-	private function update_speech_speaker_timer( $speech_speaker_id, $timer_record_id ){
-
-		$function_name = "update_speech_speaker_timer";
-		if($this->isNotUnsignedNumber($speech_speaker_id)){
-			echo "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_speaker_id)<br/>";
-			return null;
-		}
-
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			echo "!Error! / $function_name / \$this->isNotUnsignedNumber(\$timer_record_id)<br/>";
-			return null;
-		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"UPDATE `MA_SPEECH_SPEAKER`"
-			,"SET `timer_record_id`=$timer_record_id"
-			,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			,"WHERE id=$speech_speaker_id"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_SPEAKER`"
+				," SET `speaker_member_id`=$speech_speaker_member_id"
+				," ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE id=$speech_speaker_id"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+	}
+	private function update_speech_speaker_timer( $speech_speaker_id=-1, $timer_record_id=-1 ){
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-		return $this->getSimpleResult($json_res_obj);
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_speaker_id, "speech_speaker_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_record_id, "timer_record_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_SPEAKER`"
+				,"SET `timer_record_id`=$timer_record_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_speaker_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
 	}
 
 	public function delete_speech_speaker($speech_id){
@@ -3810,30 +4810,104 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 
 	}	
-	public function insert_speech_evaluator($speech_id, $speech_evaluator_member_id, $order_num=-1){
+	private function select_speech_evaluator_id($speech_id=-1){
 
-		$function_name = "insert_speech_evaluator";
-		if(empty($speech_id)){
-			return "!Error! / $function_name / empty(\$speech_id)";
-		} 
-		if(empty($speech_evaluator_member_id)){
-			return "!Error! / $function_name / empty(\$speech_evaluator_member_id)";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"INSERT INTO `MA_SPEECH_EVALUATOR`(`speech_id`, `evaluator_member_id`, `order_num`, `updttm`, `regdttm`)"
-			,"VALUES ($speech_id,$speech_evaluator_member_id, $order_num ,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		// 해당 미팅이 역할을 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MSE.`id` AS __speech_evaluator_id"
+				," FROM `MA_SPEECH_EVALUATOR` AS MSE"
+				," WHERE MSE.speech_id=$speech_id"
+				," ORDER BY MSE.`id` DESC"
+				," LIMIT 1"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
+		$result = $query_manager->get_result();
 
-		return $this->getLastId($json_res_obj);
+		return $result->__speech_evaluator_id;
 
 	}
+	public function insert_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1, $order_num=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $order_num, "order_num")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `MA_SPEECH_EVALUATOR`(`speech_id`, `evaluator_member_id`, `order_num`, `updttm`, `regdttm`)"
+				,"VALUES ($speech_id,$speech_evaluator_member_id, $order_num ,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+
+	public function set_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+			return;
+		}
+
+		$has_speech_evaluator = $this->has_speech_evaluator($speech_id);
+		if($has_speech_evaluator) {
+			// We have an evaluator. Update new evaluator.
+			$this->update_speech_evaluator($speech_id, $speech_evaluator_member_id);
+		} else {
+			// No evaluator. Add new evaluator.
+			$this->insert_speech_evaluator($speech_id, $speech_evaluator_member_id, 0);
+		}
+	}
+	private function update_speech_evaluator($speech_id=-1, $speech_evaluator_member_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_id, "speech_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_member_id, "speech_evaluator_member_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_EVALUATOR`"
+				," SET `evaluator_member_id`=$speech_evaluator_member_id"
+				," ,`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				," WHERE speech_id=$speech_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+
+	// REMOVE ME
+
+	/*
 	public function update_speech_evaluator(	$speech_evaluator_id
 												, $speech_id=-1
 												, $speech_evaluator_member_id=-1
@@ -3877,30 +4951,31 @@ class MYSQLInterface{
 		$json_res_obj = $this->getModifyResult($query);
 		return $this->getSimpleResult($json_res_obj);
 	}
-	private function update_speech_evaluator_timer( $speech_evaluator_id, $timer_record_id ){
+	*/
+	private function update_speech_evaluator_timer( $speech_evaluator_id=-1, $timer_record_id=-1 ){
 
-		$function_name = "update_speech_evaluator_timer";
-		if($this->isNotUnsignedNumber($speech_evaluator_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$speech_evaluator_id)";
+		if($this->is_not_unsigned_number(__FUNCTION__, $speech_evaluator_id, "speech_evaluator_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_record_id, "timer_record_id")){
+			return;
 		}
 
-		if($this->isNotUnsignedNumber($timer_record_id)){
-			return "!Error! / $function_name / \$this->isNotUnsignedNumber(\$timer_record_id)";
-		}
-
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"UPDATE `MA_SPEECH_EVALUATOR`"
-			,"SET `timer_record_id`=$timer_record_id"
-			,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
-			,"WHERE id=$speech_evaluator_id"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"UPDATE `MA_SPEECH_EVALUATOR`"
+				,"SET `timer_record_id`=$timer_record_id"
+				,",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+				,"WHERE id=$speech_evaluator_id"
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
 		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-		return $this->getSimpleResult($json_res_obj);
 	}	
 	public function delete_speech_evaluator($speech_evaluator_id){
 
@@ -4541,6 +5616,41 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	// 미팅의 낱개의 역할 정보를 가져옵니다
+	public function get_meeting_role_member_id($meeting_id=-1, $role_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+
+		// 해당 미팅이 역할을 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(`MEMBER`.id, -1) AS __member_id"
+				," FROM MA_ROLE AS MR"
+				," LEFT JOIN ROLE ON ROLE.id=MR.role_id"
+				," LEFT JOIN `MEMBER` ON `MEMBER`.id=MR.member_id"
+				," LEFT JOIN MEETING_AGENDA AS MA ON MA.id=MR.meeting_agenda_id"
+				," WHERE MR.meeting_agenda_id=$meeting_id"
+				," AND MR.role_id=$role_id"
+				," AND MA.`status`='A'"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+
+		$result = $query_manager->get_result();
+
+		return $result->__member_id;
+	}
+
 	// Stats - Role
 	public function get_role_history($membership_id, $role_id, $member_id) {
 
@@ -4720,6 +5830,69 @@ class MYSQLInterface{
 
 		return $this->getLastId($json_res_obj);
 	}
+	public function select_timer_id($meeting_id=-1, $timer_type_id=-1, $member_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_type_id, "timer_type_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT id AS __timer_id"
+				," FROM MA_TIMER_RECORD"
+				," WHERE meeting_id=$meeting_id"
+				," AND timer_type_id=$timer_type_id"
+				," AND member_id=$member_id"
+				," ORDER BY id DESC"
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$__timer_id = -1;
+		$result = $query_manager->get_result();
+		if(!is_null($result)) {
+			$__timer_id = $result->__timer_id;	
+		}
+
+		return $__timer_id;
+	}
+	public function insert_timer($meeting_id=-1, $timer_type_id=-1, $member_id=-1, $time_record_milli_sec=-1,$is_qualified=false){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $timer_type_id, "timer_type_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $time_record_milli_sec, "time_record_milli_sec")){
+			return;
+		}
+
+		$is_qualified_num = ($is_qualified == true)?1:0;
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `magendas`.`MA_TIMER_RECORD`(`meeting_id`,`timer_type_id`,`member_id`,`time_record_milli_sec`,`is_qualified`)"
+				, "VALUES($meeting_id,$timer_type_id,$member_id,$time_record_milli_sec,$is_qualified_num)"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}	
 
 
 	public function updateTimerMember($timer_record_id, $member_id){
@@ -5098,7 +6271,7 @@ class MYSQLInterface{
 		@ Public
 		@ Desc : ACTION COLLECTION을 추가합니다. 새로 추가한 객체의 id를 돌려줍니다.
 	*/
-	private function insert_action_collection_n_meeting_agenda($action_collection_id, $meeting_agenda_id) {
+	public function insert_action_collection_n_meeting_agenda($action_collection_id, $meeting_agenda_id) {
 		
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
@@ -5119,6 +6292,325 @@ class MYSQLInterface{
 			return;
 		}
 	}
+	private function update_officer_action_obj($tm_officers_action_table=null, $membership_id=-1, $officer_id=-1) {
+
+		if(is_null($tm_officers_action_table)) {
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $officer_id)){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+
+		$officer_action_obj = 
+		$tm_officers_action_table->search_by_context_from_root($params->OFFICER_ID, $officer_id);
+		if($this->is_not_action_item(__FUNCTION__, $officer_action_obj, "officer_action_obj")) {
+			return;
+		}
+		$officer_obj = $this->get_tm_officer($membership_id, $officer_id);
+
+		$__member_name = $params->NOT_ASSIGNED;
+		$__member_hash_key = "";
+		$__officer_member_id = intval($officer_obj->__officer_member_id);
+
+		if(0 < $__officer_member_id){
+
+			$__member_name = $officer_obj->__member_name;
+			if($this->is_empty(__FUNCTION__, $__member_name, "__member_name")){
+				return;
+			}
+			$__member_hash_key = $officer_obj->__member_hash_key;
+			if($this->is_empty(__FUNCTION__, $__member_hash_key, "__member_hash_key")){
+				return;
+			}
+
+		}
+
+		$officer_action_obj->set_context_attr($params->MEMBER_HASH_KEY, $__member_hash_key);
+		$officer_action_obj->set_name($__member_name);
+
+	}
+	public function get_toastmaster_officer_by_meeting_id($membership_id=-1) {
+
+		$params = new ToastmasterParamManager();
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return;
+		}
+
+		$tm_officers_action_table = ActionTemplate::get_TOASTMASTER_OFFICERS();
+		if($this->is_not_action_collection(__FUNCTION__, $tm_officers_action_table, "tm_officers_action_table")) {
+			return;
+		}
+
+		// officer 정보를 모두 가져옵니다.
+		// 1. President
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_PRESIDENT
+		);
+
+		// 2. Immediate Past President
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_IMMEDIATE_PAST_PRESIDENT
+		);
+
+		// 3. VPE
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPE
+		);	
+
+		// 4. VPE Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPE_DEPUTY
+		);
+
+		// 5. VPM
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPM
+		);
+
+		// 6. VPM Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPM_DEPUTY
+		);
+	
+		// 7. VPPR
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPPR
+		);
+
+		// 8. VPPR Deputy
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_VPPR_DEPUTY
+		);
+
+		// 9. Secretary
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SECRETARY
+		);
+
+		// 10. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_TREASURER
+		);
+
+		// 11. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SAA
+		);
+
+		// 12. Treasurer
+		$this->update_officer_action_obj(
+			// $tm_officers_action_table=null
+			$tm_officers_action_table
+			// $membership_id=-1
+			, $membership_id
+			// $officer_id=-1
+			, $params->OFFICER_ID_SAA_DEPUTY
+		);
+
+		return $tm_officers_action_table;
+	}
+	public function get_recent_action_collection_by_meeting_id($recent_meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $recent_meeting_id)){
+			return null;
+		}
+
+		$recent_action_id = $this->select_recent_action_id_collection_by_meeting_id($recent_meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $recent_action_id)){
+			return null;
+		}
+
+		$recent_root_action_collection = null;
+		if(0 < $recent_action_id) {
+			// 토스트마스터즈의 추가 내용을 넣습니다.
+			$recent_root_action_collection = 
+			$this->get_root_action_collection_toastmasters(
+				$recent_action_id
+				, $recent_meeting_id
+			);
+		}
+
+		return $recent_root_action_collection;
+
+	}
+
+	// @ FOR DEBUG
+	// @ Desc : MEETING ID와 ACTION COLLECTION ID로 토스트마스터트 미팅에 할당된 ACTION COLLECTION이 있는지 확인합니다. 
+	private function has_action_collection_toastmasters_meeting($action_collection_id=-1, $meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
+			return false;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(action_collection_id) AS __action_collection_cnt"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," AND action_collection_id=$action_collection_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return false;
+		}
+		$result = $query_manager->get_result();
+
+		return (0 < $result->__action_collection_cnt)?true:false;
+	}
+
+	// @ Desc : MEETING ID로 가장 최근의 ACTION COLLECTION의 ID를 가져옵니다.
+	public function select_recent_action_id_collection_by_meeting_id($latest_meeting_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $latest_meeting_id)){
+			return -1;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(action_collection_id, -1) AS __action_collection_id"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA"
+				," WHERE meeting_agenda_id=$latest_meeting_id"
+				," ORDER BY action_collection_id DESC"
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();
+
+		if(is_null($result)) {
+			return -1;
+		}
+
+		return $result->__action_collection_id;
+	}
+
+	// @ Desc : MEMBERSHIP ID로 과거의 것중, 가장 최근의 ACTION COLLECTION을 가져옵니다.
+	private function select_immediate_past_action_collection_by_membership_id($membership_id) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return null;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT ACNMA.action_collection_id AS __action_collection_id"
+				," , ACNMA.meeting_agenda_id AS __meeting_agenda_id"
+				," , ACNMA.regdttm AS __regdttm"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA AS ACNMA"
+				," LEFT JOIN MEETING_AGENDA AS MA ON MA.id=ACNMA.meeting_agenda_id"
+				," WHERE MA.membership_id=$membership_id"
+				," AND MA.regdttm < DATE_FORMAT(NOW(), '%Y%m%d000000')"
+				," ORDER BY ACNMA.action_collection_id DESC "
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
+		}
+		$result = $query_manager->get_result();
+
+		if(is_null($result)) {
+			return null;
+		}
+
+		return $result;
+	}
+
+	// @ Sample
+	/*
+	public function secondsToTime($seconds) {
+	    $dtF = new DateTime("@0");
+	    $dtT = new DateTime("@$seconds");
+	    return $dtF->diff($dtT)->format('%a days, %h hours, %i minutes and %s seconds');
+	}	
+	*/
+
+	public function seconds_to_days_ago($seconds) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $seconds)){
+			return -1;
+		}
+
+	    $dtF = new DateTime("@0");
+	    $dtT = new DateTime("@$seconds");
+	    return intval($dtF->diff($dtT)->format('%a'));
+	}	
+
 
 	/*
 		@ Public
@@ -5400,7 +6892,7 @@ class MYSQLInterface{
 			
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 
-		$target_action_obj->show_info();
+		// $target_action_obj->show_info();
 
 		// 어떤 타입인지 구분한다.
 		$action_obj_copy = null;
@@ -5429,7 +6921,7 @@ class MYSQLInterface{
 			return;
 		}
 
-		$action_obj_copy->show_info();
+		// $action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
 	}
@@ -5474,7 +6966,7 @@ class MYSQLInterface{
 			return;
 		}
 
-		$action_obj_copy->show_info();
+		// $action_obj_copy->show_info();
 
 		return $action_obj_copy;                                             
 	}	
@@ -5885,14 +7377,14 @@ class MYSQLInterface{
 			return;
 		}
 
-		$context_mysql_safe = $this->mysql_manager->escape_json_str($action_item_context);
+		// $context_mysql_safe = $this->mysql_manager->escape_json_str($action_item_context);
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
 				"UPDATE `magendas`.`ACTION_ITEM`"
 				," SET `name` = \"$action_name\""
-				," ,`context` = \"$context_mysql_safe\""
+				," ,`context` = '$action_item_context'"
 				," WHERE `id` = $action_item_id"
 			)
 		);
@@ -6073,7 +7565,7 @@ class MYSQLInterface{
 		if($this->is_empty(__FUNCTION__, $action_item_hash_key, "action_item_hash_key")){
 			return;
 		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_order, "action_item_order")){
+		if($this->is_not_number(__FUNCTION__, $action_item_order, "action_item_order")){
 			return;
 		}
 
@@ -6488,7 +7980,7 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $child_action_item_id, "child_action_item_id")){
 			return;
 		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $order, "order")){
+		if($this->is_not_number(__FUNCTION__, $order, "order")){
 			return;
 		}
 
@@ -6578,7 +8070,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung11
 		$parent_action_list_id = $this->get_action_collection_id($parent_action_list_hash_key);
 		$child_action_item_id = $this->get_action_item_id($child_action_item_hash_key);
 
@@ -6756,7 +8247,7 @@ class MYSQLInterface{
 				$query_manager->addQueryLineArr(
 					array(
 						"UPDATE ACTION_ITEM"
-						, "SET `context` = \"$action_item_context\""
+						, "SET `context` = '$action_item_context'"
 						, "WHERE `id` = $action_item_id"
 					)
 				);
@@ -6791,14 +8282,517 @@ class MYSQLInterface{
 			return;
 		}
 
-		return $this->get_root_action_collection($root_action_id, $meeting_id);
+		$cur_root_action_collection = $this->get_root_action_collection($root_action_id);
+		if($this->is_not_action_collection(__FUNCTION__, $cur_root_action_collection, "cur_root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		$cur_root_action_collection->set_context_attr($params->MEETING_ID, $meeting_id);
+
+		return $cur_root_action_collection;
 	}
-	public function get_root_action_collection($action_collection_id=-1, $meeting_id=-1) {
+	// @ desc : meeting id로 최신 root aciton collection 을 가져옵니다.
+	public function get_immediate_past_root_action_collection_by_membership_id($membership_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+
+		$recent_action_collection_detail = 
+		$this->select_immediate_past_action_collection_by_membership_id($membership_id);
+
+		$__action_collection_id = $recent_action_collection_detail->__action_collection_id;
+		if($this->is_not_unsigned_number(__FUNCTION__, $__action_collection_id, "__action_collection_id")){
+			return;
+		}
+		$__meeting_agenda_id = $recent_action_collection_detail->__meeting_agenda_id;
+		if($this->is_not_unsigned_number(__FUNCTION__, $__meeting_agenda_id, "__meeting_agenda_id")){
+			return;
+		}
+
+		$recent_root_action_collection = null;
+		if(!is_null($recent_action_collection_detail)) {
+			$recent_root_action_collection = 
+			$this->get_root_action_collection($__action_collection_id);	
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $recent_root_action_collection, "recent_root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		$recent_root_action_collection->set_context_attr($params->MEETING_ID, $__meeting_agenda_id);
+
+		return $recent_root_action_collection;
+	}
+	// @ action에 role 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	private function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		
+		$speech_cnt = 0;
+		$speech_list = $this->sel_speech_speaker($meeting_id);
+		if(!empty($speech_list)) {
+			$speech_cnt = count($speech_list);
+		}
+
+		// speech list와 action list의 갯수가 일치해야 한다.
+		// 다르다면 업데이트!
+		$action_item_speech = 
+		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+
+		// 스피치 관련 테이블을 가져옵니다.
+		$parent_action_list = null;
+		if($this->is_action_item(__FUNCTION__, $action_item_speech)) {
+			$parent_action_list = $action_item_speech->get_parent();
+		}
+		$cur_children_cnt = -1;
+		if($this->is_action_collection(__FUNCTION__, $parent_action_list)) {
+			// 제목 열도 갯수에 포함됩니다. 전체 열에서 제목 열 1개를 뺍니다.
+			$cur_children_cnt = $parent_action_list->get_children_cnt() - 1;
+		}
+
+		if((1 == $cur_children_cnt) && ($speech_cnt == 0)) {
+
+			// 스피치 데이터가 DB에는 없고, action table에만 있는 경우.
+			$order_num = 0;
+			$this->insert_speech_empty_speaker_n_evaluator($meeting_id, $order_num);
+			$new_speech_id = $this->get_last_speech_id($meeting_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $new_speech_id, "new_speech_id")){
+				return;
+			}
+			$new_speech_obj = $this->sel_speech($new_speech_id);
+			// 스피치를 추가했으므로 스피치 리스트를 다시 가져옵니다.
+			$speech_list = $this->sel_speech_speaker($meeting_id);
+
+			// 새로 지정된 SPEECH_ID 데이터를 CONTEXT 업데이트.
+			$cur_table_row_field_action_item_list = $action_item_speech->get_table_row_field_action_item_list();
+			for($idx = 0; $idx < count($cur_table_row_field_action_item_list);$idx++) {
+
+				$table_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
+				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+					break;
+				}
+
+				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $new_speech_obj->__meeting_id);
+				$table_field_action_item_obj->set_context_attr($params->SPEECH_ID, $new_speech_obj->__speech_id);
+				$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $new_speech_obj->__speech_project_id);
+
+				// 스피치 타입마다 업데이트
+
+				$this->update_action_item(
+					$table_field_action_item_obj->get_id()
+					, $table_field_action_item_obj->get_name()
+					, $table_field_action_item_obj->get_context()
+				);
+
+			}
+
+
+		} else if((0 < $cur_children_cnt) && ($cur_children_cnt < $speech_cnt)) {
+			// 액션 테이블과 스피치 리스트가 전체 갯수가 다릅니다.
+			// 스피치 리스트가 갯수가 더 많은 경우만 바꾸어 줍니다.
+
+			$diff_cnt = $speech_cnt - $cur_children_cnt;
+
+			// 열을 추가합니다.
+			$action_item_obj_before = $action_item_speech;
+			for($idx = 0; $idx < $diff_cnt;$idx++) {
+
+				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+					break;
+				}
+				
+				$cur_table_row_field_action_item_list_after = 
+				$this->add_row_into_table(
+					// $table_field_action_item_obj=null
+					$action_item_obj_before
+					// $action_name=""
+					, $params->NOT_ASSIGNED
+					// $action_context=""
+					, ""
+				);
+				if(empty($cur_table_row_field_action_item_list_after)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$cur_table_row_field_action_item_list_after)<br/>";
+					break;
+				}
+
+				$cur_speech_obj = $speech_list[$idx];
+				if(is_null($cur_speech_obj)) {
+					echo "!Error! / " . __FUNCTION__ . " / is_null($cur_speech_obj)<br/>";
+					return;
+				}
+				$__speech_id = intval($cur_speech_obj->__speech_id);
+				if($this->is_not_unsigned_number(__FUNCTION__, $__speech_id, "__speech_id")){
+					return;
+				}
+
+				for($inner_idx = 0; $inner_idx < count($cur_table_row_field_action_item_list_after);$inner_idx++) {
+					$table_field_action_item_obj = $cur_table_row_field_action_item_list_after[$inner_idx];
+					if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+						break;
+					}
+
+					$cur_context_str = $table_field_action_item_obj->get_context();
+
+					$cur_context_obj = null;
+					if(empty($cur_context_str)) {
+						$cur_context_obj = new stdClass();
+					} else {
+						$cur_context_obj = json_decode($cur_context_str);
+					}
+
+					$cur_context_obj->{$params->SPEECH_ID} = $__speech_id;
+					$new_context_str = json_encode($cur_context_obj);
+
+					// 추가한 열의 정보를 업데이트. / SPEECH_ID
+					// 검색할때 키로 사용됩니다.
+					$this->update_action_item(
+						$table_field_action_item_obj->get_id()
+						, $table_field_action_item_obj->get_name()
+						, $new_context_str
+					);
+
+				}
+
+				$first_child_action_item = $cur_table_row_field_action_item_list_after[0];
+				if($this->is_not_action_item(__FUNCTION__, $first_child_action_item, "first_child_action_item")) {
+					break;
+				}
+
+				$action_item_obj_before = $first_child_action_item;
+
+			}
+
+		}
+
+		// 각 테이블 열을 가져와 배열로 만들어야 합니다.
+		$cur_table_row_list = $action_item_speech->get_table_row_list();
+		if(is_null($cur_table_row_list)) {
+			echo "!Error! / " . __FUNCTION__ . " / is_null(\$cur_table_row_list)<br/>";
+			return;
+		}
+
+		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
+		$action_item_speech_no_speech = 
+		$root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
+
+		for($idx = 0; $idx < count($speech_list);$idx++) {
+
+			// DB에서 가져온 스피치 정보
+			$speech_obj = $speech_list[$idx];
+
+			$__speech_id = intval($speech_obj->__speech_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__speech_id, "__speech_id")){
+				return;
+			}
+
+			$__speech_project_id = intval($speech_obj->__speech_project_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__speech_project_id, "__speech_project_id")){
+				return;
+			}
+
+			$__speech_project_title = $speech_obj->__speech_project_title;
+			if($this->is_empty(__FUNCTION__, $__speech_project_title, "__speech_project_title")){
+				return;
+			}
+
+			$__title = $speech_obj->__title;
+			if($this->is_empty(__FUNCTION__, $__title, "__title")){
+				return;
+			}
+
+			$__speaker_member_hash_key = $speech_obj->__speaker_member_hash_key;
+			$__speaker_member_name = $speech_obj->__speaker_member_name;
+
+			$__speaker_timer_green_mm_ss = $speech_obj->__speaker_timer_green_mm_ss;
+			if($this->is_empty(__FUNCTION__, $__speaker_timer_green_mm_ss, "__speaker_timer_green_mm_ss")){
+				return;
+			}
+
+			$__speaker_timer_red_mm_ss = $speech_obj->__speaker_timer_red_mm_ss;
+			if($this->is_empty(__FUNCTION__, $__speaker_timer_red_mm_ss, "__speaker_timer_red_mm_ss")){
+				return;
+			}
+
+			$__evaluator_member_hash_key = $speech_obj->__evaluator_member_hash_key;
+			$__evaluator_member_name = $speech_obj->__evaluator_member_name;
+
+			$__evaluator_timer_green = $speech_obj->__evaluator_timer_green;
+			if($this->is_empty(__FUNCTION__, $__evaluator_timer_green, "__evaluator_timer_green")){
+				return;
+			}
+
+			$__evaluator_timer_red = $speech_obj->__evaluator_timer_red;
+			if($this->is_empty(__FUNCTION__, $__evaluator_timer_red, "__evaluator_timer_red")){
+				return;
+			}
+
+			$table_row_field_action_item_list = $cur_table_row_list[$idx];
+			if(empty($table_row_field_action_item_list)) {
+				echo "!Error! / " . __FUNCTION__ . " / empty(\$table_row_field_action_item_list)<br/>";
+				return;
+			}
+
+			// table row의 모든 아이템에 대해 speech 정보를 action context에 추가해줍니다.
+			for($inner_idx = 0; $inner_idx < count($table_row_field_action_item_list);$inner_idx++) {
+
+				$table_field_action_item_obj = $table_row_field_action_item_list[$inner_idx];
+				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")){
+					return;
+				}
+
+				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+
+				$ACTION_DB_UPDATE_MSG = $table_field_action_item_obj->get_context_attr($params->ACTION_DB_UPDATE_MSG);
+				if(empty($ACTION_DB_UPDATE_MSG)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$ACTION_DB_UPDATE_MSG)<br/>";
+					return;
+				}
+
+				$cur_speech_id = -1;
+				if($table_field_action_item_obj->has_context_attr($params->SPEECH_ID)) {
+					$cur_speech_id = $table_field_action_item_obj->get_context_attr($params->SPEECH_ID);
+					$cur_speech_id = intval($cur_speech_id);
+				}
+
+				$has_changed = false;
+				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_PROJECT) == 0) {
+
+					$speech_project_id_prev = $table_field_action_item_obj->get_context_attr($params->SPEECH_PROJECT_ID);
+					$speech_project_id_prev = intval($speech_project_id_prev);
+
+					$speech_project_title_prev = $table_field_action_item_obj->get_name();
+
+					if($__speech_project_id != $speech_project_id_prev) {
+						// update speech project id
+						$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $__speech_project_id);
+						$has_changed = true;
+					} // inner if end
+
+					if(strcmp($__speech_project_title, $speech_project_title_prev) != 0) {
+						// update speech project title
+						$table_field_action_item_obj->set_name($__speech_project_title);
+						$has_changed = true;
+					} // inner if end
+
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_TITLE) == 0) {
+
+					$speech_title_prev = $table_field_action_item_obj->get_context_attr($params->SPEECH_TITLE);
+
+					if(strcmp($__title, $speech_title_prev) != 0) {
+						// update speech title
+						$table_field_action_item_obj->set_context_attr($params->SPEECH_TITLE, $__title);
+						$table_field_action_item_obj->set_name($__title);
+
+						$has_changed = true;
+					} // inner if end
+
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_SPEAKER) == 0) {
+
+					$speech_speaker_member_hash_key_prev = 
+					$table_field_action_item_obj->get_context_attr($params->SPEECH_SPEAKER_MEMBER_HASH_KEY);
+
+					if(strcmp($__speaker_member_hash_key, $speech_speaker_member_hash_key_prev) != 0) {
+						// update speaker
+						$table_field_action_item_obj->set_context_attr(
+							$params->SPEECH_SPEAKER_MEMBER_HASH_KEY
+							, $__speaker_member_hash_key
+						);
+						$table_field_action_item_obj->set_name($__speaker_member_name);
+
+						$has_changed = true;
+					} // inner if end
+
+				} else if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_SPEECH_EVALUATOR) == 0) {
+
+					$speech_evaluator_member_hash_key_prev = 
+					$table_field_action_item_obj->get_context_attr($params->SPEECH_EVALUATOR_MEMBER_HASH_KEY);
+
+					if(strcmp($__evaluator_member_hash_key, $speech_evaluator_member_hash_key_prev) != 0) {
+
+						// update speaker
+						$table_field_action_item_obj->set_context_attr(
+							$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY
+							, $__evaluator_member_hash_key
+						);
+						$table_field_action_item_obj->set_name($__evaluator_member_name);
+
+						$has_changed = true;
+					} // inner if end
+
+				} // inner if end
+
+				if($has_changed) {
+
+					$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+					$table_field_action_item_obj->set_context_attr($params->SPEECH_ID, $__speech_id);
+					$table_field_action_item_obj->set_context_attr($params->SPEECH_PROJECT_ID, $__speech_project_id);
+
+					// UPDATE ACTION CONTEXT
+					$this->update_action_item(
+						// $action_item_id=-1
+						$table_field_action_item_obj->get_id()
+						// $action_name=""
+						, $table_field_action_item_obj->get_name()
+						// $action_item_context=""
+						, $table_field_action_item_obj->get_context()
+					);
+
+				} // inner if end
+
+			} // inner for end
+
+		} // outer for end
+
+		return $root_action_collection;
+
+	}
+
+	// @ action에 role 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	public function update_action_context_about_toastmaster_role($role_id=-1, $meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $role_id, "role_id")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+
+		$action_item_meeting_role = 
+		$root_action_collection->search_by_context_from_root($params->ROLE_ID, $role_id);
+
+		if(is_null($action_item_meeting_role)) {
+			echo "!Error! / " . __FUNCTION__ . " / is_null($action_item_meeting_role)<br/>";
+			return;
+		}
+
+		// DB에서 해당 롤을 맡은 사람을 가져옵니다.
+		$cur_member_id = $this->get_meeting_role_member_id($meeting_id, $role_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $cur_member_id)){
+			return;
+		}
+
+		$membership_id = $this->get_membership_id_by_meeting_id($meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+
+		$role_obj = $this->get_meeting_role($membership_id, $meeting_id, $role_id, $cur_member_id);
+		if(is_null($role_obj)) {
+			echo "!Error! / " . __FUNCTION__ . " / is_null(\$role_obj)<br/>";
+			return;
+		}
+
+		$new_action_name = $role_obj->role_total_cnt . " " . $role_obj->__member_name;
+		$action_item_meeting_role->set_name($new_action_name);
+
+		// ACTION DB UPDATE
+		$this->update_action_item(
+			$action_item_meeting_role->get_id()
+			, $new_action_name
+			, $action_item_meeting_role->get_context()
+		);
+
+	}
+	// @ toastmasters에서 사용하는 action collection을 돌려줍니다.
+	public function get_root_action_collection_toastmasters($action_collection_id=-1, $meeting_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
 		}
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		// meeting id와 action collection id로 미팅에 연결된 action collection이 있는지 확인한다.
+		// 미팅과 연결이 되어 있지 않다면 존재하는 ACTION COLLECTION이라도 돌려주지 않습니다.
+		$has_action_collection_toastmasters_meeting = 
+		$this->has_action_collection_toastmasters_meeting($action_collection_id, $meeting_id);
+
+		if(!$has_action_collection_toastmasters_meeting) {
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		$root_action_collection = $this->get_root_action_collection($action_collection_id);
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+		$root_action_collection->set_context_attr($params->MEETING_ID, $meeting_id);
+
+		// 스피치, 롤 등의 정보가 등록되었다면, DB에서 가져와 추가한다.
+		// 해당 미팅의 멤버쉽 정보를 가져옵니다.
+		$membership_id = $this->get_membership_id_by_meeting_id($meeting_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+
+		// 역할 - 
+		// 1. 롤 정보
+		// 1-1. Toastmasters
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_TOASTMASTER
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_WORD_N_QUOTE_MASTER
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_TABLE_TOPIC_MASTER
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_MINI_DEBATE_MASTER
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_GENERAL_EVALUATOR
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_GRAMMARIAN
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_AH_COUNTER
+			, $meeting_id
+			, $root_action_collection
+		);
+		$this->update_action_context_about_toastmaster_role(
+			$params->ROLE_ID_TIMER
+			, $meeting_id
+			, $root_action_collection
+		);
+
+		// 2. 스피치 관련 내용을 추가합니다.
+		$this->update_action_context_about_toastmaster_speech($meeting_id, $root_action_collection);
+
+		return $root_action_collection;
+
+	}
+	public function get_root_action_collection($action_collection_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $action_collection_id, "action_collection_id")){
 			return;
 		}
 
@@ -6810,18 +8804,7 @@ class MYSQLInterface{
 			, 0
 			// $is_shy=0
 			, 0
-			// $meeting_id=-1		
-			, $meeting_id
 		);
-
-		$cur_context = new stdClass();
-		$cur_context->meeting_id = $meeting_id;
-		$cur_context_json_str = json_encode($cur_context);
-
-		if($this->is_action_collection(null, $root_action_collection, null)) {
-			$root_action_collection->set_context($cur_context_json_str);
-			$root_action_collection->set_coordinate();
-		}
 
 		return $root_action_collection;
 	}
@@ -7093,7 +9076,7 @@ class MYSQLInterface{
 		return $action_item_copy;
 	}	
 	// @ desc : add row into table. it makes a copy previous row.
-	public function add_row_into_table($table_field_action_item_obj=null) {
+	public function add_row_into_table($table_field_action_item_obj=null, $action_name="", $action_context="") {
 		
 		if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
 			return;
@@ -7104,6 +9087,8 @@ class MYSQLInterface{
 			return;
 		}
 
+		$params = new ToastmasterParamManager();
+
 		$cur_table_row_field_action_item_list = $table_field_action_item_obj->get_table_row_field_action_item_list();
 		for($idx = 0;$idx < count($cur_table_row_field_action_item_list);$idx++) {
 			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list[$idx];
@@ -7112,8 +9097,13 @@ class MYSQLInterface{
 			}
 
 			// 엘리먼트를 복사합니다.
+			// 1. 외부에서 지정된 값이 없다면, 이전 객체의 $action_context를 빈값으로 만들어서 내립니다. 
+			// 결과는 동일한 KEY, 기본 VALUE를 가지게 됩니다.
+			$copy_context_str = $table_row_field_action_item_obj->copy_context();
+
 			$is_shy = 0;
-			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy);
+			$this->copy_action_item_relation($table_row_field_action_item_obj, $is_shy, $action_name, $copy_context_str);
+			
 		}
 
 		$table_field_action_item_obj_after = $table_field_action_item_obj->get_sibling_after();
@@ -7121,7 +9111,18 @@ class MYSQLInterface{
 			return;
 		}
 
-		$cur_table_row_field_action_item_list_after = $table_field_action_item_obj_after->get_table_row_field_action_item_list();
+		$cur_table_row_field_action_item_list_after = 
+		$table_field_action_item_obj_after->get_table_row_field_action_item_list();
+
+		// DEBUG
+		/*
+		for($idx = 0;$idx < count($cur_table_row_field_action_item_list_after);$idx++) {
+			$table_row_field_action_item_obj = $cur_table_row_field_action_item_list_after[$idx];
+
+			$cur_context = $table_row_field_action_item_obj->get_context();
+			echo "copy / \$cur_context ::: $cur_context<br/>";
+		}
+		*/		
 
 		return $cur_table_row_field_action_item_list_after;
 	}
@@ -7358,6 +9359,7 @@ class MYSQLInterface{
 		$action_item->set_id(intval($cur_action_item->__item_id));
 		$action_item->set_hash_key($cur_action_item->__item_hash_key);
 		$action_item->set_item_type(intval($cur_action_item->__item_type));
+
 		$action_item->set_item_type_name($cur_action_item->__item_type_name);
 		$action_item->set_name($cur_action_item->__item_name);
 
@@ -7407,7 +9409,7 @@ class MYSQLInterface{
 					, $__item_child_collection_order
 					, $__item_child_collection_is_shy
 				);
-			} else if($this->COLLECTION_TYPE_LIST == $__item_child_collection_type) {
+			} else if($this->COLLECTION_TYPE_TABLE == $__item_child_collection_type) {
 				// 2. 테이블 형일 경우.
 				$child_collection_obj = 
 				$this->get_action_table_object(
@@ -7477,7 +9479,8 @@ class MYSQLInterface{
 			}
 
 			$action_item->push_add_on($add_on_colllection_obj);
-			$add_on_colllection_obj->set_parent($action_item);
+			// REMOVE ME
+			// $add_on_colllection_obj->set_parent($action_item);
 		}		
 
 		return $action_item;
@@ -7509,14 +9512,14 @@ class MYSQLInterface{
 				,",IFNULL(PARENT_ITEM_N_CHILD_COLLECTION.`order`, 0) AS __item_child_collection_order"
 				,",IFNULL(PARENT_ITEM_N_CHILD_COLLECTION.`is_shy_child`, -1) AS __item_child_collection_is_shy"
 
-				,"FROM ACTION_ITEM AS AI"
-				,"LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.type"
+				," FROM ACTION_ITEM AS AI"
+				," LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.`type`"
 
-				,"LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_COLLECTION ON PARENT_ITEM_N_CHILD_COLLECTION.parent_action_item_id=AI.id"
-				,"LEFT JOIN ACTION_COLLECTION AS CHILD_COLLECTION ON CHILD_COLLECTION.id=PARENT_ITEM_N_CHILD_COLLECTION.child_action_collection_id"
+				," LEFT JOIN PARENT_ACTION_ITEM_N_CHILD_ACTION_COLLECTION AS PARENT_ITEM_N_CHILD_COLLECTION ON PARENT_ITEM_N_CHILD_COLLECTION.parent_action_item_id=AI.id"
+				," LEFT JOIN ACTION_COLLECTION AS CHILD_COLLECTION ON CHILD_COLLECTION.id=PARENT_ITEM_N_CHILD_COLLECTION.child_action_collection_id"
 
-				,"WHERE AI.id=$parent_item_id"
-				,"ORDER BY PARENT_ITEM_N_CHILD_COLLECTION.`order`"
+				," WHERE AI.id=$parent_item_id"
+				," ORDER BY PARENT_ITEM_N_CHILD_COLLECTION.`order`"
 			)
 		);
 		// $query_manager->printFormattedQuery();
@@ -7555,7 +9558,7 @@ class MYSQLInterface{
 				,",IFNULL(PARENT_ITEM_N_ADD_ON_COLLECTION.`order`, 0) AS __item_add_on_collection_order"
 
 				,"FROM ACTION_ITEM AS AI"
-				,"LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.type"
+				,"LEFT JOIN ACTION_ITEM_TYPE AS AIT ON AIT.id=AI.`type`"
 
 				,"LEFT JOIN PARENT_ACTION_ITEM_N_ADD_ON_ACTION_COLLECTION AS PARENT_ITEM_N_ADD_ON_COLLECTION ON PARENT_ITEM_N_ADD_ON_COLLECTION.parent_action_item_id=AI.id"
 				,"LEFT JOIN ACTION_COLLECTION AS ADD_ON_COLLECTION ON ADD_ON_COLLECTION.id=PARENT_ITEM_N_ADD_ON_COLLECTION.add_on_action_collection_id"
@@ -7789,12 +9792,10 @@ class MYSQLInterface{
 			return;
 		}
 
-		if(empty($action_context)) {
-			$context = $action_item_target->get_context();	
-		} else {
-			$context = $action_context;
-		}
-		$context_mysql_safe = $this->mysql_manager->escape_json_str($context);
+		$cur_context = $action_item_target->get_context();
+
+		// action obj에 포함된 context와 context str을 조합합니다.
+		$context = $action_item_target->copy_context($action_context);
 
 		$hash_key = $this->get_hash_key("$type $name $context");
 
@@ -7802,7 +9803,7 @@ class MYSQLInterface{
 		$query_manager->addQueryLineArr(
 			array(
 				"INSERT INTO `magendas`.`ACTION_ITEM`(`hash_key`,`type`,`name`,`context`)"
-				,"VALUES(\"$hash_key\",$type,\"$name\",\"$context_mysql_safe\")"
+				,"VALUES(\"$hash_key\",$type,\"$name\",'$context')"
 			)
 		);
 		$query_manager->modify();
@@ -7837,7 +9838,13 @@ class MYSQLInterface{
 		$action_item_copy->set_id($__action_item_id);
 		$action_item_copy->set_hash_key($hash_key);
 		$action_item_copy->set_name($name);
-		$action_item_copy->set_context($context_mysql_safe);
+		$action_item_copy->set_context($context);
+
+		$cur_action_item_type_name = $this->get_action_item_type_name($type);
+		if($this->is_empty(__FUNCTION__, $cur_action_item_type_name, "cur_action_item_type_name")){
+			return;
+		}
+		$action_item_copy->set_item_type_name($cur_action_item_type_name);
 
 		return $action_item_copy;
 	}	
@@ -7930,6 +9937,7 @@ class MYSQLInterface{
 		$action_item_target->set_id($__action_item_id);
 		$action_item_target->set_hash_key($hash_key);
 		$action_item_target->set_item_type($__action_item_type);
+
 		$action_item_target->set_item_type_name($__action_item_type_name);
 
 		return $action_item_target;
@@ -8538,7 +10546,7 @@ class MYSQLInterface{
 
 		return $__action_collection_name;
 	}
-	public function get_action_item_type_name($action_item_type_id=-1) {
+	private function get_action_item_type_name($action_item_type_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $action_item_type_id, "action_item_type_id")){
 			return;
@@ -8790,1426 +10798,6 @@ class MYSQLInterface{
 
 		return $action_obj;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//  dMMMMMMP dMMMMMP .dMMMb dMMMMMMP 
-	//    dMP   dMP     dMP" VP   dMP    
-	//   dMP   dMMMP    VMMMb    dMP     
-	//  dMP   dMP     dP .dMP   dMP      
-	// dMP   dMMMMMP  VMMMP"   dMP       
-	/*
-		@ public
-		@ Desc : BDTM Toastmaster timeline 템플릿을 만들어 봅니다. Action Obj로 구조를 만든 다음, 이 구조를 DB로 이전하는 과정을 검사합니다.
-		DB 업데이트 횟수를 최소한으로 줄입니다.
-	*/
-	public function get_template_meeting_timeline_BDTM($hh_mm_begins) {
-
-		if($this->is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$hh_mm_begins)<br/>";
-			return;
-		}
-
-		$params = new ToastMasterParamManager();
-
-		// 0. Action obj로 리스트를 구성합니다.
-		$root_action_obj_name = "Toastmaster Timeline";
-		$meeting_agenda_id = 134; // 243th Attitude of gratitude
-		$root_action_obj = 
-		new ActionCollection(
-			// $action_name=""
-			$root_action_obj_name
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-			// $meeting_agenda_id=-1
-			, $meeting_agenda_id
-		);
-
-		// 1.Greeting
-
-		$time_init_sec = $this->convert_hh24_mm_to_seconds($hh_mm_begins);
-		$time_init_hh24_mm = $this->convert_seconds_to_hh24_mm($time_init_sec);
-		$time_offset_sec = 0;
-		$time_next_sec = $time_init_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec);
-
-		if($this->is_not_valid_time_format_hh24_mm($time_init_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_init_hh24_mm)<br/>";
-			return;
-		}
-
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Greetings"
-			// $time_str_hhmm_init=""
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific=""
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 1-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Greetings - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 1-1-1. Welcome guests / Guest introduction
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"New Item"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-			// $is_shy=0
-			, 1
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
-
-
-
-
-
-
-		// 2.Call meeting to order [Chairperson]
-
-		$time_offset_sec = 60 * 10; // 10 mins / "19:50"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec);
-
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Call meeting to order [Chairperson]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "19:50"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 2-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Call meeting to order [Chairperson] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 2-1-1. Welcome guests / Guest introduction
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Welcome guests / Guest introduction"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 2-1-2. Cite the mission of Toastmasters
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Cite the mission of Toastmasters"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 2-1-3. Cite the mission of Toastmasters
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Fill Vacant functions & Share CL process"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 2-1-4. Cite the mission of Toastmasters
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Introduce Toastmaster"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-
-
-
-
-
-		// 20:00
-		// 3.Theme & Role Introduction [Toastmaster]
-
-		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "19:50" --> "20:00"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Theme & Role Introduction [Toastmaster]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "20:00"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 3-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Theme & Role Introduction [Toastmaster] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 3-1-1. Opening remarks ( Introduce the theme )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Opening remarks ( Introduce the theme )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 3-1-2. Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Introduce roles : General Evaluator ( < 1 min ), Timer, Ah Counter, Grammarian ( < 1 min each ), Word & Quote master ( < 2 min )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-
-		// add_on inner table
-		// 3-1-2-1. Today's Role
-		$child_action_sub_list_child_action_item_sub_table = 
-		new ActionCollection(
-			// $action_name=""
-			"Today's Role"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
-		);
-		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
-
-
-		// 3-1-2-1-1. Column List - Right Role Name List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Left Role Name"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-1-1-1. Column List Field - Toastmaster
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Toastmaster"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-1-2. Column List Field - Grammarian
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Grammarian"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-1-3. Column List Field - Timer
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Timer"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-1-4. Column List Field - Table Topic Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Table Topic Master"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 3-1-2-1-2. Column List - Right Role Name List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Left Member Name"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-1-2-1. Column List Field - Toastmaster
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Toastmaster
-		$context = new stdClass();
-
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TOASTMASTER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-1-2-2. Column List Field - Grammarian
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Grammarian
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GRAMMARIAN;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-1-2-3. Column List Field - Timer
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Timer
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TIMER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-1-2-4. Column List Field - Table Topic Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Table Topic Master
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TABLE_TOPIC_MASTER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 3-1-2-1-3. Column List - Right Role Name List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Right Role Name"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-1-3-1. Column List Field - General Evaluator
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"General Evaluator"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-3-2. Column List Field - Ah & Vote Counter
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Ah & Vote Counter"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-3-3. Column List Field - Word & Quote Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Word & Quote Master"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-3-4. Column List Field - Mini Debate Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Mini Debate Master"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
-
-
-		// 3-1-2-1-4. Column List - Right Role Name List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Right Member Name"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-1-4-1. Column List Field - General Evaluator
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - General Evaluator
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GENERAL_EVALUATOR;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-1-4-2. Column List Field - Ah & Vote Counter
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Ah & Vote Counter
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_AH_COUNTER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 3-1-2-1-4-3. Column List Field - Word & Quote Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Word & Quote Master
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_WORD_N_QUOTE_MASTER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 3-1-2-1-4-4. Column List Field - Mini Debate Master
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
-		);
-
-		// DB interface prop - Mini Debate Master
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_MINI_DEBATE_MASTER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-
-
-		// add_on inner table
-		// 3-1-2-2. Today's Role
-		$child_action_sub_list_child_action_item_sub_table = 
-		new ActionCollection(
-			// $action_name=""
-			"Word & Quote"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
-		);
-		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
-
-		// 3-1-2-2-1. Column List - Title Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Title Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-2-1-1. Column List Field - Word
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Word"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-2-1-2. Column List Field - Word Desc
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Word Desc"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-2-1-3. Column List Field - Quote
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Quote"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 3-1-2-2-2. Column List - Speech Title Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Text Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 3-1-2-2-2-1. Column List Field - Word Text
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-2-2-2. Column List Field - Word Desc Text
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 3-1-2-2-2-3. Column List Field - Quote Desc Text
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
-
-		// 20:00
-
-
-
-
-
-
-
-		// 20:15
-		// 4.Table Topics Session [ Table Topic Master ]
-
-		$time_offset_sec = 60 * 15; // 15 mins / "19:40" / "20:00" --> "20:15"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Table Topics Session [ Table Topic Master ]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "20:15"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 4-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Table Topics Session [ Table Topic Master ] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 4-1-1. Explain the rules and theme
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Explain the rules and theme"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 4-1-2. 1 to 2 minutes impromptu speaking
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"1 to 2 minutes impromptu speaking"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 4-1-3. Timer‘s Report
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Timer‘s Report"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 4-1-4. Vote for the Best Table Topic Speaker
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Vote for the Best Table Topic Speaker"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 20:15
-
-
-
-
-
-
-
-
-
-		// 20:25
-		// 5. Prepared Speech Session [ Toastmaster ]
-
-		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "20:15" --> "20:25"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Prepared Speech Session [ Toastmaster ]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "20:25"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 5-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Prepared Speech Session [ Toastmaster ] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 5-1-1. Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Introduce speakers ( Speaker, Project Number, Topic, Evaluator, Speech Objectives, Time )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-
-		// add_on inner table
-		// 5-1-1-1. Today's Role
-		$child_action_sub_list_child_action_item_sub_table = 
-		new ActionCollection(
-			// $action_name=""
-			"Today's Speech"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
-		);
-		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
-
-		// 5-1-1-1-1. Column List - Project Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Project Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 5-1-1-1-1-1. Column List Field - Speech Project
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Project"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 5-1-1-1-1-2. Column List Field - Speech Project Editable
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
-		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_PROJECT_ID} = -1;
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 5-1-1-1-2. Column List - Speech Title Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Speech Title Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 5-1-1-1-2-1. Column List Field - Speech Title
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Title"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 5-1-1-1-2-2. Column List Field - Speech Title Editable
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_TITLE} = -1;
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 5-1-1-1-3. Column List - Speaker Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Speaker Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 5-1-1-1-3-1. Column List Field - Speaker
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Speaker"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 5-1-1-1-3-2. Column List Field - Speaker Editable
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
-		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_SPEAKER_MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-		// 5-1-1-1-4. Column List - Evaluator Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Evaluator Column List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 5-1-1-1-4-1. Column List Field - Evaluator
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Evaluator"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_FIXED
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-		// 5-1-1-1-4-2. Column List Field - Evaluator Editable
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
-		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
-
-
-
-
-
-
-
-
-		// 5-1-2. Timer‘s Report
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Timer‘s Report"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 5-1-3. Vote for the Best Prepared Speech Speaker
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Vote for the Best Prepared Speech Speaker"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 5-1-4. Empty space
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			" "
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 20:25
-
-
-
-
-
-
-
-
-
-
-		// 21:00
-		// 6. Break
-
-		$time_offset_sec = 60 * 35; // 35 mins / "19:40" / "20:25" --> "21:00"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Break"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:00"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 6-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Break - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 6-1-1. Complete Feedback to prepared speakers
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Complete Feedback to prepared speakers"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 6-1-2. Empty Space
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			" "
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 21:00
-
-
-
-
-
-
-
-
-
-
-		// 21:10
-		// 7. Break
-
-		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "21:00" --> "21:10"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Mini debate session"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:10"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-		// 7-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Mini debate session - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 7-1-1. Welcome guests / Guest introduction
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"New Item"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-			// $is_shy=0
-			, 1
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);			
-		// 21:10		
-
-
-
-
-
-
-
-
-
-
-		// 21:20
-		// 8. Evaluation Session [ General Evaluator ]
-
-		$time_offset_sec = 60 * 10; // 10 mins / "19:40" / "21:10" --> "21:20"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Evaluation Session [ General Evaluator ]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:20"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 8-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Evaluation Session [ General Evaluator ] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 8-1-1. Introduces Evaluators
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Introduces Evaluators"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 8-1-2. Timer‘s Report & Vote
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Timer‘s Report & Vote"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 8-1-3. Ah Counter‘s Ah tally report
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Ah Counter‘s Ah tally report"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 8-1-4. Grammarian‘s Report
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Grammarian‘s Report"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 8-1-5. General comments on meeting ( < 3 min )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"General comments on meeting ( < 3 min )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 21:20
-
-
-
-
-
-
-
-		// 21:35
-		// 9. Evaluation Session [ General Evaluator ]
-
-		$time_offset_sec = 60 * 15; // 15 mins / "19:40" / "21:20" --> "21:35"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Award Session [ Toastmaster ]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:35"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 9-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Award Session [ Toastmaster ] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 9-1-1. Present award ( < 1 min )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Present award ( < 1 min )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 9-1-2. Closing remarks ( < 2 min )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Closing remarks ( < 2 min )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);		
-		// 21:35
-
-
-
-
-
-
-
-		// 21:40
-		// 10. Club Business [ Chairperson ]
-
-		$time_offset_sec = 60 * 5; // 5 mins / "19:40" / "21:35" --> "21:40"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Club Business [ Chairperson ]"
-			// $time_str_hhmm_init="" / "19:40"
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:40"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 10-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Club Business [ Chairperson ] - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 10-1-1. Club News ( What's new? )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Club News ( What's new? )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-
-		// add_on inner table
-		// 10-1-1-1. Club News / 뉴스의 내용은 action obj 형식으로 관리해도 문제 없음.
-		$child_action_sub_list_child_action_item_sub_table = 
-		new ActionCollection(
-			// $action_name=""
-			"Club News"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
-		);
-		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
-
-		// 10-1-1-1-1. Column List - Project Column List
-		$child_action_sub_list_child_action_item_sub_table_column_list = 
-		new ActionCollection(
-			// $action_name=""
-			"News List"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
-
-		// 10-1-1-1-1-1. Column List Field - Speech Project
-		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
-		new ActionItem(
-			// $action_name="New Item"
-			"NOT ASSIGNED"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-
-
-
-		// 10-1-2. Announcement & Role Sign-up for future meeting
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Announcement & Role Sign-up for future meeting"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 10-1-3. Guest Comments
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Guest Comments"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 10-1-4. Acknowledgement
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Acknowledgement"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 21:40	
-
-
-
-
-
-
-
-		// 21:50
-		// 11. Call Meeting to adjourn & Group photos
-
-		$time_offset_sec = 60 * 5; // 5 mins / "19:40" / "21:40" --> "21:45"
-		$time_next_sec = $time_next_sec + $time_offset_sec;
-		$time_next_hh24_mm = $this->convert_seconds_to_hh24_mm($time_next_sec); // $time_init_hh24_mm
-		if($this->is_not_valid_time_format_hh24_mm($time_next_hh24_mm)) {
-			echo "\$this->is_not_valid_time_format_hh24_mm(\$time_next_hh24_mm)<br/>";
-			return;
-		}
-
-		$child_action_item =  
-		new ActionItemTitleNTimeHHMM(
-			// $action_name=""
-			"Call Meeting to adjourn & Group photos"
-			// $time_str_hhmm_init=""
-			, $time_init_hh24_mm
-			// $time_str_hhmm_specific="" / "21:40"
-			, $time_next_hh24_mm
-		);
-		$root_action_obj->add_child($child_action_item);
-
-		// 11-1. Sublist
-		$child_action_sub_list = 
-		new ActionCollection(
-			// $action_name=""
-			"Call Meeting to adjourn & Group photos - Sublist"
-			// $action_collection_type=1
-			, ActionCollection::$ACTION_COLLECTION_TYPE_LIST
-		);
-		$child_action_item->add_child($child_action_sub_list);
-
-		// 11-1-1. Club News ( What's new? )
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Closing remarks ( < 2min )"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-
-		// 11-1-2. Announcement & Role Sign-up for future meeting
-		$child_action_sub_list_child_action_item =  
-		new ActionItem(
-			// $action_name="New Item"
-			"Group Photo"
-			// $action_item_type=1
-			, ActionItem::$TITLE_ONLY_ADDABLE
-		);
-		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
-		// 21:40
-
-		$root_action_obj = $this->add_action($root_action_obj);
-		$root_action_obj->set_coordinate();
-
-		return $root_action_obj;
-	}
-
-
-
-
-
 
 }
 

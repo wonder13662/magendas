@@ -30,10 +30,17 @@ $executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_me
 
 $FONT_SIZE = $params->getParamString($params->FONT_SIZE_LARGE);
 
+// LEGACY
 // 액션 리스트로 출력합니다.
-$action_list = $wdj_mysql_interface->get_root_action_collection(6229, 134); 	// 용인
 // $action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
 
+// 액션 리스트로 출력합니다.
+$recent_action_id = $wdj_mysql_interface->select_recent_action_id_collection_by_meeting_id($meeting_id);
+$action_list = null;
+$recent_root_action_collection = null;
+if(0 < $recent_action_id) {
+	$action_list = $wdj_mysql_interface->get_root_action_collection($recent_action_id, $meeting_id);	
+}
 
 
 // @ required
@@ -214,6 +221,10 @@ $action_list->set_cell_width(133);
 $action_list->set_font_type($FONT_SIZE);
 
 $wdj_pdf->draw_element($action_list);
+
+// TEST 직접 사각형을 그림.
+$cur_pdf = $wdj_pdf->get_pdf();
+
 
 
 

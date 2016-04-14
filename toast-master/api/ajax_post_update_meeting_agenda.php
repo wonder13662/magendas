@@ -112,8 +112,8 @@
 	$MEMBER_ID = $params->getParamNumber($params->MEMBER_ID);
 
 	if( $IS_UPDATE_TODAY_ROLE && $MEETING_ID > 0 && $ROLE_ID > 0 && $MEMBER_ID > 0 ){
-		$query_output = $wdj_mysql_interface->updateTodayRole($MEETING_ID, $ROLE_ID, $MEMBER_ID);
-		array_push($result->query_output_arr,$query_output);
+		// $query_output = $wdj_mysql_interface->updateTodayRole($MEETING_ID, $ROLE_ID, $MEMBER_ID);
+		// array_push($result->query_output_arr,$query_output);
 	}
 
 
@@ -427,6 +427,7 @@
 			$cur_order_num = intval($cur_speech_evaluator_table_row_info->__ORDER_NUM);
 
 			// 입력된 파라미터만 업데이트됩니다.
+			/*
 			$query_output = 
 			$wdj_mysql_interface->update_speech_evaluator(
 				// $SPEECH_ID
@@ -443,6 +444,7 @@
 				, $cur_order_num
 			);
 			array_push($result->query_output_arr,$query_output);
+			*/
 		}
 
 	} else if(	$IS_UPDATE_SPEECH_EVALUATOR && 
@@ -454,6 +456,7 @@
 		$recent_speech_evaluator_id = $wdj_mysql_interface->select_recent_speech_evaluator_id($SPEECH_ID);
 		if(0 < $recent_speech_evaluator_id) {
 
+			/*
 			$query_output = 
 			$wdj_mysql_interface->update_speech_evaluator(
 				// $speech_evaluator_id
@@ -466,6 +469,7 @@
 				, null
 			);
 			$result->update_speech_evaluator=$query_output;
+			*/
 		}
 
 	} else if($IS_DELETE_SPEECH_EVALUATOR==$params->YES && $EVALUATOR_ID > 0){
