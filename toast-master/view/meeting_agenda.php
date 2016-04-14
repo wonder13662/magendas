@@ -79,13 +79,20 @@
 	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
 
 	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
-	$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
-	$action_collection_obj_immediate_past_std = null;
-	$meeting_obj_immediate_past = null;
-	if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
-		$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
-		$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
-		$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
+	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
+	$action_collection_obj_immediate_past = null;
+	if($has_immediate_past_action_collection) {
+		// 최근의 ACTION COLLECTION이 있습니다.
+		echo "최근의 ACTION COLLECTION이 있습니다.<br/>";
+
+		$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
+		$action_collection_obj_immediate_past_std = null;
+		$meeting_obj_immediate_past = null;
+		if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
+			$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
+			$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
+			$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
+		}
 	}
 
 	// 화면에 표시할 action list.

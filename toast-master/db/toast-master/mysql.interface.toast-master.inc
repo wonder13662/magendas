@@ -6557,6 +6557,42 @@ class MYSQLInterface{
 	}
 
 	// @ Desc : MEMBERSHIP ID로 과거의 것중, 가장 최근의 ACTION COLLECTION을 가져옵니다.
+	public function has_immediate_past_action_collection_by_membership_id($membership_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(ACNMA.action_collection_id) AS __action_collection_cnt"
+				," FROM ACTION_COLLECTION_N_MEETING_AGENDA AS ACNMA"
+				," LEFT JOIN MEETING_AGENDA AS MA ON MA.id=ACNMA.meeting_agenda_id"
+				," WHERE MA.membership_id=$membership_id"
+				," AND MA.regdttm < DATE_FORMAT(NOW(), '%Y%m%d000000')"
+				," ORDER BY ACNMA.action_collection_id DESC "
+				," LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return false;
+		}
+		$result = $query_manager->get_result();
+
+		if(is_null($result)) {
+			return false;
+		}
+
+		$__action_collection_cnt = $result->__action_collection_cnt;
+
+		return (0 < $__action_collection_cnt)?true:false;
+	}
+
+
+	// @ Desc : MEMBERSHIP ID로 과거의 것중, 가장 최근의 ACTION COLLECTION을 가져옵니다.
 	private function select_immediate_past_action_collection_by_membership_id($membership_id) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id)){
@@ -8298,6 +8334,8 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
 			return;
 		}
+
+		// wonder.jung
 
 		$recent_action_collection_detail = 
 		$this->select_immediate_past_action_collection_by_membership_id($membership_id);
