@@ -4993,8 +4993,9 @@ airborne.bootstrap.obj.__action = {
 					this.show_btn_time_minus();
 					this.show_title_input_btn_ok_jq();
 
-					// SET EVENT
+					// SET EVENT - wonder.jung
 					this.set_event_time_btns();
+					this.show_child();
 					
 				} else {
 					console.log("!Error! / show_input_mode_time / cur_action_item_obj.is_not_item_title_n_time_hh_mm()");
@@ -5956,7 +5957,7 @@ airborne.bootstrap.obj.__action = {
 					}
 
 					// Mysql Query Safe Check.
-
+					console.log("TEST / event_type ::: ",event_type);
 
 					if(_obj.EVENT_TYPE_INSERT_ITEM === event_type || _action.EVENT_TYPE_ADD_ROW === event_type){
 
@@ -6173,6 +6174,7 @@ airborne.bootstrap.obj.__action = {
 					}
 
 					_self.hide_all();
+					// wonder.jung - 자식 객체가 있다면 보여줘야 합니다.
 					_self.show_view_mode();
 					_self.release();
 
@@ -6219,15 +6221,9 @@ airborne.bootstrap.obj.__action = {
 				}
 
 				cur_btn_time_ok_jq.click(function(e){
+
 					e.stopPropagation();
-
-					console.log("cur_btn_time_ok_jq.click / cur_action_item_obj ::: ",cur_action_item_obj);
-
 					do_on_event_btn_time_ok(e, cur_action_item_obj);
-
-					// DEBUG
-					//var cur_sibling_element_event_manager_arr = _self.get_sibling_element_event_manager_arr(true);
-					// console.log("DEBUG / cur_sibling_element_event_manager_arr : ",cur_sibling_element_event_manager_arr);
 
 				});
 
