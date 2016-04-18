@@ -1314,6 +1314,12 @@ airborne.bootstrap.view.obj.__action_list = {
 				var height_element_jq = 0;
 				var cur_title_input_container_jq = cur_event_manager.get_title_input_container_jq();
 
+				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
+				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
+					console.log("!Error! / delegate_show_input_mode_default_view_control / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
+					return;
+				}
+
 				if(_action.INPUT_TYPE_DEFAULT === input_type) {
 					
 					var height_title_input_container = cur_title_input_container_jq.outerHeight();
@@ -1325,6 +1331,24 @@ airborne.bootstrap.view.obj.__action_list = {
 
 					var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
 					cur_btn_cancel_jq.css("top", "");
+
+					var cur_element_jq = cur_event_manager.get_element_jq();
+					cur_element_jq.css("height", height_element_jq + "px");
+
+					if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
+						// 시간 입력과 타이틀 입력이 가능한 열에서 타이틀 입력을 선택했을 때의 처리.
+						cur_event_manager.show_time_jq();
+
+						// 입력칸 표시로 time jq의 위치를 변경합니다.
+						var cur_time_jq = cur_event_manager.get_time_jq();
+						top_offset = _obj.get_top_offset_child_centered_vertical(cur_element_jq, cur_time_jq);
+						cur_time_jq.css("top", top_offset + "px");
+
+						// 텍스트 입력 창을 시간 span의 옆으로 띄워줍니다.
+						var padding_left_element_jq = cur_element_jq.css("padding-left");
+						cur_title_input_container_jq.css("margin-left", padding_left_element_jq);
+
+					}					
 
 				} else if(_action.INPUT_TYPE_TIME === input_type) {
 
@@ -1338,30 +1362,6 @@ airborne.bootstrap.view.obj.__action_list = {
 
 					var cur_btn_cancel_jq = cur_event_manager.get_title_input_btn_cancel_jq();
 					cur_btn_cancel_jq.css("top", "-6px");
-
-				}
-
-				var cur_element_jq = cur_event_manager.get_element_jq();
-				cur_element_jq.css("height", height_element_jq + "px");
-
-				var cur_action_item_obj = cur_event_manager.get_action_item_obj();
-				if(_action.is_not_valid_action_item_obj(cur_action_item_obj)) {
-					console.log("!Error! / delegate_show_input_mode_default_view_control / _action.is_not_valid_action_item_obj(cur_action_item_obj)");
-					return;
-				}
-				if(cur_action_item_obj.is_item_title_n_time_hh_mm()) {
-
-					cur_event_manager.show_time_jq();
-
-					// 입력칸 표시로 time jq의 위치를 변경합니다.
-					var cur_time_jq = cur_event_manager.get_time_jq();
-					top_offset = _obj.get_top_offset_child_centered_vertical(cur_element_jq, cur_time_jq);
-					cur_time_jq.css("top", top_offset + "px");
-
-					// 텍스트 입력 창을 시간 span의 옆으로 띄워줍니다.
-					var padding_left_element_jq = cur_element_jq.css("padding-left");
-					console.log("padding_left_element_jq ::: ",padding_left_element_jq);
-					cur_title_input_container_jq.css("margin-left", padding_left_element_jq);
 
 				}
 
