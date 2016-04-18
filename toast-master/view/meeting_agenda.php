@@ -76,7 +76,9 @@
 	$role_list = $wdj_mysql_interface->getRoleList();
 	$time_guide_line = $wdj_mysql_interface->getTimeGuideLine();
 
-	$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
+	// $speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
+	$speech_project_list = $wdj_mysql_interface->select_speech_project_list();
+	
 
 	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
 	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
@@ -106,10 +108,6 @@
 	if(ActionCollection::is_instance($tm_officer_table_obj)) {
 		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
 	}
-
-	// TEST
-	$test_title = "Homemaking Queen' Secret Recipe for Setting Goals";
-	$title_mysql_safe = htmlspecialchars($test_title, ENT_QUOTES);
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -325,6 +323,9 @@ var schedule_timeline_template_list = <?php echo json_encode($schedule_timeline_
 var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?>;
 var speech_evaluator_cnt_list = <?php echo json_encode($speech_evaluator_cnt_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
+
+console.log("speech_project_list ::: ",speech_project_list);
+
 var is_expired = <?php echo json_encode($is_expired);?>;
 var is_editable = <?php echo json_encode($is_editable);?>;
 var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
@@ -348,13 +349,6 @@ var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_p
 
 var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
-
-// TEST
-// title_mysql_safe
-var test_title = <?php echo json_encode($test_title);?>;
-var title_mysql_safe = <?php echo json_encode($title_mysql_safe);?>;
-console.log("test_title ::: ",test_title);
-console.log("title_mysql_safe ::: ",title_mysql_safe);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

@@ -1435,7 +1435,7 @@ class TCPDFManager{
 
 		$cur_text_size = $action_item_obj->get_text_size();
 		$html_safe_action_name = htmlspecialchars_decode($action_item_obj->get_name(), ENT_QUOTES);
-		if(20 < strlen($html_safe_action_name)) {
+		if(15 < strlen($html_safe_action_name)) {
 			// TODO 자간 간격과 글자수간을 계산하는 알고리즘이 필요.
 			$cur_text_size = 7;
 		}

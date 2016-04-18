@@ -80,14 +80,30 @@ wonglish.meeting_agenda_manager = {
 
 			// 빈값으로 지정할 수 있는 필드를 추가한다.
 			search_option_arr_members.push(_obj.get_select_option(_param.NOT_ASSIGNED,"-1"));
-		}	
+		}
 
 		var search_option_arr_speech_projects = [];
 		var speech_project_list = meeting_agenda_data_set.speech_project_list;
+		console.log("speech_project_list ::: ",speech_project_list);
+
 		if(_v.isValidArray(speech_project_list)){
 			for (var idx = 0; idx < speech_project_list.length; idx++) {
 				var cur_speech_obj = speech_project_list[idx];
-				var cur_select_option = _obj.get_select_option(cur_speech_obj.__speech_project_title, cur_speech_obj.__speech_project_id);
+
+				var speech_timer_green_min = parseInt(cur_speech_obj.__speech_timer_green_mm_ss);
+				var speech_timer_red_min = parseInt(cur_speech_obj.__speech_timer_red_mm_ss);
+				var speech_timer_text = speech_timer_green_min + "m-" + speech_timer_red_min + "m";
+
+				var speech_project_title = "";
+				if(cur_speech_obj.__speech_manual_name === "" && speech_timer_green_min == 0) {
+					speech_project_title = cur_speech_obj.__speech_manual_project_name;
+				} else if(cur_speech_obj.__speech_manual_name === "") {
+					speech_project_title = cur_speech_obj.__speech_manual_project_name + " / " + speech_timer_text;
+				} else {
+					speech_project_title = cur_speech_obj.__speech_manual_name + " - " + cur_speech_obj.__speech_manual_project_name + " / " + speech_timer_text;
+				}
+
+				var cur_select_option = _obj.get_select_option(speech_project_title, cur_speech_obj.__speech_manual_project_id);
 				search_option_arr_speech_projects.push(cur_select_option);
 			}
 		}
@@ -156,9 +172,6 @@ wonglish.meeting_agenda_manager = {
 		//  dMP dMP dMP.aMP   dMP   dMP dMP.aMP dMP dMP        dMP   dMP dMP dMP dMPdMP     dMP     dMP dMP dMP dMP        
 		// dMP dMP  VMMMP"   dMP   dMP  VMMMP" dMP dMP        dMP   dMP dMP dMP dMPdMMMMMP dMMMMMP dMP dMP dMP dMMMMMP
 
-		// TODO 여기서 레이아웃을 관리할 수 있도록 수정.
-
-		// TEST
 		var meeting_action_list = meeting_agenda_data_obj.meeting_action_list;
 		var new_action_element_collection_set = undefined;
 		var remove_action_timeline = function(container_jq) {
@@ -338,8 +351,6 @@ wonglish.meeting_agenda_manager = {
 							)
 						); // ajax done.
 
-
-
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_speech_update) {
 
 						console.log("TM SPEECH UPDATE");
@@ -368,7 +379,6 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.
-
 
 					} else if(_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event && is_speech_update) {
 
@@ -460,6 +470,8 @@ wonglish.meeting_agenda_manager = {
 							return;
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
+
+							console.log("search_option_arr_speech_projects ::: ",search_option_arr_speech_projects);
 
 							return search_option_arr_speech_projects;
 
@@ -683,16 +695,6 @@ wonglish.meeting_agenda_manager = {
 				}
 			}
 
-			// 과거 날짜인 경우 알려줍니다.
-			/*
-			var cur_date = datePickerObj.val();
-			if(_dates.isExpired(cur_date, _dates.DATE_TYPE_YYYY_MM_DD)) {
-				alert("Meeting date is over.\nPlease check your meeeting date.");
-				datePickerObj.val("");
-				return;
-			}
-			*/
-
 		});
 
 		// SET TEMPLATE EVENT
@@ -706,7 +708,7 @@ wonglish.meeting_agenda_manager = {
 				var action_template = self_jq.attr("action_template");
 				var src_meeting_id = parseInt(self_jq.attr("src_meeting_id"));
 				var meeting_id = parseInt(self_jq.attr("meeting_id"));
-				var action_name = "action_timelne";
+				var action_name = "Schedule";
 
 				var request_param_obj =
 				_param
@@ -840,14 +842,6 @@ wonglish.meeting_agenda_manager = {
 				return;
 			}
 
-			console.log("cur_meeting_theme ::: ",cur_meeting_theme);
-			console.log("cur_input_meeting_date ::: ",cur_input_meeting_date);
-
-			// wonder.jung
-			// TODO - 미팅 날짜와 주제를 업데이트 합니다. --> REST API 구조로 변경하는 건 다음에...
-
-			// $THEME = $params->getParamString($params->THEME);
-
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
@@ -869,8 +863,9 @@ wonglish.meeting_agenda_manager = {
 
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것
-						alert("Updated!");
-
+						if(confirm("Updated!")) {
+							_link.go_there(_link.MEETING_AGENDA, _param.get(_param.MEETING_ID,meeting_agenda_id));	
+						}
 					},
 					// delegate_scope
 					this

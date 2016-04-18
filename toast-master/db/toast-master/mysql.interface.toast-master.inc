@@ -3328,29 +3328,81 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
-	public function get_speech_project($project_id=-1) {
+	public function get_speech_project_text($project_id=-1) {
+		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
+			return;
+		}
+		
+		$speech_project_obj = $this->get_speech_project($project_id);
+		if(is_null($speech_project_obj)) {
+			echo "!Error! / get_speech_project_text / is_null(\$speech_project_obj)<br/>";
+			return;
+		}
+
+		$speech_project_text = "";
+		$__speech_timer_green_min = intval($speech_project_obj->__speech_timer_green_mm_ss);
+		$__speech_timer_red_min = intval($speech_project_obj->__speech_timer_red_mm_ss);
+		$__speech_manual_name = $speech_project_obj->__speech_manual_name;
+		$__speech_manual_project_name = $speech_project_obj->__speech_manual_project_name;
+
+		
+		if(empty($__speech_manual_name) && $__speech_timer_green_min == 0) {
+			$speech_project_text = $__speech_manual_project_name;
+		} else if(empty($__speech_manual_name)) {
+			$speech_project_text = $__speech_manual_project_name . " / " . $__speech_timer_green_min . "-" . $__speech_timer_red_min . "m";
+		} else {
+			$speech_project_text = $__speech_manual_name . "-" . $__speech_manual_project_name . " / " . $__speech_timer_green_min . "-" . $__speech_timer_red_min . "m";
+		}
+
+		return $speech_project_text;
+	}
+
+	private function get_speech_project($project_id=-1) {
+
+		// wonder.jung
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
 			return;
 		}
 
+		// 추가된 collection의 id를 가져옵니다.
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-				"SELECT id AS __speech_project_id"
-				,", title AS __speech_project_title"
-				,", ordernum AS __speech_project_ordernum"
-				,"FROM SPEECH_PROJECT"
-				,"WHERE id=$project_id"				
+				"SELECT SMP.id AS __speech_manual_project_id"
+				," , SMP.`name` AS __speech_manual_project_name"
+				," , SM.id AS __speech_manual_id"
+				," , SM.`name` AS __speech_manual_name"
+
+				," , IFNULL(MTGL.`sec_qualified_min`,0) AS __speech_timer_min"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_qualified_min`),'%i'),0) AS __speech_timer_min_mm_ss"
+
+				," , IFNULL(MTGL.`sec_green`,0) AS __speech_timer_green"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speech_timer_green_mm_ss"
+		 
+				," , IFNULL(MTGL.`sec_yellow`,0) AS __speech_timer_yellow"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speech_timer_yellow_mm_ss"
+
+				," , IFNULL(MTGL.`sec_red`,0) AS __speech_timer_red"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speech_timer_red_mm_ss"
+
+				," , IFNULL(MTGL.`sec_qualified_max`,0) AS __speech_timer_max"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_qualified_max`),'%i'),0) AS __speech_timer_max_mm_ss"
+
+				," FROM magendas.SPEECH_MANUAL_PROJECT AS SMP"
+				," LEFT JOIN SPEECH_MANUAL AS SM ON SM.id=SMP.speech_manual_id"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=SMP.id"
+				," LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
+				," WHERE SMP.id=$project_id"
 			)
 		);
+		// $query_manager->printFormattedQuery();
 		$query_manager->select_one();
 		if($query_manager->is_failed()) {
-			return null;
+			return;
 		}
 
 		$result = $query_manager->get_result();
-
 		return $result;
 	}
 
@@ -3359,12 +3411,12 @@ class MYSQLInterface{
 
 		// "NOT ASSIGNED"를 제외한 모든 프로젝트 명을 가져옴.
 		$query = 
-		"SELECT id AS __speech_project_id"
-		. " , ordernum AS __speech_project_ordernum"
-		. " , title AS __speech_project_title"
-		. " FROM `SPEECH_PROJECT`"
-		. " WHERE id NOT IN (86, 87, 85)"
-		. " ORDER BY ordernum"
+		"SELECT SP.id AS __speech_project_id"
+		. " , SP.ordernum AS __speech_project_ordernum"
+		. " , SP.title AS __speech_project_title"
+		. " FROM `SPEECH_PROJECT` AS SP"
+		. " WHERE SP.id NOT IN (86, 87, 85)"
+		. " ORDER BY SP.ordernum"
 		;
 
 		$json_res_obj = $this->getSelectResult($query);
@@ -3589,7 +3641,7 @@ class MYSQLInterface{
 				," , 120 AS __evaluator_timer_green"
 				," , 150 AS __evaluator_timer_yellow"
 				," , 180 AS __evaluator_timer_red"
-
+				// wonder.jung
 				," , MSV2.`updttm` AS __updttm"
 				," , MSV2.`regdttm` AS __regdttm"
 				," FROM `MA_SPEECH` AS MSV2"
@@ -6127,7 +6179,51 @@ class MYSQLInterface{
 		. " LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=SMP.id"
 		. " LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
 		;		
-	}	
+	}
+
+	// wonder.jung
+	public function select_speech_project_list() {
+		
+		// 추가된 collection의 id를 가져옵니다.
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT SMP.id AS __speech_manual_project_id"
+				," , SMP.`name` AS __speech_manual_project_name"
+				," , SM.id AS __speech_manual_id"
+				," , SM.`name` AS __speech_manual_name"
+
+				," , IFNULL(MTGL.`sec_qualified_min`,0) AS __speech_timer_min"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_qualified_min`),'%i'),0) AS __speech_timer_min_mm_ss"
+
+				," , IFNULL(MTGL.`sec_green`,0) AS __speech_timer_green"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_green`),'%i'),0) AS __speech_timer_green_mm_ss"
+		 
+				," , IFNULL(MTGL.`sec_yellow`,0) AS __speech_timer_yellow"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_yellow`),'%i'),0) AS __speech_timer_yellow_mm_ss"
+
+				," , IFNULL(MTGL.`sec_red`,0) AS __speech_timer_red"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speech_timer_red_mm_ss"
+
+				," , IFNULL(MTGL.`sec_qualified_max`,0) AS __speech_timer_max"
+				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_qualified_max`),'%i'),0) AS __speech_timer_max_mm_ss"
+
+				," FROM magendas.SPEECH_MANUAL_PROJECT AS SMP"
+				," LEFT JOIN SPEECH_MANUAL AS SM ON SM.id=SMP.speech_manual_id"
+				," LEFT JOIN SPEECH_MANUAL_PROJECT_N_TIME_GUIDE_LINE AS SMPNTGL ON SMPNTGL.speech_manual_project_id=SMP.id"
+				," LEFT JOIN MA_TIMER_GUIDE_LINE AS MTGL ON MTGL.id=SMPNTGL.time_guide_line_id"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+		$result = $query_manager->get_result();
+
+		return $result;
+	}
 
 	public function isQualifiedTime($timer_type_id, $time_record_millisec){
 
@@ -8535,7 +8631,7 @@ class MYSQLInterface{
 				return;
 			}
 
-			$__speech_project_title = $speech_obj->__speech_project_title;
+			$__speech_project_title = $this->get_speech_project_text($__speech_project_id);
 			if($this->is_empty(__FUNCTION__, $__speech_project_title, "__speech_project_title")){
 				return;
 			}
