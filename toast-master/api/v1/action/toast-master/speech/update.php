@@ -461,13 +461,35 @@
 			$result->SPEECH_PROJECT_ID = $SPEECH_PROJECT_ID;
 			$wdj_mysql_interface->update_speech_project($SPEECH_ID, $SPEECH_PROJECT_ID);
 
+			$new_action_name = $wdj_mysql_interface->get_speech_project_text($SPEECH_PROJECT_ID);
+			$result->new_action_name = $new_action_name;
+			
+			/*
 			$speech_project_obj = $wdj_mysql_interface->get_speech_project($SPEECH_PROJECT_ID);
 
 			$new_action_name = null;
 			if(!is_null($speech_project_obj)) {
-				$new_action_name = $speech_project_obj->__speech_project_title;	
+
+				$__speech_timer_green_min = intval($speech_project_obj->__speech_timer_green_mm_ss);
+				$__speech_timer_red_min = intval($speech_project_obj->__speech_timer_red_mm_ss);
+				$__speech_manual_name = $speech_project_obj->__speech_manual_name;
+				$__speech_manual_project_name = $speech_project_obj->__speech_manual_project_name;
+
+				$speech_project_text = "";
+				if(empty($__speech_manual_name) && $__speech_timer_green_min == 0) {
+					$speech_project_text = $__speech_manual_project_name;
+				} else if(empty($__speech_manual_name)) {
+					$speech_project_text = $__speech_manual_project_name . " / " . $__speech_timer_green_min . "-" . $__speech_timer_red_min . "m";
+				} else {
+					$speech_project_text = $__speech_manual_name . "-" . $__speech_manual_project_name . " / " . $__speech_timer_green_min . "-" . $__speech_timer_red_min . "m";
+				}
+
+				$result->speech_project_text = $speech_project_text;
+
+				$new_action_name = $speech_project_text;	
 			}
 			$result->new_action_name = $new_action_name;
+			*/
 
 		} else if($IS_UPDATE_SPEECH_SPEAKER) {
 
