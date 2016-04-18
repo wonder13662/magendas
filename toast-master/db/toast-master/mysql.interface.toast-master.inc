@@ -8625,8 +8625,8 @@ class MYSQLInterface{
 
 					if(strcmp($__title, $speech_title_prev) != 0) {
 						// escape가 필요합니다.
-						// wonder.jung
-						$title_mysql_safe = $this->mysql_manager->escape_json_str($__title);
+						$title_mysql_safe = htmlspecialchars($__title, ENT_QUOTES); // convert single quote.
+						$title_mysql_safe = $this->mysql_manager->escape_json_str($title_mysql_safe);
 
 						// update speech title
 						$table_field_action_item_obj->set_context_attr($params->SPEECH_TITLE, $title_mysql_safe);
