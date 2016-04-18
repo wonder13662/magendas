@@ -528,7 +528,6 @@ wonglish.meeting_agenda_manager = {
 
 		var activate_officer_list = function(tm_officer_action_list, container_jq) {
 
-			// wonder.jung
 			_action_table.add_editable_table_from_action_table(
 				// parent_jq
 				container_jq
@@ -819,7 +818,10 @@ wonglish.meeting_agenda_manager = {
 
 		var btn_new_meeting_save_jq = $("button#meeting-agenda-new");
 		btn_new_meeting_save_jq.click(function(e){
-			// TODO 입력되었던 내용들에 대한 유효성 검사를 진행합니다.
+
+			console.log("click save");
+
+			// 입력되었던 내용들에 대한 유효성 검사를 진행합니다.
 			// 문제없다면 새로운 meeting agenda를 입력뒤, 새로운 agenda 페이지로 이동합니다.
 			var input_meeting_theme_jq = $("input#meeting-theme");
 			var cur_meeting_theme = input_meeting_theme_jq.val();
@@ -829,7 +831,7 @@ wonglish.meeting_agenda_manager = {
 				return;
 			}
 
-			// TODO 입력할 수 있는 글자를 제한합니다.
+			// 입력할 수 있는 글자를 제한합니다.
 			var input_meeting_date_jq = $("input#meeting-date");
 			var cur_input_meeting_date = input_meeting_date_jq.val();
 			if(_v.isNotValidStr(cur_input_meeting_date)) {
@@ -837,6 +839,45 @@ wonglish.meeting_agenda_manager = {
 				input_meeting_date_jq.focus();
 				return;
 			}
+
+			console.log("cur_meeting_theme ::: ",cur_meeting_theme);
+			console.log("cur_input_meeting_date ::: ",cur_input_meeting_date);
+
+			// wonder.jung
+			// TODO - 미팅 날짜와 주제를 업데이트 합니다. --> REST API 구조로 변경하는 건 다음에...
+
+			// $THEME = $params->getParamString($params->THEME);
+
+			// 이상이 없다면 업데이트!
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				// _param_obj / MEETING_ID
+				, _param
+				.get(_param.IS_UPDATE_HEADER,_param.YES)
+				.get(_param.MEETING_ID,meeting_agenda_id)
+				.get(_param.THEME,cur_meeting_theme)
+				.get(_param.START_DATE,cur_input_meeting_date)
+				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+
+				// _delegate_after_job_done
+				,_obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						console.log(data);
+
+						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
+						// TOAST POPUP 찾아볼 것
+						alert("Updated!");
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.
+
+
 		});
 
 
