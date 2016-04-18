@@ -1179,7 +1179,6 @@ class TCPDFManager{
 			$SIMPLE_TABLE_TITLE_FONT_SIZE = TCPDFElement::$SIMPLE_TABLE_TITLE_MIDIUM_FONT_SIZE;
 		}
 
-		
 		// Element Property를 만듭니다.
 		$element_prop_main_action = 
 		TCPDFElement::GET_ELEMENT_PROP(
@@ -1189,7 +1188,7 @@ class TCPDFManager{
 			// element_name
 			, $action_item_obj->get_name()
 			// text
-			, $action_item_obj->get_name()
+			, htmlspecialchars_decode($action_item_obj->get_name(), ENT_QUOTES)
 			// text_color_arr
 			, TCPDFElement::$COLOR_DARK_GRAY_ARR
 			// text_size
@@ -1432,6 +1431,14 @@ class TCPDFManager{
 			$cell_color_arr = TCPDFElement::$COLOR_WARM_GRAY_ARR;
 		}
 
+		$cur_action_name = htmlspecialchars_decode($action_item_obj->get_name(), ENT_QUOTES);
+
+		$cur_text_size = $action_item_obj->get_text_size();
+		$html_safe_action_name = htmlspecialchars_decode($action_item_obj->get_name(), ENT_QUOTES);
+		if(20 < strlen($html_safe_action_name)) {
+			// TODO 자간 간격과 글자수간을 계산하는 알고리즘이 필요.
+			$cur_text_size = 7;
+		}
 
 		$element_prop_simple_table_field = 
 		TCPDFElement::GET_ELEMENT_PROP(
@@ -1441,11 +1448,11 @@ class TCPDFManager{
 			// element_name
 			, "sub_action_" . $simple_table_row_idx . "_" . $simple_table_column_idx . "_" . $simple_table_column->name
 			// text
-			, $action_item_obj->get_name()
+			, $cur_action_name
 			// text_color_arr
 			, $text_color_arr
 			// text_size
-			, $action_item_obj->get_text_size()
+			, $cur_text_size
 			// cell_x_pos
 			, 0
 			// cell_y_pos
