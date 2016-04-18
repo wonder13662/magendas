@@ -82,9 +82,8 @@
 	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
 	$action_collection_obj_immediate_past = null;
 	if($has_immediate_past_action_collection) {
-		// 최근의 ACTION COLLECTION이 있습니다.
-		echo "최근의 ACTION COLLECTION이 있습니다.<br/>";
 
+		// 최근의 ACTION COLLECTION이 있습니다.
 		$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
 		$action_collection_obj_immediate_past_std = null;
 		$meeting_obj_immediate_past = null;

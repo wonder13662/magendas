@@ -8335,8 +8335,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung
-
 		$recent_action_collection_detail = 
 		$this->select_immediate_past_action_collection_by_membership_id($membership_id);
 
@@ -8626,9 +8624,13 @@ class MYSQLInterface{
 					$speech_title_prev = $table_field_action_item_obj->get_context_attr($params->SPEECH_TITLE);
 
 					if(strcmp($__title, $speech_title_prev) != 0) {
+						// escape가 필요합니다.
+						// wonder.jung
+						$title_mysql_safe = $this->mysql_manager->escape_json_str($__title);
+
 						// update speech title
-						$table_field_action_item_obj->set_context_attr($params->SPEECH_TITLE, $__title);
-						$table_field_action_item_obj->set_name($__title);
+						$table_field_action_item_obj->set_context_attr($params->SPEECH_TITLE, $title_mysql_safe);
+						$table_field_action_item_obj->set_name($title_mysql_safe);
 
 						$has_changed = true;
 					} // inner if end
