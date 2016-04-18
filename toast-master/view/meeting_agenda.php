@@ -82,9 +82,8 @@
 	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
 	$action_collection_obj_immediate_past = null;
 	if($has_immediate_past_action_collection) {
-		// 최근의 ACTION COLLECTION이 있습니다.
-		echo "최근의 ACTION COLLECTION이 있습니다.<br/>";
 
+		// 최근의 ACTION COLLECTION이 있습니다.
 		$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
 		$action_collection_obj_immediate_past_std = null;
 		$meeting_obj_immediate_past = null;
@@ -107,6 +106,10 @@
 	if(ActionCollection::is_instance($tm_officer_table_obj)) {
 		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
 	}
+
+	// TEST
+	$test_title = "Homemaking Queen' Secret Recipe for Setting Goals";
+	$title_mysql_safe = htmlspecialchars($test_title, ENT_QUOTES);
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -347,7 +350,12 @@ var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_p
 var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
 
-
+// TEST
+// title_mysql_safe
+var test_title = <?php echo json_encode($test_title);?>;
+var title_mysql_safe = <?php echo json_encode($title_mysql_safe);?>;
+console.log("test_title ::: ",test_title);
+console.log("title_mysql_safe ::: ",title_mysql_safe);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
