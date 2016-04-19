@@ -1713,6 +1713,47 @@ class MYSQLInterface{
 
 	}
 
+	// @ Desc : member id, membership id 로 멤버 정보를 가져옵니다.
+	public function get_club_member($member_id=-1, $membership_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $member_id, "member_id")){
+			return -1;
+		}
+		if($this->is_empty(__FUNCTION__, $membership_id, "membership_id")){
+			return -1;
+		}
+
+		// wonder.jung
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				," , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				," , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				," , CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name) AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				," , IFNULL(`MNM`.status,\"\") AS __member_membership_status"
+				," , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership_id"
+				," , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				," , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
+				," FROM `MEMBER`"
+				," LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				," LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=`MEMBER_N_MEMBERSHIP`.membership_id"
+				," WHERE `MEMBER`.id=\"$member_id\""
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;
+
+	}	
+
 	public function getSleepingMember($expire_date=180, $membership_id=1) {
 
 		if($this->isNotUnsignedNumber($expire_date)) return null;
@@ -1986,7 +2027,7 @@ class MYSQLInterface{
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-				"SELECT `MEMBER`.id AS __member_id"
+				"SELECT IFNULL(`MEMBER`.id, -1) AS __member_id"
 				," FROM `MEMBER`"
 				," WHERE `MEMBER`.`hash_key`=\"$member_hash_key\""
 			)
@@ -1997,7 +2038,9 @@ class MYSQLInterface{
 		}
 
 		$result = $query_manager->get_result();
-		return $result->__member_id;
+		$__member_id = intval($result->__member_id);
+
+		return $__member_id;
 
 	}	
 
