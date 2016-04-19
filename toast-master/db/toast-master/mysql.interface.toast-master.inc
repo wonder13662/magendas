@@ -2792,7 +2792,7 @@ class MYSQLInterface{
 			$today_role_obj->__member_id=$member_id;
 			$today_role_obj->__member_first_name=$member_first_name;
 			$today_role_obj->__member_last_name=$member_last_name;
-			$today_role_obj->__member_name=$member_first_name . " " . $member_last_name;
+			$today_role_obj->__member_name = $member_first_name . " " . $member_last_name;
 			$today_role_obj->__member_membership_status=$member_membership_status;
 
 			// push array
@@ -3243,7 +3243,7 @@ class MYSQLInterface{
 
 		$this->update_meeting_role($meeting_agenda_id, $role_id, $member_id);
 	}
-	private function update_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
+	public function update_meeting_role($meeting_agenda_id=-1, $role_id=-1, $member_id=-1){
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
 			return;

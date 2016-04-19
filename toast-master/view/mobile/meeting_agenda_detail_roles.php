@@ -168,10 +168,11 @@ if(!IS_EXTERNAL_SHARE) {
 var key_value_obj_arr = [];
 for(var idx = 0;idx < member_list.length; idx++) {
 	var member_obj = member_list[idx];
+
 	var key_value_obj = 
 	_obj.get_select_option(
 		// key_str
-		""+member_obj.__member_id
+		member_obj.__member_hash_key
 		// value_str
 		,member_obj.__member_name
 		// key_access_prop_name
@@ -251,20 +252,71 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 			_obj.getDelegate(function(selector_delegate_data){
 
 				var target_jq = selector_delegate_data.delegate_data.get_target_jq();
-				var MEMBER_ID = target_jq.attr("key");
+				var MEMBER_HASH_KEY = target_jq.attr("key");
 				var MEMBER_NAME = target_jq.find("strong").html();
 
+				var param_obj = 
+				_param
+				.get(_param.IS_UPDATE_TODAY_ROLE,_param.YES)
+				.get(_param.MEETING_ID,MEETING_ID)
+				.get(_param.SELECTED_VALUE,MEMBER_HASH_KEY)
+				.get(_param.ROLE_ID,ROLE_ID)
+				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_TODAY_ROLE)
+				;
+
+				console.log("HERE / param_obj ::: ",param_obj);
+
+				_ajax.send_simple_post(
+					// _url
+					_link.get_link(_link.API_UPDATE_TOASTMASTER_ROLE)
+					// _param_obj
+					,param_obj
+					// _delegate_after_job_done
+					,_obj.get_delegate(
+						// delegate_func
+						function(data){
+
+							console.log("data ::: ",data);
+							
+							// 역할을 업데이트 했을 경우의 화면 변경.
+							var MEMBER_NAME = data.NEW_ACTION_NAME;
+
+							// 롤의 이름을 업데이트 합니다.
+							row_role_jq.find("span.badge").find("strong").html(MEMBER_NAME);
+							delegate_data.target_jq.attr("is_open", "NO");
+
+							// 선택된 배지 녹색으로 변경
+							var target_controller = delegate_data.delegate_data.target_controller;
+
+							if(MEMBER_NAME == _param.NOT_ASSIGNED) {
+								target_controller.set_badge_gray();
+							} else {
+								target_controller.set_badge_green();
+							}
+
+							// REFACTOR ME
+							var body = $("html, body");
+							row_member_obj.hide();
+							body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
+							   console.log("Finished animating");
+
+							   //console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
+							});
+
+						},
+						// delegate_scope
+						this
+					)
+				); // ajax done.				
+
+				/*
 				// 선택한 사용자를 해당 롤에 업데이트 합니다.
 				// 이상이 없다면 업데이트!
 				_ajax.send_simple_post(
 					// _url
 					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
 					// _param_obj / MEETING_ID
-					, _param
-					.get(_param.IS_UPDATE_TODAY_ROLE,_param.YES)
-					.get(_param.MEETING_ID,MEETING_ID)
-					.get(_param.MEMBER_ID,MEMBER_ID)
-					.get(_param.ROLE_ID,ROLE_ID)
+					,param_obj
 
 					// _delegate_after_job_done
 					,_obj.get_delegate(
@@ -304,6 +356,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						this
 					)
 				); // ajax done.
+				*/
 
 			}, this)					
 		);
@@ -357,8 +410,10 @@ var role_name = "Toast Master"
 var role_member_name = _param.NOT_ASSIGNED;
 var role_obj = today_role_list[role_idx++];
 
+console.log("role_obj ::: ",role_obj);
+
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 
 var role_controller = 
@@ -408,7 +463,7 @@ role_name = "General Evaluator"
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -440,7 +495,7 @@ role_name = "Timer";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -472,7 +527,7 @@ role_name = "Table Topic Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status === _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -504,7 +559,7 @@ role_name = "Ah & Vote Counter";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -538,7 +593,7 @@ role_name = "Mini Debate Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -572,7 +627,7 @@ role_name = "Grammarian";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
@@ -606,7 +661,7 @@ role_name = "Word & Quote Master";
 role_member_name = _param.NOT_ASSIGNED;
 role_obj = today_role_list[role_idx++];
 if(parseInt(role_obj.__member_id) > 0){
-	role_member_name = role_obj.__member_first_name + " " + role_obj.__member_last_name;
+	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;
 }
 role_controller = 
 _m_list.addTableRowTitleNBadge(
