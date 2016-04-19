@@ -26,8 +26,7 @@ $__membership_list = $wdj_mysql_interface->getMemberShipList();
 
 // GET MEMBER CLUB ACHIEVMENTS
 if(!empty($MEMBER_HASH_KEY)) {
-	$selected_member_arr = $wdj_mysql_interface->getMember($MEMBER_HASH_KEY);	
-	$selected_member_obj = $selected_member_arr[0];
+	$selected_member_obj = $wdj_mysql_interface->get_club_member_by_hash_key($MEMBER_HASH_KEY, $MEETING_MEMBERSHIP_ID);
 }
 
 if(!is_null($selected_member_obj)) {
@@ -118,15 +117,9 @@ var role_history_general_evaluator = <?php echo json_encode($role_history_genera
 var role_history_grammarian = <?php echo json_encode($role_history_grammarian);?>;
 var role_history_ah_counter = <?php echo json_encode($role_history_ah_counter);?>;
 var role_history_timer = <?php echo json_encode($role_history_timer);?>;
+var __member_obj = <?php echo json_encode($selected_member_obj);?>;
 
-// console.log(">>> selected_member_arr :: ",selected_member_arr);
-
-
-
-var __member_obj = null;
-if(_v.isValidArray(selected_member_arr)){
-	__member_obj = selected_member_arr[0];
-}
+console.log("__member_obj ::: ",__member_obj);
 
 
 // Header - Log In Treatment
@@ -182,13 +175,10 @@ if(__member_obj != undefined){
 	__member_hash_key = __member_obj.__member_hash_key;
 	__member_first_name = __member_obj.__member_first_name;
 	__member_last_name = __member_obj.__member_last_name;
-	__member_membership_id = __member_obj.__member_membership;
+	__member_membership_id = __member_obj.__member_membership_id;
 	__member_email = __member_obj.__member_email;
 
 }
-
-
-
 
 
 
@@ -263,6 +253,13 @@ _m_list.addTableRowMultipleTextInputInline(
 				return;	
 			}
 
+
+
+
+
+
+			// wonder.jung
+
 			_ajax.send_simple_post(
 				// _url
 				_link.get_link(_link.API_UPDATE_MEMBER)
@@ -303,6 +300,15 @@ _m_list.addTableRowMultipleTextInputInline(
 				console.log("!STOP! / MEMBER_LAST_NAME does not changed at all!");
 				return;	
 			}
+
+
+
+
+
+
+
+
+			// wonder.jung
 
 			_ajax.send_simple_post(
 				// _url
@@ -369,7 +375,7 @@ if(__member_obj != undefined) {
 
 
 			var MEETING_MEMBERSHIP_ID = parseInt(delegate_data.MEETING_MEMBERSHIP_ID);
-			var MEMBER_ID = parseInt(delegate_data.MEMBER_ID);
+			var MEMBER_HASH_KEY = delegate_data.MEMBER_HASH_KEY;
 			var checked = delegate_data.checked;
 
 			var MEMBER_MEMBERSHIP_STATUS = _param.MEMBER_MEMBERSHIP_STATUS_AVAILABLE;
@@ -377,24 +383,27 @@ if(__member_obj != undefined) {
 				MEMBER_MEMBERSHIP_STATUS = _param.MEMBER_MEMBERSHIP_STATUS_SLEEPING;
 			}
 
+			var _param_obj = 
+			_param
+			.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_MEMBER)
+			.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
+			.get(_param.MEMBER_HASH_KEY,MEMBER_HASH_KEY)
+			.get(_param.MEMBER_MEMBERSHIP_STATUS,MEMBER_MEMBERSHIP_STATUS)
+			;
+
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEMBER)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_MEMBER)
 				// _param_obj / MEETING_ID
-				, _param
-				.get(_param.IS_UPDATE_MEMBER_MEMBERSHIP_STATUS,_param.YES)
-				.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
-				.get(_param.MEMBER_ID,MEMBER_ID)
-				.get(_param.MEMBER_MEMBERSHIP_STATUS,MEMBER_MEMBERSHIP_STATUS)
-
+				, _param_obj
 				// _delegate_after_job_done
 				,_obj.get_delegate(
 					// delegate_func
 					function(data){
 
-						console.log(data);
-						console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
+						// console.log(data);
+						// console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
 						alert("Updated!");
 
@@ -404,12 +413,10 @@ if(__member_obj != undefined) {
 				)
 			); // ajax done.
 
-
-
 		}, this)
 		// delegate_data
 		, _param
-		.get(_param.MEMBER_ID,__member_id)
+		.get(_param.MEMBER_HASH_KEY,__member_hash_key)
 		.get(_param.MEETING_MEMBERSHIP_ID,parseInt(__member_membership_id))
 	);
 
@@ -464,17 +471,20 @@ _m_list.addTableRowTextInputInline(
 			return;	
 		}
 
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_MEMBER)
+		.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
+		.get(_param.MEMBER_HASH_KEY,MEMBER_HASH_KEY)
+		.get(_param.MEMBER_EMAIL,MEMBER_EMAIL)
+		;
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEMBER)
+			_link.get_link(_link.API_UPDATE_TOASTMASTER_MEMBER)
 			// _param_obj / MEETING_ID
-			, _param
-			.get(_param.IS_UPDATE_MEMBER_EMAIL,_param.YES)
-			.get(_param.MEETING_MEMBERSHIP_ID,MEETING_MEMBERSHIP_ID)
-			.get(_param.MEMBER_HASH_KEY,MEMBER_HASH_KEY)
-			.get(_param.MEMBER_EMAIL,MEMBER_EMAIL)
-
+			, _param_obj
 			// _delegate_after_job_done
 			,_obj.get_delegate(
 				// delegate_func
@@ -490,7 +500,6 @@ _m_list.addTableRowTextInputInline(
 				this
 			)
 		); // ajax done.
-
 
 	}, this)
 	// param_obj

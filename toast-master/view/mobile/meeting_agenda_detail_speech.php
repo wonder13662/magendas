@@ -674,23 +674,28 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				return;	
 			}
 
+
+			var _param_obj = 
+			_param
+			.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_SPEECH)
+			.get(_param.SPEECH_ID,SPEECH_ID)
+			.get(_param.SPEECH_TITLE,cur_title)
+			;
+
+
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
 				// _param_obj / MEETING_ID
-				, _param
-				.get(_param.IS_UPDATE_SPEECH_TITLE,_param.YES)
-				.get(_param.SPEECH_ID,SPEECH_ID)
-				.get(_param.SPEECH_TITLE,cur_title)
-
+				, _param_obj
 				// _delegate_after_job_done
 				,_obj.get_delegate(
 					// delegate_func
 					function(data){
 
-						// console.log(data);
-						// console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
+						console.log(data);
+						console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
 						alert("Updated!");
 
@@ -699,6 +704,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					this
 				)
 			); // ajax done.
+
 
 		}, this)
 		// param_obj
@@ -894,15 +900,19 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
 					var target_controller = selected_delegate_data.target_controller;
 
+					var _param_obj =
+					_param
+					.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_SPEECH)
+					.get(_param.SPEECH_ID,SPEECH_ID)
+					.get(_param.SPEECH_SPEAKER_MEMBER_HASH_KEY,SELECTED_KEY)
+					;
+
+					// 이상이 없다면 업데이트!
 					_ajax.send_simple_post(
 						// _url
-						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+						_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
 						// _param_obj / MEETING_ID
-						, _param
-						.get(_param.IS_UPDATE_SPEECH_SPEAKER,_param.YES)
-						.get(_param.SPEECH_ID,SPEECH_ID)
-						.get(_param.SPEECH_SPEAKER_MEMBER_HASH_KEY,SELECTED_KEY)
-
+						, _param_obj
 						// _delegate_after_job_done
 						,_obj.get_delegate(
 							// delegate_func
@@ -911,17 +921,11 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 								console.log(data);
 								console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
+								var updated_speaker_member_id = parseInt(data.updated_speaker_member_id);
+
 								alert("Updated!");
 
-								var is_success = false;
-								if(	data != undefined && 
-									data.upsert_speech_speaker != undefined && 
-									data.upsert_speech_speaker.output === true) {
-
-									is_success = true;
-								}
-
-								if(is_success) {
+								if(0 < updated_speaker_member_id) {
 									// 성공했다면 표시된 값을 변경해준다.
 									row_member_jq.find("span.badge").find("strong").html(SELECTED_VALUE);
 
@@ -1011,13 +1015,55 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 					var SELECTED_VALUE = selected_delegate_data[_param.SELECTED_VALUE];
 					var target_controller = selected_delegate_data.target_controller;
 
-					var request_param = 
+					var _param_obj =
 					_param
-					.get(_param.IS_UPDATE_SPEECH_EVALUATOR,_param.YES)
+					.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_SPEECH)
 					.get(_param.SPEECH_ID,SPEECH_ID)
 					.get(_param.SPEECH_EVALUATOR_MEMBER_HASH_KEY,SELECTED_KEY)
 					;
 
+					// 이상이 없다면 업데이트!
+					_ajax.send_simple_post(
+						// _url
+						_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+						// _param_obj / MEETING_ID
+						, _param_obj
+						// _delegate_after_job_done
+						,_obj.get_delegate(
+							// delegate_func
+							function(data){
+
+								console.log(data);
+								console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
+
+								var updated_evaluator_member_id = parseInt(data.updated_evaluator_member_id);
+
+								alert("Updated!");
+
+								if(0 < updated_evaluator_member_id) {
+									// 성공했다면 표시된 값을 변경해준다.
+									row_member_jq.find("span.badge").find("strong").html(SELECTED_VALUE);
+
+									if(SELECTED_VALUE  === _param.NOT_ASSIGNED) {
+										target_controller.set_badge_gray();
+									} else {
+										target_controller.set_badge_green();
+									}
+
+
+								} else {
+									alert("Update failed!");
+								}
+
+							},
+							// delegate_scope
+							this
+						)
+					); // ajax done.
+
+
+
+/*
 					_ajax.send_simple_post(
 						// _url
 						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
@@ -1058,6 +1104,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 							this
 						)
 					); // ajax done.
+*/
 
 				},this)
 				// delegate_data

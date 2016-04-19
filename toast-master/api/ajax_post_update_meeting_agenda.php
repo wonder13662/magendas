@@ -63,10 +63,10 @@
 
 	if(	$IS_UPDATE_HEADER && $MEETING_ID > 0 ){
 
-		if(!empty($START_DATE) && !empty($THEME) && ($ROUND > 0)) {
+		if(!empty($START_DATE) && !empty($THEME)) {
 
 			$start_dttm = date("YmdHis", strtotime($START_DATE));
-			$query_output = $wdj_mysql_interface->updateMeetingAgenda($MEETING_ID, $ROUND, $THEME, $start_dttm);
+			$query_output = $wdj_mysql_interface->updateMeetingAgenda($MEETING_ID, $THEME, $start_dttm);
 			array_push($result->query_output_arr,$query_output);
 
 		} else if(!empty($START_DATE)) {
@@ -322,11 +322,18 @@
 	} else if($IS_UPDATE_SPEECH_SPEAKER){
 
 		$query_output = 
-		$wdj_mysql_interface->upsert_speech_speaker(
+		$wdj_mysql_interface->update_speech_speaker(
 			$SPEECH_ID
 			, $SPEECH_SPEAKER_MEMBER_ID
 		);
-		$result->upsert_speech_speaker=$query_output;
+
+		// wonder.jung
+		// 업데이트한 스피커 정보를 가져옵니다.
+		// public function sel_speech($speech_id=-1){
+		$update_speech_obj = $wdj_mysql_interface->sel_speech($SPEECH_ID);
+
+		$result->update_speech_obj=$update_speech_obj;
+
 
 	} else if( $IS_UPDATE_TABLE_ROW_ORDER_ON_TODAYS_EVALUATOR && !empty($SPEECH_EVALUATOR_TABLE_ROW_INFO_ARR_JSON_STR)){
 

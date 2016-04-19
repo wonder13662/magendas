@@ -1087,15 +1087,15 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}
 
-	public function updateMeetingAgenda($meeting_id, $round, $theme, $start_dttm, $meeting_membership_id=1){
+	public function updateMeetingAgenda($meeting_id, $theme, $start_dttm, $meeting_membership_id=1){
 
-		if($this->isNotUnsignedNumber($meeting_id) || $this->isNotUnsignedNumber($round) || empty($theme) || empty($start_dttm)) return null;
+		if($this->isNotUnsignedNumber($meeting_id) || empty($theme) || empty($start_dttm)) return null;
 
 		$theme_safe = addslashes($theme);
 
 		$query =
 		"UPDATE `MEETING_AGENDA`"
-		. " SET `round`=$round,`theme`=\"$theme_safe\",`startdttm`=\"$start_dttm\",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
+		. " SET `theme`=\"$theme_safe\",`startdttm`=\"$start_dttm\",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
 		. " WHERE id=$meeting_id"
 		. " AND membership_id=$meeting_membership_id"
 		;
@@ -1713,14 +1713,30 @@ class MYSQLInterface{
 
 	}
 
+	public function get_club_member_by_hash_key($member_hash_key="", $membership_id=-1) {
+
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		$member_id = $this->get_member_id_by_hash_key($member_hash_key);
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+
+		return $this->get_club_member($member_id, $membership_id);
+	}
+
 	// @ Desc : member id, membership id 로 멤버 정보를 가져옵니다.
 	public function get_club_member($member_id=-1, $membership_id=-1) {
 
-		if($this->is_empty(__FUNCTION__, $member_id, "member_id")){
-			return -1;
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
 		}
-		if($this->is_empty(__FUNCTION__, $membership_id, "membership_id")){
-			return -1;
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
 		}
 
 		// wonder.jung
@@ -1740,10 +1756,11 @@ class MYSQLInterface{
 				," , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
 				," FROM `MEMBER`"
 				," LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-				," LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=`MEMBER_N_MEMBERSHIP`.membership_id"
+				," LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
 				," WHERE `MEMBER`.id=\"$member_id\""
 			)
 		);
+		// $query_manager->printFormattedQuery();
 		$query_manager->select_one();
 		if($query_manager->is_failed()) {
 			return -1;
@@ -3758,6 +3775,7 @@ class MYSQLInterface{
 				," , MSV2.`order_num` AS __order_num"
 
 				," , IFNULL(MSS.`id`,-1) AS __speaker_id"
+				," , IFNULL(SPEAKER.id,-1) AS __speaker_member_id"
 				," , IFNULL(SPEAKER.hash_key,\"\") AS __speaker_member_hash_key"
 				," , IFNULL(CONCAT(SPEAKER.first_name,' ',SPEAKER.last_name), \"NOT ASSIGNED\") AS __speaker_member_name"
 
@@ -3771,7 +3789,7 @@ class MYSQLInterface{
 				," , IFNULL(TIME_FORMAT(SEC_TO_TIME(MTGL.`sec_red`),'%i'),0) AS __speaker_timer_red_mm_ss"
 
 				," , IFNULL(MSE.`id`,-1) AS __evaluator_id"
-				," , IFNULL(EVALUATOR.id,\"\") AS __evaluator_member_id"
+				," , IFNULL(EVALUATOR.id,-1) AS __evaluator_member_id"
 				," , IFNULL(EVALUATOR.hash_key,\"\") AS __evaluator_member_hash_key"
 				," , IFNULL(CONCAT(EVALUATOR.first_name,\" \",EVALUATOR.last_name), \"NOT ASSIGNED\") AS __evaluator_member_name"
 				," , 120 AS __evaluator_timer_green"

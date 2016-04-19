@@ -133,14 +133,6 @@
 
 
 
-	// $MEMBER_FIRST_NAME = $params->getParamString($params->MEMBER_FIRST_NAME, "");
-	// $MEMBER_LAST_NAME = $params->getParamString($params->MEMBER_LAST_NAME, "");
-	// $MEMBER_EMAIL = $params->getParamString($params->MEMBER_EMAIL, "");
-
-	// public $MEMBER_MEMBERSHIP_STATUS="MEMBER_MEMBERSHIP_STATUS";
-	// public $MEMBER_MEMBERSHIP_STATUS_AVAILABLE="A";
-	// public $MEMBER_MEMBERSHIP_STATUS_SLEEPING="N";
-
 
 
 
@@ -184,9 +176,39 @@
 			$result->updated_member_last_name = $updated_member_last_name;
 		}
 
+	} else if(!empty($MEMBER_EMAIL)) {
+		// UPDATE MEMBER EMAIL
+
+		$is_changed = false;
+		if(strcmp($__member_email, $MEMBER_EMAIL) != 0) {
+			$is_changed = true;
+		}
+		if($is_changed) {
+			$wdj_mysql_interface->updateMemberEmail($MEMBER_HASH_KEY, $MEMBER_EMAIL);
+
+			$updated_member_obj = $wdj_mysql_interface->get_club_member($MEMBER_ID, $MEETING_MEMBERSHIP_ID);
+			$updated_member_email = $updated_member_obj->__member_email;
+
+			$result->updated_member_email = $updated_member_email;
+		}
+
 	} else if(!empty($MEMBER_MEMBERSHIP_STATUS)) {
 		// UPDATE MEMBER STATUS
-		// public function updateMemberStatus(	$member_id, $membership_id, $member_status ){
+
+		$is_changed = false;
+		if(strcmp($__member_membership_status, $MEMBER_MEMBERSHIP_STATUS) != 0) {
+			$is_changed = true;
+		}
+		if($is_changed) {
+			$wdj_mysql_interface->updateMemberStatus($MEMBER_ID, $MEETING_MEMBERSHIP_ID, $MEMBER_MEMBERSHIP_STATUS);
+
+			$updated_member_obj = $wdj_mysql_interface->get_club_member($MEMBER_ID, $MEETING_MEMBERSHIP_ID);
+			$updated_member_membership_status = $updated_member_obj->__member_membership_status;
+
+			$result->updated_member_membership_status = $updated_member_membership_status;
+		}
+
+
 	}
 
 
@@ -198,4 +220,40 @@
 	terminate($wdj_mysql_interface, $result);
 
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
