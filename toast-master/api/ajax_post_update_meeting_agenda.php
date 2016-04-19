@@ -112,8 +112,8 @@
 	$MEMBER_ID = $params->getParamNumber($params->MEMBER_ID);
 
 	if( $IS_UPDATE_TODAY_ROLE && $MEETING_ID > 0 && $ROLE_ID > 0 && $MEMBER_ID > 0 ){
-		// $query_output = $wdj_mysql_interface->updateTodayRole($MEETING_ID, $ROLE_ID, $MEMBER_ID);
-		// array_push($result->query_output_arr,$query_output);
+		$query_output = $wdj_mysql_interface->update_meeting_role($MEETING_ID, $ROLE_ID, $MEMBER_ID);
+		array_push($result->query_output_arr,$query_output);
 	}
 
 
