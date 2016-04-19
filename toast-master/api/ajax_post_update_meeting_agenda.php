@@ -60,6 +60,7 @@
 	$ROUND = $params->getParamNumber($params->ROUND);
 	$THEME = $params->getParamString($params->THEME);
 	$START_DATE = $params->getParamString($params->START_DATE);
+	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
 
 	if(	$IS_UPDATE_HEADER && $MEETING_ID > 0 ){
 
@@ -562,7 +563,7 @@
 	$IS_UPDATE_EXECUTIVE_MEMBER = $params->isYes($params->IS_UPDATE_EXECUTIVE_MEMBER);
 	$EXECUTIVE_OFFICER_ID = $params->getParamNumber($params->EXECUTIVE_OFFICER_ID);
 	$EXECUTIVE_MEMBER_ID = $params->getParamNumber($params->EXECUTIVE_MEMBER_ID);
-	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
+	
 
 	if($IS_UPDATE_EXECUTIVE_MEMBER){
 		$query_output = $wdj_mysql_interface->updateExecutiveMember($MEETING_MEMBERSHIP_ID, $EXECUTIVE_OFFICER_ID, $EXECUTIVE_MEMBER_ID);

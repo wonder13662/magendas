@@ -1087,7 +1087,7 @@ class MYSQLInterface{
 		return $this->getSimpleResult($json_res_obj);
 	}
 
-	public function updateMeetingAgenda($meeting_id, $theme, $start_dttm, $meeting_membership_id=1){
+	public function updateMeetingAgenda($meeting_id, $theme, $start_dttm){
 
 		if($this->isNotUnsignedNumber($meeting_id) || empty($theme) || empty($start_dttm)) return null;
 
@@ -1097,7 +1097,6 @@ class MYSQLInterface{
 		"UPDATE `MEETING_AGENDA`"
 		. " SET `theme`=\"$theme_safe\",`startdttm`=\"$start_dttm\",`updttm`=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')"
 		. " WHERE id=$meeting_id"
-		. " AND membership_id=$meeting_membership_id"
 		;
 
 		$json_res_obj = $this->getModifyResult($query);

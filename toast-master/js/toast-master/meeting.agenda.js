@@ -61,6 +61,8 @@ wonglish.meeting_agenda_manager = {
 
 		console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
 
+		console.log("HERE / meeting_membership_id ::: ",meeting_membership_id);
+
 
 		var meeting_agenda_id = meeting_agenda_obj.__meeting_id;
 		var meeting_agenda_startdttm = meeting_agenda_obj.__startdttm;
@@ -842,19 +844,23 @@ wonglish.meeting_agenda_manager = {
 				return;
 			}
 
+			var _param_obj =
+			_param
+			.get(_param.IS_UPDATE_HEADER,_param.YES)
+			.get(_param.MEETING_ID,meeting_agenda_id)
+			.get(_param.THEME,cur_meeting_theme)
+			.get(_param.START_DATE,cur_input_meeting_date)
+			.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+			;
+
+			console.log("HERE / _param_obj ::: ",_param_obj);
+
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
 				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
 				// _param_obj / MEETING_ID
-				, _param
-				.get(_param.IS_UPDATE_HEADER,_param.YES)
-				.get(_param.MEETING_ID,meeting_agenda_id)
-				.get(_param.THEME,cur_meeting_theme)
-				.get(_param.START_DATE,cur_input_meeting_date)
-				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
-				
-
+				, _param_obj
 				// _delegate_after_job_done
 				,_obj.get_delegate(
 					// delegate_func
@@ -865,7 +871,12 @@ wonglish.meeting_agenda_manager = {
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것
 						if(confirm("Updated!")) {
-							_link.go_there(_link.MEETING_AGENDA, _param.get(_param.MEETING_ID,meeting_agenda_id));	
+							var param_obj = 
+							_param
+							.get(_param.MEETING_ID,meeting_agenda_id)
+							.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+							;
+							_link.go_there(_link.MEETING_AGENDA, param_obj);
 						}
 					},
 					// delegate_scope
