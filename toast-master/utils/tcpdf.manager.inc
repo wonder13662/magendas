@@ -1284,9 +1284,8 @@ class TCPDFManager{
 		}
 
 		$cell_y_pos = $parent_element_set->get_element_set_bottom_y_pos();
-		// echo "\$cell_y_pos ::: $cell_y_pos<br/>";
 
-		// wonder.jung
+		
 		$element_prop_simple_table_cell = 
 		TCPDFElement::GET_ELEMENT_PROP(
 			$this->pdf
@@ -1439,6 +1438,8 @@ class TCPDFManager{
 			// TODO 자간 간격과 글자수간을 계산하는 알고리즘이 필요.
 			$cur_text_size = 7;
 		}
+		// wonder.jung
+		// echo "\$cur_action_name ::: $cur_action_name<br/>";
 
 		$element_prop_simple_table_field = 
 		TCPDFElement::GET_ELEMENT_PROP(

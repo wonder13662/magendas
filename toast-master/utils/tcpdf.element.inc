@@ -1038,6 +1038,14 @@ class TCPDFElement{
 
 		$raw_text = html_entity_decode($raw_text);
 
+		// wonder.jung
+		$target_raw_text = "Organize";
+		$is_debug = false;
+		if(strpos($raw_text,$target_raw_text) !== FALSE) {
+			// $is_debug = true;
+		}
+
+
 		$this->set_font();
 
 		// 입력된 텍스트로 셀의 높이가 결정되는 경우는 아래 절차를 진행합니다.
@@ -1053,6 +1061,9 @@ class TCPDFElement{
 
 		// b-1. 사용자의 글의 길이를 구합니다.
 		$raw_text_width = $this->get_text_width_on_font($raw_text);
+		if($is_debug) {
+			echo "\$raw_text_width : $raw_text_width<br/>";
+		}
 
 		// http://www.tcpdf.org/doc/code/classTCPDF.html
 		$raw_text_height = 
@@ -1120,6 +1131,10 @@ class TCPDFElement{
 
 			$cur_max_text_width = $cur_cell_width - ($cur_text_x_pos - $cur_cell_x_pos) - 1;
 
+			if($is_debug) {
+				echo "\$cur_max_text_width : $cur_max_text_width<br/>";
+				echo "\$cur_cell_width : $cur_cell_width<br/>";
+			}
 		}	
 
 		// 줄바꿈 하는 인덱스를 구했습니다.
@@ -1128,7 +1143,10 @@ class TCPDFElement{
 		$text_row_count = 0;
 		if($cur_max_text_width > 0) {
 			$text_row_count = CEIL($raw_text_width / $cur_max_text_width);
-			// echo "\$text_row_count : $text_row_count<br/>";
+
+			if($is_debug) {
+				echo "\$text_row_count : $text_row_count<br/>";
+			}
 		}
 
 		// 수정 이전에는 모두 한줄로 표시.
@@ -1140,6 +1158,8 @@ class TCPDFElement{
 		}
 		$this->set_text_height($text_height);
 		// $this->set_text_height($raw_text_height);
+
+
 
 		if($text_row_count > 1) {
 			// 두 줄 이상인 경우
@@ -1159,25 +1179,26 @@ class TCPDFElement{
 			// echo "\$cur_cnt : $cur_cnt<br/>";
 			// echo "\$max_loop_cnt : $max_loop_cnt<br/>";
 
+
 			while($cur_cnt < $max_loop_cnt) {
 
 				$sub_text = SUBSTR($raw_text_to_slice, 0, $slice_length);
 
 				$sub_text_width = $this->get_text_width_on_font($sub_text);
 
-				// if(strpos($raw_text,"Your time is limited") !== FALSE) {
-				// 	echo "\$raw_text_to_slice : $raw_text_to_slice<br/>";
-				// 	echo "\$sub_text : $sub_text<br/><br/>";
+				if($is_debug) {
+					echo "\$raw_text_to_slice : $raw_text_to_slice<br/>";
+					echo "\$sub_text : $sub_text<br/><br/>";
 
-				// 	echo "\$sub_text_width : $sub_text_width<br/>";
-				// 	echo "\$cur_max_text_width : $cur_max_text_width<br/><br/>";
+					echo "\$sub_text_width : $sub_text_width<br/>";
+					echo "\$cur_max_text_width : $cur_max_text_width<br/><br/>";
 
-				// 	echo "\$slice_length : $slice_length<br/>";
-				// 	echo "\$text_char_count_left_over : $text_char_count_left_over<br/>";
+					echo "\$slice_length : $slice_length<br/>";
+					echo "\$text_char_count_left_over : $text_char_count_left_over<br/>";
 					
-				// 	print_r($text_arr);
-				// 	echo "<br/><br/>";
-				// }
+					print_r($text_arr);
+					echo "<br/><br/>";
+				}
 
 
 				if($cur_max_text_width < $sub_text_width) {
@@ -1186,6 +1207,11 @@ class TCPDFElement{
 					$sub_text_next = SUBSTR($raw_text_to_slice, ($slice_length - 1), ($slice_length * 2) - 1);
 					$next_sub_text_fisrt_char = SUBSTR($sub_text_next, 0, 1);
 					$last_pos_white_space = -1;
+
+					$prev_sub_text = SUBSTR($prev_sub_text, 0, $last_pos_white_space);
+					$_raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
+
+					/*
 					if(strcmp($prev_sub_text_last_char," ") != 0 && strcmp($next_sub_text_fisrt_char," ") != 0) {
 						// 나눈 줄의 마지막 글자가 공백이 아니다. && 다음 줄의 첫글자가 공백이 아니다.
 						// 그렇다면 단어가 줄바꿈으로 둘로 나뉜것이다.
@@ -1195,6 +1221,7 @@ class TCPDFElement{
 						$prev_sub_text = SUBSTR($prev_sub_text, 0, $last_pos_white_space);
 						$_raw_text_to_slice = SUBSTR($raw_text_to_slice, strlen($prev_sub_text), (strlen($raw_text_to_slice) - strlen($prev_sub_text)));
 					}
+					*/
 
 					// 문자열을 시작하는 인덱스를 조정합니다.
 					// 1을 빼지 않을 경우, 다음 열의 첫번째 문자가 사라집니다.
@@ -1231,13 +1258,13 @@ class TCPDFElement{
 			array_push($text_arr, $raw_text);
 		}
 
-		// DEBUG
-		// if(strpos($raw_text,"Vote Counter") !== FALSE) {
-		// 	echo "\$raw_text : $raw_text<br/>";
-		// 	echo "\$text_row_count : $text_row_count<br/>";
-		// 	print_r($text_arr);
-		// 	echo "<br/><br/>";
-		// }
+		// DEBUG - wonder.jung
+		if($is_debug) {
+			echo "\$raw_text : $raw_text<br/>";
+			echo "\$text_row_count : $text_row_count<br/>";
+			print_r($text_arr);
+			echo "<br/><br/>";
+		}
 
 		$this->set_text_arr($text_arr);
 		
