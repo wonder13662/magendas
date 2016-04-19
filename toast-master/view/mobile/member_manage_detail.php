@@ -100,13 +100,13 @@ var MEMBER_ID = <?php echo json_encode($MEMBER_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 
-console.log(">>> membership_obj :: ",membership_obj);
+// console.log(">>> membership_obj :: ",membership_obj);
 
 var __all_member_list = <?php echo json_encode($__all_member_list);?>;
 var selected_member_arr = <?php echo json_encode($selected_member_arr);?>;
 var __membership_list = <?php echo json_encode($__membership_list);?>;
 
-console.log(">>> selected_member_arr :: ",selected_member_arr);
+// console.log(">>> selected_member_arr :: ",selected_member_arr);
 
 var speech_history = <?php echo json_encode($speech_history);?>;
 var evaluation_history = <?php echo json_encode($evaluation_history);?>;
@@ -119,7 +119,7 @@ var role_history_grammarian = <?php echo json_encode($role_history_grammarian);?
 var role_history_ah_counter = <?php echo json_encode($role_history_ah_counter);?>;
 var role_history_timer = <?php echo json_encode($role_history_timer);?>;
 
-console.log(">>> selected_member_arr :: ",selected_member_arr);
+// console.log(">>> selected_member_arr :: ",selected_member_arr);
 
 
 
@@ -349,7 +349,7 @@ if(__member_obj == undefined) {
 
 
 
-// 2. member status - 신규 입사자 등록시에는 노출하지 않습니다.
+// 2. member status - 신규 멤버 등록시에는 노출하지 않습니다.
 if(__member_obj != undefined) {
 
 	var member_status_toggle =
