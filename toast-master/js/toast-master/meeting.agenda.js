@@ -305,7 +305,7 @@ wonglish.meeting_agenda_manager = {
 
 						_ajax.send_simple_post(
 							// _url
-							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_SPEECH)
 							// _param_obj
 							,cur_action_obj_for_db_update
 							// _delegate_after_job_done
@@ -359,7 +359,7 @@ wonglish.meeting_agenda_manager = {
 
 						_ajax.send_simple_post(
 							// _url
-							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_SPEECH)
 							// _param_obj
 							,cur_action_obj_for_db_update
 							// _delegate_after_job_done
@@ -388,7 +388,7 @@ wonglish.meeting_agenda_manager = {
 
 						_ajax.send_simple_post(
 							// _url
-							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_SPEECH)
 							// _param_obj
 							,cur_action_obj_for_db_update
 							// _delegate_after_job_done
@@ -443,7 +443,7 @@ wonglish.meeting_agenda_manager = {
 
 						_ajax.send_simple_post(
 							// _url
-							_link.get_link(_link.API_UPDATE_TOASTMASTER_SPEECH)
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_SPEECH)
 							// _param_obj
 							,cur_action_obj_for_db_update
 							// _delegate_after_job_done
@@ -853,6 +853,7 @@ wonglish.meeting_agenda_manager = {
 				.get(_param.THEME,cur_meeting_theme)
 				.get(_param.START_DATE,cur_input_meeting_date)
 				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+				
 
 				// _delegate_after_job_done
 				,_obj.get_delegate(
