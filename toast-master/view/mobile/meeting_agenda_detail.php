@@ -20,7 +20,14 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 
 $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
 
-$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgenda($MEETING_MEMBERSHIP_ID, $MEETING_ID);
+// 가장 최신의 미팅 ID를 가져옵니다.
+$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($MEETING_MEMBERSHIP_ID);
+if($MEETING_ID == -1) {
+	$MEETING_ID = $latest_meeting_id;
+}
+
+
+$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
 $today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
 $today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
 $today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
@@ -67,15 +74,10 @@ var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
 
 var membership_obj = <?php echo json_encode($membership_obj);?>;
-var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
+var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
-
-console.log(">>> login_user_info :: ",login_user_info);
-console.log(">>> membership_obj :: ",membership_obj);
-
-console.log(">>> today_speech_list :: ",today_speech_list);
 
 var is_editable = true;
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
@@ -93,17 +95,6 @@ _tm_m_list.addHeaderRow(
 	// header_arr
 	,[
 		_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
 			_link.MOBILE_TOP
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -115,13 +106,13 @@ _tm_m_list.addHeaderRow(
 	, _tm_m_list.COLOR_TEXT_WHITE
 	// bg_color_vmouse_down
 	, _tm_m_list.COLOR_RED_WINE
+	// is_disabled
+	, null
+	// redirect_url_after_log_in
+	, _link.MOBILE_MEETING_AGENDA_DETAIL
 );
 
 // Body - Content
-var meeting_agenda_obj = null;
-if(meeting_agenda_list != null || meeting_agenda_list.length > 0){
-	meeting_agenda_obj = meeting_agenda_list[0];
-}
 console.log(">>> meeting_agenda_obj :: ",meeting_agenda_obj);
 
 
@@ -197,16 +188,19 @@ _m_list.addTableRowDateInput(
 			}
 		}
 
+		var _param_obj =
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+		.get(_param.MEETING_ID,MEETING_ID)
+		.get(_param.START_DATE,cur_date)
+		;
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-			// _param_obj / MEETING_ID
-			, _param
-			.get(_param.IS_UPDATE_HEADER,_param.YES)
-			.get(_param.MEETING_ID,MEETING_ID)
-			.get(_param.START_DATE,cur_date)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			_link.get_link(_link.API_UPDATE_TOASTMASTER_MEETING_AGENDA)
+			// _param_obj
+			, _param_obj
 
 			// _delegate_after_job_done
 			,_obj.get_delegate(
@@ -223,7 +217,7 @@ _m_list.addTableRowDateInput(
 				// delegate_scope
 				this
 			)
-		); // ajax done.		
+		); // ajax done.
 
 	}, this)
 	// param_obj
@@ -245,7 +239,6 @@ if(!is_editable) {
 
 
 
-console.log("_color :: ",_color);
 
 
 // 3. THEME
@@ -279,16 +272,20 @@ _m_list.addTableRowTextInputInline(
 			return;	
 		}
 
+
+		var _param_obj =
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+		.get(_param.MEETING_ID,MEETING_ID)
+		.get(_param.THEME,cur_theme)
+		;
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-			// _param_obj / MEETING_ID
-			, _param
-			.get(_param.IS_UPDATE_HEADER,_param.YES)
-			.get(_param.MEETING_ID,MEETING_ID)
-			.get(_param.THEME,cur_theme)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			_link.get_link(_link.API_UPDATE_TOASTMASTER_MEETING_AGENDA)
+			// _param_obj
+			, _param_obj
 
 			// _delegate_after_job_done
 			,_obj.get_delegate(
@@ -296,6 +293,9 @@ _m_list.addTableRowTextInputInline(
 				function(data){
 
 					console.log(data);
+
+					// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
+					// TOAST POPUP 찾아볼 것
 					alert("Updated!");
 
 				},
@@ -344,8 +344,10 @@ for(var idx = 0; idx < today_role_list.length; idx++) {
 		role_cnt++;
 	}
 }
+// wonder.jung - iframe test
 var row_role_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
+// _m_list.addTableRowMovingArrowWidthBadge(
+_m_list.add_table_row_badge_n_iframe(
 	// title
 	"Roles"
 	// title_on_badge
@@ -355,35 +357,27 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(delegate_data){
 
-		if(!is_editable) {
-			alert(msg_guide_not_club_member);
-			return;
-		}
-
-		if(	delegate_data == undefined ||
-			delegate_data.delegate_data == undefined ||
-			delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] == undefined ) {
-
-			console.log("!Error!\taddTableRowMovingArrowWidthBadge\tdelegate_data is not valid!\tdelegate_data :: ",delegate_data);
-			return;
-		}
-
-		if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
-
-			_link.go_there(
-				_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
-				,_param
-				.get(_param.MEETING_ID, MEETING_ID)
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			);
-
-		}
+		console.log(">>> delegate_data ::: ",delegate_data);
 
 	}, this)
 	// is_bold
 	, true
-	// delegate_data
+	// param_obj
 	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// iframe_height
+	, 416
 );
 
 

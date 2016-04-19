@@ -1833,6 +1833,24 @@ class ActionTemplate{
 
 	}
 
+
+
+
+
+
+
+
+
+	// ActionTemplate::get_TOASTMASTER_OFFICERS();
+	public static function get_TOASTMASTER_ROLE_SIGN_UP() {
+
+		// wonder.jung
+		// 롤 사인업을 나타내는 테이블을 만듭니다.
+
+		return null;
+	}
+
+
 }
 
 ?>

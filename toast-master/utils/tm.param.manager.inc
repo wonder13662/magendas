@@ -365,6 +365,9 @@ class ToastmasterParamManager{
 
 	public $SELECTED_VALUE="SELECTED_VALUE";
 
+	// IFRAME
+	public $IS_IFRAME_VIEW="IS_IFRAME_VIEW";
+
 }
 
 ?>

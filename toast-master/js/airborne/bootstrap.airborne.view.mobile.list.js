@@ -871,7 +871,8 @@ airborne.bootstrap.view.mobile.list = {
 
 		// 첫번째 버튼에 적용할 이벤트 
 		// 첫번째 버튼에는 '이전화면으로 이동' 기능이 있으므로 독립적인 이벤트 구현 로직이 필요하다.
-		if(_v.isValidArray(row_jq_arr) && header_arr.length > 1){
+		// if(_v.isValidArray(row_jq_arr) && header_arr.length > 1){
+		if(_v.isValidArray(row_jq_arr)){
 			var cur_row_tag_jq = row_jq_arr[0];
 			var _self_obj = this;
 
@@ -881,52 +882,54 @@ airborne.bootstrap.view.mobile.list = {
 				// delegate_obj
 				, _obj.getDelegate(function(delegate_data){
 
-					if(delegate_data != undefined && delegate_data.delegate_data != undefined) {
+					if(delegate_data == undefined || delegate_data.delegate_data == undefined) {
+						return;
+					}
 
-						if(_param.EVENT_MOUSE_DOWN === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+					if (_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
-							// 사용자가 첫번째 열을 터치. 누른 상태입니다.
-							// 타이틀의 그림자를 지워줍니다.
-							if(delegate_data.target_jq != undefined) {
-								console.log("타이틀의 그림자를 지워줍니다. / delegate_data :: ",delegate_data);
-								delegate_data.target_jq.find("span").css("text-shadow", "");
-							}
+						console.log("delegate_data ::: ",delegate_data);
+						console.log("header_arr ::: ",header_arr);
 
-						} else if (_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+						var last_header_obj = header_arr[(header_arr.length-1)];
+						location.href = last_header_obj.__call_url;
 
-							// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
-							// 타이틀의 그림자를 다시 보여줍니다.
-							console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
-							delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
+						// TEST
+						return;
 
-							var _event = delegate_data._event;
-							var is_hover = _obj.is_hover(_event, icon_arrow_clickable_mask_jq);
-							if(is_hover === true) {
+						/*
+						// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
+						// 타이틀의 그림자를 다시 보여줍니다.
+						console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
+						delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
 
-								// console.log("이전 페이지로 돌아갑니다.");
-								var __call_url = header_arr[1].__call_url;
-								location.href = __call_url;
+						var _event = delegate_data._event;
+						var is_hover = _obj.is_hover(_event, icon_arrow_clickable_mask_jq);
+						if(is_hover === true) {
 
+							// console.log("이전 페이지로 돌아갑니다.");
+							var __call_url = header_arr[1].__call_url;
+							location.href = __call_url;
+
+						} else {
+
+							// console.log("이전 페이지 목록을 보여줍니다.");
+							var self_tag_jq = delegate_data.target_jq;
+							var row_status = self_tag_jq.parent().attr("status");
+
+							var next_row_status = (row_status == "close")?"open":"close";
+							self_tag_jq.parent().attr("status",next_row_status);
+							if(next_row_status == "close"){
+								closeAll();
 							} else {
-
-								// console.log("이전 페이지 목록을 보여줍니다.");
-								var self_tag_jq = delegate_data.target_jq;
-								var row_status = self_tag_jq.parent().attr("status");
-
-								var next_row_status = (row_status == "close")?"open":"close";
-								self_tag_jq.parent().attr("status",next_row_status);
-								if(next_row_status == "close"){
-									closeAll();
-								} else {
-									openAll();
-								}
-
+								openAll();
 							}
 
+						}
+						*/
 
-						} // inner if end
+					} // if end
 
-					} // outer if end
 
 				}, this)
 				// bg_color_vmouse_down
@@ -2898,7 +2901,6 @@ airborne.bootstrap.view.mobile.list = {
 		row_tag += ""
 		+ "<tr class=\"active\" id=\"date_picker\">".replace(/\<_v\>/gi, row_id)
 			+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>\">".replace(/\<COLOR\>/gi, text_color).replace(/\<BG_COLOR\>/gi, bg_color)
-				//+ "<input type=\"text\" class=\"span2 datepicker center-block\" data-date-format=\"yyyy-mm-dd\" readonly=\"\" style=\"<style>\" disabled=\"disabled\">"
 				+ "<input type=\"text\" class=\"span2 datepicker center-block\" data-date-format=\"yyyy-mm-dd\" readonly=\"\" style=\"<style>\">"
 				.replace(/\<_v\>/gi, input_id)
 				.replace(/\<style\>/gi, input_style)
@@ -3182,10 +3184,8 @@ airborne.bootstrap.view.mobile.list = {
 
 		return header_row_jq;
 	}
-	/*
-		@ Public
-		@ Desc : 다른 페이지 뷰로 이동하는 테이블 열을 그립니다. 추가 정보를 제공하는 배지가 있습니다.
-	*/
+	// @ Public
+	// @ Desc : 다른 페이지 뷰로 이동하는 테이블 열을 그립니다. 추가 정보를 제공하는 배지가 있습니다.
 	,addTableRowMovingArrowWidthBadge:function(title, title_on_badge, append_target_jq, delegate_obj_click_row, is_bold, param_obj, text_color, bg_color){
 
 		var _obj = airborne.bootstrap.obj;
@@ -3274,7 +3274,168 @@ airborne.bootstrap.view.mobile.list = {
 		);
 
 		return header_row_jq;
-	}	
+	}
+	// @ Public
+	// @ Desc : 클릭시, 지정한 주소의 페이지를 iframe으로 보여줍니다. 추가 정보를 제공하는 배지가 있습니다.
+	,add_table_row_badge_n_iframe:function(title, title_on_badge, append_target_jq, delegate_obj_click_row, is_bold, param_obj, text_color, bg_color, iframe_page_link, iframe_height){
+
+		var _obj = airborne.bootstrap.obj;
+
+		if(_v.isNotValidStr(title)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / _v.isNotValidStr(title)");
+			return;
+		}
+		if(_v.isNotValidStr(title_on_badge)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / _v.isNotValidStr(title_on_badge)");
+			return;
+		}
+		if(append_target_jq==null){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / append_target_jq==null");
+			return;
+		}
+		if(_obj.isNotValidDelegate(delegate_obj_click_row)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / _obj.isNotValidDelegate(delegate_obj_click_row)");
+			return;
+		}
+		if(is_bold == undefined) {
+			is_bold = false;
+		}
+		if(text_color == undefined) {
+			text_color = _color.COLOR_MEDIUM_GRAY;
+		}
+		if(bg_color == undefined) {
+			bg_color = _color.COLOR_TINT_GRAY;
+		}
+		if(_v.is_not_valid_str(iframe_page_link)) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / _v.is_not_valid_str(iframe_page_link)");
+			return;
+		}
+		if(_v.is_not_unsigned_number(iframe_height)) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_badge_n_iframe / _v.is_not_unsigned_number(iframe_height)");
+			return;
+		}
+
+		console.log("iframe_page_link :::: ",iframe_page_link);
+
+
+		var row_id = airborne.html.getIdRandomTail("TableRowMovingArrow_" + title);
+		var row_id_iframe = row_id + "_iframe";
+		var iframe_id = row_id + "_iframe_entity";
+
+		// Set Title
+		var row_tag = "";
+		if(is_bold) {
+
+			row_tag += ""
+			+ "<tr class=\"active\" id=\"<_v>\" status=\"close\">".replace(/\<_v\>/gi, row_id)
+				+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;\">"
+					.replace(/\<COLOR\>/gi, text_color)
+					.replace(/\<BG_COLOR\>/gi, bg_color)
+					+ "<h5>"
+						+ "<span style=\"text-center\" class=\"no_selection\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
+						+ "<span class=\"badge no_selection\" style=\"float:right;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title_on_badge)
+					+ "</h5>"
+				+ "</td>"
+			+ "</tr>"
+			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
+				+ "<td style=\"background-color:#DDD;\">"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\"></iframe>"
+					.replace(/\<LINK\>/gi, iframe_page_link)
+					.replace(/\<_v\>/gi, iframe_id)
+					.replace(/\<HEIGHT\>/gi, iframe_height)
+				+ "</td>"
+			+ "</tr>"
+			;
+
+		} else {
+
+			row_tag += ""
+			+ "<tr class=\"active\" id=\"<_v>\" status=\"close\">".replace(/\<_v\>/gi, row_id)
+				+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;padding:15px;\">"
+					.replace(/\<COLOR\>/gi, text_color)
+					.replace(/\<BG_COLOR\>/gi, bg_color)
+					+ "<span style=\"text-center;font-size:small;\" class=\"no_selection\"><_v></span>".replace(/\<_v\>/gi, title)
+					+ "<span class=\"badge no_selection\" style=\"float:right;\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title_on_badge)
+				+ "</td>"
+			+ "</tr>"
+			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
+				+ "<td style=\"background-color:#DDD;\">"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\"></iframe>"
+					.replace(/\<LINK\>/gi, iframe_page_link)
+					.replace(/\<_v\>/gi, iframe_id)
+					.replace(/\<HEIGHT\>/gi, iframe_height)
+				+ "</td>"
+			+ "</tr>"
+			;
+
+		}
+
+		append_target_jq.append(row_tag);
+
+		// Set Event
+		var header_row_container_jq = append_target_jq.find("tr#" + row_id);
+		var header_row_jq = append_target_jq.find("tr#" + row_id).find("td");
+		var header_row_iframe_jq = append_target_jq.find("tr#" + row_id_iframe);
+
+		param_obj.header_row_iframe_jq = header_row_iframe_jq;
+
+		var delegate_obj = 
+		_obj.getDelegate(function(delegate_data){
+
+			var status = header_row_container_jq.attr("status");
+			var is_close = false;
+			if(status === "close") {
+				header_row_container_jq.attr("status","open");
+				header_row_iframe_jq.show();
+				is_close = false;
+				console.log();
+			} else {
+				header_row_container_jq.attr("status","close");
+				is_close = true;
+			}
+
+			// 외부 delegate로 파라미터를 넘겨줍니다.
+			delegate_obj_click_row._apply([delegate_data.delegate_data]);
+
+			// scroll screen
+			var scroll_to_y_pos = header_row_container_jq.offset().top;
+			if(is_close) {
+				scroll_to_y_pos = 0;
+			}
+
+			$('html, body').animate(
+				{
+                    scrollTop:scroll_to_y_pos
+            	}
+            	, 500
+            	, function() {
+    				// Animation complete.
+    				if(is_close) {
+    					header_row_iframe_jq.hide();
+    				}
+				}
+			);
+
+		}, this);
+
+		// 제목 열이 클릭 되었을 때, 배경 색깔 바뀌는 등의 이벤트를 제어합니다.
+		var bg_color_vmouse_down = text_color;
+		var text_color_vmouse_down = bg_color;
+		this.setTableRowEvent(
+			// row_jq
+			header_row_jq
+			// delegate_obj
+			, delegate_obj
+			// bg_color_vmouse_down
+			, bg_color_vmouse_down
+			// delegate_data
+			, param_obj
+			// text_color_vmouse_down
+			, text_color_vmouse_down
+		);
+
+		return header_row_jq;
+	}
 	/*
 		@ Public
 		@ Desc : 두가지 항목중에 한가지를 토글로 선택할 수 있는 테이블 열을 만듭니다.

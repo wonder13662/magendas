@@ -86,7 +86,6 @@ wonglish.meeting_agenda_manager = {
 
 		var search_option_arr_speech_projects = [];
 		var speech_project_list = meeting_agenda_data_set.speech_project_list;
-		console.log("speech_project_list ::: ",speech_project_list);
 
 		if(_v.isValidArray(speech_project_list)){
 			for (var idx = 0; idx < speech_project_list.length; idx++) {
@@ -677,6 +676,10 @@ wonglish.meeting_agenda_manager = {
 		var datepicker_jq = $('.datepicker');
 		var datePickerObj = datepicker_jq.datepicker();
 
+		// datepicker_jq.val(start_date);
+		// datepicker_jq.datepicker({startDate:start_date});
+
+
 		datePickerObj.autoclose = true;
 
 		datepicker_jq.datepicker().on('changeDate', function(ev){
@@ -704,8 +707,6 @@ wonglish.meeting_agenda_manager = {
 		if(agenda_template_jq_list != undefined && 0 < agenda_template_jq_list.length) {
 			agenda_template_jq_list.click(function(e) {
 
-				console.log("this ::: ",this);
-
 				var self_jq = $(this);
 				var action_template = self_jq.attr("action_template");
 				var src_meeting_id = parseInt(self_jq.attr("src_meeting_id"));
@@ -726,8 +727,6 @@ wonglish.meeting_agenda_manager = {
 				if(!confirm(msg_confirm)) {
 					return;
 				}
-
-				console.log(">>> request_param_obj ::: ",request_param_obj);
 
 				// 모달 창을 닫습니다.
 				var target_modal = $("div#modal-new-meeting-dialog");
@@ -767,7 +766,7 @@ wonglish.meeting_agenda_manager = {
 			});
 		}
 
-		var init_meeting_modal = function(meeting_agenda_list, datepicker_jq) {
+		var init_meeting_modal = function(meeting_agenda_obj, datepicker_jq) {
 
 			// 입력되었던 내역들을 모두 지웁니다.
 			// 1. 주제 입력창을 초기화합니다.
@@ -777,45 +776,25 @@ wonglish.meeting_agenda_manager = {
 			// 2. 미팅 시작날짜를 초기화합니다.
 			var input_meeting_date_jq = $("input#meeting-date");
 
-			// 2-1. 마지막 미팅에서 일주일씩 날짜를 더해 가장 가까운 미래의 날짜를 지정해줍니다.(같은 요일로 설정하기 위해서 입니다.)
-			var meeting_date_recommend = undefined;
-			if(_v.is_valid_array(meeting_agenda_list)) {
-				var last_meeting_obj = meeting_agenda_list[0];
-				var last_meeting_date_yyyy_mm_dd = _dates.getFormattedTime(meeting_agenda_obj.__startdttm,_dates.DATE_TYPE_YYYY_MM_DD);
-
-				var max_loop = 24; // 최대 6개월까지 검사해줍니다.
-				var weeks_later_yyyy_mm_dd = undefined;
-				for(var idx = 1; idx < max_loop; idx++) {
-					// 미팅 날짜로 부터 n주 뒤의 날짜를 가져옵니다.
-					weeks_later_yyyy_mm_dd = _dates.getWeeksLater(last_meeting_date_yyyy_mm_dd, idx, _dates.DATE_TYPE_YYYY_MM_DD);
-					if(_dates.isFuture(weeks_later_yyyy_mm_dd, _dates.DATE_TYPE_YYYY_MM_DD)) {
-						console.log("그 날짜가 현재로부터 미래라면 그것을 사용합니다.");
-						break;
-					}
-					
-					weeks_later_yyyy_mm_dd = undefined;
-				}
-
-				meeting_date_recommend = weeks_later_yyyy_mm_dd;
-			}
-
-			// 2-2. 이전 미팅 정보가 없는 경우. 오늘 날짜를 추천
+			var meeting_date_recommend = meeting_agenda_obj.__startdate;
 			if(meeting_date_recommend == undefined) {
+				// 3. 이전 미팅 정보가 없는 경우. 오늘 날짜를 추천
 				meeting_date_recommend = _dates.getNow(_dates.DATE_TYPE_YYYY_MM_DD);
 			}
+
 			input_meeting_date_jq.val(meeting_date_recommend);
 			if(datepicker_jq != undefined) {
 				datepicker_jq.datepicker('update', meeting_date_recommend);
 			}
-
+			
 			// 4. 이벤트 락을 해제합니다.
 			_action.get_event_hierarchy_manager().release();
 
 		};
-		init_meeting_modal(meeting_agenda_list, datepicker_jq);
+		init_meeting_modal(meeting_agenda_obj, datepicker_jq);
 		$('div#modal-new-meeting-dialog').on('hidden.bs.modal', function (e) {
 
-			init_meeting_modal(meeting_agenda_list, datepicker_jq);
+			init_meeting_modal(meeting_agenda_obj, datepicker_jq);
 
 		});
 
@@ -846,19 +825,16 @@ wonglish.meeting_agenda_manager = {
 
 			var _param_obj =
 			_param
-			.get(_param.IS_UPDATE_HEADER,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
 			.get(_param.MEETING_ID,meeting_agenda_id)
 			.get(_param.THEME,cur_meeting_theme)
 			.get(_param.START_DATE,cur_input_meeting_date)
-			.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
 			;
-
-			console.log("HERE / _param_obj ::: ",_param_obj);
 
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_MEETING_AGENDA)
 				// _param_obj / MEETING_ID
 				, _param_obj
 				// _delegate_after_job_done
@@ -883,8 +859,6 @@ wonglish.meeting_agenda_manager = {
 					this
 				)
 			); // ajax done.
-
-
 		});
 
 

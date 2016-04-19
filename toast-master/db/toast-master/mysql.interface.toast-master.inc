@@ -610,14 +610,10 @@ class MYSQLInterface{
 		if(!is_null($result)) {
 			$__meeting_id = intval($result->__meeting_id);	
 		}
-
-		// 예정된 미팅이 없는 경우, 이번주 미팅을 추가합니다.
-		$meeting_agenda_added = null;
+		
 		if($__meeting_id == -1) {
-			$meeting_agenda_added = $this->add_meeting_agenda($meeting_membership_id);	
-		}
-		if(!is_null($meeting_agenda_added)) {
-			$__meeting_id = intval($meeting_agenda_added->__meeting_id);
+			// 예정된 미팅이 없는 경우, 이번주 미팅을 추가합니다.
+			$__meeting_id = $this->add_meeting_agenda($meeting_membership_id);	
 		}
 
 		return $__meeting_id;
@@ -643,7 +639,18 @@ class MYSQLInterface{
 
 		$recent_meeting_agenda_obj = null;
 		if(!empty($recent_meeting_agenda_list)) {
+			// 이전의 미팅이 있는 경우.
 			$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
+		} else {
+			// 이전의 미팅이 하나도 없는 경우. 최초의 미팅을 만들어 줍니다.
+			$query_output = $wdj_mysql_interface->insertFisrtMeetingAgenda($meeting_membership_id);
+
+			$result = $wdj_mysql_interface->getLatestMeetingAgendaId($meeting_membership_id);
+			if(!empty($result)) {
+				$new_meeting_id = intval($result[0]->__meeting_id);
+			}
+
+			return $new_meeting_id;
 		}
 
 		if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__startdttm)) {
@@ -694,7 +701,10 @@ class MYSQLInterface{
 				, $meeting_membership_id
 			);
 
-			return $result;
+			$new_meeting_id = $meeting_agenda_added->__meeting_id;
+			$new_meeting_id = intval($new_meeting_id);
+
+			return $new_meeting_id;
 		}		
 
 	}
@@ -970,47 +980,37 @@ class MYSQLInterface{
 		@ Public
 		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
 	*/
-	public function get_meeting_agenda_by_id($meeting_membership_id=-1, $meeting_id=-1){
+	public function get_meeting_agenda_by_id($meeting_id=-1){
 
-		$function_name = "get_meeting_agenda_by_id";
-		if($this->isNotUnsignedNumber($meeting_membership_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
-		}
-		if($this->isNotUnsignedNumber($meeting_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return -1;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"SELECT MA.id AS __meeting_id"
-			,", MA.round AS __round"
-			,", MA.theme AS __theme"
-			,", MA.startdttm AS __startdttm"
-			,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
-			,", MA.membership_id AS __membership_id"
-			,", MEMBERSHIP.name AS __membership_name"
-			,", MEMBERSHIP.desc AS __membership_desc"
-			,", IFNULL(QUOTE.content,\"\") AS __quote"
-			,", IFNULL(WORD.word,\"\") AS __word"
-			,", IFNULL(WORD.desc,\"\") AS __word_desc"
-			,"FROM MEETING_AGENDA AS MA"
-			,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
-			,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
-			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
-			,"WHERE MA.id=$meeting_id"
-			,"AND MA.membership_id=$meeting_membership_id"
-			,"AND MA.`status`=\"A\""
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,", MA.round AS __round"
+				,", MA.theme AS __theme"
+				,", MA.startdttm AS __startdttm"
+				,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
+				,", MA.membership_id AS __membership_id"
+				,", MEMBERSHIP.name AS __membership_name"
+				,", MEMBERSHIP.desc AS __membership_desc"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.id=$meeting_id"
+				,"AND MA.`status`=\"A\""
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
-
-		$json_res_obj = $this->getSelectResult($query_manager->getExecuteQuery());
-		if(!is_null($json_res_obj->result) && !empty($json_res_obj->result) &&is_array($json_res_obj->result) ) {
-			return $json_res_obj->result[0];
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
 		}
 
-		return null;
+		$result = $query_manager->get_result();
+		return $result;
+
 	}	
 
 	public function getLatestMeetingAgendaId($meetingship_id=-1){

@@ -3,10 +3,11 @@
 include_once("../../common.inc");
 
 $IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+$IS_IFRAME_VIEW = $params->isYes($params->IS_IFRAME_VIEW);
 
 // 클럽 멤버가 아닌 경우, 해당 페이지로는 접근할 수 없습니다.
 // 로그인 유저가 해당 클럽의 멤버가 아니라면 TOP페이지로 리다이렉트.
-if($IS_EXTERNAL_SHARE == false && $login_user_info->__is_club_member == false) {
+if($IS_IFRAME_VIEW == false && $IS_EXTERNAL_SHARE == false && $login_user_info->__is_club_member == false) {
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MOBILE_TOP);
 }
 
@@ -94,6 +95,7 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+var IS_IFRAME_VIEW = <?php echo json_encode($IS_IFRAME_VIEW);?>;
 
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var member_list = <?php echo json_encode($member_list);?>;
@@ -102,6 +104,7 @@ var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
 console.log(">>> login_user_info :: ",login_user_info);
+console.log(">>> IS_IFRAME_VIEW :: ",IS_IFRAME_VIEW);
 
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
@@ -115,7 +118,7 @@ var role_id_word_n_quote_master = <?php echo json_encode($role_id_word_n_quote_m
 var table_jq = $("table tbody#list");
 
 // Header - Log In Treatment
-if(!IS_EXTERNAL_SHARE) {
+if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW) {
 
 	_tm_m_list.addHeaderRow(
 		// login_user_info
@@ -307,56 +310,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						// delegate_scope
 						this
 					)
-				); // ajax done.				
-
-				/*
-				// 선택한 사용자를 해당 롤에 업데이트 합니다.
-				// 이상이 없다면 업데이트!
-				_ajax.send_simple_post(
-					// _url
-					_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-					// _param_obj / MEETING_ID
-					,param_obj
-
-					// _delegate_after_job_done
-					,_obj.get_delegate(
-						// delegate_func
-						function(data){
-
-							console.log(data);
-
-							if(data != undefined && data.query_output_arr != undefined && data.query_output_arr[0].output === true) {
-
-								// 롤의 이름을 업데이트 합니다.
-								row_role_jq.find("span.badge").find("strong").html(MEMBER_NAME);
-								delegate_data.target_jq.attr("is_open", "NO");
-
-								// 선택된 배지 녹색으로 변경
-								var target_controller = delegate_data.delegate_data.target_controller;
-
-								if(MEMBER_NAME == _param.NOT_ASSIGNED) {
-									target_controller.set_badge_gray();
-								} else {
-									target_controller.set_badge_green();
-								}
-
-								// REFACTOR ME
-								var body = $("html, body");
-								row_member_obj.hide();
-								body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-								   console.log("Finished animating");
-
-								   //console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
-								});
-								
-							} // if end
-
-						},
-						// delegate_scope
-						this
-					)
 				); // ajax done.
-				*/
 
 			}, this)					
 		);
@@ -382,7 +336,7 @@ if(IS_EXTERNAL_SHARE) {
 		}, this)
 	);	
 
-} else {
+} else if(!IS_IFRAME_VIEW) {
 
 	_m_list.addTableRowTitle(
 		// title
@@ -690,7 +644,7 @@ if(parseInt(role_obj.__member_id) > 0 && role_obj.__member_membership_status ===
 
 
 // SHARE EXTERNAL
-if(!IS_EXTERNAL_SHARE) {
+if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW) {
 
 	var share_msg = "Did you take any role in " + membership_obj.__membership_desc + "?\nRole sign up on " + meeting_agenda_obj.__startdate;
 	var accessor_external_share =

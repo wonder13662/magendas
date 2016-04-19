@@ -232,7 +232,7 @@ toast_master.mobile_list_manager = {
 		@ public
 		@ desc : 로그인 및 페이지 뎁스를 보여주는 열을 그립니다.
 	*/
-	,addHeaderRow:function(login_user_info, membership_obj, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled){
+	,addHeaderRow:function(login_user_info, membership_obj, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled, redirect_url_after_log_in){
 
 		var _v = airborne.validator;
 		var _m_list = airborne.bootstrap.view.mobile.list;
@@ -244,10 +244,6 @@ toast_master.mobile_list_manager = {
 		}
 		if(membership_obj == null){
 			console.log("!Error! / toast_master.mobile_list_manager / addHeaderRow / membership_obj == null");
-			return;
-		}
-		if(_v.isNotValidArray(header_arr)){
-			console.log("!Error! / toast_master.mobile_list_manager / addHeaderRow / _v.isNotValidArray(header_arr)");
 			return;
 		}
 		if(table_jq == null){
@@ -262,7 +258,10 @@ toast_master.mobile_list_manager = {
 			bg_color_vmouse_down = this.COLOR_RED_WINE;
 		}
 
-		var redirect_url_after_log_in = header_arr[0].__call_url;
+		if(_v.is_not_valid_str(redirect_url_after_log_in)) {
+			console.log("!Error! / toast_master.mobile_list_manager / addHeaderRow / _v.is_not_valid_str(redirect_url_after_log_in)");
+			return;
+		}
 
 		var log_in_row_jq = 
 		this.addLogInRowDoubleSlot(
@@ -298,22 +297,22 @@ toast_master.mobile_list_manager = {
 			, redirect_url_after_log_in
 		);
 
-
-		_m_list.addTableHeaderNavRow(
-			// header_arr
-			header_arr
-			// color_rgb_max_bright
-			, this.COLOR_ARR_MENU_TOP
-			// color_rgb_min_darker
-			, this.COLOR_ARR_MENU_BOTTOM
-			// after_row_jq
-			, log_in_row_jq
-			// color_text
-			, color_text
-			// bg_color_vmouse_down
-			, bg_color_vmouse_down
-		);
-
+		if(_v.is_valid_array(header_arr)) {
+			_m_list.addTableHeaderNavRow(
+				// header_arr
+				header_arr
+				// color_rgb_max_bright
+				, this.COLOR_ARR_MENU_TOP
+				// color_rgb_min_darker
+				, this.COLOR_ARR_MENU_BOTTOM
+				// after_row_jq
+				, log_in_row_jq
+				// color_text
+				, color_text
+				// bg_color_vmouse_down
+				, bg_color_vmouse_down
+			);
+		}
 		return log_in_row_jq;
 
 	}
