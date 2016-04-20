@@ -85,8 +85,10 @@ _tm_m_list.addHeaderRow(
 	// is_disabled
 	, null
 	// redirect_url_after_log_in
-	, _link.MOBILE_TOP
+	,_link.get_link(_link.MOBILE_TOP)
 );
+
+
 
 
 // 미팅에 참여한 로그인 유저가 볼 수 있는 메뉴.

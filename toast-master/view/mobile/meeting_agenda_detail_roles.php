@@ -117,6 +117,32 @@ var role_id_word_n_quote_master = <?php echo json_encode($role_id_word_n_quote_m
 
 var table_jq = $("table tbody#list");
 
+
+// IFRAME - FUNCTION
+var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
+
+	if(IS_IFRAME_VIEW == undefined && IS_IFRAME_VIEW !== true) {
+		return;
+	}
+	if(parent_obj == undefined) {
+		return;	
+	}
+	var accessor_meeting_role = parent_obj.accessor_meeting_role;
+	if(accessor_meeting_role == undefined) {
+		return;
+	}
+
+	var container = $("tbody#list");
+	var container_height = container.height();
+
+	if(0 < container_height) {
+		console.log("container_height ::: ",container_height);
+		accessor_meeting_role.set_iframe_height(container_height);	
+	}
+
+}
+
+
 // Header - Log In Treatment
 if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW) {
 
@@ -227,10 +253,12 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 	if(delegate_data.target_jq.attr("is_open") === "YES") {
 		delegate_data.target_jq.attr("is_open", "NO");
 
-		//window.scrollTo(0, 0);
 		// REFACTOR ME
 		var body = $("html, body");
 		row_member_obj.hide();
+		// CALL PARENT WINDOW FUNCTION
+		send_height_to_parent(IS_IFRAME_VIEW, parent);
+
 		body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
 		   console.log("Finished animating");
 		});
@@ -238,6 +266,8 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 	} else {
 		delegate_data.target_jq.attr("is_open", "YES");
 		row_member_obj.show();
+		// CALL PARENT WINDOW FUNCTION
+		send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 		// TODO 선택된 사용자는 제외합니다.
 		var cur_offset = delegate_data.target_jq.offset();
@@ -271,7 +301,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 
 				_ajax.send_simple_post(
 					// _url
-					_link.get_link(_link.API_UPDATE_TOASTMASTER_ROLE)
+					_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_ROLE)
 					// _param_obj
 					,param_obj
 					// _delegate_after_job_done
@@ -300,10 +330,11 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 							// REFACTOR ME
 							var body = $("html, body");
 							row_member_obj.hide();
+							// CALL PARENT WINDOW FUNCTION
+							send_height_to_parent(IS_IFRAME_VIEW, parent);
+
 							body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
 							   console.log("Finished animating");
-
-							   //console.log("사용자에게 업데이트가 완료되었음을 알립니다. / MEMBER_NAME :: ",MEMBER_NAME);	
 							});
 
 						},

@@ -3,6 +3,8 @@
 // common setting
 include_once("../../common.inc");
 
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+$IS_IFRAME_VIEW = $params->isYes($params->IS_IFRAME_VIEW);
 
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
@@ -25,9 +27,14 @@ if(!empty($meeting_agenda_list)) {
 	$meeting_agenda_obj = $meeting_agenda_list[0];
 }
 
-$news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+// $news_list = $wdj_mysql_interface->getNews($MEETING_ID);
 
-$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+// club news는 action timeline에서 가져와 추가합니다.
+
+
+
+
+
 
 // @ required
 $wdj_mysql_interface->close();
@@ -65,6 +72,7 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.mobile.
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
 var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+var IS_IFRAME_VIEW = <?php echo json_encode($IS_IFRAME_VIEW);?>;
 
 var news_id = <?php echo json_encode($news_id);?>;
 var news_list = <?php echo json_encode($news_list);?>;
@@ -73,17 +81,39 @@ var service_root_path = <?php echo json_encode($service_root_path);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
-console.log(">> IS_EXTERNAL_SHARE :: ",IS_EXTERNAL_SHARE);
-console.log(">> membership_obj :: ",membership_obj);
-console.log(">> meeting_agenda_obj :: ",meeting_agenda_obj);
-
-console.log(">> news_list :: ",news_list);
-
-
 var table_jq = $("table tbody#list");
 
+// IFRAME - FUNCTION
+var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
+
+	console.log("XXX / 001");
+
+	if(IS_IFRAME_VIEW == undefined && IS_IFRAME_VIEW !== true) {
+		return;
+	}
+	if(parent_obj == undefined) {
+		return;	
+	}
+	var accessor_news = parent_obj.accessor_news;
+	if(accessor_news == undefined) {
+		return;
+	}
+
+	console.log("XXX / 002");
+
+	var container = $("table tbody#list");
+	var container_height = container.height();
+
+	if(0 < container_height) {
+		console.log("container_height ::: ",container_height);
+		accessor_news.set_iframe_height(container_height);	
+	}
+
+}
+
+
 // Header - Log In Treatment
-if(!IS_EXTERNAL_SHARE) {
+if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW) {
 
 	_tm_m_list.addHeaderRow(
 		// login_user_info
@@ -119,7 +149,7 @@ if(!IS_EXTERNAL_SHARE) {
 		,table_jq
 	);	
 
-} else {
+} else if(!IS_IFRAME_VIEW) {
 
 	// show brief meeting info
 	_m_list.addTableRowTitle(
@@ -172,24 +202,18 @@ _m_list.addTableRowTextInputFlexible(
 	// append_target_jq
 	,table_jq
 	// place holder
-	,"type meeting theme"
+	,"What's New?"
 	// value array
 	, news_value_array
 	// delegate_on_delete
 	, _obj.getDelegate(function(delegate_data){
-
-		// console.log(">>> delegate_data :: ",delegate_data);
-		// console.log(">>> delegate_data._key :: ",delegate_data._key);
-		// console.log(">>> delegate_data._value :: ",delegate_data._value);
 
 		var cur_event = delegate_data[_param.EVENT_PARAM_EVENT_TYPE];
 		var key = parseInt(delegate_data[_param.EVENT_PARAM_KEY]);
 		var value = delegate_data[_param.EVENT_PARAM_VALUE];
 		var target_jq = delegate_data[_param.EVENT_PARAM_TARGET_JQ];
 
-		console.log(">>> cur_event :: ",cur_event);
-		console.log(">>> key :: ",key);
-		console.log(">>> value :: ",value);
+		console.log("XXX / cur_event ::: ",cur_event);
 
 		if(_param.EVENT_INSERT === cur_event && key == -1 && _v.is_valid_str(value)) {
 
@@ -214,6 +238,8 @@ _m_list.addTableRowTextInputFlexible(
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것
 						alert("Updated!");
+
+						send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 					}
 					// delegate_scope
@@ -283,13 +309,16 @@ _m_list.addTableRowTextInputFlexible(
 
 						target_jq.remove();
 
+						send_height_to_parent(IS_IFRAME_VIEW, parent);
+
 					},
 					// delegate_scope
 					this
 				)
-			); // ajax done.			
+			); // ajax done.
 
-
+		} else {
+			send_height_to_parent(IS_IFRAME_VIEW, parent);
 		}
 
 	}, this)
@@ -304,7 +333,7 @@ _m_list.addTableRowTextInputFlexible(
 
 
 // SHARE EXTERNAL
-if(!IS_EXTERNAL_SHARE) {
+if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW) {
 
 	_m_list.addTableRowShareExternal(
 		// title
@@ -337,7 +366,11 @@ if(!IS_EXTERNAL_SHARE) {
 
 
 // 99. REMOVE Loading message
-_tm_m_list.doWhenDocumentReady();
+var delegate_on_ready = 
+_obj.getDelegate(function(){
+	send_height_to_parent(IS_IFRAME_VIEW, parent);
+}, this);
+_tm_m_list.doWhenDocumentReady(delegate_on_ready);
 
 
 </script>

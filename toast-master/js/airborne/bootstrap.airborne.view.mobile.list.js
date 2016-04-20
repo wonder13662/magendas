@@ -2357,7 +2357,7 @@ airborne.bootstrap.view.mobile.list = {
 		var header_row_jq = append_target_jq.find("tr#input_text_title_row");
 		var input_row_jq_arr = append_target_jq.find("tr#" + row_id);
 
-		var add_row_event = function(input_row_jq, param_obj) {
+		var add_row_event = function(input_row_jq, param_obj, delegate_on_event) {
 
 			if(param_obj == undefined) {
 				param_obj = {};
@@ -2458,8 +2458,6 @@ airborne.bootstrap.view.mobile.list = {
 					+ "</tr>"
 					;
 
-					//append_target_jq.append(new_row_tag);
-
 					last_sibling_jq = append_target_jq.find("tr#" + row_id).last();
 					last_sibling_jq.after(new_row_tag);
 					var last_row_jq = append_target_jq.find("tr#" + row_id).last();
@@ -2467,14 +2465,21 @@ airborne.bootstrap.view.mobile.list = {
 					console.log(">> last_sibling_jq :: ",last_sibling_jq);
 					console.log(">> last_row_jq :: ",last_row_jq);
 
-					add_row_event(last_row_jq, param_obj);
+					add_row_event(last_row_jq, param_obj, delegate_on_event);
 
 					last_sibling_jq = last_row_jq;
+					
+					// wonder.jung
+					param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_INSERT;
+					param_obj[_param.EVENT_PARAM_TARGET_JQ] = last_row_jq;
+
+					delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);
+
 
 				});
 			}
 
-			add_row_event(input_row_jq, param_obj);
+			add_row_event(input_row_jq, param_obj, delegate_on_event);
 
 		}
 
@@ -3315,9 +3320,6 @@ airborne.bootstrap.view.mobile.list = {
 			return;
 		}
 
-		console.log("iframe_page_link :::: ",iframe_page_link);
-
-
 		var row_id = airborne.html.getIdRandomTail("TableRowMovingArrow_" + title);
 		var row_id_iframe = row_id + "_iframe";
 		var iframe_id = row_id + "_iframe_entity";
@@ -3339,7 +3341,7 @@ airborne.bootstrap.view.mobile.list = {
 			+ "</tr>"
 			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
 				+ "<td style=\"background-color:#DDD;\">"
-					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\"></iframe>"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\" scrolling=\"no\"></iframe>"
 					.replace(/\<LINK\>/gi, iframe_page_link)
 					.replace(/\<_v\>/gi, iframe_id)
 					.replace(/\<HEIGHT\>/gi, iframe_height)
@@ -3360,7 +3362,7 @@ airborne.bootstrap.view.mobile.list = {
 			+ "</tr>"
 			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
 				+ "<td style=\"background-color:#DDD;\">"
-					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\"></iframe>"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\" scrolling=\"no\"></iframe>"
 					.replace(/\<LINK\>/gi, iframe_page_link)
 					.replace(/\<_v\>/gi, iframe_id)
 					.replace(/\<HEIGHT\>/gi, iframe_height)
@@ -3375,12 +3377,82 @@ airborne.bootstrap.view.mobile.list = {
 		// Set Event
 		var header_row_container_jq = append_target_jq.find("tr#" + row_id);
 		var header_row_jq = append_target_jq.find("tr#" + row_id).find("td");
+		var badge_jq = header_row_jq.find("span.badge strong");
 		var header_row_iframe_jq = append_target_jq.find("tr#" + row_id_iframe);
+		var iframe_jq = header_row_iframe_jq.find("iframe");
 
 		param_obj.header_row_iframe_jq = header_row_iframe_jq;
 
+		var do_scroll = function(scroll_to_y_pos, is_close, header_row_iframe_jq) {
+
+			if(is_close == undefined) {
+				is_close = false;
+			}
+
+			$('html, body').animate(
+				{
+                    scrollTop:scroll_to_y_pos
+            	}
+            	, 500
+            	, function() {
+    				// Animation complete.
+    				if(is_close && header_row_iframe_jq != undefined) {
+    					header_row_iframe_jq.hide();
+    				}
+				}
+			);
+		}
+
+		var accessor = {
+			badge_jq:badge_jq
+			, set_badge_title:function(title){
+
+				if(_v.isNumber(title)) {
+					title = title + "";
+				}
+				if(_v.is_not_valid_str(title)) {
+					console.log("!Error! / add_table_row_badge_n_iframe / set_badge_title / _v.is_not_valid_str(title)");
+					return;					
+				}
+
+				var badge_jq = this.badge_jq;
+				badge_jq.html(title);
+			}
+			, is_iframe_enable:true
+			, on_iframe:function(){
+				this.is_iframe_enable = true;
+			}
+			, off_iframe:function(){
+				this.is_iframe_enable = false;
+			}
+			, get_iframe_enable:function() {
+				return this.is_iframe_enable;
+			}
+			, delegate_obj_click_row:delegate_obj_click_row
+			, header_row_container_jq:header_row_container_jq
+			, iframe_jq:iframe_jq
+			, set_iframe_height:function(new_height) {
+				this.iframe_jq.height(new_height);
+
+				// 높이 변경 뒤에 스크롤.
+				var header_row_container_jq = this.header_row_container_jq;
+				var scroll_to_y_pos = header_row_container_jq.offset().top;
+				var header_row_iframe_jq = undefined;
+				var is_close = false;
+				do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
+
+				// 부모 정보 업데이트.
+				this.delegate_obj_click_row._apply([this]);
+
+			}
+		};
+
 		var delegate_obj = 
 		_obj.getDelegate(function(delegate_data){
+
+			if(!accessor.get_iframe_enable()) {
+				return;
+			}
 
 			var status = header_row_container_jq.attr("status");
 			var is_close = false;
@@ -3388,7 +3460,6 @@ airborne.bootstrap.view.mobile.list = {
 				header_row_container_jq.attr("status","open");
 				header_row_iframe_jq.show();
 				is_close = false;
-				console.log();
 			} else {
 				header_row_container_jq.attr("status","close");
 				is_close = true;
@@ -3402,19 +3473,7 @@ airborne.bootstrap.view.mobile.list = {
 			if(is_close) {
 				scroll_to_y_pos = 0;
 			}
-
-			$('html, body').animate(
-				{
-                    scrollTop:scroll_to_y_pos
-            	}
-            	, 500
-            	, function() {
-    				// Animation complete.
-    				if(is_close) {
-    					header_row_iframe_jq.hide();
-    				}
-				}
-			);
+			do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
 
 		}, this);
 
@@ -3434,7 +3493,7 @@ airborne.bootstrap.view.mobile.list = {
 			, text_color_vmouse_down
 		);
 
-		return header_row_jq;
+		return accessor;
 	}
 	/*
 		@ Public

@@ -72,10 +72,13 @@ var link_manager = {
 	,API_UPDATE_MEETING_AGENDA:"/api/ajax_post_update_meeting_agenda.php"
 	,API_UPDATE_MEMBER:"/api/ajax_post_update_member.php"
 	
-	,API_UPDATE_TOASTMASTER_ROLE:"/api/v1/action/toast-master/role/update.php"
+	,API_UPDATE_ACTION_TOASTMASTER_ROLE:"/api/v1/action/toast-master/role/update.php"
+	,API_SELECT_TOASTMASTER_ROLE:"/api/v1/toast-master/role/select.php"
 	,API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE:"/api/v1/action/toast-master/schedule/template/update.php"
 	,API_UPDATE_TOASTMASTER_SCHEDULE:"/api/v1/action/toast-master/schedule/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_SPEECH:"/api/v1/action/toast-master/speech/update.php"
+
+	,API_SELECT_TOASTMASTER_SPEECH:"/api/v1/toast-master/speech/select.php"
 	,API_UPDATE_TOASTMASTER_SPEECH:"/api/v1/toast-master/speech/update.php"
 	,API_UPDATE_TOASTMASTER_OFFICER:"/api/v1/action/toast-master/officer/update.php"
 	,API_UPDATE_TOASTMASTER_MEMBER:"/api/v1/toast-master/member/update.php"

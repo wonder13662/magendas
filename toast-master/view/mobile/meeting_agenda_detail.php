@@ -109,7 +109,7 @@ _tm_m_list.addHeaderRow(
 	// is_disabled
 	, null
 	// redirect_url_after_log_in
-	, _link.MOBILE_MEETING_AGENDA_DETAIL
+	, _link.get_link(_link.MOBILE_MEETING_AGENDA_DETAIL)
 );
 
 // Body - Content
@@ -226,8 +226,31 @@ _m_list.addTableRowDateInput(
 	.get(_param.START_DATE,start_date)
 );
 if(!is_editable) {
-	accessor_date.off();	
+	accessor_date.off();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -321,6 +344,36 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var msg_guide_not_club_member = ""; 
 if(login_user_info.__is_login === _param.YES) {
 	msg_guide_not_club_member = 
@@ -344,9 +397,7 @@ for(var idx = 0; idx < today_role_list.length; idx++) {
 		role_cnt++;
 	}
 }
-// wonder.jung - iframe test
-var row_role_jq = 
-// _m_list.addTableRowMovingArrowWidthBadge(
+var accessor_meeting_role = 
 _m_list.add_table_row_badge_n_iframe(
 	// title
 	"Roles"
@@ -355,9 +406,40 @@ _m_list.add_table_row_badge_n_iframe(
 	// append_target_jq
 	, table_jq
 	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+	, _obj.getDelegate(function(accessor){
 
-		console.log(">>> delegate_data ::: ",delegate_data);
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_TODAY_ROLE_CNT)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
+
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_ROLE)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if(	EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_TODAY_ROLE_CNT && 
+						accessor.set_badge_title != undefined) {
+
+						var today_role_cnt = parseInt(data.today_role_cnt);
+						accessor.set_badge_title(today_role_cnt);
+
+					}
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
+
 
 	}, this)
 	// is_bold
@@ -376,9 +458,41 @@ _m_list.add_table_row_badge_n_iframe(
 		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 		.get(_param.IS_IFRAME_VIEW, _param.YES)
 	)
-	// iframe_height
+	// delegate_update_iframe_height
 	, 416
+	// 
 );
+if(!is_editable) {
+	accessor_meeting_role.off_iframe();	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -388,8 +502,8 @@ _m_list.add_table_row_badge_n_iframe(
 
 
 // 5. Today's Speech
-var row_speech_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
+var accessor_speech = 
+_m_list.add_table_row_badge_n_iframe(
 	// title
 	"Speeches"
 	// title_on_badge
@@ -397,29 +511,70 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// append_target_jq
 	, table_jq
 	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+	, _obj.getDelegate(function(accessor){
 
-		if(!is_editable) {
-			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
-			alert(msg_guide_not_club_member);
-			return;
-		}
+		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
+		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
 
-		console.log(">>> delegate_data :: ",delegate_data);
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_SPEECH)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
 
-		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		);
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_SPEECH)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log("data ::: ",data);
+
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_SPEECH && 
+						accessor.set_badge_title != undefined	) {
+
+						var speech_cnt = parseInt(data.speech_cnt);
+						accessor.set_badge_title(speech_cnt);
+
+					}
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
+
 
 	}, this)
 	// is_bold
 	, true
-	// delegate_data
+	// param_obj
 	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// delegate_update_iframe_height
+	, 416
+	// 
 );
+if(!is_editable) {
+	accessor_speech.off_iframe();	
+}
 
 
 
@@ -430,6 +585,83 @@ _m_list.addTableRowMovingArrowWidthBadge(
 
 
 // 6. News
+var accessor_news = 
+_m_list.add_table_row_badge_n_iframe(
+	// title
+	"Club News"
+	// title_on_badge
+	, "" + today_news_list.length
+	// append_target_jq
+	, table_jq
+	// delegate_obj_row_click
+	, _obj.getDelegate(function(accessor){
+
+		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
+		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
+
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_SPEECH)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
+
+		/*
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_SPEECH)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log("data ::: ",data);
+
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_SPEECH && 
+						accessor.set_badge_title != undefined	) {
+
+						var speech_cnt = parseInt(data.speech_cnt);
+						accessor.set_badge_title(speech_cnt);
+
+					}
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
+		*/
+
+	}, this)
+	// is_bold
+	, true
+	// param_obj
+	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// delegate_update_iframe_height
+	, 416
+	// 
+);
+if(!is_editable) {
+	accessor_news.off_iframe();	
+}
+
+
+/*
 var row_news_jq = 
 _m_list.addTableRowMovingArrowWidthBadge(
 	// title
@@ -460,7 +692,7 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// delegate_data
 	, _param.get(_param.MEETING_ID, MEETING_ID)
 );
-
+*/
 
 
 

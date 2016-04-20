@@ -3700,7 +3700,7 @@ class MYSQLInterface{
 				," , 120 AS __evaluator_timer_green"
 				," , 150 AS __evaluator_timer_yellow"
 				," , 180 AS __evaluator_timer_red"
-				// wonder.jung
+
 				," , MSV2.`updttm` AS __updttm"
 				," , MSV2.`regdttm` AS __regdttm"
 				," FROM `MA_SPEECH` AS MSV2"
@@ -5761,7 +5761,7 @@ class MYSQLInterface{
 		$result = $query_manager->get_result();
 
 		return $result->__member_id;
-	}
+	}	
 
 	// Stats - Role
 	public function get_role_history($membership_id, $role_id, $member_id) {
@@ -8704,28 +8704,8 @@ class MYSQLInterface{
 			$__speaker_member_hash_key = $speech_obj->__speaker_member_hash_key;
 			$__speaker_member_name = $speech_obj->__speaker_member_name;
 
-			$__speaker_timer_green_mm_ss = $speech_obj->__speaker_timer_green_mm_ss;
-			if($this->is_empty(__FUNCTION__, $__speaker_timer_green_mm_ss, "__speaker_timer_green_mm_ss")){
-				return;
-			}
-
-			$__speaker_timer_red_mm_ss = $speech_obj->__speaker_timer_red_mm_ss;
-			if($this->is_empty(__FUNCTION__, $__speaker_timer_red_mm_ss, "__speaker_timer_red_mm_ss")){
-				return;
-			}
-
 			$__evaluator_member_hash_key = $speech_obj->__evaluator_member_hash_key;
 			$__evaluator_member_name = $speech_obj->__evaluator_member_name;
-
-			$__evaluator_timer_green = $speech_obj->__evaluator_timer_green;
-			if($this->is_empty(__FUNCTION__, $__evaluator_timer_green, "__evaluator_timer_green")){
-				return;
-			}
-
-			$__evaluator_timer_red = $speech_obj->__evaluator_timer_red;
-			if($this->is_empty(__FUNCTION__, $__evaluator_timer_red, "__evaluator_timer_red")){
-				return;
-			}
 
 			$table_row_field_action_item_list = $cur_table_row_list[$idx];
 			if(empty($table_row_field_action_item_list)) {
