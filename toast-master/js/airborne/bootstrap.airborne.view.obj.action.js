@@ -3263,7 +3263,7 @@ airborne.bootstrap.obj.__action = {
 							prev_search_keyword != cur_search_keyword){
 
 							// 최대 입력 글자수를 넘었는지 확인.
-							var max_length = 128;
+							var max_length = 256;
 							var is_over_max_length = false;
 							if(_v.is_valid_str(cur_search_keyword) && max_length < cur_search_keyword.length) {
 								is_over_max_length = true;
