@@ -352,6 +352,55 @@ wonglish.meeting_agenda_manager = {
 							)
 						); // ajax done.
 
+					} else if(_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event) {
+
+						// wonder.jung
+						// INSERT ACTION ITEM.
+						console.log("INSERT ACTION ITEM.");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									// 테이블의 열이 추가된 경우의 데이터 업데이트
+									var TABLE_FIELD_ACTION_ITEM_LIST_STD = data.TABLE_FIELD_ACTION_ITEM_LIST_STD;
+									var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+									for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
+
+										var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
+										var cur_context_str = cur_action_item_std.context;
+										var cur_action_hash_key = cur_action_item_std.action_hash_key;
+										var cur_action_name = cur_action_item_std.action_name;
+
+										var cur_table_field_item_obj = cur_table_row_sibling_arr[idx];
+										var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
+
+										if(cur_table_field_item_obj != undefined) {
+
+											cur_table_field_item_obj.set_action_name(cur_action_name);
+											cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
+											cur_table_field_item_obj.set_action_context(cur_context_str);
+											cur_table_field_event_manager.set_title_jq_text(cur_action_name);
+											cur_table_field_event_manager.set_title_jq_attr_tossed_value(cur_action_name);
+
+										}	// end if
+
+									} // end for
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_speech_update) {
 
 						console.log("TM SPEECH UPDATE");
@@ -699,10 +748,6 @@ wonglish.meeting_agenda_manager = {
 		var meeting_agenda_list = meeting_agenda_data_set.meeting_agenda_list;
 		var datepicker_jq = $('.datepicker');
 		var datePickerObj = datepicker_jq.datepicker();
-
-		// datepicker_jq.val(start_date);
-		// datepicker_jq.datepicker({startDate:start_date});
-
 
 		datePickerObj.autoclose = true;
 
