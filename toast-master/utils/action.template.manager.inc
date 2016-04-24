@@ -1254,6 +1254,8 @@ class ActionTemplate{
 		);
 		$child_action_sub_list_child_action_item->push_add_on($child_action_sub_list_child_action_item_sub_table);
 
+		// wonder.jung
+
 		// 10-1-1-1-1. Column List - Project Column List
 		$child_action_sub_list_child_action_item_sub_table_column_list = 
 		new ActionCollection(
@@ -1273,6 +1275,19 @@ class ActionTemplate{
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_NEWS;
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_NEWS;
+		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_NEWS;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->NEWS_ID} = -1;
+		$context->{$params->NEWS_CONTENTS} = "";
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
+
 
 
 

@@ -1831,8 +1831,6 @@ class MYSQLInterface{
 			return;
 		}
 
-		// wonder.jung
-
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
@@ -3510,8 +3508,6 @@ class MYSQLInterface{
 	}
 
 	private function get_speech_project($project_id=-1) {
-
-		// wonder.jung
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
 			return;
@@ -6334,7 +6330,6 @@ class MYSQLInterface{
 		;		
 	}
 
-	// wonder.jung
 	public function select_speech_project_list() {
 		
 		// 추가된 collection의 id를 가져옵니다.
@@ -8610,7 +8605,205 @@ class MYSQLInterface{
 
 		return $recent_root_action_collection;
 	}
-	// @ action에 role 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	// @ action에 news 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	private function update_action_context_about_toastmaster_news($meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+
+
+		// DB에 등록된 뉴스 갯수를 가져옵니다.
+		$news_list = $wdj_mysql_interface->get_news_list($MEETING_ID);
+		if(is_null($news_list)){
+			$result->error = "is_null(\$news_list)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$news_cnt = count($news_list);
+
+		// news list와 action list의 갯수가 일치해야 한다.
+		// 다르다면 업데이트!
+		$action_item_news = 
+		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+
+		// news 관련 테이블을 가져옵니다.
+		$parent_action_list = null;
+		if($this->is_action_item(__FUNCTION__, $action_item_news)) {
+			$parent_action_list = $action_item_news->get_parent();
+		}
+		$cur_children_cnt = -1;
+		if($this->is_action_collection(__FUNCTION__, $parent_action_list)) {
+			// 제목 열도 갯수에 포함됩니다. 전체 열에서 제목 열 1개를 뺍니다.
+			$cur_children_cnt = $parent_action_list->get_children_cnt() - 1;
+		}
+
+
+		if((0 < $cur_children_cnt) && ($cur_children_cnt < $news_cnt)) {
+
+			$diff_cnt = $news_cnt - $cur_children_cnt;
+
+			// 열을 추가합니다.
+			$action_item_obj_before = $action_item_speech;
+			for($idx = 0; $idx < $diff_cnt;$idx++) {
+
+				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+					break;
+				}
+				
+				$cur_table_row_field_action_item_list_after = 
+				$this->add_row_into_table(
+					// $table_field_action_item_obj=null
+					$action_item_obj_before
+					// $action_name=""
+					, $params->NOT_ASSIGNED
+					// $action_context=""
+					, ""
+				);
+				if(empty($cur_table_row_field_action_item_list_after)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$cur_table_row_field_action_item_list_after)<br/>";
+					break;
+				}
+
+				$cur_news_obj = $news_list[$idx];
+				if(is_null($cur_news_obj)) {
+					echo "!Error! / " . __FUNCTION__ . " / is_null($cur_news_obj)<br/>";
+					return;
+				}
+				
+				$__news_id = intval($cur_news_obj->__news_id);
+				if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+					return;
+				}
+
+				for($inner_idx = 0; $inner_idx < count($cur_table_row_field_action_item_list_after);$inner_idx++) {
+					$table_field_action_item_obj = $cur_table_row_field_action_item_list_after[$inner_idx];
+					if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+						break;
+					}
+
+					$cur_context_str = $table_field_action_item_obj->get_context();
+
+					$cur_context_obj = null;
+					if(empty($cur_context_str)) {
+						$cur_context_obj = new stdClass();
+					} else {
+						$cur_context_obj = json_decode($cur_context_str);
+					}
+
+					$cur_context_obj->{$params->NEWS_ID} = $__news_id;
+					$new_context_str = json_encode($cur_context_obj);
+
+					// 추가한 열의 정보를 업데이트. / NEWS_ID
+					// 검색할때 키로 사용됩니다.
+					$this->update_action_item(
+						$table_field_action_item_obj->get_id()
+						, $table_field_action_item_obj->get_name()
+						, $new_context_str
+					);
+
+				}
+
+				$first_child_action_item = $cur_table_row_field_action_item_list_after[0];
+				if($this->is_not_action_item(__FUNCTION__, $first_child_action_item, "first_child_action_item")) {
+					break;
+				}
+
+				$action_item_obj_before = $first_child_action_item;
+
+			}			
+
+		}
+
+
+		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
+		for($idx = 0; $idx < count($news_list);$idx++) {
+
+			// DB에서 가져온 스피치 정보
+			$news_obj = $news_list[$idx];
+
+			$__news_id = intval($news_obj->__news_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+				return;
+			}
+
+			$__news_content = $news_obj->__news_content;
+			if($this->is_empty(__FUNCTION__, $__news_content, "__news_content")){
+				return;
+			}
+
+			$table_row_field_action_item_list = $cur_table_row_list[$idx];
+			if(empty($table_row_field_action_item_list)) {
+				echo "!Error! / " . __FUNCTION__ . " / empty(\$table_row_field_action_item_list)<br/>";
+				return;
+			}
+
+			// table row의 모든 아이템에 대해 speech 정보를 action context에 추가해줍니다.
+			for($inner_idx = 0; $inner_idx < count($table_row_field_action_item_list);$inner_idx++) {
+
+				$table_field_action_item_obj = $table_row_field_action_item_list[$inner_idx];
+				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")){
+					return;
+				}
+
+				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+
+				$ACTION_DB_UPDATE_MSG = $table_field_action_item_obj->get_context_attr($params->ACTION_DB_UPDATE_MSG);
+				if(empty($ACTION_DB_UPDATE_MSG)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$ACTION_DB_UPDATE_MSG)<br/>";
+					return;
+				}
+
+				$cur_news_id = -1;
+				if($table_field_action_item_obj->has_context_attr($params->SPEECH_ID)) {
+					$cur_news_id = $table_field_action_item_obj->get_context_attr($params->SPEECH_ID);
+					$cur_news_id = intval($cur_news_id);
+				}
+
+				$has_changed = false;
+				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_NEWS) == 0) {
+
+					$news_contents_prev = $table_field_action_item_obj->get_context_attr($params->NEWS_CONTENTS);
+
+					if(strcmp($__news_content, $news_contents_prev) != 0) {
+						// update speech project title
+						$table_field_action_item_obj->set_name($__news_content);
+						$has_changed = true;
+					} // inner if end
+
+				}
+
+				if($has_changed) {
+
+					$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+					$table_field_action_item_obj->set_context_attr($params->NEWS_ID, $__news_id);
+					$table_field_action_item_obj->set_context_attr($params->NEWS_CONTENTS, $__news_content);
+
+					// UPDATE ACTION CONTEXT
+					$this->update_action_item(
+						// $action_item_id=-1
+						$table_field_action_item_obj->get_id()
+						// $action_name=""
+						, $table_field_action_item_obj->get_name()
+						// $action_item_context=""
+						, $table_field_action_item_obj->get_context()
+					);
+
+				} // inner if end
+
+			} // inner for end
+
+		} // outer for end
+
+		return $root_action_collection;
+
+	}
+	// @ action에 speech 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
 	private function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
@@ -8765,10 +8958,11 @@ class MYSQLInterface{
 			return;
 		}
 
-		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
-		$action_item_speech_no_speech = 
-		$root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
+		// REMOVE ME
+		// $action_item_speech_no_speech = 
+		// $root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
 
+		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
 		for($idx = 0; $idx < count($speech_list);$idx++) {
 
 			// DB에서 가져온 스피치 정보
@@ -9055,6 +9249,9 @@ class MYSQLInterface{
 
 		// 2. 스피치 관련 내용을 추가합니다.
 		$this->update_action_context_about_toastmaster_speech($meeting_id, $root_action_collection);
+
+		// 3. 뉴스 관련 내용을 추가합니다.
+		$this->update_action_context_about_toastmaster_news($meeting_id, $root_action_collection);
 
 		return $root_action_collection;
 
