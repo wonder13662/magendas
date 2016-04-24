@@ -1455,6 +1455,99 @@ class MYSQLInterface{
 
 		return $json_res_obj->result;
 	}
+	public function get_news_list($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+			)
+		);
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}	
+	public function get_news($meeting_id=-1, $news_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $news_id, "news_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+				," AND `MA_NEWS`.id=$news_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}
+	public function get_latest_news($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+				," ORDER BY `MA_NEWS`.id DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}	
 	public function getNewsByNewsId($membership_id, $meeting_id, $news_id){
 
 		$function_name = "getNewsByNewsId";

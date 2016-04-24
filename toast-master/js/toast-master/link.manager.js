@@ -83,7 +83,8 @@ var link_manager = {
 	,API_UPDATE_TOASTMASTER_OFFICER:"/api/v1/action/toast-master/officer/update.php"
 	,API_UPDATE_TOASTMASTER_MEMBER:"/api/v1/toast-master/member/update.php"
 	,API_UPDATE_TOASTMASTER_MEETING_AGENDA:"/api/v1/toast-master/meeting_agenda/update.php"
-
+	,API_SELECT_TOASTMASTER_NEWS:"/api/v1/toast-master/news/select.php"
+	,API_UPDATE_TOASTMASTER_NEWS:"/api/v1/toast-master/news/update.php"
 
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"

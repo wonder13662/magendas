@@ -441,6 +441,8 @@ _m_list.add_table_row_badge_n_iframe(
 		); // ajax done.
 
 
+		// 여닫을때마다 업데이트된 내역을 가져와 갱신!
+
 	}, this)
 	// is_bold
 	, true
@@ -583,7 +585,7 @@ if(!is_editable) {
 
 
 
-
+console.log("TEST / today_news_list ::: ",today_news_list);
 // 6. News
 var accessor_news = 
 _m_list.add_table_row_badge_n_iframe(
@@ -596,19 +598,20 @@ _m_list.add_table_row_badge_n_iframe(
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(accessor){
 
+		console.log("accessor ::: ",accessor);
+
 		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
 		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
 
 		var _param_obj = 
 		_param
-		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_SPEECH)
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_NEWS_CNT)
 		.get(_param.MEETING_ID,MEETING_ID)
 		;
 
-		/*
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_SELECT_TOASTMASTER_SPEECH)
+			_link.get_link(_link.API_SELECT_TOASTMASTER_NEWS)
 			// _param_obj
 			, _param_obj
 			// _delegate_after_job_done
@@ -620,11 +623,11 @@ _m_list.add_table_row_badge_n_iframe(
 
 					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
 					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
-					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_SPEECH && 
+					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_NEWS_CNT && 
 						accessor.set_badge_title != undefined	) {
 
-						var speech_cnt = parseInt(data.speech_cnt);
-						accessor.set_badge_title(speech_cnt);
+						var news_cnt = parseInt(data.news_cnt);
+						accessor.set_badge_title(news_cnt);
 
 					}
 
@@ -633,7 +636,6 @@ _m_list.add_table_row_badge_n_iframe(
 				this
 			)
 		); // ajax done.
-		*/
 
 	}, this)
 	// is_bold

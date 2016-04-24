@@ -27,13 +27,7 @@ if(!empty($meeting_agenda_list)) {
 	$meeting_agenda_obj = $meeting_agenda_list[0];
 }
 
-// $news_list = $wdj_mysql_interface->getNews($MEETING_ID);
-
-// club news는 action timeline에서 가져와 추가합니다.
-
-
-
-
+$news_list = $wdj_mysql_interface->get_news_list($MEETING_ID);
 
 
 // @ required
@@ -86,8 +80,6 @@ var table_jq = $("table tbody#list");
 // IFRAME - FUNCTION
 var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 
-	console.log("XXX / 001");
-
 	if(IS_IFRAME_VIEW == undefined && IS_IFRAME_VIEW !== true) {
 		return;
 	}
@@ -98,8 +90,6 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 	if(accessor_news == undefined) {
 		return;
 	}
-
-	console.log("XXX / 002");
 
 	var container = $("table tbody#list");
 	var container_height = container.height();
@@ -209,22 +199,34 @@ _m_list.addTableRowTextInputFlexible(
 	, _obj.getDelegate(function(delegate_data){
 
 		var cur_event = delegate_data[_param.EVENT_PARAM_EVENT_TYPE];
-		var key = parseInt(delegate_data[_param.EVENT_PARAM_KEY]);
+		var key = -1;
+		if(delegate_data[_param.EVENT_PARAM_KEY] != undefined) {
+			key = parseInt(delegate_data[_param.EVENT_PARAM_KEY]);
+		}
 		var value = delegate_data[_param.EVENT_PARAM_VALUE];
+		if(value == undefined) {
+			value = "Please update news.";
+		}
 		var target_jq = delegate_data[_param.EVENT_PARAM_TARGET_JQ];
 
+		console.log("XXX / delegate_data ::: ",delegate_data);
 		console.log("XXX / cur_event ::: ",cur_event);
+		console.log("XXX / key ::: ",key);
+		console.log("XXX / value ::: ",value);
 
 		if(_param.EVENT_INSERT === cur_event && key == -1 && _v.is_valid_str(value)) {
+
+			var linktest = _link.get_link(_link.API_UPDATE_TOASTMASTER_NEWS);
+			console.log("TEST / HERE / 001 / linktest ::: ",linktest);
 
 			// 새로운 뉴스를 추가한 이후, 뉴스의 id를 열에 업데이트 해줘야 합니다.
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_NEWS)
 				// _param_obj / MEETING_ID
 				, _param
-				.get(_param.IS_INSERT_NEWS,_param.YES)
+				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_INSERT_NEWS)
 				.get(_param.MEETING_ID,MEETING_ID)
 				.get(_param.NEWS_CONTENTS,value)
 
@@ -233,7 +235,7 @@ _m_list.addTableRowTextInputFlexible(
 					// delegate_func
 					function(data){
 
-						console.log(data);
+						console.log("meeting_agenda_detail_news / data ::: ",data);
 
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것
@@ -252,10 +254,10 @@ _m_list.addTableRowTextInputFlexible(
 			// 이상이 없다면 업데이트!
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_NEWS)
 				// _param_obj / MEETING_ID
 				, _param
-				.get(_param.IS_UPDATE_NEWS,_param.YES)
+				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_NEWS)
 				.get(_param.MEETING_ID,MEETING_ID)
 				.get(_param.NEWS_ID,key)
 				.get(_param.NEWS_CONTENTS,value)
@@ -291,10 +293,10 @@ _m_list.addTableRowTextInputFlexible(
 
 			_ajax.send_simple_post(
 				// _url
-				_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+				_link.get_link(_link.API_UPDATE_TOASTMASTER_NEWS)
 				// _param_obj / MEETING_ID
 				, _param
-				.get(_param.IS_DELETE_NEWS,_param.YES)
+				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_DELETE_NEWS)
 				.get(_param.MEETING_ID,MEETING_ID)
 				.get(_param.NEWS_ID,key)
 
