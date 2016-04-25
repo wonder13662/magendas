@@ -7,7 +7,7 @@ include_once("../../common.inc");
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
 	// 인스턴스 페이지 사용을 위해 멤버쉽 정보를 받을 수 있도록 변경합니다.
-	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);	
+	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);	
 }
 if($MEETING_MEMBERSHIP_ID == -1) {
 	// move to membership picker page
@@ -17,6 +17,7 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	$membership_obj_arr = $wdj_mysql_interface->getMembership($MEETING_MEMBERSHIP_ID);
 	$membership_obj = $membership_obj_arr[0];
 }
+
 
 $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
 
@@ -78,6 +79,8 @@ var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
+
+console.log("membership_obj ::: ",membership_obj);
 
 var is_editable = true;
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
@@ -375,7 +378,7 @@ if(!is_editable) {
 
 
 var msg_guide_not_club_member = ""; 
-if(login_user_info.__is_login === _param.YES) {
+if(login_user_info.__is_login === _param.YES && membership_obj != undefined) {
 	msg_guide_not_club_member = 
 	"Sorry, <MEMBER_NAME>.\nYou are not the member of\n<CLUB_NAME>"
 	.replace(/\<MEMBER_NAME\>/gi, login_user_info.__member_first_name + " " + login_user_info.__member_last_name)

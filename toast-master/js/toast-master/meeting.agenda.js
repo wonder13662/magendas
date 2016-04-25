@@ -225,6 +225,16 @@ wonglish.meeting_agenda_manager = {
 
 					console.log("is_speech_update ::: ",is_speech_update);
 
+					var is_news_update = 
+					(
+						action_context_obj != undefined && (
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_NEWS
+						)
+					)?true:false;
+
+					console.log("is_news_update ::: ",is_news_update);
+
+
 					var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
 					if(_v.is_not_unsigned_number(MEETING_ID)) {
 						console.log("!Error! / delegate_save_n_reload / _v.is_not_unsigned_number(MEETING_ID)");
@@ -352,6 +362,63 @@ wonglish.meeting_agenda_manager = {
 							)
 						); // ajax done.
 
+
+					} else if(_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event && is_news_update) {
+
+						console.log("TM NEWS INSERT");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_NEWS)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+									var TABLE_FIELD_ACTION_ITEM_LIST_STD = data.TABLE_FIELD_ACTION_ITEM_LIST_STD;
+									if(TABLE_FIELD_ACTION_ITEM_LIST_STD == undefined) {
+										return;
+									}
+
+									// 테이블의 열이 추가된 경우의 데이터 업데이트
+									var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+
+									for(var idx = 0;idx < TABLE_FIELD_ACTION_ITEM_LIST_STD.length;idx++) {
+
+										var cur_action_item_std = TABLE_FIELD_ACTION_ITEM_LIST_STD[idx];
+										var cur_context_str = cur_action_item_std.context;
+										var cur_action_id = parseInt(cur_action_item_std.action_id);
+										var cur_action_hash_key = cur_action_item_std.action_hash_key;
+										var cur_action_name = cur_action_item_std.action_name;
+
+										var cur_table_field_item_obj = cur_table_row_sibling_arr[idx];
+										var cur_table_field_event_manager = cur_table_field_item_obj.get_event_manager();
+
+										if(cur_table_field_item_obj != undefined) {
+
+											cur_table_field_item_obj.set_action_id(cur_action_id);
+											cur_table_field_item_obj.set_action_name(cur_action_name);
+											cur_table_field_item_obj.set_action_hash_key(cur_action_hash_key);
+											cur_table_field_item_obj.set_action_context(cur_context_str);
+											cur_table_field_event_manager.set_title_jq_text(cur_action_name);
+											cur_table_field_event_manager.set_title_jq_attr_tossed_value(cur_action_name);
+
+										}	// end if
+
+									} // end for										
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
 					} else if(_action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event) {
 
 						// wonder.jung
@@ -457,9 +524,36 @@ wonglish.meeting_agenda_manager = {
 								// delegate_scope
 								this
 							)
-						); // ajax done.						
+						); // ajax done.	
 
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_news_update) {
 
+						console.log("TM NEWS UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_NEWS)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+									// 스피치를 업데이트 했을 경우의 화면 변경.
+									var ACTION_NAME = data.ACTION_NAME;
+									action_item_obj.set_action_name(ACTION_NAME);
+									cur_element_event_manager.set_title_jq_text(ACTION_NAME);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
 
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event) {
 
@@ -508,6 +602,33 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.
+
+					} else if(_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event && is_news_update) {
+
+						console.log("TM NEWS DELETE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
+
+						// TEST
+						// return;
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_NEWS)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.						
 
 					} else if(_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event) {
 

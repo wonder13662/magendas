@@ -1274,7 +1274,6 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// DB interface prop
 		$context = new stdClass();

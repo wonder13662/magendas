@@ -95,6 +95,7 @@
 		$cur_latest_news = $wdj_mysql_interface->get_latest_news($MEETING_ID);
 		$result->INSERTED_NEWS = $cur_latest_news;
 
+
 		$news_list = $wdj_mysql_interface->get_news_list($MEETING_ID);
 		if(is_null($news_list)){
 			$result->error = "is_null(\$news_list)";

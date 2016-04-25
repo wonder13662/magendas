@@ -2,13 +2,6 @@
 	// @ common setting
 	include_once("../common.inc");
 
-
-	//    .dMMMb  dMMMMMP dMP     dMMMMMP .aMMMb dMMMMMMP         dMP dMMMMb  dMMMMMP .aMMMb  .dMMMb 
-	//   dMP" VP dMP     dMP     dMP     dMP"VMP   dMP           amr dMP dMP dMP     dMP"dMP dMP" VP 
-	//   VMMMb  dMMMP   dMP     dMMMP   dMP       dMP           dMP dMP dMP dMMMP   dMP dMP  VMMMb   
-	// dP .dMP dMP     dMP     dMP     dMP.aMP   dMP           dMP dMP dMP dMP     dMP.aMP dP .dMP   
-	// VMMMP" dMMMMMP dMMMMMP dMMMMMP  VMMMP"   dMP           dMP dMP dMP dMP      VMMMP"  VMMMP"    
-
 	// $today_role_list - 화면 표시 기준에 맞게 정렬합니다.
 	// 7 - Genera Evaluator 	/	2 - ToastMaster (No announce)
 	// 9 - Timer				/	5 - Table Topic Master (Announce later)
@@ -328,6 +321,9 @@ var meeting_action_list = undefined;
 if(meeting_action_list_std != undefined) {
 	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
 }
+
+// TEST
+console.log("meeting_action_list_std ::: ",meeting_action_list_std);
 
 var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
 var tm_officer_action_list = undefined;

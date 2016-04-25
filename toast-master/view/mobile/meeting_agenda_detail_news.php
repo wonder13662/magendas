@@ -185,7 +185,7 @@ if(_v.is_valid_array(news_list)) {
 } // if end
 
 // 1. NEWS
-var accessor_theme =
+var accessor = 
 _m_list.addTableRowTextInputFlexible(
 	// title
 	"Add News"
@@ -205,14 +205,15 @@ _m_list.addTableRowTextInputFlexible(
 		}
 		var value = delegate_data[_param.EVENT_PARAM_VALUE];
 		if(value == undefined) {
-			value = "Please update news.";
+			value = _param.NEWS_CONTENTS_DEFAULT;
 		}
 		var target_jq = delegate_data[_param.EVENT_PARAM_TARGET_JQ];
 
-		console.log("XXX / delegate_data ::: ",delegate_data);
-		console.log("XXX / cur_event ::: ",cur_event);
-		console.log("XXX / key ::: ",key);
-		console.log("XXX / value ::: ",value);
+	 	var accessor = delegate_data.accessor;
+	 	if(accessor == undefined) {
+	 		console.log("!Error! / NEWS / accessor == undefined");
+	 		return;
+	 	}
 
 		if(_param.EVENT_INSERT === cur_event && key == -1 && _v.is_valid_str(value)) {
 
@@ -236,6 +237,13 @@ _m_list.addTableRowTextInputFlexible(
 					function(data){
 
 						console.log("meeting_agenda_detail_news / data ::: ",data);
+
+						var NEWS_CONTENTS = data.NEWS_CONTENTS;
+						if(_v.is_not_valid_str(NEWS_CONTENTS)) {
+							console.log("!Error! / NEWS / _v.is_not_valid_str(NEWS_CONTENTS)");
+							return;
+						}
+						accessor.set(NEWS_CONTENTS);
 
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것
@@ -267,7 +275,10 @@ _m_list.addTableRowTextInputFlexible(
 					// delegate_func
 					function(data){
 
-						console.log(data);
+						console.log("data ::: ",data);
+
+						// target_jq
+						console.log("target_jq ::: ",target_jq);
 
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
 						// TOAST POPUP 찾아볼 것

@@ -8639,7 +8639,40 @@ class MYSQLInterface{
 			$cur_children_cnt = $parent_action_list->get_children_cnt();
 		}
 
-		if((0 < $cur_children_cnt) && ($cur_children_cnt < $news_cnt)) {
+		if($cur_children_cnt == 1 && $news_cnt == 0) {
+
+			// ACTION LIST에서 뉴스 기본값은 있음. DB에서는 조회 안됨.
+			// DB에 기본 뉴스를 1개 추가.
+
+			// wonder.jung
+			$this->insertNews_V2($meeting_id, "", $params->NEWS_CONTENTS_DEFAULT);
+
+			$cur_latest_news = $this->get_latest_news($meeting_id);
+
+			$__news_id = $cur_latest_news->__news_id;
+			$__news_content = $cur_latest_news->__news_content;
+
+			if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+				return;
+			}
+			if(empty($__news_content)) {
+				echo "!Error! / " . __FUNCTION__ . " / empty(\$__news_content)<br/>";
+				break;
+			}
+
+			// UPDATE
+			$action_item_news->set_name($__news_content);
+			$action_item_news->set_context_attr($params->NEWS_ID, $__news_id);
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_news->get_id()
+				// $action_name=""
+				, $action_item_news->get_name()
+				// $action_item_context=""
+				, $action_item_news->get_context()
+			);
+
+		} else if((0 < $cur_children_cnt) && ($cur_children_cnt < $news_cnt)) {
 
 			$diff_cnt = $news_cnt - $cur_children_cnt;
 
@@ -8682,24 +8715,15 @@ class MYSQLInterface{
 						break;
 					}
 
-					$cur_context_str = $table_field_action_item_obj->get_context();
-
-					$cur_context_obj = null;
-					if(empty($cur_context_str)) {
-						$cur_context_obj = new stdClass();
-					} else {
-						$cur_context_obj = json_decode($cur_context_str);
-					}
-
-					$cur_context_obj->{$params->NEWS_ID} = $__news_id;
-					$new_context_str = json_encode($cur_context_obj);
+					$table_field_action_item_obj->set_context_attr($params->NEWS_ID, $__news_id);
 
 					// 추가한 열의 정보를 업데이트. / NEWS_ID
 					// 검색할때 키로 사용됩니다.
 					$this->update_action_item(
 						$table_field_action_item_obj->get_id()
 						, $table_field_action_item_obj->get_name()
-						, $new_context_str
+						// , $new_context_str
+						, $table_field_action_item_obj->get_context()
 					);
 
 				}
@@ -8765,8 +8789,6 @@ class MYSQLInterface{
 					$cur_news_id = $table_field_action_item_obj->get_context_attr($params->NEWS_ID);
 					$cur_news_id = intval($cur_news_id);
 				}
-
-				echo "\$ACTION_DB_UPDATE_MSG ::: $ACTION_DB_UPDATE_MSG<br/>";
 
 				$has_changed = false;
 				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_NEWS) == 0) {

@@ -173,6 +173,7 @@ class ToastmasterParamManager{
 	public $NEWS_ID="NEWS_ID";
 	public $NEWS_TITLE="NEWS_TITLE";
 	public $NEWS_CONTENTS="NEWS_CONTENTS";
+	public $NEWS_CONTENTS_DEFAULT="Please update news";
 
 	public $IS_SELECT_NEWS_CNT="IS_SELECT_NEWS_CNT";
 	public $IS_SELECT_NEWS="IS_SELECT_NEWS";

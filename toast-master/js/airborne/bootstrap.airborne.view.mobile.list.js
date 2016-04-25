@@ -2357,7 +2357,8 @@ airborne.bootstrap.view.mobile.list = {
 		var header_row_jq = append_target_jq.find("tr#input_text_title_row");
 		var input_row_jq_arr = append_target_jq.find("tr#" + row_id);
 
-		var add_row_event = function(input_row_jq, param_obj, delegate_on_event) {
+
+		var add_row_event = function(input_row_jq, param_obj, delegate_on_event, accessor_parent) {
 
 			if(param_obj == undefined) {
 				param_obj = {};
@@ -2365,17 +2366,48 @@ airborne.bootstrap.view.mobile.list = {
 
 			// set event - button remove
 			var btn_remove_jq = input_row_jq.find("button#btn_remove");
-			var textarea_jq = input_row_jq.find("textarea");
+			var textarea_jq = input_row_jq.find("textarea.form-control");
 			var btn_save_jq = input_row_jq.find("button#btn_save");
+
+			if(textarea_jq.length == 0) {
+				// textarea가 없습니다. 더이상 진행하지 않습니다.
+				return;
+			}
+
+			console.log("add_row_event / textarea_jq ::: ",textarea_jq);
+
+			var accessor = {
+				textarea_jq:textarea_jq
+				, get:function(){
+					return this.textarea_jq.val();
+				}
+				, set:function(new_value) {
+					this.textarea_jq.val(new_value);	
+				}
+				, focus:function(){
+					this.textarea_jq.focus();
+				}
+				, set_height:function(new_height){
+					console.log("set_height / new_height ::: ",new_height);
+					// this.textarea_jq.height(new_height);
+					this.textarea_jq.css("height",new_height + "px");
+				}
+				, accessor_parent:accessor_parent
+				, get_parent:function() {
+					this.accessor_parent;
+				}
+			};
+			accessor_parent.add_child(accessor);				
+			// accessor.set_height(49);
 
 			if(btn_remove_jq != undefined && btn_remove_jq.length > 0) {
 				btn_remove_jq.click(function(e){
 
 					var _self_jq = $(this);
-					var text_area_jq = _self_jq.parent().find("textarea");
+					var textarea_jq = _self_jq.parent().find("textarea");
 
-					var key = text_area_jq.attr("_key");
-					var value = text_area_jq.attr("_value");
+					var key = textarea_jq.attr("_key");
+					var value = textarea_jq.attr("_value");
 
 					if(delegate_on_event != undefined) {
 
@@ -2383,10 +2415,10 @@ airborne.bootstrap.view.mobile.list = {
 						param_obj[_param.EVENT_PARAM_KEY] = key;
 						param_obj[_param.EVENT_PARAM_VALUE] = value;
 						param_obj[_param.EVENT_PARAM_TARGET_JQ] = input_row_jq;
+						param_obj.accessor = accessor;
 
 						delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);
 					}
-
 				});
 			}
 
@@ -2401,6 +2433,7 @@ airborne.bootstrap.view.mobile.list = {
 					param_obj[_param.EVENT_PARAM_KEY] = key;
 					param_obj[_param.EVENT_PARAM_VALUE] = value;
 					param_obj[_param.EVENT_PARAM_TARGET_JQ] = input_row_jq;
+					param_obj.accessor = accessor;
 
 					if((init_value != value) && delegate_on_event != undefined) {
 						if(key == -1){
@@ -2423,14 +2456,27 @@ airborne.bootstrap.view.mobile.list = {
 				btn_save_jq.show();
 			});
 
+			return accessor;
 		}
 
 		// 새로운 열을 추가할 대상의 참조.
 		var last_sibling_jq = append_target_jq.children().last();
+		var accessor_parent = {
+			children_arr:[]
+			, add_child:function(child_accessor) {
+				console.log("HERE / add_child / child_accessor ::: ",child_accessor);
+				this.children_arr.push(child_accessor);
+			}
+			, get_children:function() {
+				return this.children_arr;
+			}
+		}
 
 		for(var idx = 0; idx < input_row_jq_arr.length; idx++) {
 			// 각 열별로 이벤트를 부여합니다.
 			var input_row_jq = $(input_row_jq_arr[idx]);
+
+
 
 			var btn_add_jq = input_row_jq.find("button#btn_add");
 			if(btn_add_jq != undefined && btn_add_jq.length > 0) {
@@ -2462,37 +2508,23 @@ airborne.bootstrap.view.mobile.list = {
 					last_sibling_jq.after(new_row_tag);
 					var last_row_jq = append_target_jq.find("tr#" + row_id).last();
 
-					console.log(">> last_sibling_jq :: ",last_sibling_jq);
-					console.log(">> last_row_jq :: ",last_row_jq);
-
-					add_row_event(last_row_jq, param_obj, delegate_on_event);
-
-					last_sibling_jq = last_row_jq;
+					var accessor = add_row_event(last_row_jq, param_obj, delegate_on_event, accessor_parent);
 					
 					// wonder.jung
 					param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_INSERT;
 					param_obj[_param.EVENT_PARAM_TARGET_JQ] = last_row_jq;
+					param_obj.accessor = accessor;
 
 					delegate_on_event._func.apply(delegate_on_event._scope,[param_obj]);
-
 
 				});
 			}
 
-			add_row_event(input_row_jq, param_obj, delegate_on_event);
+			add_row_event(input_row_jq, param_obj, delegate_on_event, accessor_parent);
 
 		}
 
-		var accessor = {
-			get:function(){
-				return input_row_jq.val();
-			}
-			, focus:function(){
-				input_row_jq.focus();
-			}
-		}
-
-		return accessor;
+		return accessor_parent;
 	}	
 	/*
 		@ Public
