@@ -643,9 +643,9 @@ class MYSQLInterface{
 			$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
 		} else {
 			// 이전의 미팅이 하나도 없는 경우. 최초의 미팅을 만들어 줍니다.
-			$query_output = $wdj_mysql_interface->insertFisrtMeetingAgenda($meeting_membership_id);
+			$query_output = $this->insertFisrtMeetingAgenda($meeting_membership_id);
 
-			$result = $wdj_mysql_interface->getLatestMeetingAgendaId($meeting_membership_id);
+			$result = $this->getLatestMeetingAgendaId($meeting_membership_id);
 			if(!empty($result)) {
 				$new_meeting_id = intval($result[0]->__meeting_id);
 			}
@@ -8538,9 +8538,6 @@ class MYSQLInterface{
 				} // end if
 			} // end if
 		} // end for
-
-
-
 	} // end function
 
 
@@ -8619,10 +8616,10 @@ class MYSQLInterface{
 
 
 		// DB에 등록된 뉴스 갯수를 가져옵니다.
-		$news_list = $wdj_mysql_interface->get_news_list($MEETING_ID);
+		$news_list = $this->get_news_list($meeting_id);
 		if(is_null($news_list)){
 			$result->error = "is_null(\$news_list)";
-			terminate($wdj_mysql_interface, $result);
+			terminate($this, $result);
 			return;
 		}
 		$news_cnt = count($news_list);
@@ -8630,7 +8627,7 @@ class MYSQLInterface{
 		// news list와 action list의 갯수가 일치해야 한다.
 		// 다르다면 업데이트!
 		$action_item_news = 
-		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+		$root_action_collection->search_by_context_from_root($params->NEWS_ID);
 
 		// news 관련 테이블을 가져옵니다.
 		$parent_action_list = null;
@@ -8639,17 +8636,15 @@ class MYSQLInterface{
 		}
 		$cur_children_cnt = -1;
 		if($this->is_action_collection(__FUNCTION__, $parent_action_list)) {
-			// 제목 열도 갯수에 포함됩니다. 전체 열에서 제목 열 1개를 뺍니다.
-			$cur_children_cnt = $parent_action_list->get_children_cnt() - 1;
+			$cur_children_cnt = $parent_action_list->get_children_cnt();
 		}
-
 
 		if((0 < $cur_children_cnt) && ($cur_children_cnt < $news_cnt)) {
 
 			$diff_cnt = $news_cnt - $cur_children_cnt;
 
 			// 열을 추가합니다.
-			$action_item_obj_before = $action_item_speech;
+			$action_item_obj_before = $action_item_news;
 			for($idx = 0; $idx < $diff_cnt;$idx++) {
 
 				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
@@ -8720,6 +8715,12 @@ class MYSQLInterface{
 
 		}
 
+		// 각 테이블 열을 가져와 배열로 만들어야 합니다.
+		$cur_table_row_list = $action_item_news->get_table_row_list();
+		if(is_null($cur_table_row_list)) {
+			echo "!Error! / " . __FUNCTION__ . " / is_null(\$cur_table_row_list)<br/>";
+			return;
+		}
 
 		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
 		for($idx = 0; $idx < count($news_list);$idx++) {
@@ -8760,10 +8761,12 @@ class MYSQLInterface{
 				}
 
 				$cur_news_id = -1;
-				if($table_field_action_item_obj->has_context_attr($params->SPEECH_ID)) {
-					$cur_news_id = $table_field_action_item_obj->get_context_attr($params->SPEECH_ID);
+				if($table_field_action_item_obj->has_context_attr($params->NEWS_ID)) {
+					$cur_news_id = $table_field_action_item_obj->get_context_attr($params->NEWS_ID);
 					$cur_news_id = intval($cur_news_id);
 				}
+
+				echo "\$ACTION_DB_UPDATE_MSG ::: $ACTION_DB_UPDATE_MSG<br/>";
 
 				$has_changed = false;
 				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_NEWS) == 0) {
