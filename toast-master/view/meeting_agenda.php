@@ -293,6 +293,14 @@
 	<div id="white_space" style="height:300px;"></div>
 	<!-- white space ends-->
 
+
+	<div
+	  class="fb-like"
+	  data-share="true"
+	  data-width="450"
+	  data-show-faces="true">
+	</div>
+
 <script>
 
 // php to javascript sample
@@ -330,6 +338,10 @@ var tm_officer_action_list = undefined;
 if(tm_officer_std != undefined) {
 	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
 }
+
+// TEST
+// facebook_sdk.init();
+// console.log("HERE / XXX");
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
