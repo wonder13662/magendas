@@ -1,4 +1,5 @@
 <?php
+
 	// @ common setting
 	include_once("../common.inc");
 

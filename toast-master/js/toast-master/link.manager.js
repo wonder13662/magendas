@@ -78,6 +78,7 @@ var link_manager = {
 	,API_UPDATE_TOASTMASTER_SCHEDULE:"/api/v1/action/toast-master/schedule/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_SPEECH:"/api/v1/action/toast-master/speech/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_NEWS:"/api/v1/action/toast-master/news/update.php"
+	,API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE:"/api/v1/action/toast-master/word_n_quote/update.php"
 
 	,API_SELECT_TOASTMASTER_SPEECH:"/api/v1/toast-master/speech/select.php"
 	,API_UPDATE_TOASTMASTER_SPEECH:"/api/v1/toast-master/speech/update.php"
@@ -86,6 +87,7 @@ var link_manager = {
 	,API_UPDATE_TOASTMASTER_MEETING_AGENDA:"/api/v1/toast-master/meeting_agenda/update.php"
 	,API_SELECT_TOASTMASTER_NEWS:"/api/v1/toast-master/news/select.php"
 	,API_UPDATE_TOASTMASTER_NEWS:"/api/v1/toast-master/news/update.php"
+	,API_UPDATE_TOASTMASTER_WORD_N_QUOTE:"/api/v1/toast-master/word_n_quote/update.php"
 
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"

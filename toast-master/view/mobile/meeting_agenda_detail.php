@@ -26,12 +26,17 @@ $latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($MEETI
 if($MEETING_ID == -1) {
 	$MEETING_ID = $latest_meeting_id;
 }
+if($MEETING_ID > 0) {
 
+	$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
+	$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
+	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
+	$today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+	$word_obj = $wdj_mysql_interface->get_word_of_the_day($MEETING_ID);
+	$quote_obj = $wdj_mysql_interface->get_quote_of_the_day($MEETING_ID);
 
-$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
-$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
-$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
-$today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+}
+
 
 // 다음 미팅 날짜를 가져옵니다.
 $start_date = date('Y-m-d');
@@ -80,7 +85,12 @@ var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
 
+var word_obj = <?php echo json_encode($word_obj);?>;
+var quote_obj = <?php echo json_encode($quote_obj);?>;
+
 console.log("membership_obj ::: ",membership_obj);
+console.log("word_obj ::: ",word_obj);
+console.log("quote_obj ::: ",quote_obj);
 
 var is_editable = true;
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
@@ -147,7 +157,6 @@ _m_list.addTableRowTitleNBadge(
 
 
 // 2. DATE
-// draw date picker
 var start_date = _dates.getFormattedTime(meeting_agenda_obj.__startdttm,_dates.DATE_TYPE_YYYY_MM_DD);
 var accessor_date =
 _m_list.addTableRowDateInput(
@@ -588,7 +597,38 @@ if(!is_editable) {
 
 
 
-console.log("TEST / today_news_list ::: ",today_news_list);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 6. News
 var accessor_news = 
 _m_list.add_table_row_badge_n_iframe(
@@ -666,38 +706,33 @@ if(!is_editable) {
 }
 
 
-/*
-var row_news_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
-	// title
-	"Club News"
-	// title_on_badge
-	, "" + today_news_list.length
-	// append_target_jq
-	, table_jq
-	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
 
-		if(!is_editable) {
-			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
-			alert(msg_guide_not_club_member);
-			return;
-		}
 
-		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		);
 
-	}, this)
-	// is_bold
-	, true
-	// delegate_data
-	, _param.get(_param.MEETING_ID, MEETING_ID)
-);
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -722,7 +757,7 @@ _m_list.addTableRowTextInputInline(
 	// place holder
 	,"type word"
 	// value
-	, meeting_agenda_obj.__word
+	, word_obj.__word
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -743,13 +778,15 @@ _m_list.addTableRowTextInputInline(
 			return;	
 		}
 
+		// .get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.WORD,cur_word)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -789,6 +826,37 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 8. WORD DESC
 var accessor_word_desc =
 _m_list.addTableRowTextAreaInputInline(
@@ -799,7 +867,7 @@ _m_list.addTableRowTextAreaInputInline(
 	// place holder
 	,"type word description"
 	// value
-	, meeting_agenda_obj.__word_desc
+	, word_obj.__word_desc
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -823,10 +891,10 @@ _m_list.addTableRowTextAreaInputInline(
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.WORD_DESC,cur_word_desc)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -868,6 +936,42 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 9. QUOTE
 var accessor_quote =
 _m_list.addTableRowTextAreaInputInline(
@@ -878,7 +982,7 @@ _m_list.addTableRowTextAreaInputInline(
 	// place holder
 	,"type quote"
 	// value
-	, meeting_agenda_obj.__quote
+	, quote_obj.__quote_content
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -902,10 +1006,10 @@ _m_list.addTableRowTextAreaInputInline(
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.QUOTE,cur_quote)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -933,6 +1037,39 @@ _m_list.addTableRowTextAreaInputInline(
 if(!is_editable) {
 	accessor_quote.off();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

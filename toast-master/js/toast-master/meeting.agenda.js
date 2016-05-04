@@ -231,8 +231,25 @@ wonglish.meeting_agenda_manager = {
 						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_NEWS
 						)
 					)?true:false;
+					var is_word_update = 
+					(
+						action_context_obj != undefined && (
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY
+						)
+					)?true:false;
+					var is_word_desc_update = 
+					(
+						action_context_obj != undefined && (
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY
+						)
+					)?true:false;
+					var is_quote_update = 
+					(
+						action_context_obj != undefined && (
+						action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY
+						)
+					)?true:false;
 
-					console.log("is_news_update ::: ",is_news_update);
 
 
 					var MEETING_ID = meeting_agenda_data_set.meeting_agenda_obj.__meeting_id;
@@ -525,6 +542,84 @@ wonglish.meeting_agenda_manager = {
 								this
 							)
 						); // ajax done.	
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_word_update) {
+						
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = _param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY;
+						cur_action_obj_for_db_update[_param.WORD] = action_item_obj.get_action_name();
+
+						console.log("TM WORD UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_word_desc_update) {
+
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = _param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY;
+						cur_action_obj_for_db_update[_param.WORD_DESC] = action_item_obj.get_action_name();
+
+						console.log("TM WORD DESC UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_quote_update) {
+
+						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = _param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY;
+						cur_action_obj_for_db_update[_param.QUOTE] = action_item_obj.get_action_name();
+
+						console.log("TM QUOTE DESC UPDATE");
+						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
+
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
+							// _param_obj
+							,cur_action_obj_for_db_update
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
+
+									console.log(">>> data ::: ",data);
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
 
 					} else if(_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event && is_news_update) {
 

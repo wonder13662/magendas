@@ -1211,6 +1211,45 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function get_word_of_the_day($meeting_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __word_id"
+				," , `meeting_agenda_id` AS __meeting_agenda_id"
+				," , `word` AS __word"
+				," , `desc` AS __word_desc"
+				," , `updttm` AS __word_updttm"
+				," , `regdttm` AS __word_regdttm"
+				," FROM `MA_WORD_OF_THE_DAY`"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		if(is_null($result)) {
+			$result = new stdClass();
+			$result->__word_id = -1;
+			$result->__word = "";
+			$result->__word_desc = "";
+			$result->__word_updttm = "";
+			$result->__word_regdttm = "";
+			$result->__meeting_agenda_id = $meeting_id;
+		}
+
+		return $result;
+	}	
+
 	private function deleteWordOfTheDay($meeting_agenda_id){
 		$query =
 		"DELETE FROM `MA_WORD_OF_THE_DAY` WHERE $meeting_agenda_id"
@@ -1352,6 +1391,43 @@ class MYSQLInterface{
 
 		return $json_res_obj->result;
 	}
+
+	public function get_quote_of_the_day($meeting_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __quote_id"
+				," , `content` AS __quote_content"
+				," , `meeting_agenda_id` AS __meeting_agenda_id"
+				," , `updttm` AS __quote_updttm"
+				," , `regdttm` AS __quote_regdttm"
+				," FROM `MA_QUOTE_OF_THE_DAY`"
+				," WHERE `meeting_agenda_id`=$meeting_id"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		if(is_null($result)) {
+			$result = new stdClass();
+			$result->__quote_id = -1;
+			$result->__quote_content = "";
+			$result->__meeting_agenda_id = $meeting_id;
+			$result->__quote_updttm = "";
+			$result->__quote_regdttm = "";
+		}
+		return $result;
+	}
+
 
 	private function deleteQuoteOfTheDay($meeting_agenda_id){
 		$query=
@@ -8644,7 +8720,6 @@ class MYSQLInterface{
 			// ACTION LIST에서 뉴스 기본값은 있음. DB에서는 조회 안됨.
 			// DB에 기본 뉴스를 1개 추가.
 
-			// wonder.jung
 			$this->insertNews_V2($meeting_id, "", $params->NEWS_CONTENTS_DEFAULT);
 
 			$cur_latest_news = $this->get_latest_news($meeting_id);
@@ -8828,6 +8903,83 @@ class MYSQLInterface{
 		return $root_action_collection;
 
 	}
+
+	// @ action에 word n quote 관련 정보를 context에 업데이트 합니다.
+	private function update_action_context_about_toastmaster_word_n_quote($meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		
+		$word_obj = $this->get_word_of_the_day($meeting_id);
+		$quote_obj = $this->get_quote_of_the_day($meeting_id);
+
+		$__word = $word_obj->__word;
+		$__word_desc = $word_obj->__word_desc;
+		$__quote_content = $quote_obj->__quote_content;
+
+		// wonder.jung
+		$action_item_word = 
+		$root_action_collection->search_by_context_from_root($params->WORD);
+		if(!is_null($action_item_word) && strcmp($action_item_word->get_name(), $__word) != 0) {
+
+			$action_item_word->set_name($__word);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_word->get_id()
+				// $action_name=""
+				, $action_item_word->get_name()
+				// $action_item_context=""
+				, $action_item_word->get_context()
+			);
+
+		}
+
+		$action_item_word_desc = 
+		$root_action_collection->search_by_context_from_root($params->WORD_DESC);
+		if(!is_null($action_item_word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
+
+			$action_item_word_desc->set_name($__word_desc);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_word_desc->get_id()
+				// $action_name=""
+				, $action_item_word_desc->get_name()
+				// $action_item_context=""
+				, $action_item_word_desc->get_context()
+			);
+
+		}
+
+		$action_item_quote = 
+		$root_action_collection->search_by_context_from_root($params->QUOTE);
+		if(!is_null($action_item_quote) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
+
+			$action_item_quote->set_name($__quote_content);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_quote->get_id()
+				// $action_name=""
+				, $action_item_quote->get_name()
+				// $action_item_context=""
+				, $action_item_quote->get_context()
+			);
+
+		}
+
+		return $root_action_collection;
+
+	}
+
+
 	// @ action에 speech 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
 	private function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
 
@@ -9277,6 +9429,9 @@ class MYSQLInterface{
 
 		// 3. 뉴스 관련 내용을 추가합니다.
 		$this->update_action_context_about_toastmaster_news($meeting_id, $root_action_collection);
+
+		// 4. word n quote 내용을 추가합니다.
+		$this->update_action_context_about_toastmaster_word_n_quote($meeting_id, $root_action_collection);
 
 		return $root_action_collection;
 

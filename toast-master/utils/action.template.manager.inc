@@ -218,7 +218,6 @@ class ActionTemplate{
 		);
 		$child_action_sub_list->add_child($child_action_sub_list_child_action_item);
 
-
 		// add_on inner table
 		// 3-1-2-1. Today's Role
 		$child_action_sub_list_child_action_item_sub_table = 
@@ -527,6 +526,7 @@ class ActionTemplate{
 		);
 		$child_action_sub_list_child_action_item_sub_table->add_child($child_action_sub_list_child_action_item_sub_table_column_list);
 
+		// wonder.jung
 		// 3-1-2-2-1-1. Column List Field - Word
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -535,8 +535,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
+		// wonder.jung
 		// 3-1-2-2-1-2. Column List Field - Word Desc
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -545,8 +547,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
+		// wonder.jung
 		// 3-1-2-2-1-3. Column List Field - Quote
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -555,6 +559,7 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -576,6 +581,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_WORD_N_QUOTE_WORD_ONLY;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->WORD} = $params->YES;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 3-1-2-2-2-2. Column List Field - Word Desc Text
@@ -586,6 +599,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->WORD_DESC} = $params->YES;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 3-1-2-2-2-3. Column List Field - Quote Desc Text
@@ -596,6 +617,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY
 		);
+
+		// DB interface prop
+		$context = new stdClass();
+		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY;
+		$context->{$params->MEETING_ID} = $meeting_agenda_id;
+		$context->{$params->QUOTE} = $params->YES;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+		
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
 		// 20:00
