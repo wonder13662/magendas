@@ -37,6 +37,7 @@ if($MEETING_ID > 0) {
 
 }
 
+$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($MEETING_MEMBERSHIP_ID);
 
 // 다음 미팅 날짜를 가져옵니다.
 $start_date = date('Y-m-d');
@@ -84,6 +85,7 @@ var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
+var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 
 var word_obj = <?php echo json_encode($word_obj);?>;
 var quote_obj = <?php echo json_encode($quote_obj);?>;
