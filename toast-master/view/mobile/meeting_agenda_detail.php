@@ -7,7 +7,7 @@ include_once("../../common.inc");
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
 	// 인스턴스 페이지 사용을 위해 멤버쉽 정보를 받을 수 있도록 변경합니다.
-	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID);	
+	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);	
 }
 if($MEETING_MEMBERSHIP_ID == -1) {
 	// move to membership picker page
@@ -18,12 +18,25 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 	$membership_obj = $membership_obj_arr[0];
 }
 
+
 $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
 
-$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgenda($MEETING_MEMBERSHIP_ID, $MEETING_ID);
-$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
-$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
-$today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+// 가장 최신의 미팅 ID를 가져옵니다.
+$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($MEETING_MEMBERSHIP_ID);
+if($MEETING_ID == -1) {
+	$MEETING_ID = $latest_meeting_id;
+}
+if($MEETING_ID > 0) {
+
+	$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
+	$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
+	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
+	$today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
+	$word_obj = $wdj_mysql_interface->get_word_of_the_day($MEETING_ID);
+	$quote_obj = $wdj_mysql_interface->get_quote_of_the_day($MEETING_ID);
+
+}
+
 
 // 다음 미팅 날짜를 가져옵니다.
 $start_date = date('Y-m-d');
@@ -67,15 +80,17 @@ var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
 
 var membership_obj = <?php echo json_encode($membership_obj);?>;
-var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
+var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
 
-console.log(">>> login_user_info :: ",login_user_info);
-console.log(">>> membership_obj :: ",membership_obj);
+var word_obj = <?php echo json_encode($word_obj);?>;
+var quote_obj = <?php echo json_encode($quote_obj);?>;
 
-console.log(">>> today_speech_list :: ",today_speech_list);
+console.log("membership_obj ::: ",membership_obj);
+console.log("word_obj ::: ",word_obj);
+console.log("quote_obj ::: ",quote_obj);
 
 var is_editable = true;
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
@@ -93,17 +108,6 @@ _tm_m_list.addHeaderRow(
 	// header_arr
 	,[
 		_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_DETAIL
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
 			_link.MOBILE_TOP
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -115,13 +119,13 @@ _tm_m_list.addHeaderRow(
 	, _tm_m_list.COLOR_TEXT_WHITE
 	// bg_color_vmouse_down
 	, _tm_m_list.COLOR_RED_WINE
+	// is_disabled
+	, null
+	// redirect_url_after_log_in
+	, _link.get_link(_link.MOBILE_MEETING_AGENDA_DETAIL)
 );
 
 // Body - Content
-var meeting_agenda_obj = null;
-if(meeting_agenda_list != null || meeting_agenda_list.length > 0){
-	meeting_agenda_obj = meeting_agenda_list[0];
-}
 console.log(">>> meeting_agenda_obj :: ",meeting_agenda_obj);
 
 
@@ -153,7 +157,6 @@ _m_list.addTableRowTitleNBadge(
 
 
 // 2. DATE
-// draw date picker
 var start_date = _dates.getFormattedTime(meeting_agenda_obj.__startdttm,_dates.DATE_TYPE_YYYY_MM_DD);
 var accessor_date =
 _m_list.addTableRowDateInput(
@@ -197,16 +200,19 @@ _m_list.addTableRowDateInput(
 			}
 		}
 
+		var _param_obj =
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+		.get(_param.MEETING_ID,MEETING_ID)
+		.get(_param.START_DATE,cur_date)
+		;
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-			// _param_obj / MEETING_ID
-			, _param
-			.get(_param.IS_UPDATE_HEADER,_param.YES)
-			.get(_param.MEETING_ID,MEETING_ID)
-			.get(_param.START_DATE,cur_date)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			_link.get_link(_link.API_UPDATE_TOASTMASTER_MEETING_AGENDA)
+			// _param_obj
+			, _param_obj
 
 			// _delegate_after_job_done
 			,_obj.get_delegate(
@@ -223,7 +229,7 @@ _m_list.addTableRowDateInput(
 				// delegate_scope
 				this
 			)
-		); // ajax done.		
+		); // ajax done.
 
 	}, this)
 	// param_obj
@@ -232,7 +238,7 @@ _m_list.addTableRowDateInput(
 	.get(_param.START_DATE,start_date)
 );
 if(!is_editable) {
-	accessor_date.off();	
+	accessor_date.off();
 }
 
 
@@ -245,7 +251,29 @@ if(!is_editable) {
 
 
 
-console.log("_color :: ",_color);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // 3. THEME
@@ -279,16 +307,20 @@ _m_list.addTableRowTextInputInline(
 			return;	
 		}
 
+
+		var _param_obj =
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+		.get(_param.MEETING_ID,MEETING_ID)
+		.get(_param.THEME,cur_theme)
+		;
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-			// _param_obj / MEETING_ID
-			, _param
-			.get(_param.IS_UPDATE_HEADER,_param.YES)
-			.get(_param.MEETING_ID,MEETING_ID)
-			.get(_param.THEME,cur_theme)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			_link.get_link(_link.API_UPDATE_TOASTMASTER_MEETING_AGENDA)
+			// _param_obj
+			, _param_obj
 
 			// _delegate_after_job_done
 			,_obj.get_delegate(
@@ -296,6 +328,9 @@ _m_list.addTableRowTextInputInline(
 				function(data){
 
 					console.log(data);
+
+					// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
+					// TOAST POPUP 찾아볼 것
 					alert("Updated!");
 
 				},
@@ -321,8 +356,38 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var msg_guide_not_club_member = ""; 
-if(login_user_info.__is_login === _param.YES) {
+if(login_user_info.__is_login === _param.YES && membership_obj != undefined) {
 	msg_guide_not_club_member = 
 	"Sorry, <MEMBER_NAME>.\nYou are not the member of\n<CLUB_NAME>"
 	.replace(/\<MEMBER_NAME\>/gi, login_user_info.__member_first_name + " " + login_user_info.__member_last_name)
@@ -344,8 +409,8 @@ for(var idx = 0; idx < today_role_list.length; idx++) {
 		role_cnt++;
 	}
 }
-var row_role_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
+var accessor_meeting_role = 
+_m_list.add_table_row_badge_n_iframe(
 	// title
 	"Roles"
 	// title_on_badge
@@ -353,38 +418,95 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// append_target_jq
 	, table_jq
 	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+	, _obj.getDelegate(function(accessor){
 
-		if(!is_editable) {
-			alert(msg_guide_not_club_member);
-			return;
-		}
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_TODAY_ROLE_CNT)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
 
-		if(	delegate_data == undefined ||
-			delegate_data.delegate_data == undefined ||
-			delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE] == undefined ) {
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_ROLE)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
 
-			console.log("!Error!\taddTableRowMovingArrowWidthBadge\tdelegate_data is not valid!\tdelegate_data :: ",delegate_data);
-			return;
-		}
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if(	EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_TODAY_ROLE_CNT && 
+						accessor.set_badge_title != undefined) {
 
-		if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
+						var today_role_cnt = parseInt(data.today_role_cnt);
+						accessor.set_badge_title(today_role_cnt);
 
-			_link.go_there(
-				_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
-				,_param
-				.get(_param.MEETING_ID, MEETING_ID)
-				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			);
+					}
 
-		}
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
+
+
+		// 여닫을때마다 업데이트된 내역을 가져와 갱신!
 
 	}, this)
 	// is_bold
 	, true
-	// delegate_data
+	// param_obj
 	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_ROLE
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// delegate_update_iframe_height
+	, 416
+	// 
 );
+if(!is_editable) {
+	accessor_meeting_role.off_iframe();	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -394,8 +516,8 @@ _m_list.addTableRowMovingArrowWidthBadge(
 
 
 // 5. Today's Speech
-var row_speech_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
+var accessor_speech = 
+_m_list.add_table_row_badge_n_iframe(
 	// title
 	"Speeches"
 	// title_on_badge
@@ -403,29 +525,101 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// append_target_jq
 	, table_jq
 	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+	, _obj.getDelegate(function(accessor){
 
-		if(!is_editable) {
-			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
-			alert(msg_guide_not_club_member);
-			return;
-		}
+		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
+		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
 
-		console.log(">>> delegate_data :: ",delegate_data);
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_SPEECH)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
 
-		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		);
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_SPEECH)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log("data ::: ",data);
+
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_SPEECH && 
+						accessor.set_badge_title != undefined	) {
+
+						var speech_cnt = parseInt(data.speech_cnt);
+						accessor.set_badge_title(speech_cnt);
+
+					}
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
+
 
 	}, this)
 	// is_bold
 	, true
-	// delegate_data
+	// param_obj
 	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// delegate_update_iframe_height
+	, 416
+	// 
 );
+if(!is_editable) {
+	accessor_speech.off_iframe();	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -436,8 +630,8 @@ _m_list.addTableRowMovingArrowWidthBadge(
 
 
 // 6. News
-var row_news_jq = 
-_m_list.addTableRowMovingArrowWidthBadge(
+var accessor_news = 
+_m_list.add_table_row_badge_n_iframe(
 	// title
 	"Club News"
 	// title_on_badge
@@ -445,27 +639,99 @@ _m_list.addTableRowMovingArrowWidthBadge(
 	// append_target_jq
 	, table_jq
 	// delegate_obj_row_click
-	, _obj.getDelegate(function(delegate_data){
+	, _obj.getDelegate(function(accessor){
 
-		if(!is_editable) {
-			// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
-			alert(msg_guide_not_club_member);
-			return;
-		}
+		console.log("accessor ::: ",accessor);
 
-		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		);
+		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
+		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
+
+		var _param_obj = 
+		_param
+		.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_SELECT_NEWS_CNT)
+		.get(_param.MEETING_ID,MEETING_ID)
+		;
+
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_SELECT_TOASTMASTER_NEWS)
+			// _param_obj
+			, _param_obj
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log("data ::: ",data);
+
+					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
+					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
+					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_NEWS_CNT && 
+						accessor.set_badge_title != undefined	) {
+
+						var news_cnt = parseInt(data.news_cnt);
+						accessor.set_badge_title(news_cnt);
+
+					}
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.
 
 	}, this)
 	// is_bold
 	, true
-	// delegate_data
+	// param_obj
 	, _param.get(_param.MEETING_ID, MEETING_ID)
+	// text_color
+	, null
+	// bg_color
+	, null
+	// iframe_page_link
+	, _link.get_link(
+		_link.MOBILE_MEETING_AGENDA_DETAIL_NEWS
+		,_param
+		.get(_param.MEETING_ID, MEETING_ID)
+		.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+		.get(_param.IS_IFRAME_VIEW, _param.YES)
+	)
+	// delegate_update_iframe_height
+	, 416
+	// 
 );
+if(!is_editable) {
+	accessor_news.off_iframe();	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -491,7 +757,7 @@ _m_list.addTableRowTextInputInline(
 	// place holder
 	,"type word"
 	// value
-	, meeting_agenda_obj.__word
+	, word_obj.__word
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -512,13 +778,15 @@ _m_list.addTableRowTextInputInline(
 			return;	
 		}
 
+		// .get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_HEADER)
+
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_WORD_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.WORD,cur_word)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -558,6 +826,37 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 8. WORD DESC
 var accessor_word_desc =
 _m_list.addTableRowTextAreaInputInline(
@@ -568,7 +867,7 @@ _m_list.addTableRowTextAreaInputInline(
 	// place holder
 	,"type word description"
 	// value
-	, meeting_agenda_obj.__word_desc
+	, word_obj.__word_desc
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -592,10 +891,10 @@ _m_list.addTableRowTextAreaInputInline(
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_WORD_DESC_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.WORD_DESC,cur_word_desc)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -637,6 +936,42 @@ if(!is_editable) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 9. QUOTE
 var accessor_quote =
 _m_list.addTableRowTextAreaInputInline(
@@ -647,7 +982,7 @@ _m_list.addTableRowTextAreaInputInline(
 	// place holder
 	,"type quote"
 	// value
-	, meeting_agenda_obj.__quote
+	, quote_obj.__quote_content
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
 
@@ -671,10 +1006,10 @@ _m_list.addTableRowTextAreaInputInline(
 		// 이상이 없다면 업데이트!
 		_ajax.send_simple_post(
 			// _url
-			_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
+			_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE)
 			// _param_obj / MEETING_ID
 			, _param
-			.get(_param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY,_param.YES)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_UPDATE_WORD_N_QUOTE_QUOTE_ONLY)
 			.get(_param.MEETING_ID,MEETING_ID)
 			.get(_param.QUOTE,cur_quote)
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -702,6 +1037,39 @@ _m_list.addTableRowTextAreaInputInline(
 if(!is_editable) {
 	accessor_quote.off();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -610,14 +610,10 @@ class MYSQLInterface{
 		if(!is_null($result)) {
 			$__meeting_id = intval($result->__meeting_id);	
 		}
-
-		// 예정된 미팅이 없는 경우, 이번주 미팅을 추가합니다.
-		$meeting_agenda_added = null;
+		
 		if($__meeting_id == -1) {
-			$meeting_agenda_added = $this->add_meeting_agenda($meeting_membership_id);	
-		}
-		if(!is_null($meeting_agenda_added)) {
-			$__meeting_id = intval($meeting_agenda_added->__meeting_id);
+			// 예정된 미팅이 없는 경우, 이번주 미팅을 추가합니다.
+			$__meeting_id = $this->add_meeting_agenda($meeting_membership_id);	
 		}
 
 		return $__meeting_id;
@@ -643,7 +639,18 @@ class MYSQLInterface{
 
 		$recent_meeting_agenda_obj = null;
 		if(!empty($recent_meeting_agenda_list)) {
+			// 이전의 미팅이 있는 경우.
 			$recent_meeting_agenda_obj = $recent_meeting_agenda_list[0];
+		} else {
+			// 이전의 미팅이 하나도 없는 경우. 최초의 미팅을 만들어 줍니다.
+			$query_output = $this->insertFisrtMeetingAgenda($meeting_membership_id);
+
+			$result = $this->getLatestMeetingAgendaId($meeting_membership_id);
+			if(!empty($result)) {
+				$new_meeting_id = intval($result[0]->__meeting_id);
+			}
+
+			return $new_meeting_id;
 		}
 
 		if(!is_null($recent_meeting_agenda_obj) && !empty($recent_meeting_agenda_obj->__startdttm)) {
@@ -694,7 +701,10 @@ class MYSQLInterface{
 				, $meeting_membership_id
 			);
 
-			return $result;
+			$new_meeting_id = $meeting_agenda_added->__meeting_id;
+			$new_meeting_id = intval($new_meeting_id);
+
+			return $new_meeting_id;
 		}		
 
 	}
@@ -970,47 +980,37 @@ class MYSQLInterface{
 		@ Public
 		@ Desc : id로 미팅 아젠다 정보를 가져옵니다.
 	*/
-	public function get_meeting_agenda_by_id($meeting_membership_id=-1, $meeting_id=-1){
+	public function get_meeting_agenda_by_id($meeting_id=-1){
 
-		$function_name = "get_meeting_agenda_by_id";
-		if($this->isNotUnsignedNumber($meeting_membership_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_membership_id)<br/>";
-		}
-		if($this->isNotUnsignedNumber($meeting_id)){
-			return "$function_name / \$this->isNotUnsignedNumber(\$meeting_id)<br/>";
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return -1;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"SELECT MA.id AS __meeting_id"
-			,", MA.round AS __round"
-			,", MA.theme AS __theme"
-			,", MA.startdttm AS __startdttm"
-			,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
-			,", MA.membership_id AS __membership_id"
-			,", MEMBERSHIP.name AS __membership_name"
-			,", MEMBERSHIP.desc AS __membership_desc"
-			,", IFNULL(QUOTE.content,\"\") AS __quote"
-			,", IFNULL(WORD.word,\"\") AS __word"
-			,", IFNULL(WORD.desc,\"\") AS __word_desc"
-			,"FROM MEETING_AGENDA AS MA"
-			,"LEFT JOIN MA_QUOTE_OF_THE_DAY AS QUOTE ON QUOTE.meeting_agenda_id=MA.id"
-			,"LEFT JOIN MA_WORD_OF_THE_DAY AS WORD ON WORD.meeting_agenda_id=MA.id"
-			,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
-			,"WHERE MA.id=$meeting_id"
-			,"AND MA.membership_id=$meeting_membership_id"
-			,"AND MA.`status`=\"A\""
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT MA.id AS __meeting_id"
+				,", MA.round AS __round"
+				,", MA.theme AS __theme"
+				,", MA.startdttm AS __startdttm"
+				,", DATE_FORMAT(MA.startdttm, '%Y-%m-%d') AS __startdate"					
+				,", MA.membership_id AS __membership_id"
+				,", MEMBERSHIP.name AS __membership_name"
+				,", MEMBERSHIP.desc AS __membership_desc"
+				,"FROM MEETING_AGENDA AS MA"
+				,"LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MA.membership_id"
+				,"WHERE MA.id=$meeting_id"
+				,"AND MA.`status`=\"A\""
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
-
-		$json_res_obj = $this->getSelectResult($query_manager->getExecuteQuery());
-		if(!is_null($json_res_obj->result) && !empty($json_res_obj->result) &&is_array($json_res_obj->result) ) {
-			return $json_res_obj->result[0];
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return null;
 		}
 
-		return null;
+		$result = $query_manager->get_result();
+		return $result;
+
 	}	
 
 	public function getLatestMeetingAgendaId($meetingship_id=-1){
@@ -1211,6 +1211,45 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function get_word_of_the_day($meeting_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __word_id"
+				," , `meeting_agenda_id` AS __meeting_agenda_id"
+				," , `word` AS __word"
+				," , `desc` AS __word_desc"
+				," , `updttm` AS __word_updttm"
+				," , `regdttm` AS __word_regdttm"
+				," FROM `MA_WORD_OF_THE_DAY`"
+				," WHERE meeting_agenda_id=$meeting_id"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		if(is_null($result)) {
+			$result = new stdClass();
+			$result->__word_id = -1;
+			$result->__word = "";
+			$result->__word_desc = "";
+			$result->__word_updttm = "";
+			$result->__word_regdttm = "";
+			$result->__meeting_agenda_id = $meeting_id;
+		}
+
+		return $result;
+	}	
+
 	private function deleteWordOfTheDay($meeting_agenda_id){
 		$query =
 		"DELETE FROM `MA_WORD_OF_THE_DAY` WHERE $meeting_agenda_id"
@@ -1353,6 +1392,43 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	public function get_quote_of_the_day($meeting_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `id` AS __quote_id"
+				," , `content` AS __quote_content"
+				," , `meeting_agenda_id` AS __meeting_agenda_id"
+				," , `updttm` AS __quote_updttm"
+				," , `regdttm` AS __quote_regdttm"
+				," FROM `MA_QUOTE_OF_THE_DAY`"
+				," WHERE `meeting_agenda_id`=$meeting_id"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		if(is_null($result)) {
+			$result = new stdClass();
+			$result->__quote_id = -1;
+			$result->__quote_content = "";
+			$result->__meeting_agenda_id = $meeting_id;
+			$result->__quote_updttm = "";
+			$result->__quote_regdttm = "";
+		}
+		return $result;
+	}
+
+
 	private function deleteQuoteOfTheDay($meeting_agenda_id){
 		$query=
 		"DELETE FROM `MA_QUOTE_OF_THE_DAY` WHERE $meeting_agenda_id"
@@ -1455,6 +1531,99 @@ class MYSQLInterface{
 
 		return $json_res_obj->result;
 	}
+	public function get_news_list($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+			)
+		);
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}	
+	public function get_news($meeting_id=-1, $news_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $news_id, "news_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+				," AND `MA_NEWS`.id=$news_id"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}
+	public function get_latest_news($meeting_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MA_NEWS`.id AS __news_id"
+				," , `MA_NEWS`.meeting_agenda_id AS __news_meeting_agenda_id"
+				," , `MA_NEWS`.title AS __news_title"
+				," , `MA_NEWS`.content AS __news_content"
+				," , `MA_NEWS`.updttm AS __news_updttm"
+				," , `MA_NEWS`.regdttm AS __news_regdttm"
+				," , `MA_NEWS`.order_num AS __news_order_num"
+				," FROM `MA_NEWS`"
+				," WHERE `MA_NEWS`.meeting_agenda_id=$meeting_id"
+				," ORDER BY `MA_NEWS`.id DESC"
+				," LIMIT 1"
+			)
+		);
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+
+		$result = $query_manager->get_result();
+		return $result;		
+
+	}	
 	public function getNewsByNewsId($membership_id, $meeting_id, $news_id){
 
 		$function_name = "getNewsByNewsId";
@@ -1737,8 +1906,6 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
 			return;
 		}
-
-		// wonder.jung
 
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
@@ -3418,8 +3585,6 @@ class MYSQLInterface{
 
 	private function get_speech_project($project_id=-1) {
 
-		// wonder.jung
-
 		if($this->is_not_unsigned_number(__FUNCTION__, $project_id, "project_id")){
 			return;
 		}
@@ -3700,7 +3865,7 @@ class MYSQLInterface{
 				," , 120 AS __evaluator_timer_green"
 				," , 150 AS __evaluator_timer_yellow"
 				," , 180 AS __evaluator_timer_red"
-				// wonder.jung
+
 				," , MSV2.`updttm` AS __updttm"
 				," , MSV2.`regdttm` AS __regdttm"
 				," FROM `MA_SPEECH` AS MSV2"
@@ -5761,7 +5926,7 @@ class MYSQLInterface{
 		$result = $query_manager->get_result();
 
 		return $result->__member_id;
-	}
+	}	
 
 	// Stats - Role
 	public function get_role_history($membership_id, $role_id, $member_id) {
@@ -6241,7 +6406,6 @@ class MYSQLInterface{
 		;		
 	}
 
-	// wonder.jung
 	public function select_speech_project_list() {
 		
 		// 추가된 collection의 id를 가져옵니다.
@@ -8450,9 +8614,6 @@ class MYSQLInterface{
 				} // end if
 			} // end if
 		} // end for
-
-
-
 	} // end function
 
 
@@ -8517,7 +8678,309 @@ class MYSQLInterface{
 
 		return $recent_root_action_collection;
 	}
-	// @ action에 role 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	// @ action에 news 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
+	private function update_action_context_about_toastmaster_news($meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+
+
+		// DB에 등록된 뉴스 갯수를 가져옵니다.
+		$news_list = $this->get_news_list($meeting_id);
+		if(is_null($news_list)){
+			$result->error = "is_null(\$news_list)";
+			terminate($this, $result);
+			return;
+		}
+		$news_cnt = count($news_list);
+
+		// news list와 action list의 갯수가 일치해야 한다.
+		// 다르다면 업데이트!
+		$action_item_news = 
+		$root_action_collection->search_by_context_from_root($params->NEWS_ID);
+
+		// news 관련 테이블을 가져옵니다.
+		$parent_action_list = null;
+		if($this->is_action_item(__FUNCTION__, $action_item_news)) {
+			$parent_action_list = $action_item_news->get_parent();
+		}
+		$cur_children_cnt = -1;
+		if($this->is_action_collection(__FUNCTION__, $parent_action_list)) {
+			$cur_children_cnt = $parent_action_list->get_children_cnt();
+		}
+
+		if($cur_children_cnt == 1 && $news_cnt == 0) {
+
+			// ACTION LIST에서 뉴스 기본값은 있음. DB에서는 조회 안됨.
+			// DB에 기본 뉴스를 1개 추가.
+
+			$this->insertNews_V2($meeting_id, "", $params->NEWS_CONTENTS_DEFAULT);
+
+			$cur_latest_news = $this->get_latest_news($meeting_id);
+
+			$__news_id = $cur_latest_news->__news_id;
+			$__news_content = $cur_latest_news->__news_content;
+
+			if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+				return;
+			}
+			if(empty($__news_content)) {
+				echo "!Error! / " . __FUNCTION__ . " / empty(\$__news_content)<br/>";
+				break;
+			}
+
+			// UPDATE
+			$action_item_news->set_name($__news_content);
+			$action_item_news->set_context_attr($params->NEWS_ID, $__news_id);
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_news->get_id()
+				// $action_name=""
+				, $action_item_news->get_name()
+				// $action_item_context=""
+				, $action_item_news->get_context()
+			);
+
+		} else if((0 < $cur_children_cnt) && ($cur_children_cnt < $news_cnt)) {
+
+			$diff_cnt = $news_cnt - $cur_children_cnt;
+
+			// 열을 추가합니다.
+			$action_item_obj_before = $action_item_news;
+			for($idx = 0; $idx < $diff_cnt;$idx++) {
+
+				if($this->is_not_action_item(__FUNCTION__, $action_item_obj_before, "action_item_obj_before")) {
+					break;
+				}
+				
+				$cur_table_row_field_action_item_list_after = 
+				$this->add_row_into_table(
+					// $table_field_action_item_obj=null
+					$action_item_obj_before
+					// $action_name=""
+					, $params->NOT_ASSIGNED
+					// $action_context=""
+					, ""
+				);
+				if(empty($cur_table_row_field_action_item_list_after)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$cur_table_row_field_action_item_list_after)<br/>";
+					break;
+				}
+
+				$cur_news_obj = $news_list[$idx];
+				if(is_null($cur_news_obj)) {
+					echo "!Error! / " . __FUNCTION__ . " / is_null($cur_news_obj)<br/>";
+					return;
+				}
+				
+				$__news_id = intval($cur_news_obj->__news_id);
+				if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+					return;
+				}
+
+				for($inner_idx = 0; $inner_idx < count($cur_table_row_field_action_item_list_after);$inner_idx++) {
+					$table_field_action_item_obj = $cur_table_row_field_action_item_list_after[$inner_idx];
+					if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")) {
+						break;
+					}
+
+					$table_field_action_item_obj->set_context_attr($params->NEWS_ID, $__news_id);
+
+					// 추가한 열의 정보를 업데이트. / NEWS_ID
+					// 검색할때 키로 사용됩니다.
+					$this->update_action_item(
+						$table_field_action_item_obj->get_id()
+						, $table_field_action_item_obj->get_name()
+						// , $new_context_str
+						, $table_field_action_item_obj->get_context()
+					);
+
+				}
+
+				$first_child_action_item = $cur_table_row_field_action_item_list_after[0];
+				if($this->is_not_action_item(__FUNCTION__, $first_child_action_item, "first_child_action_item")) {
+					break;
+				}
+
+				$action_item_obj_before = $first_child_action_item;
+
+			}			
+
+		}
+
+		// 각 테이블 열을 가져와 배열로 만들어야 합니다.
+		$cur_table_row_list = $action_item_news->get_table_row_list();
+		if(is_null($cur_table_row_list)) {
+			echo "!Error! / " . __FUNCTION__ . " / is_null(\$cur_table_row_list)<br/>";
+			return;
+		}
+
+		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
+		for($idx = 0; $idx < count($news_list);$idx++) {
+
+			// DB에서 가져온 스피치 정보
+			$news_obj = $news_list[$idx];
+
+			$__news_id = intval($news_obj->__news_id);
+			if($this->is_not_unsigned_number(__FUNCTION__, $__news_id, "__news_id")){
+				return;
+			}
+
+			$__news_content = $news_obj->__news_content;
+			if($this->is_empty(__FUNCTION__, $__news_content, "__news_content")){
+				return;
+			}
+
+			$table_row_field_action_item_list = $cur_table_row_list[$idx];
+			if(empty($table_row_field_action_item_list)) {
+				echo "!Error! / " . __FUNCTION__ . " / empty(\$table_row_field_action_item_list)<br/>";
+				return;
+			}
+
+			// table row의 모든 아이템에 대해 speech 정보를 action context에 추가해줍니다.
+			for($inner_idx = 0; $inner_idx < count($table_row_field_action_item_list);$inner_idx++) {
+
+				$table_field_action_item_obj = $table_row_field_action_item_list[$inner_idx];
+				if($this->is_not_action_item(__FUNCTION__, $table_field_action_item_obj, "table_field_action_item_obj")){
+					return;
+				}
+
+				$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+
+				$ACTION_DB_UPDATE_MSG = $table_field_action_item_obj->get_context_attr($params->ACTION_DB_UPDATE_MSG);
+				if(empty($ACTION_DB_UPDATE_MSG)) {
+					echo "!Error! / " . __FUNCTION__ . " / empty(\$ACTION_DB_UPDATE_MSG)<br/>";
+					return;
+				}
+
+				$cur_news_id = -1;
+				if($table_field_action_item_obj->has_context_attr($params->NEWS_ID)) {
+					$cur_news_id = $table_field_action_item_obj->get_context_attr($params->NEWS_ID);
+					$cur_news_id = intval($cur_news_id);
+				}
+
+				$has_changed = false;
+				if(strcmp($ACTION_DB_UPDATE_MSG, $params->IS_UPDATE_NEWS) == 0) {
+
+					$news_contents_prev = $table_field_action_item_obj->get_context_attr($params->NEWS_CONTENTS);
+
+					if(strcmp($__news_content, $news_contents_prev) != 0) {
+						// update speech project title
+						$table_field_action_item_obj->set_name($__news_content);
+						$has_changed = true;
+					} // inner if end
+
+				}
+
+				if($has_changed) {
+
+					$table_field_action_item_obj->set_context_attr($params->MEETING_ID, $meeting_id);
+					$table_field_action_item_obj->set_context_attr($params->NEWS_ID, $__news_id);
+					$table_field_action_item_obj->set_context_attr($params->NEWS_CONTENTS, $__news_content);
+
+					// UPDATE ACTION CONTEXT
+					$this->update_action_item(
+						// $action_item_id=-1
+						$table_field_action_item_obj->get_id()
+						// $action_name=""
+						, $table_field_action_item_obj->get_name()
+						// $action_item_context=""
+						, $table_field_action_item_obj->get_context()
+					);
+
+				} // inner if end
+
+			} // inner for end
+
+		} // outer for end
+
+		return $root_action_collection;
+
+	}
+
+	// @ action에 word n quote 관련 정보를 context에 업데이트 합니다.
+	private function update_action_context_about_toastmaster_word_n_quote($meeting_id=-1, $root_action_collection=null) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
+			return;
+		}
+		if($this->is_not_action_collection(__FUNCTION__, $root_action_collection, "root_action_collection")){
+			return;
+		}
+
+		$params = new ToastmasterParamManager();
+		
+		$word_obj = $this->get_word_of_the_day($meeting_id);
+		$quote_obj = $this->get_quote_of_the_day($meeting_id);
+
+		$__word = $word_obj->__word;
+		$__word_desc = $word_obj->__word_desc;
+		$__quote_content = $quote_obj->__quote_content;
+
+		// wonder.jung
+		$action_item_word = 
+		$root_action_collection->search_by_context_from_root($params->WORD);
+		if(!is_null($action_item_word) && strcmp($action_item_word->get_name(), $__word) != 0) {
+
+			$action_item_word->set_name($__word);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_word->get_id()
+				// $action_name=""
+				, $action_item_word->get_name()
+				// $action_item_context=""
+				, $action_item_word->get_context()
+			);
+
+		}
+
+		$action_item_word_desc = 
+		$root_action_collection->search_by_context_from_root($params->WORD_DESC);
+		if(!is_null($action_item_word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
+
+			$action_item_word_desc->set_name($__word_desc);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_word_desc->get_id()
+				// $action_name=""
+				, $action_item_word_desc->get_name()
+				// $action_item_context=""
+				, $action_item_word_desc->get_context()
+			);
+
+		}
+
+		$action_item_quote = 
+		$root_action_collection->search_by_context_from_root($params->QUOTE);
+		if(!is_null($action_item_quote) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
+
+			$action_item_quote->set_name($__quote_content);
+
+			$this->update_action_item(
+				// $action_item_id=-1
+				$action_item_quote->get_id()
+				// $action_name=""
+				, $action_item_quote->get_name()
+				// $action_item_context=""
+				, $action_item_quote->get_context()
+			);
+
+		}
+
+		return $root_action_collection;
+
+	}
+
+
+	// @ action에 speech 관련 정보를 context에 업데이트 합니다. 멤버 이름과 롤의 참여 횟수를 추가해 줍니다.
 	private function update_action_context_about_toastmaster_speech($meeting_id=-1, $root_action_collection=null) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_id, "meeting_id")){
@@ -8672,10 +9135,11 @@ class MYSQLInterface{
 			return;
 		}
 
-		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
-		$action_item_speech_no_speech = 
-		$root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
+		// REMOVE ME
+		// $action_item_speech_no_speech = 
+		// $root_action_collection->search_by_context_from_root($params->SPEECH_ID, -1);
 
+		// DB에서 가져온 스피치 정보를 ACTION ITEM에 넣음. 스피치 정보가 지정되었을 때만 사용함.
 		for($idx = 0; $idx < count($speech_list);$idx++) {
 
 			// DB에서 가져온 스피치 정보
@@ -8704,28 +9168,8 @@ class MYSQLInterface{
 			$__speaker_member_hash_key = $speech_obj->__speaker_member_hash_key;
 			$__speaker_member_name = $speech_obj->__speaker_member_name;
 
-			$__speaker_timer_green_mm_ss = $speech_obj->__speaker_timer_green_mm_ss;
-			if($this->is_empty(__FUNCTION__, $__speaker_timer_green_mm_ss, "__speaker_timer_green_mm_ss")){
-				return;
-			}
-
-			$__speaker_timer_red_mm_ss = $speech_obj->__speaker_timer_red_mm_ss;
-			if($this->is_empty(__FUNCTION__, $__speaker_timer_red_mm_ss, "__speaker_timer_red_mm_ss")){
-				return;
-			}
-
 			$__evaluator_member_hash_key = $speech_obj->__evaluator_member_hash_key;
 			$__evaluator_member_name = $speech_obj->__evaluator_member_name;
-
-			$__evaluator_timer_green = $speech_obj->__evaluator_timer_green;
-			if($this->is_empty(__FUNCTION__, $__evaluator_timer_green, "__evaluator_timer_green")){
-				return;
-			}
-
-			$__evaluator_timer_red = $speech_obj->__evaluator_timer_red;
-			if($this->is_empty(__FUNCTION__, $__evaluator_timer_red, "__evaluator_timer_red")){
-				return;
-			}
 
 			$table_row_field_action_item_list = $cur_table_row_list[$idx];
 			if(empty($table_row_field_action_item_list)) {
@@ -8982,6 +9426,12 @@ class MYSQLInterface{
 
 		// 2. 스피치 관련 내용을 추가합니다.
 		$this->update_action_context_about_toastmaster_speech($meeting_id, $root_action_collection);
+
+		// 3. 뉴스 관련 내용을 추가합니다.
+		$this->update_action_context_about_toastmaster_news($meeting_id, $root_action_collection);
+
+		// 4. word n quote 내용을 추가합니다.
+		$this->update_action_context_about_toastmaster_word_n_quote($meeting_id, $root_action_collection);
 
 		return $root_action_collection;
 

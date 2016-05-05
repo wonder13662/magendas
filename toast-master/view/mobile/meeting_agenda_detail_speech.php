@@ -2,6 +2,9 @@
 // common setting
 include_once("../../common.inc");
 
+$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+$IS_IFRAME_VIEW = $params->isYes($params->IS_IFRAME_VIEW);
+
 // Membership Check
 $MEETING_MEMBERSHIP_ID = ToastMasterLogInManager::getMembershipCookie();
 if($MEETING_MEMBERSHIP_ID == -1) {
@@ -26,7 +29,7 @@ if(!empty($meeting_agenda_list)) {
 $today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
 
 $SPEECH_ID = $params->getParamNumber($params->SPEECH_ID, -1);
-$IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
+
 $today_speech_list_valid = array();
 if(0 < $SPEECH_ID && $IS_EXTERNAL_SHARE) {
 	// 지정된 스피치만 업데이트하는 경우. 카카오톡으로 페이지 링크가 전송된 경우, 해당 스피치만 노출됩니다.
@@ -80,6 +83,7 @@ var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 
 var SPEECH_ID = <?php echo json_encode($SPEECH_ID);?>;
 var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
+var IS_IFRAME_VIEW = <?php echo json_encode($IS_IFRAME_VIEW);?>;
 
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
@@ -89,9 +93,36 @@ var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
 var table_jq = $("table tbody#list");
 
+// IFRAME - FUNCTION
+var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
+
+	if(IS_IFRAME_VIEW == undefined && IS_IFRAME_VIEW !== true) {
+		return;
+	}
+	if(parent_obj == undefined) {
+		return;	
+	}
+	var accessor_speech = parent_obj.accessor_speech;
+	if(accessor_speech == undefined) {
+		return;
+	}
+
+	var container = $("tbody#list");
+	var container_height = container.height();
+
+	if(0 < container_height) {
+		console.log("container_height ::: ",container_height);
+		accessor_speech.set_iframe_height(container_height);	
+	}
+
+}
+
+
+console.log("TEST / DETAIL SPEECH / IS_IFRAME_VIEW ::: ",IS_IFRAME_VIEW);
+
 // Header - Log In Treatment
 // 지정된 스피치만 보여주는 경우에는 로그인 탭을 노출하지 않습니다.
-if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
+if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW && !(0 < SPEECH_ID)) {
 	_tm_m_list.addHeaderRow(
 		// login_user_info
 		login_user_info
@@ -143,7 +174,6 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 
 
 
-
 // 지정된 스피치만 보여주는 경우에는 새로운 스피치를 추가할 수 없습니다.
 if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 	// Body - Content / 새로운 스피치를 추가합니다.
@@ -177,12 +207,15 @@ if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
 					_link.go_there(
 						_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
 						,_param
+						.get(_param.IS_IFRAME_VIEW, _param.YES)
 						.get(_param.MEETING_ID, MEETING_ID)
 						.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 					);
 
 				},this)
 			); // ajax done.
+
+			send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 		}, this)
 		// append_target_jq
@@ -277,15 +310,10 @@ _m_list.addTableRowsSelectFolderV2(
 	// bg_color
 	, _color.COLOR_WHITE
 );
-
-
-
-
 select_folder_speech_project.hide();
 
 
 
-console.log(">>> member_list :: ",member_list);
 
 // Member List for speaker n evaluator.
 var key_value_obj_member_arr = [];
@@ -497,6 +525,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 							_link.go_there(
 								_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
 								,_param
+								.get(_param.IS_IFRAME_VIEW, _param.YES)
 								.get(_param.MEETING_ID, MEETING_ID)
 								.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 							);
@@ -601,6 +630,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 							_link.go_there(
 								_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
 								,_param
+								.get(_param.IS_IFRAME_VIEW, _param.YES)
 								.get(_param.MEETING_ID, MEETING_ID)
 								.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 							);
@@ -1061,51 +1091,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 						)
 					); // ajax done.
 
-
-
-/*
-					_ajax.send_simple_post(
-						// _url
-						_link.get_link(_link.API_UPDATE_MEETING_AGENDA)
-						// _param_obj / MEETING_ID
-						, request_param
-						// _delegate_after_job_done
-						,_obj.get_delegate(
-							// delegate_func
-							function(data){
-
-								console.log(data);
-								console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
-
-								var is_success = false;
-								if(	data != undefined && 
-									data.update_speech_evaluator != undefined &&
-									data.update_speech_evaluator.output != undefined &&	
-									data.update_speech_evaluator.output === true ) {
-
-									is_success = true;
-								}
-								if(is_success) {
-									// console.log("성공했다면 표시된 값을 변경해준다.");
-									row_member_jq.find("span.badge").find("strong").html(SELECTED_VALUE);
-
-									if(SELECTED_VALUE  === _param.NOT_ASSIGNED) {
-										target_controller.set_badge_gray();
-									} else {
-										target_controller.set_badge_green();
-									}
-
-								} else {
-									alert("Update failed!");
-								}
-
-							},
-							// delegate_scope
-							this
-						)
-					); // ajax done.
-*/
-
 				},this)
 				// delegate_data
 				, delegate_data
@@ -1134,9 +1119,11 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 
 	// 지정된 스피치가 있는 경우에는 공유버튼을 노출할 수 없습니다.
-	if(!IS_EXTERNAL_SHARE && !(0 < SPEECH_ID)) {
+	if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW && !(0 < SPEECH_ID)) {
 
-		console.log(">>> today_speech_obj :: ",today_speech_obj);
+		console.log("XXX / IS_EXTERNAL_SHARE ::: ",IS_EXTERNAL_SHARE);
+		console.log("XXX / IS_IFRAME_VIEW ::: ",IS_IFRAME_VIEW);
+		console.log("XXX / SPEECH_ID ::: ",SPEECH_ID);
 
 		// SHARE EXTERNAL
 		var share_msg = 
@@ -1170,6 +1157,42 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 		);
 
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1215,12 +1238,15 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 						_link.go_there(
 							_link.MOBILE_MEETING_AGENDA_DETAIL_SPEECH
 							,_param
+							.get(_param.IS_IFRAME_VIEW, _param.YES)
 							.get(_param.MEETING_ID, MEETING_ID)
 							.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 						);
 
 					},this)
 				); // ajax done.
+
+				send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 			}, this)
 			// append_target_jq
@@ -1236,10 +1262,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 	}
 
 
-
-
-
-
 } // for end
 
 
@@ -1249,8 +1271,25 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 
 
+
+
+
+
+
+
+
 // 99. REMOVE loading message
-_tm_m_list.doWhenDocumentReady();
+var delegate_on_ready = 
+_obj.getDelegate(function(){
+	send_height_to_parent(IS_IFRAME_VIEW, parent);
+}, this);
+_tm_m_list.doWhenDocumentReady(delegate_on_ready);
+
+
+
+
+
+
 
 
 

@@ -75,10 +75,20 @@ _tm_m_list.addHeaderRow(
 	// membership_obj
 	, membership_obj
 	// header_arr
-	, [_link.get_header_link(_link.MOBILE_TOP)]
+	, []
 	// table_jq
 	, table_jq
+	// color_text
+	, null
+	// bg_color_vmouse_down
+	, null
+	// is_disabled
+	, null
+	// redirect_url_after_log_in
+	,_link.get_link(_link.MOBILE_TOP)
 );
+
+
 
 
 // 미팅에 참여한 로그인 유저가 볼 수 있는 메뉴.
@@ -113,9 +123,8 @@ _m_list.addTableRowMovingArrow(
 		}
 
 		_link.go_there(
-			_link.MOBILE_MEETING_AGENDA_LIST
-			, _param
-			.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
+			_link.MOBILE_MEETING_AGENDA_DETAIL
+			, _param.get(_param.MEETING_MEMBERSHIP_ID,meeting_membership_id)
 		);
 
 	}, this)

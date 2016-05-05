@@ -1,13 +1,7 @@
 <?php
+
 	// @ common setting
 	include_once("../common.inc");
-
-
-	//    .dMMMb  dMMMMMP dMP     dMMMMMP .aMMMb dMMMMMMP         dMP dMMMMb  dMMMMMP .aMMMb  .dMMMb 
-	//   dMP" VP dMP     dMP     dMP     dMP"VMP   dMP           amr dMP dMP dMP     dMP"dMP dMP" VP 
-	//   VMMMb  dMMMP   dMP     dMMMP   dMP       dMP           dMP dMP dMP dMMMP   dMP dMP  VMMMb   
-	// dP .dMP dMP     dMP     dMP     dMP.aMP   dMP           dMP dMP dMP dMP     dMP.aMP dP .dMP   
-	// VMMMP" dMMMMMP dMMMMMP dMMMMMP  VMMMP"   dMP           dMP dMP dMP dMP      VMMMP"  VMMMP"    
 
 	// $today_role_list - 화면 표시 기준에 맞게 정렬합니다.
 	// 7 - Genera Evaluator 	/	2 - ToastMaster (No announce)
@@ -44,29 +38,21 @@
 	$membership = $wdj_mysql_interface->get_membership($meeting_membership_id);
 	$window_scroll_y = $params->getParamNumber($params->WINDOW_SCROLL_Y);
 
-	// 미래의 가장 가까운 미팅 ID를 가져옵니다.
+	// 가장 최신의 미팅 ID를 가져옵니다.
 	$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
 	if((0 == $meeting_id) && (0 < $latest_meeting_id)) {
-		// 외부로 받은 미팅 아이디가 정상적인 값이 아닐 경우, upcoming meeting id를 사용합니다.
+		// param으로 받은 미팅 아이디가 없을 경우, upcoming meeting id를 사용합니다.
 		$meeting_id = $latest_meeting_id;
 	}
 
 	$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($meeting_membership_id);
-	if(empty($meeting_agenda_list) && 0 < $meeting_membership_id) {
-		// 1. 최초 생성으로 미팅 정보가 없는 경우, 임의의 미팅을 1개 생성해준다.
-		$query_output = $wdj_mysql_interface->insertFisrtMeetingAgenda($meeting_membership_id);
 
-		$result = $wdj_mysql_interface->getLatestMeetingAgendaId($meeting_membership_id);
-		if(!empty($result)) {
-			$meeting_id = $result[0]->__meeting_id;	
-		}
-	}
 
 	$meeting_agenda_obj = null;
 	if($meeting_id > 0) {
 
 		// 지정한 meeting_id가 있는 경우.
-		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id);
+		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_id);
 
 	}
 
@@ -92,7 +78,7 @@
 		if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
 			$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
 			$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
-			$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_membership_id, $meeting_id_immediate_past);
+			$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_id_immediate_past);
 		}
 	}
 
@@ -308,6 +294,14 @@
 	<div id="white_space" style="height:300px;"></div>
 	<!-- white space ends-->
 
+
+	<div
+	  class="fb-like"
+	  data-share="true"
+	  data-width="450"
+	  data-show-faces="true">
+	</div>
+
 <script>
 
 // php to javascript sample
@@ -324,7 +318,7 @@ var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?
 var speech_evaluator_cnt_list = <?php echo json_encode($speech_evaluator_cnt_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
 
-console.log("speech_project_list ::: ",speech_project_list);
+console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
 
 var is_expired = <?php echo json_encode($is_expired);?>;
 var is_editable = <?php echo json_encode($is_editable);?>;
@@ -337,11 +331,18 @@ if(meeting_action_list_std != undefined) {
 	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
 }
 
+// TEST
+console.log("meeting_action_list_std ::: ",meeting_action_list_std);
+
 var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
 var tm_officer_action_list = undefined;
 if(tm_officer_std != undefined) {
 	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
 }
+
+// TEST
+// facebook_sdk.init();
+// console.log("HERE / XXX");
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
@@ -402,6 +403,7 @@ if (navigator.geolocation) {
 else {
 	console.log('Geolocation is not supported for this Browser/OS version yet.');
 }
+
 
 
 </script>
