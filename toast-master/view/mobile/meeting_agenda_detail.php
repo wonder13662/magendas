@@ -93,10 +93,12 @@ console.log("word_obj ::: ",word_obj);
 console.log("quote_obj ::: ",quote_obj);
 
 var is_editable = true;
+/*
 if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
 	// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
 	is_editable = false;
 }
+*/
 
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
