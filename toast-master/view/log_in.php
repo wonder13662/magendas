@@ -3,7 +3,6 @@
 // common setting
 include_once("../common.inc");
 
-
 // get membership cookie
 $meeting_membership_id = ToastMasterLogInManager::getMembershipCookie();
 if($meeting_membership_id == -1) {
@@ -40,6 +39,9 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 
 
 
+
+
+
 <body role="document">
 
     <div class="container">
@@ -56,6 +58,7 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 			</label>
 			-->
 			<button id="log_in_btn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
 		</form>
 
     </div> <!-- /container -->
@@ -267,6 +270,7 @@ $("button#log_in_btn").on("click", function(e){
     });
 
 });
+
 
 </script>
 </body>

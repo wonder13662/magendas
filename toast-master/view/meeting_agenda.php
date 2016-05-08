@@ -318,8 +318,6 @@ var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?
 var speech_evaluator_cnt_list = <?php echo json_encode($speech_evaluator_cnt_list);?>;
 var speech_project_list = <?php echo json_encode($speech_project_list);?>;
 
-console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
-
 var is_expired = <?php echo json_encode($is_expired);?>;
 var is_editable = <?php echo json_encode($is_editable);?>;
 var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
@@ -332,6 +330,7 @@ if(meeting_action_list_std != undefined) {
 }
 
 // TEST
+console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
 console.log("meeting_action_list_std ::: ",meeting_action_list_std);
 
 var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
@@ -341,8 +340,9 @@ if(tm_officer_std != undefined) {
 }
 
 // TEST
-// facebook_sdk.init();
-// console.log("HERE / XXX");
+//facebookSDK.initLogIn(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION);
+// facebook_sdk.init(_param.FACEBOOK_SDK_APP_ID, _param.FACEBOOK_SDK_VERSION);
+console.log("HERE / XXX");
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;

@@ -276,6 +276,12 @@ var param_manager = {
 
 	, SELECTED_VALUE:"SELECTED_VALUE"
 
+	// FACEBOOK
+	, FACEBOOK_SDK_PRODUCT_APP_ID:"236514070071909"
+	, FACEBOOK_SDK_PRODUCT_VERSION:"v2.6"
+	, FACEBOOK_SDK_STAGE_APP_ID:"237491313307518"
+	, FACEBOOK_SDK_STAGE_VERSION:"v2.6"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {
