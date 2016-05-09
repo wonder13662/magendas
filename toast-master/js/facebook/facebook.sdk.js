@@ -384,6 +384,7 @@ var facebookSDK = {
 		}
 
 		// 1. fetch page post list
+		var _self = this;
 		var callback = function(paramObj) {
 
 			console.log("drawPagePost / callback / paramObj ::: ",paramObj);
@@ -398,16 +399,99 @@ var facebookSDK = {
 				// 3. set post view info
 				// wonder.jung - TODO
 
+				var callbackViewCnt = function(paramObj) {
+
+					console.log("HERE / XXX / paramObj ::: ",paramObj);
+
+				}
+				var callbackViewCntScope = this;
+				_self.setPostViewCnt(callbackViewCnt, callbackViewCntScope, paramObj);
+
 			}
 			var callbackContentScope = this;
-			this.setPostCotentInfo(callbackContent, callbackContentScope, paramObj);
-
+			_self.setPostCotentInfo(callbackContent, callbackContentScope, paramObj);
 
 		}
 		var callbackScope = this;
 		this.getPagePosts(callback, callbackScope, nextParamObj);
 
 	}
+
+	// @ Private
+	, setPostViewCnt:function(callback, callbackScope, paramObj) {
+
+		// param - postList
+		if(paramObj == null) {
+			console.log("!Error! / setPostCotentInfo / paramObj == null");
+			return;
+		}
+
+		// var postList = paramObj.postList;
+		// if(postList == null || 0 == postList.length) {
+		// 	console.log("!Error! / setPostCotentInfo / postList is not valid!");
+		// 	return;
+		// }
+
+		// console.log("setPostViewCnt / postList ::: ",postList);
+
+		var nextParamObj = {
+			callback:callback
+			, callbackScope:callbackScope
+			, paramObj:paramObj
+		}
+
+		var _self = this;
+		var callback = function(paramObj) {
+
+			console.log("XXX / paramObj ::: ",paramObj);
+
+			var postList = paramObj.paramObj.postList;
+			if(postList == null || 0 == postList.length) {
+				console.log("!Error! / setPostCotentInfo / postList is not valid!");
+				return;
+			}
+
+			var asyncCnt = 0;
+			for(var idx = 0; idx < postList.length; idx++) {
+
+				var postObj = postList[idx];
+				var postId = postObj.id;
+
+				console.log("setPostViewCnt / postId ::: ",postId);
+
+				FB.api(
+					'/{post-id}/insights/post_impressions_unique/lifetime'.replace(/\{post\-id\}/gi, postId),
+					'GET',
+					{},
+					function(response) {
+
+						console.log("setPostViewCnt / response ::: ",response);
+
+						var viewCnt = -1;
+						if(response != null && response.data != null && 0 < response.data.length) {
+							viewCnt = response.data[0].values[0].value;
+						}
+
+						console.log("setPostViewCnt / viewCnt ::: ",viewCnt);
+						postObj.viewCnt = viewCnt;
+						asyncCnt++;
+
+						if(postList.length === asyncCnt) {
+							console.log("DONE / HERE !");
+							paramObj.callback.apply(paramObj.callbackScope, [paramObj.paramObj]);
+						}
+					}
+				); // end api
+
+			} // end for			
+
+		}
+		var callbackScope = this;
+
+		this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
+
+
+	}	
 
 	// @ Private
 	, setPostCotentInfo:function(callback, callbackScope, paramObj) {
