@@ -8926,7 +8926,7 @@ class MYSQLInterface{
 		// wonder.jung
 		$action_item_word = 
 		$root_action_collection->search_by_context_from_root($params->WORD);
-		if(!is_null($action_item_word) && strcmp($action_item_word->get_name(), $__word) != 0) {
+		if(!is_null($action_item_word) && !empty($__word) && strcmp($action_item_word->get_name(), $__word) != 0) {
 
 			$action_item_word->set_name($__word);
 
@@ -8943,7 +8943,7 @@ class MYSQLInterface{
 
 		$action_item_word_desc = 
 		$root_action_collection->search_by_context_from_root($params->WORD_DESC);
-		if(!is_null($action_item_word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
+		if(!is_null($action_item_word_desc) && !empty($__word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
 
 			$action_item_word_desc->set_name($__word_desc);
 
@@ -8960,7 +8960,7 @@ class MYSQLInterface{
 
 		$action_item_quote = 
 		$root_action_collection->search_by_context_from_root($params->QUOTE);
-		if(!is_null($action_item_quote) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
+		if(!is_null($action_item_quote) && !empty($__quote_content) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
 
 			$action_item_quote->set_name($__quote_content);
 

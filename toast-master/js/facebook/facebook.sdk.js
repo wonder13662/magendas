@@ -254,14 +254,21 @@ var facebookSDK = {
 				console.log("!Error! / getPhoto / paramObj == null");
 				return;
 			}
+			if(paramObj.paramObj == null) {
+				console.log("!Error! / getPhoto / paramObj.paramObj == null");
+				return;
+			}
 
 			FB.api(
 				"/{photo-id}".replace(/\{photo\-id\}/gi, paramObj.objectId),
+				{"fields":"id,album,from,height,width,images,link,picture"},
 				function (response) {
 
-					console.log("getPhoto / response ::: ",response);
+					paramObj.paramObj.photo = response;
 
 					if (response && !response.error) {
+
+						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
 
 					}
 
@@ -289,142 +296,279 @@ var facebookSDK = {
 	}
 
 	// @ Public
-	, getPagePosts:function(callback, callbackScope, paramObj) {
-
-	if(paramObj == null) {
-		console.log("!Error! / getPagePosts / paramObj == null");
-		return;
-	}
-	var pageId = paramObj.pageId;
-	if(_v.is_not_valid_str(pageId)) {
-		console.log("!Error! / getPagePosts / _v.is_not_valid_str(pageId)");
-		return;
-	}
-
-	if(callback == null) {
-		console.log("!Error! / getPagePosts / callback == null");
-		return;
-	}
-
-	if(callbackScope == null) {
-		console.log("!Error! / getPagePosts / callbackScope == null");
-		return;
-	}
-	var nextParamObj = {
-		callback:callback
-		, callbackScope:callbackScope
-		, paramObj:paramObj
-		, pageId:pageId
-	}
-
-	var callback = function(paramObj) {
+	, getVideo:function(callback, callbackScope, paramObj) {
 
 		if(paramObj == null) {
-		console.log("!Error! / getPagePosts / paramObj == null");
-		return;
+			console.log("!Error! / getVideo / paramObj == null");
+			return;
+		}
+		var objectId = paramObj.objectId;
+		if(_v.is_not_valid_str(objectId)) {
+			console.log("!Error! / getVideo / _v.is_not_valid_str(objectId)");
+			return;
 		}
 
-		// write the page post after getting Page Access Token
-		FB.api(
-			"/{page-id}/promotable_posts".replace(/\{page\-id\}/gi, paramObj.pageId),
-			"GET",
-			{"fields":"id,created_time,shares,type,status_type,properties,object_id,message,is_published,from,icon,link,is_hidden"},
-			function (response) {
+		var nextParamObj = {
+			callback:callback
+			, callbackScope:callbackScope
+			, paramObj:paramObj
+			, objectId:objectId
+		}
 
-				console.log("promotable_posts / response ::: ",response);
+		var callback = function(paramObj) {
 
-				if (response && !response.error) {
-					/* handle the result */
+			if(paramObj == null) {
+				console.log("!Error! / getVideo / paramObj == null");
+				return;
+			}
+			if(paramObj.paramObj == null) {
+				console.log("!Error! / getVideo / paramObj.paramObj == null");
+				return;
+			}
 
-					var postList = response.data;
+			// wonder.jung
+			FB.api(
+				"/{video-id}".replace(/\{video\-id\}/gi, paramObj.objectId),
+				{"fields":"id,description,updated_time,embed_html,embeddable,from,length,picture,source,published"},
+				function (response) {
 
-					// check post object and its type
-					if(postList != null && 0 < postList.length) {
+					paramObj.paramObj.video = response;
 
-						for(var idx = 0; idx < postList.length; idx++) {
+					if (response && !response.error) {
 
-							var postObj = postList[idx];
-							console.log("promotable_posts / postObj ::: ",postObj);
+						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
 
-							// wonder.jung
-							var nextParamObjPost = {
-								callback:callback
-								, callbackScope:callbackScope
-								, paramObj:paramObj
-								, pageId:pageId
-							}
-
-							// CHECK TYPE
-							var type = postObj.type;
-							if("photo" === type) {
-
-								// fecth photo resource url
-								var callbackPhoto = function(paramObj) {
-
-								}
-								var callbackScopePhoto = this;
-
-
-							} // end if
-
-						} // end for
-
-				  	} // end if
-
-					var nextParamObj = paramObj.paramObj;
-					nextParamObj.postList = postList;
-					paramObj.callback.apply(paramObj.callbackScope, [nextParamObj]);
-
-				} else {
-				  /* handle the error */
+					}
 
 				}
+			); // end FB api
 
-			} // End callback
+		} // end callback
+		var callbackScope = this;
 
-		); // End FB.api      
+		if(!this.isLogIn) {
 
-	}
-	var callbackScope = this;
+			// if not logged in, log in.
+			this.logIn(function(paramObj) {
 
-	if(!this.isLogIn) {
+				this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
 
-		// if not logged in, log in.
-		this.logIn(function(paramObj) {
+			}, this, nextParamObj);
+
+		} else {
 
 			this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
 
-		}, this, nextParamObj);
+		}
 
-	} else {
+	}	
 
-		this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
-	}
-
-	}
-	// @ Private
-	, pageAccessToken:{
-		pageId:-1
-		,accessToken:""
-	}
-	, getPageAccessTokenAsync:function(callback, callbackScope, paramObj, forceToUpdate) {
+	// @ Public
+	, getPagePosts:function(callback, callbackScope, paramObj) {
 
 		if(paramObj == null) {
-			console.log("!Error! / getPageAccessTokenAsync / paramObj == null");
+			console.log("!Error! / getPagePosts / paramObj == null");
 			return;
 		}
 		var pageId = paramObj.pageId;
 		if(_v.is_not_valid_str(pageId)) {
-			console.log("!Error! / getPageAccessTokenAsync / _v.is_not_valid_str(pageId)");
+			console.log("!Error! / getPagePosts / _v.is_not_valid_str(pageId)");
 			return;
 		}
+
+		if(callback == null) {
+			console.log("!Error! / getPagePosts / callback == null");
+			return;
+		}
+
+		if(callbackScope == null) {
+			console.log("!Error! / getPagePosts / callbackScope == null");
+			return;
+		}
+		var nextParamObj = {
+			callback:callback
+			, callbackScope:callbackScope
+			, paramObj:paramObj
+			, pageId:pageId
+		}
+
+		var _self = this;
+		var callback = function(paramObj) {
+
+			if(paramObj == null) {
+			console.log("!Error! / getPagePosts / paramObj == null");
+			return;
+			}
+
+			console.log("HERE / 001 / paramObj ::: ",paramObj);
+
+			// write the page post after getting Page Access Token
+			FB.api(
+				"/{page-id}/promotable_posts".replace(/\{page\-id\}/gi, paramObj.pageId),
+				"GET",
+				{"fields":"id,created_time,shares,type,status_type,properties,object_id,message,is_published,from,icon,link,is_hidden"},
+				function (response) {
+
+					console.log("promotable_posts / response ::: ",response);
+
+					if (response && !response.error) {
+						/* handle the result */
+
+						var postList = response.data;
+
+						// check post object and its type
+						if(postList != null && 0 < postList.length) {
+
+							var asyncCnt = 0;
+							for(var idx = 0; idx < postList.length; idx++) {
+
+								var postObj = postList[idx];
+
+								// REMOVE ME
+								// console.log("promotable_posts / postObj ::: ",postObj);
+								// console.log("promotable_posts / paramObj ::: ",paramObj);
+
+								var objectType = postObj.type;
+								var nextParamObjPost = {
+									callback:callback
+									, callbackScope:callbackScope
+									, paramObj:paramObj
+									, pageId:paramObj.pageId
+									, objectId:postObj.object_id
+									, objectType:objectType
+									, postListIdx:idx
+									, postListCnt:postList.length
+									, postObj:postObj
+									, postList:postList
+								}
+
+								// CHECK TYPE
+
+								// REMOVE ME
+								// console.log("objectType ::: ",objectType);
+
+								// objectType : link, status, photo, video, offer
+								if("photo" === objectType) {
+
+									// fecth photo resource url
+									var callbackPhoto = function(paramObj) {
+
+										asyncCnt++;
+
+										paramObj.postObj.photo = paramObj.photo;
+
+										if(asyncCnt === paramObj.postListCnt) {
+											console.log("DONE!");
+											paramObj.callback.apply(paramObj.callbackScope,[paramObj.postList]);
+										}
+
+									}
+									var callbackScopePhoto = this;
+
+									_self.getPhoto(callbackPhoto, callbackScopePhoto, nextParamObjPost);
+
+								} else if("video" === objectType) {
+
+									var callbackVideo = function(paramObj) {
+
+										asyncCnt++;
+
+										paramObj.postObj.video = paramObj.video;
+
+										if(asyncCnt === paramObj.postListCnt) {
+											console.log("DONE!");
+											paramObj.callback.apply(paramObj.callbackScope,[paramObj.postList]);											
+										}
+
+									}
+									var callbackScopeVideo = this;
+
+									_self.getVideo(callbackVideo, callbackScopeVideo, nextParamObjPost);
+
+								} else if("status" === objectType) {
+
+									asyncCnt++;
+
+								} else if("link" === objectType) {
+
+									asyncCnt++;
+
+								} else if("offer" === objectType) {
+
+									asyncCnt++;
+
+								} else {
+
+									asyncCnt++;
+
+								} // end if
+
+							} // end for
+
+					  	} // end if
+
+
+					} else {
+						// TODO
+					  	/* handle the error */
+
+					}
+
+				} // End callback
+
+			); // End FB.api      
+
+		}
+		var callbackScope = this;
+
+		if(!this.isLogIn) {
+
+			// if not logged in, log in.
+			this.logIn(function(paramObj) {
+
+				console.log("HERE / 001 / paramObj ::: ",paramObj);
+
+				this.getPageAccessTokenAsync(callback, callbackScope, paramObj);
+
+			}, this, nextParamObj);
+
+		} else {
+
+			console.log("HERE / 002 / nextParamObj ::: ",nextParamObj);
+
+			this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
+
+		}
+
+	}
+	// @ Private
+	, pageAccessToken:{
+		pageId:""
+		,accessToken:""
+	}
+	, getPageAccessTokenAsync:function(callback, callbackScope, paramObj, forceToUpdate) {
+
 		if(callback == null) {
 			console.log("!Error! / getPageAccessTokenAsync / callback == null");
 			return;
 		}
 		if(callbackScope == null) {
 			console.log("!Error! / getPageAccessTokenAsync / callbackScope == null");
+			return;
+		}
+
+		if(paramObj == null) {
+			console.log("!Error! / getPageAccessTokenAsync / paramObj == null");
+			return;
+		}
+		if(paramObj.pageId == null && this.pageAccessToken.pageId != "") {
+			paramObj.accessToken = this.pageAccessToken.accessToken;
+			callback.apply(callbackScope, [paramObj]);
+			return;
+		}
+		var pageId = paramObj.pageId;
+		if(_v.is_not_valid_str(pageId)) {
+			console.log("!Error! / getPageAccessTokenAsync / _v.is_not_valid_str(pageId)");
 			return;
 		}
 		if(forceToUpdate == null) {
