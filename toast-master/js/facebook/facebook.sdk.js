@@ -395,12 +395,12 @@ var facebookSDK = {
 
 				console.log("drawPagePost / callbackContent / paramObj ::: ",paramObj);
 
+				// 3. set post view info
+				// wonder.jung - TODO
+
 			}
 			var callbackContentScope = this;
 			this.setPostCotentInfo(callbackContent, callbackContentScope, paramObj);
-
-				// wonder.jung - TODO
-					// 3. set post view info
 
 
 		}
