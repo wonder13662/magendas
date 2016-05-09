@@ -96,11 +96,11 @@ var callback = function(paramObj) {
 	}
 
 	// getPagePosts:function(callback, callbackScope, paramObj) {
-	var callbackGPP = function(paramObj) {
-		console.log("callbackGPP / paramObj :: ",paramObj);
+	var callbackDPP = function(paramObj) {
+		console.log("callbackDPP / paramObj :: ",paramObj);
 	}
-	var callbackScopeGPP = this;
-	facebookSDK.getPagePosts(callbackGPP, callbackScopeGPP, paramObj);
+	var callbackScopeDPP = this;
+	facebookSDK.drawPagePost(callbackDPP, callbackScopeDPP, paramObj);
 
 }
 var callbackScope = this;

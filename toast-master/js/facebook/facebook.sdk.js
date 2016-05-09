@@ -361,7 +361,164 @@ var facebookSDK = {
 
 		}
 
-	}	
+	}
+
+	// @ Private
+	, drawPagePost:function(callback, callbackScope, paramObj) {
+
+		if(paramObj == null) {
+			console.log("!Error! / drawPagePost / paramObj == null");
+			return;
+		}
+		var pageId = paramObj.pageId;
+		if(_v.is_not_valid_str(pageId)) {
+			console.log("!Error! / drawPagePost / _v.is_not_valid_str(pageId)");
+			return;
+		}
+
+		var nextParamObj = {
+			callback:callback,
+			callbackScope:callbackScope,
+			paramObj:paramObj,
+			pageId:pageId
+		}
+
+		// 1. fetch page post list
+		var callback = function(paramObj) {
+
+			console.log("drawPagePost / callback / paramObj ::: ",paramObj);
+
+			var postList = paramObj.postList;
+
+			// 2. set post contetn info
+			var callbackContent = function(paramObj) {
+
+				console.log("drawPagePost / callbackContent / paramObj ::: ",paramObj);
+
+			}
+			var callbackContentScope = this;
+			this.setPostCotentInfo(callbackContent, callbackContentScope, paramObj);
+
+				// wonder.jung - TODO
+					// 3. set post view info
+
+
+		}
+		var callbackScope = this;
+		this.getPagePosts(callback, callbackScope, nextParamObj);
+
+	}
+
+	// @ Private
+	, setPostCotentInfo:function(callback, callbackScope, paramObj) {
+
+		// param - postList
+		if(paramObj == null) {
+			console.log("!Error! / setPostCotentInfo / paramObj == null");
+			return;
+		}
+		var postList = paramObj.postList;
+		if(postList == null || 0 == postList.length) {
+			console.log("!Error! / setPostCotentInfo / postList is not valid!");
+			return;
+		}
+
+		var _self = this;
+		var asyncCnt = 0;
+		for(var idx = 0; idx < postList.length; idx++) {
+
+			var postObj = postList[idx];
+
+			// REMOVE ME
+			// console.log("promotable_posts / postObj ::: ",postObj);
+			// console.log("promotable_posts / paramObj ::: ",paramObj);
+
+			var objectType = postObj.type;
+			var nextParamObjPost = {
+				callback:callback
+				, callbackScope:callbackScope
+				, paramObj:paramObj
+				, pageId:paramObj.pageId
+				, objectId:postObj.object_id
+				, objectType:objectType
+				, postListIdx:idx
+				, postListCnt:postList.length
+				, postObj:postObj
+				, postList:postList
+			}
+
+			// CHECK TYPE
+
+			// REMOVE ME
+			// console.log("objectType ::: ",objectType);
+
+			// objectType : link, status, photo, video, offer
+			if("photo" === objectType) {
+
+				// fecth photo resource url
+				var callbackPhoto = function(paramObj) {
+
+					asyncCnt++;
+
+					paramObj.postObj.photo = paramObj.photo;
+
+					if(asyncCnt === paramObj.postListCnt) {
+						console.log("DONE!");
+						paramObj.callback.apply(paramObj.callbackScope,[paramObj]);
+					}
+
+				}
+				var callbackScopePhoto = this;
+
+				_self.getPhoto(callbackPhoto, callbackScopePhoto, nextParamObjPost);
+
+			} else if("video" === objectType) {
+
+				var callbackVideo = function(paramObj) {
+
+					asyncCnt++;
+
+					paramObj.postObj.video = paramObj.video;
+
+					if(asyncCnt === paramObj.postListCnt) {
+						console.log("DONE!");
+						paramObj.callback.apply(paramObj.callbackScope,[paramObj]);											
+					}
+
+				}
+				var callbackScopeVideo = this;
+
+				_self.getVideo(callbackVideo, callbackScopeVideo, nextParamObjPost);
+
+			} else if("status" === objectType) {
+
+				asyncCnt++;
+
+			} else if("link" === objectType) {
+
+				asyncCnt++;
+
+			} else if("offer" === objectType) {
+
+				asyncCnt++;
+
+			} else {
+
+				asyncCnt++;
+
+			} // end if
+
+		} // end for
+
+
+	}
+
+	// @ Private
+	, setPostViewInfo:function(callback, callbackScope, paramObj) {
+
+		// param - postList
+
+	}
 
 	// @ Public
 	, getPagePosts:function(callback, callbackScope, paramObj) {
@@ -415,7 +572,12 @@ var facebookSDK = {
 						/* handle the result */
 
 						var postList = response.data;
+						paramObj.paramObj.postList = postList;
 
+						// wonder.jung
+						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
+
+						/*
 						// check post object and its type
 						if(postList != null && 0 < postList.length) {
 
@@ -506,7 +668,7 @@ var facebookSDK = {
 							} // end for
 
 					  	} // end if
-
+						*/
 
 					} else {
 						// TODO
