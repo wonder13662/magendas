@@ -77,41 +77,34 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 
 <script>
 
+var pageIdTestCommnity = "233311017036635";
+var pageIdMagendas = "1347579945268869";
+var pageId = pageIdMagendas;
 
 console.log("XXX - 001");
 var callback = function(paramObj) {
 
 	// FB SDK initialized.
+	console.log("FB SDK initialized.");
+	console.log("Document / callback / paramObj :::: ",paramObj);
 
 	// View count 정보를 가져옵니다.
-
-	// 
-
-	// 1. 화면에 표시된 모든 post의 아이디를 가져옴.
-	// var iframeJq = $("div.fb_iframe_widget");
-	// console.log("iframeJq ::: ",iframeJq);
-	// $( "#frameDemo" ).contents();
-
-	// var postJqArr = $(".accessible_elem");
-	// console.log("postJqArr ::: ",postJqArr);
-
-	var finished_rendering = function() {
-		console.log("finished rendering plugins");
-
-		// var iframeJq = $("div.fb_iframe_widget").find("iframe");
-		// console.log("iframeJq ::: ",iframeJq);
-
-		// var postJqArr = iframeJq.contents().find("div._4-u2");
-		// h2#newsFeedHeading
-		// var postJqArr = iframeJq.contents().find("h2#newsFeedHeading");
-		// console.log("postJqArr ::: ",postJqArr);
+	var pageId = paramObj.pageId;
+	if(pageId == null || pageId == "") {
+		return;
 	}
-	// In your onload handler
-	FB.Event.subscribe('xfbml.render', finished_rendering);
+
+	// getPagePosts:function(callback, callbackScope, paramObj) {
+	var callbackGPP = function(paramObj) {
+		console.log("callbackGPP / paramObj :: ",paramObj);
+	}
+	var callbackScopeGPP = this;
+	facebookSDK.getPagePosts(callbackGPP, callbackScopeGPP, paramObj);
 
 }
 var callbackScope = this;
-facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, callback, callbackScope);
+var paramObj = {pageId:pageId};
+facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, callback, callbackScope, paramObj);
 
 
 
@@ -136,9 +129,6 @@ function prepareUpload(event)
 	console.log("files ::: ",files);
 }
 
-var pageIdTestCommnity = "233311017036635";
-var pageIdMagendas = "1347579945268869";
-var pageId = pageIdMagendas;
 btnSubmit.on("click", function(e){
 
 	e.preventDefault();
