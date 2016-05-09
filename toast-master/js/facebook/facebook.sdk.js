@@ -375,6 +375,11 @@ var facebookSDK = {
 			console.log("!Error! / drawPagePost / _v.is_not_valid_str(pageId)");
 			return;
 		}
+		var parentJq = paramObj.parentJq;
+		if(parentJq == null) {
+			console.log("!Error! / drawPagePost / parentJq == null");
+			return;
+		}
 
 		var nextParamObj = {
 			callback:callback,
@@ -383,40 +388,232 @@ var facebookSDK = {
 			pageId:pageId
 		}
 
+
 		// 1. fetch page post list
 		var _self = this;
-		var callback = function(paramObj) {
-
-			console.log("drawPagePost / callback / paramObj ::: ",paramObj);
+		var callbackPagePost = function(paramObj) {
 
 			var postList = paramObj.postList;
 
-			// 2. set post contetn info
-			var callbackContent = function(paramObj) {
-
-				console.log("drawPagePost / callbackContent / paramObj ::: ",paramObj);
-
-				// 3. set post view info
-				// wonder.jung - TODO
-
-				var callbackViewCnt = function(paramObj) {
-
-					console.log("HERE / XXX / paramObj ::: ",paramObj);
-
-				}
-				var callbackViewCntScope = this;
-				_self.setPostViewCnt(callbackViewCnt, callbackViewCntScope, paramObj);
-
-			}
-			var callbackContentScope = this;
 			_self.setPostCotentInfo(callbackContent, callbackContentScope, paramObj);
 
 		}
-		var callbackScope = this;
-		this.getPagePosts(callback, callbackScope, nextParamObj);
+		var callbackScopePagePost = this;
+		this.getPagePosts(callbackPagePost, callbackScopePagePost, nextParamObj);
 
+		// 2. set post contetn info
+		var callbackContent = function(paramObj) {
+
+			_self.setPostViewCnt(callbackViewCnt, callbackViewCntScope, paramObj);
+
+		}
+		var callbackContentScope = this;
+
+		// 3. set post view info
+		var callbackViewCnt = function(paramObj) {
+
+			var postList = paramObj.postList;
+			var viewCntSet = paramObj.viewCntSet;
+
+			// set view cnt 
+			for(var idx=0; idx < postList.length; idx++) {
+				var postObj = postList[idx];
+				var viewCnt = viewCntSet[postObj.id];
+				postObj.viewCnt = viewCnt;
+			}
+
+			// drawList.apply(_self,[postList]);
+			_self.setPagePicture(callbackDrawList, callbackDrawListScope, paramObj);
+		}
+		var callbackViewCntScope = this;
+
+		// 4. get page info
+		var callbackDrawList = function(paramObj) {
+
+			var pagePictureUrl = paramObj.pagePictureUrl;
+			var postList = paramObj.postList;
+
+			var tag = "<div class=\"well\" style=\"width:500px;padding-bottom:0px;padding-left:7px;padding-top:7px;\">";
+
+			for(var idx=0; idx < postList.length; idx++) {
+				var postObj = postList[idx];
+
+				var message = "";
+				if(postObj.message != null && postObj.message != "") {
+					message = postObj.message;
+				}
+
+				var pageName = "";
+				if(	postObj.from != null && 
+					postObj.from.name != null && 
+					postObj.from.name != "") {
+
+					pageName = postObj.from.name;
+				}
+
+				var createdTime = postObj.created_time.replace(/T/gi, " ").replace(/\+\d+/gi, "");
+				var viewCntMsg = createdTime;
+				var viewCnt = postObj.viewCnt;
+				if(0 < viewCnt) {
+					viewCntMsg += " " + viewCnt + " viewed";
+				}
+
+				tag += ""
+				+ "<div class=\"row\">"
+					+ "<div class=\"col-sm-6 col-md-4\">"
+				;
+
+				// page thumbnail
+				tag += ""
+						+ "<a href=\"#\" class=\"thumbnail\" style=\"float:left;margin:5px;width:54px;\">"
+							+ "<img src=\"{src}\" alt=\"...\">".replace(/\{src\}/gi, pagePictureUrl)
+						+ "</a>"
+						+ "<div class=\"thumbnail\" style=\"width:484px;margin-bottom:7px;\">"
+				;
+
+				if(postObj.photo != null) {
+
+					var source = postObj.photo.images[2].source;
+
+					tag += ""
+							+ "<div class=\"caption\">"
+								+ "<h5 style=\"margin-bottom:32px;\">{title}<span style=\"font-size:14px;color:#ccc;margin-left:20px;\">{view_cnt}</span></h5>"
+								.replace(/\{title\}/gi, pageName)
+								.replace(/\{view_cnt\}/gi, viewCntMsg)
+							+ "</div>"
+
+							+ "<img src=\"{src}\" alt=\"...\">".replace(/\{src\}/gi, source)
+
+							+ "<div class=\"caption\">"
+								+ "<p style=\"margin-bottom:0px;\">{message}</p>".replace(/\{message\}/gi, message)
+								// + "<p><a href=\"#\" class=\"btn btn-primary\" role=\"button\">Button</a> <a href=\"#\" class=\"btn btn-default\" role=\"button\">Button</a></p>"
+							+ "</div>"
+					// + "</div>"
+					;
+
+				} else if(postObj.video != null) {
+
+					var embedHtml = postObj.video.embed_html;
+
+					tag += ""
+					// + "<div class=\"thumbnail\" style=\"width:484px;margin-bottom:7px;\">"
+							+ "<div class=\"caption\">"
+								+ "<h5 style=\"margin-bottom:32px;\">{title}<span style=\"font-size:14px;color:#ccc;margin-left:20px;\">{view_cnt}</span></h5>"
+								.replace(/\{title\}/gi, pageName)
+								.replace(/\{view_cnt\}/gi, viewCntMsg)
+							+ "</div>"
+
+							+ embedHtml.replace(/400/gi, 450)
+
+							+ "<div class=\"caption\">"
+								+ "<p style=\"margin-bottom:0px;\">{message}</p>".replace(/\{message\}/gi, message)
+							+ "</div>"
+					// + "</div>"
+					;
+
+
+				} else {
+
+					tag += ""
+					// + "<div class=\"thumbnail\" style=\"width:484px;margin-bottom:7px;\">"
+							+ "<div class=\"caption\">"
+								+ "<h5 style=\"margin-bottom:32px;\">{title}<span style=\"font-size:14px;color:#ccc;margin-left:20px;\">{view_cnt}</span></h5>"
+								.replace(/\{title\}/gi, pageName)
+								.replace(/\{view_cnt\}/gi, viewCntMsg)
+								+ "<p style=\"margin-bottom:0px;\">{message}</p>".replace(/\{message\}/gi, message)
+							+ "</div>"
+					
+					;
+				}
+
+				// DEBUG - INIT
+				tag += ""	
+							+ "<ul class=\"list-group\" style=\"margin-bottom:0px;\">"
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><strong>{key} : </strong>{value}</li>"
+									.replace(/\{key\}/gi, "id")
+									.replace(/\{value\}/gi, postObj.id)
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><strong>{key} : </strong>{value}</li>"
+									.replace(/\{key\}/gi, "is_published")
+									.replace(/\{value\}/gi, postObj.is_published)
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><strong>{key} : </strong>{value}</li>"
+									.replace(/\{key\}/gi, "is_hidden")
+									.replace(/\{value\}/gi, postObj.is_hidden)
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><strong>{key} : </strong>{value}</li>"
+									.replace(/\{key\}/gi, "type")
+									.replace(/\{value\}/gi, postObj.type)
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><strong>{key} : </strong>{value}</li>"
+									.replace(/\{key\}/gi, "status_type")
+									.replace(/\{value\}/gi, postObj.status_type)
+
+				if(postObj.link != null && postObj.link != "") {
+					tag += ""
+								+ "<li class=\"list-group-item\" style=\"padding:3px;font-size:10px;color:#5B74B3;\"><a href=\"{value}\"><strong>{key}</strong></a></li>"
+									.replace(/\{key\}/gi, "link")
+									.replace(/\{value\}/gi, postObj.link)
+					;
+				}
+				// DEBUG - END
+
+				tag += ""	
+							+ "</ul>"
+						+ "</div>"
+					+ "</div>"
+				+ "</div>"
+				;
+			}
+			tag += "</div>"
+			; 
+
+			parentJq.append(tag);
+
+		}
+		var callbackDrawListScope = this;
 	}
 
+	// @ Private
+	, setPagePicture:function(callback, callbackScope, paramObj) {
+
+		if(callback == null) {
+			console.log("!Error! / getPageInfo / callback == null");
+			return;
+		}
+		if(callbackScope == null) {
+			console.log("!Error! / getPageInfo / callbackScope == null");
+			return;
+		}
+		if(paramObj == null) {
+			console.log("!Error! / getPageInfo / paramObj == null");
+			return;
+		}
+		var pageId = paramObj.pageId;
+		if(pageId == null) {
+			console.log("!Error! / getPageInfo / paramObj == null");
+			return;
+		}
+
+		// No log in needed.
+
+		FB.api(
+			'/{page-id}/picture'.replace(/\{page\-id\}/gi, pageId),
+			'GET',
+			{},
+			function(response) {
+
+				console.log("getPagePicture / response ::: ",response);
+				
+				var pagePictureUrl = "";
+				if(response.data != null && response.data.url != null) {
+
+					pagePictureUrl = response.data.url;	
+					paramObj.pagePictureUrl = pagePictureUrl;
+
+					callback.apply(callbackScope,[paramObj]);
+
+				} // end if
+			} // end callback
+		); // end api
+
+	}
 	// @ Private
 	, setPostViewCnt:function(callback, callbackScope, paramObj) {
 
@@ -425,14 +622,6 @@ var facebookSDK = {
 			console.log("!Error! / setPostCotentInfo / paramObj == null");
 			return;
 		}
-
-		// var postList = paramObj.postList;
-		// if(postList == null || 0 == postList.length) {
-		// 	console.log("!Error! / setPostCotentInfo / postList is not valid!");
-		// 	return;
-		// }
-
-		// console.log("setPostViewCnt / postList ::: ",postList);
 
 		var nextParamObj = {
 			callback:callback
@@ -452,12 +641,11 @@ var facebookSDK = {
 			}
 
 			var asyncCnt = 0;
+			var viewCntSet = {};
 			for(var idx = 0; idx < postList.length; idx++) {
 
 				var postObj = postList[idx];
 				var postId = postObj.id;
-
-				console.log("setPostViewCnt / postId ::: ",postId);
 
 				FB.api(
 					'/{post-id}/insights/post_impressions_unique/lifetime'.replace(/\{post\-id\}/gi, postId),
@@ -465,19 +653,20 @@ var facebookSDK = {
 					{},
 					function(response) {
 
-						console.log("setPostViewCnt / response ::: ",response);
-
 						var viewCnt = -1;
+						var postId = -1;
 						if(response != null && response.data != null && 0 < response.data.length) {
 							viewCnt = response.data[0].values[0].value;
+							var postIdRaw = response.data[0].id;
+							postId = postIdRaw.split("/")[0];
 						}
+						viewCntSet[postId] = viewCnt;
 
-						console.log("setPostViewCnt / viewCnt ::: ",viewCnt);
-						postObj.viewCnt = viewCnt;
 						asyncCnt++;
 
 						if(postList.length === asyncCnt) {
 							console.log("DONE / HERE !");
+							paramObj.paramObj.viewCntSet = viewCntSet;
 							paramObj.callback.apply(paramObj.callbackScope, [paramObj.paramObj]);
 						}
 					}
@@ -597,11 +786,99 @@ var facebookSDK = {
 
 	}
 
-	// @ Private
-	, setPostViewInfo:function(callback, callbackScope, paramObj) {
+	// @ Public
+	, writePagePost:function(callback, callbackScope, paramObj) {
 
-		// param - postList
+		if(callback == null) {
+			console.log("!Error! / writePagePost / callback == null");
+			return;
+		}
+		if(callbackScope == null) {
+			console.log("!Error! / writePagePost / callbackScope == null");
+			return;
+		}
+		if(paramObj == null) {
+			console.log("!Error! / writePagePost / paramObj == null");
+			return;
+		}
 
+
+
+		var _self = this;
+		var callbackWritePagePost = function(paramObj) {
+
+			console.log("callbackWritePagePost / paramObj ::: ",paramObj);
+
+			if(paramObj == null) {
+			console.log("!Error! / getPagePosts / paramObj == null");
+			return;
+			}
+
+			var pageId = paramObj.pageId;
+			if(_v.is_not_valid_str(pageId)) {
+				console.log("!Error! / writePagePost / _v.is_not_valid_str(pageId)");
+				return;
+			}
+			var message = paramObj.message;
+			if(_v.is_not_valid_str(message)) {
+				console.log("!Error! / writePagePost / _v.is_not_valid_str(message)");
+				return;
+			}
+			var published = paramObj.published;
+			if(published == null) {
+				console.log("!Error! / writePagePost / published == null");
+				return;
+			}
+			var scheduled_publish_time = paramObj.scheduled_publish_time;
+			if(published == null) {
+				console.log("!Error! / writePagePost / scheduled_publish_time == null");
+				return;
+			}
+			var accessToken = paramObj.accessToken;
+			if(accessToken == null) {
+				console.log("!Error! / writePagePost / accessToken == null");
+				return;
+			}
+
+			var fieldsObj = null;
+			if(published) {
+				fieldsObj = {"message":message,"published":published,"access_token":accessToken};
+			} else {
+				fieldsObj = {"message":message,"published":published,"scheduled_publish_time":scheduled_publish_time,"access_token":accessToken};
+			}
+
+			// wonder.jung
+			FB.api(
+			    "/{page-id}/feed".replace(/\{page\-id\}/gi, pageId),
+			    "POST",
+			    fieldsObj,        
+			    function (response) {
+
+					console.log("writePagePost / response ::: ",response);
+
+					if (response && !response.error) {
+
+					}
+			    }
+			); // end api   
+
+		}
+		var callbackWritePagePostScope = this;
+
+		if(!this.isLogIn) {
+
+			// if not logged in, log in.
+			this.logIn(function(paramObj) {
+
+				this.getPageAccessTokenAsync(callbackWritePagePost, callbackWritePagePostScope, paramObj);
+
+			}, this, nextParamObj);
+
+		} else {
+
+			this.getPageAccessTokenAsync(callbackWritePagePost, callbackWritePagePostScope, paramObj);
+
+		}		
 	}
 
 	// @ Public
@@ -647,7 +924,7 @@ var facebookSDK = {
 			FB.api(
 				"/{page-id}/promotable_posts".replace(/\{page\-id\}/gi, paramObj.pageId),
 				"GET",
-				{"fields":"id,created_time,shares,type,status_type,properties,object_id,message,is_published,from,icon,link,is_hidden"},
+				{"fields":"id,created_time,shares,type,status_type,properties,object_id,message,is_published,from,icon,link,is_hidden","include_hidden":"true"},
 				function (response) {
 
 					console.log("promotable_posts / response ::: ",response);
@@ -660,99 +937,6 @@ var facebookSDK = {
 
 						// wonder.jung
 						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
-
-						/*
-						// check post object and its type
-						if(postList != null && 0 < postList.length) {
-
-							var asyncCnt = 0;
-							for(var idx = 0; idx < postList.length; idx++) {
-
-								var postObj = postList[idx];
-
-								// REMOVE ME
-								// console.log("promotable_posts / postObj ::: ",postObj);
-								// console.log("promotable_posts / paramObj ::: ",paramObj);
-
-								var objectType = postObj.type;
-								var nextParamObjPost = {
-									callback:callback
-									, callbackScope:callbackScope
-									, paramObj:paramObj
-									, pageId:paramObj.pageId
-									, objectId:postObj.object_id
-									, objectType:objectType
-									, postListIdx:idx
-									, postListCnt:postList.length
-									, postObj:postObj
-									, postList:postList
-								}
-
-								// CHECK TYPE
-
-								// REMOVE ME
-								// console.log("objectType ::: ",objectType);
-
-								// objectType : link, status, photo, video, offer
-								if("photo" === objectType) {
-
-									// fecth photo resource url
-									var callbackPhoto = function(paramObj) {
-
-										asyncCnt++;
-
-										paramObj.postObj.photo = paramObj.photo;
-
-										if(asyncCnt === paramObj.postListCnt) {
-											console.log("DONE!");
-											paramObj.callback.apply(paramObj.callbackScope,[paramObj.postList]);
-										}
-
-									}
-									var callbackScopePhoto = this;
-
-									_self.getPhoto(callbackPhoto, callbackScopePhoto, nextParamObjPost);
-
-								} else if("video" === objectType) {
-
-									var callbackVideo = function(paramObj) {
-
-										asyncCnt++;
-
-										paramObj.postObj.video = paramObj.video;
-
-										if(asyncCnt === paramObj.postListCnt) {
-											console.log("DONE!");
-											paramObj.callback.apply(paramObj.callbackScope,[paramObj.postList]);											
-										}
-
-									}
-									var callbackScopeVideo = this;
-
-									_self.getVideo(callbackVideo, callbackScopeVideo, nextParamObjPost);
-
-								} else if("status" === objectType) {
-
-									asyncCnt++;
-
-								} else if("link" === objectType) {
-
-									asyncCnt++;
-
-								} else if("offer" === objectType) {
-
-									asyncCnt++;
-
-								} else {
-
-									asyncCnt++;
-
-								} // end if
-
-							} // end for
-
-					  	} // end if
-						*/
 
 					} else {
 						// TODO
@@ -982,6 +1166,7 @@ var facebookSDK = {
 				;
 
 				console.log("paramInput ::: ",paramInput);
+
 				formUploadJq.append(paramInput);
 
 			} // end for
@@ -1037,22 +1222,22 @@ var facebookSDK = {
 	, uploadMediaFile:function(callback, callbackScope, paramObj) {
 
 		if(paramObj == null) {
-			console.log("!Error! / uploadVideo / paramObj == null");
+			console.log("!Error! / uploadMediaFile / paramObj == null");
 			return;
 		}
 		var formUpload = paramObj.formUpload;
 		if(formUpload == null) {
-			console.log("!Error! / uploadVideo / formUpload == null");
+			console.log("!Error! / uploadMediaFile / formUpload == null");
 			return;
 		}
 		var pageId = paramObj.pageId;
 		if(_v.is_not_valid_str(pageId)) {
-			console.log("!Error! / uploadVideo / _v.is_not_valid_str(pageId)");
+			console.log("!Error! / uploadMediaFile / _v.is_not_valid_str(pageId)");
 			return;
 		}
 		var url = paramObj.url;
 		if(formUpload == null) {
-			console.log("!Error! / uploadVideo / url == null");
+			console.log("!Error! / uploadMediaFile / url == null");
 			return;
 		}
 
@@ -1061,19 +1246,22 @@ var facebookSDK = {
 			published = paramObj.published;
 	    }
 		var unpublishedContentType = "";
+		var scheduled_publish_time = null;
 		if( !published && 
 		    paramObj.unpublishedContentType != null && 
 		    this.isValidUnpublishedContentType(paramObj.unpublishedContentType) ) {
 
 			unpublishedContentType = paramObj.unpublishedContentType;
+			scheduled_publish_time = paramObj.scheduled_publish_time;
 		}
 
+
 		if(callback == null) {
-			console.log("!Error! / uploadVideo / callback == null");
+			console.log("!Error! / uploadMediaFile / callback == null");
 			return;
 		}
 		if(callbackScope == null) {
-			console.log("!Error! / uploadVideo / callbackScope == null");
+			console.log("!Error! / uploadMediaFile / callbackScope == null");
 			return;
 		}
 
@@ -1085,29 +1273,56 @@ var facebookSDK = {
 			unpublishedContentType:unpublishedContentType,
 			callback:callback,
 			callbackScope:callbackScope,
-			url:url
+			url:url,
+			scheduled_publish_time:scheduled_publish_time
 		};
 
 		var _self = this;
 		var nextCallback = function(paramObj) {
 
-			console.log("uploadVideo / nextCallback / paramObj ::: ",paramObj);
+			console.log("uploadMediaFile / nextCallback / paramObj ::: ",paramObj);
 
 			var formUpload = paramObj.formUpload;
 			var pageId = paramObj.pageId; 
-			// var videoTitle = paramObj.videoTitle;
 			var published = paramObj.published;
 			var unpublishedContentType = paramObj.unpublishedContentType;
+			var scheduled_publish_time = paramObj.scheduled_publish_time;
 			var callback = paramObj.callback;
 			var callbackScope = paramObj.callbackScope;
 			var accessToken = paramObj.accessToken;
 			var description = paramObj.description;
+			if(description == null) {
+				description = "";
+			}
 
-			var postParam = {
-				access_token:accessToken,
-				published:published,
-				unpublished_content_type:unpublishedContentType,
-				description:description
+			var postParam = null;
+			if(published) {
+
+				postParam = {
+					access_token:accessToken,
+					published:published,
+					description:description
+				};
+
+			} else if(scheduled_publish_time != null) {
+
+				postParam = {
+					access_token:accessToken,
+					published:published,
+					unpublished_content_type:unpublishedContentType,
+					description:description,
+					scheduled_publish_time:scheduled_publish_time
+				};
+
+			} else {
+
+				postParam = {
+					access_token:accessToken,
+					published:published,
+					unpublished_content_type:unpublishedContentType,
+					description:description
+				};
+
 			}
 			paramObj.postParam = postParam;
 
@@ -1178,41 +1393,8 @@ var facebookSDK = {
 		);
 	}
 	*/
-	// REMOVE ME
-	// @ Public
-	/*
-	, writePagePostVisitor:function(pageId, message) {
 
-		if(!this.isLogIn) {
-			console.log("!Error! / writePagePostVisitor / !this.isLogIn");
-			return; 
-		}
 
-		if(_v.is_not_valid_str(pageId)) {
-			console.log("!Error! / writePagePostVisitor / _v.is_not_valid_str(pageId)");
-			return;
-		}
-
-		if(_v.is_not_valid_str(message)) {
-			console.log("!Error! / writePagePostVisitor / _v.is_not_valid_str(message)");
-			return;
-		}
-
-		FB.api(
-		    "/{page-id}/feed".replace(/\{page\-id\}/gi, pageId),
-		    "POST",
-		    {"message":message},        
-		    function (response) {
-
-				console.log("writePagePostVisitor / response ::: ",response);
-
-				if (response && !response.error) {
-
-				}
-		    }
-		); // end api
-	}
-	*/	
 
 }
 

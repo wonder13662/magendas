@@ -58,8 +58,6 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 					<select class="form-control" id="publish_mode_selector" style="margin-bottom:10px;">
 						<option>PUBLISHED</option>
 						<option>SCHEDULED</option>
-						<option>DRAFT</option>
-						<option>ADS_POST</option>
 					</select>
 				</div>
 
@@ -68,10 +66,7 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 			</form>
 		</div>
 
-		<div class="fb-page" data-href="https://www.facebook.com/Magendas-1347579945268869/" data-tabs="timeline" data-width="500" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"></div>
-		<!--
-		<div class="fb-page" data-href="https://www.facebook.com/testCommunityWonder/" data-tabs="timeline" data-width="500" data-height="1000" data-small-header="false" data-adapt-container-width="false" data-hide-cover="false" data-show-facepile="true" style="padding-top: 30px;"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/testCommunityWonder/"><a href="https://www.facebook.com/testCommunityWonder/">Test community</a></blockquote></div></div>
-		-->
+		<div id="postListContainer"></div>
 
     </div> <!-- /container -->
 
@@ -104,7 +99,9 @@ var callback = function(paramObj) {
 
 }
 var callbackScope = this;
-var paramObj = {pageId:pageId};
+var postListContainerJq = $("div#postListContainer");
+console.log("postListContainerJq ::: ",postListContainerJq);
+var paramObj = {pageId:pageId,parentJq:postListContainerJq};
 facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, callback, callbackScope, paramObj);
 
 
@@ -130,6 +127,9 @@ function prepareUpload(event)
 	console.log("files ::: ",files);
 }
 
+var testTimeStamp = Math.floor(Date.now() / 1000);
+console.log("testTimeStamp ::: ",testTimeStamp);
+
 btnSubmit.on("click", function(e){
 
 	e.preventDefault();
@@ -138,10 +138,18 @@ btnSubmit.on("click", function(e){
 	var publishMode = publishModeSelectorJq.val();
 	var isPublished = true;
 	var unpublishedContentType = null;
+	var scheduledPublishTime = null;
 
+
+	if(facebookSDK.UNPUBLISHED_CONTENT_TYPE_SCHEDULED == publishMode) {
+		// scheduledPublishTime = Date.now() + (11 * 60 * 1000)// 11min after
+		scheduledPublishTime = Math.floor(Date.now()/1000) + (11 * 60)// 11min after
+	}
 	if(facebookSDK.PUBLISHED_CONTENT_TYPE_PUBLISHED != publishMode) {
+
 		unpublishedContentType = publishMode;
 		isPublished = false;
+
 	} // end if
 
 	var paramObj = 
@@ -149,6 +157,7 @@ btnSubmit.on("click", function(e){
 		pageId:pageId,
 		published:isPublished,
 		unpublishedContentType:unpublishedContentType,
+		scheduled_publish_time:scheduledPublishTime,
 		formUpload:feedDialog[0]
 	};
 
@@ -178,6 +187,25 @@ btnSubmit.on("click", function(e){
 				}, callbackScope, paramObj);
 			} // end inner if
 		} // end for
+
+	} else {	
+
+		// 
+		var status = statusTextareaJq.val();
+		if(status === "") {
+			alert("Please write your status.");
+			statusTextareaJq.focus();
+			return;
+		} else {
+			// writePagePost:function(callback, callbackScope, paramObj) {
+
+			paramObj.message = status;
+			facebookSDK.writePagePost(function(paramObj) {
+
+			}, callbackScope, paramObj);
+		}
+		
+
 	} // end if
 
 });
