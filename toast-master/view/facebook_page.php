@@ -53,11 +53,11 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 				</div>
 
 				<div class="form-group">
-					<label for="input_file_photo_n_video">Published / Unpublished</label>
+					<label for="input_file_photo_n_video">Published / Scheduled</label>
 
 					<select class="form-control" id="publish_mode_selector" style="margin-bottom:10px;">
-						<option>PUBLISHED</option>
-						<option>SCHEDULED</option>
+						<option value="PUBLISHED">Published</option>
+						<option value="SCHEDULED">Scheduled(11 minutes later - Unpublished)</option>
 					</select>
 				</div>
 

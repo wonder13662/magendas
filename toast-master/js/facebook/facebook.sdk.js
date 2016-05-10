@@ -99,8 +99,6 @@ var facebookSDK = {
 					FB.login(function(response){
 
 						// Handle the response object, like in statusChangeCallback() in our demo code.
-						console.log("logIn / response :: ",response);
-
 						// paramObj
 						var callback = paramObj.callback;
 						var callbackScope = paramObj.callbackScope;
@@ -228,141 +226,6 @@ var facebookSDK = {
 	}
 
 
-	// @ Public
-	, getPhoto:function(callback, callbackScope, paramObj) {
-
-		if(paramObj == null) {
-			console.log("!Error! / getPhoto / paramObj == null");
-			return;
-		}
-		var objectId = paramObj.objectId;
-		if(_v.is_not_valid_str(objectId)) {
-			console.log("!Error! / getPhoto / _v.is_not_valid_str(objectId)");
-			return;
-		}
-
-		var nextParamObj = {
-			callback:callback
-			, callbackScope:callbackScope
-			, paramObj:paramObj
-			, objectId:objectId
-		}
-
-		var callback = function(paramObj) {
-
-			if(paramObj == null) {
-				console.log("!Error! / getPhoto / paramObj == null");
-				return;
-			}
-			if(paramObj.paramObj == null) {
-				console.log("!Error! / getPhoto / paramObj.paramObj == null");
-				return;
-			}
-
-			FB.api(
-				"/{photo-id}".replace(/\{photo\-id\}/gi, paramObj.objectId),
-				{"fields":"id,album,from,height,width,images,link,picture"},
-				function (response) {
-
-					paramObj.paramObj.photo = response;
-
-					if (response && !response.error) {
-
-						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
-
-					}
-
-				}
-			); // end FB api
-
-		} // end callback
-		var callbackScope = this;
-
-		if(!this.isLogIn) {
-
-			// if not logged in, log in.
-			this.logIn(function(paramObj) {
-
-				this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
-			}, this, nextParamObj);
-
-		} else {
-
-			this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
-		}
-
-	}
-
-	// @ Public
-	, getVideo:function(callback, callbackScope, paramObj) {
-
-		if(paramObj == null) {
-			console.log("!Error! / getVideo / paramObj == null");
-			return;
-		}
-		var objectId = paramObj.objectId;
-		if(_v.is_not_valid_str(objectId)) {
-			console.log("!Error! / getVideo / _v.is_not_valid_str(objectId)");
-			return;
-		}
-
-		var nextParamObj = {
-			callback:callback
-			, callbackScope:callbackScope
-			, paramObj:paramObj
-			, objectId:objectId
-		}
-
-		var callback = function(paramObj) {
-
-			if(paramObj == null) {
-				console.log("!Error! / getVideo / paramObj == null");
-				return;
-			}
-			if(paramObj.paramObj == null) {
-				console.log("!Error! / getVideo / paramObj.paramObj == null");
-				return;
-			}
-
-			// wonder.jung
-			FB.api(
-				"/{video-id}".replace(/\{video\-id\}/gi, paramObj.objectId),
-				{"fields":"id,description,updated_time,embed_html,embeddable,from,length,picture,source,published"},
-				function (response) {
-
-					paramObj.paramObj.video = response;
-
-					if (response && !response.error) {
-
-						paramObj.callback.apply(paramObj.callbackScope,[paramObj.paramObj]);
-
-					}
-
-				}
-			); // end FB api
-
-		} // end callback
-		var callbackScope = this;
-
-		if(!this.isLogIn) {
-
-			// if not logged in, log in.
-			this.logIn(function(paramObj) {
-
-				this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
-			}, this, nextParamObj);
-
-		} else {
-
-			this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
-		}
-
-	}
-
 	// @ Private
 	, drawPagePost:function(callback, callbackScope, paramObj) {
 
@@ -413,16 +276,6 @@ var facebookSDK = {
 		var callbackViewCnt = function(paramObj) {
 
 			var postList = paramObj.postList;
-			var viewCntSet = paramObj.viewCntSet;
-
-			// set view cnt 
-			for(var idx=0; idx < postList.length; idx++) {
-				var postObj = postList[idx];
-				var viewCnt = viewCntSet[postObj.id];
-				postObj.viewCnt = viewCnt;
-			}
-
-			// drawList.apply(_self,[postList]);
 			_self.setPagePicture(callbackDrawList, callbackDrawListScope, paramObj);
 		}
 		var callbackViewCntScope = this;
@@ -619,7 +472,7 @@ var facebookSDK = {
 
 		// param - postList
 		if(paramObj == null) {
-			console.log("!Error! / setPostCotentInfo / paramObj == null");
+			console.log("!Error! / setPostViewCnt / paramObj == null");
 			return;
 		}
 
@@ -630,55 +483,87 @@ var facebookSDK = {
 		}
 
 		var _self = this;
-		var callback = function(paramObj) {
+		var callbackViewCnt = function(paramObj) {
 
 			console.log("XXX / paramObj ::: ",paramObj);
 
 			var postList = paramObj.paramObj.postList;
 			if(postList == null || 0 == postList.length) {
-				console.log("!Error! / setPostCotentInfo / postList is not valid!");
+				console.log("!Error! / setPostViewCnt / postList is not valid!");
 				return;
 			}
 
-			var asyncCnt = 0;
-			var viewCntSet = {};
-			for(var idx = 0; idx < postList.length; idx++) {
+			// Multiple Request - init.
+			var _url = "https://graph.facebook.com";
+			var access_token = paramObj.accessToken;
+			var postListForBatch = paramObj.paramObj.postList;
 
-				var postObj = postList[idx];
+			var batchReqJSONArr = [];
+			for(var idx = 0; idx < postListForBatch.length; idx++) {
+				var postObj = postListForBatch[idx];
 				var postId = postObj.id;
 
-				FB.api(
-					'/{post-id}/insights/post_impressions_unique/lifetime'.replace(/\{post\-id\}/gi, postId),
-					'GET',
-					{},
-					function(response) {
+				// -F ‘batch=[{“method”:”GET”, “relative_url”:”me”},{“method”:”GET”, “relative_url”:”me/friends?limit=50”}]’ \
+				var reqObj = {
+					"method":"GET"
+					, "relative_url":"/{post-id}/insights/post_impressions_unique/lifetime".replace(/\{post\-id\}/gi, postId)
+				};
+				batchReqJSONArr.push(reqObj);
+			}
+			var batchReqJSONArrStr = JSON.stringify(batchReqJSONArr);
 
-						var viewCnt = -1;
-						var postId = -1;
-						if(response != null && response.data != null && 0 < response.data.length) {
-							viewCnt = response.data[0].values[0].value;
-							var postIdRaw = response.data[0].id;
-							postId = postIdRaw.split("/")[0];
+			_ajax.send_simple_post(
+				// _url
+				"https://graph.facebook.com"
+				// _param_obj
+				,{
+					access_token:access_token
+					,batch:batchReqJSONArrStr
+				}
+				// _delegate_after_job_done
+				,_obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						var viewCntSet = {};
+						if(data != null && 0 < data.length) {
+							for(var idx=0; idx < data.length;idx++) {
+								var resultObj = data[idx];
+								var resultCode = resultObj.code;
+
+								if(resultCode != 200) {
+									console.log("!Error! / setPostViewCnt / resultCode != 200");
+									continue;
+								}
+								var resultJSONStr = resultObj.body;
+								var resultJSONObj = $.parseJSON(resultJSONStr);
+
+								var viewCnt = resultJSONObj.data[0].values[0].value;
+								var postIdRaw = resultJSONObj.data[0].id;
+								var postId = postIdRaw.split("/")[0];
+
+								viewCntSet[postId] = viewCnt;
+							} // end for
+						} // end if
+
+						for(var idx=0; idx < postListForBatch.length;idx++) {
+							var postObj = postListForBatch[idx];
+							postObj.viewCnt = viewCntSet[postObj.id];
 						}
-						viewCntSet[postId] = viewCnt;
 
-						asyncCnt++;
+						paramObj.callback.apply(paramObj.callbackScope, [paramObj.paramObj]);
 
-						if(postList.length === asyncCnt) {
-							console.log("DONE / HERE !");
-							paramObj.paramObj.viewCntSet = viewCntSet;
-							paramObj.callback.apply(paramObj.callbackScope, [paramObj.paramObj]);
-						}
-					}
-				); // end api
-
-			} // end for			
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.
+			// Multiple Request - done.
 
 		}
-		var callbackScope = this;
+		var callbackViewCntScope = this;
 
-		this.getPageAccessTokenAsync(callback, callbackScope, nextParamObj);
-
+		this.getPageAccessTokenAsync(callbackViewCnt, callbackViewCntScope, nextParamObj);
 
 	}	
 
@@ -697,92 +582,107 @@ var facebookSDK = {
 		}
 
 		var _self = this;
-		var asyncCnt = 0;
-		for(var idx = 0; idx < postList.length; idx++) {
 
-			var postObj = postList[idx];
+		// Prepare multiple request query
+		var callbackContentInfo = function(paramObj) {
 
-			// REMOVE ME
-			// console.log("promotable_posts / postObj ::: ",postObj);
-			// console.log("promotable_posts / paramObj ::: ",paramObj);
+			var access_token = paramObj.accessToken;
+			var batchReqJSONArr = [];
+			var postListForContentInfo = paramObj.postList;
+			for(var idx = 0; idx < postListForContentInfo.length; idx++) {
+				var postObj = postListForContentInfo[idx];
+				var postId = postObj.id;
+				var objectType = postObj.type;
 
-			var objectType = postObj.type;
-			var nextParamObjPost = {
-				callback:callback
-				, callbackScope:callbackScope
-				, paramObj:paramObj
-				, pageId:paramObj.pageId
-				, objectId:postObj.object_id
-				, objectType:objectType
-				, postListIdx:idx
-				, postListCnt:postList.length
-				, postObj:postObj
-				, postList:postList
+				if("photo" === objectType) {
+
+					var objectId = postObj.object_id;
+					var reqObj = {
+						"method":"GET"
+						, "relative_url":"/{photo-id}?fields=id,album,from,height,width,images,link,picture".replace(/\{photo\-id\}/gi, objectId)
+					};
+					batchReqJSONArr.push(reqObj);
+
+				} else if("video" === objectType) {
+
+					var objectId = postObj.object_id;
+					var reqObj = {
+						"method":"GET"
+						, "relative_url":"/{video-id}?fields=id,description,updated_time,embed_html,embeddable,from,length,picture,source,published".replace(/\{video\-id\}/gi, objectId),
+					};
+					batchReqJSONArr.push(reqObj);
+
+				}		
+
 			}
+			var batchReqJSONArrStr = JSON.stringify(batchReqJSONArr);
 
-			// CHECK TYPE
-
-			// REMOVE ME
-			// console.log("objectType ::: ",objectType);
-
-			// objectType : link, status, photo, video, offer
-			if("photo" === objectType) {
-
-				// fecth photo resource url
-				var callbackPhoto = function(paramObj) {
-
-					asyncCnt++;
-
-					paramObj.postObj.photo = paramObj.photo;
-
-					if(asyncCnt === paramObj.postListCnt) {
-						console.log("DONE!");
-						paramObj.callback.apply(paramObj.callbackScope,[paramObj]);
-					}
-
+			_ajax.send_simple_post(
+				// _url
+				"https://graph.facebook.com"
+				// _param_obj
+				,{
+					access_token:access_token
+					,batch:batchReqJSONArrStr
 				}
-				var callbackScopePhoto = this;
+				// _delegate_after_job_done
+				,_obj.get_delegate(
+					// delegate_func
+					function(data){
 
-				_self.getPhoto(callbackPhoto, callbackScopePhoto, nextParamObjPost);
+						var mediaSet = {};
+						if(data != null && 0 < data.length) {
 
-			} else if("video" === objectType) {
 
-				var callbackVideo = function(paramObj) {
+							for(var idx=0; idx < data.length;idx++) {
+								var resultObj = data[idx];
+								var resultCode = resultObj.code;
 
-					asyncCnt++;
+								if(resultCode != 200) {
+									console.log("!Error! / setPostViewCnt / resultCode != 200");
+									continue;
+								}
+								var resultJSONStr = resultObj.body;
+								var resultJSONObj = $.parseJSON(resultJSONStr);
+								mediaSet[resultJSONObj.id] = resultJSONObj;
 
-					paramObj.postObj.video = paramObj.video;
+							} // end for
 
-					if(asyncCnt === paramObj.postListCnt) {
-						console.log("DONE!");
-						paramObj.callback.apply(paramObj.callbackScope,[paramObj]);											
-					}
 
-				}
-				var callbackScopeVideo = this;
+						} // end if
 
-				_self.getVideo(callbackVideo, callbackScopeVideo, nextParamObjPost);
+						for(var idx=0; idx < postListForContentInfo.length;idx++) {
 
-			} else if("status" === objectType) {
+							var postObj = postListForContentInfo[idx];
+							var postId = postObj.id;
+							var objectType = postObj.type;
+							var objectId = postObj.object_id;
 
-				asyncCnt++;
+							if("photo" === objectType) {
 
-			} else if("link" === objectType) {
+								postObj.photo = mediaSet[objectId];
 
-				asyncCnt++;
+							} else if("video" === objectType) {
 
-			} else if("offer" === objectType) {
+								postObj.video = mediaSet[objectId];
 
-				asyncCnt++;
+							} // end if
 
-			} else {
+						} // end for
 
-				asyncCnt++;
+						callback.apply(callbackScope, [paramObj]);
 
-			} // end if
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.
+			// Multiple Request - done.
 
-		} // end for
+		}
+		var callbackContentInfoScope = this;
 
+		this.getPageAccessTokenAsync(callbackContentInfo, callbackContentInfoScope, paramObj);
 
 	}
 
@@ -1332,69 +1232,6 @@ var facebookSDK = {
 		this.getPageAccessTokenAsync(nextCallback, nextCallbackScope, nextParamObj);
 
 	}
-
-
-	// REMOVE ME
-	// @ Public
-	/*
-	, getPage:function(pageId) {
-
-		if(!this.isLogIn) {
-			console.log("!Error! / getMe / !this.isLogIn");
-			return; 
-		}
-
-		if(_v.is_not_valid_str(pageId)) {
-			console.log("!Error! / initLogIn / _v.is_not_valid_str(pageId)");
-			return;
-		}
-
-		FB.api(
-			"/{page-id}".replace(/\{page\-id\}/gi, pageId),
-			function (response) {
-
-				if (response && !response.error) {
-
-				} else {
-
-				}
-			}
-		); // End FB.api
-
-	}
-	*/
-
-
-	// REMOVE ME
-	// @ Public
-	/*
-	, getPost:function(postId) {
-
-		if(!this.isLogIn) {
-			console.log("!Error! / getMe / !this.isLogIn");
-			return; 
-		}
-
-		if(_v.is_not_valid_str(postId)) {
-			console.log("!Error! / getMe / _v.is_not_valid_str(postId)");
-			return;
-		}
-
-		FB.api(
-			"/{post-id}".replace(/\{post\-id\}/gi, postId),
-			function (response) {
-
-				console.log("getPost / response ::: ",response);
-
-				if (response && !response.error) {
-
-				}
-			}
-		);
-	}
-	*/
-
-
 
 }
 
