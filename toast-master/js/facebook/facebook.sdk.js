@@ -503,6 +503,14 @@ var facebookSDK = {
 				var postObj = postListForBatch[idx];
 				var postId = postObj.id;
 
+				// TODO - wonder.jung
+
+				// video view - total_video_views_unique
+				// https://developers.facebook.com/docs/graph-api/reference/video/video_insights/
+				// /{video-id}/video_insights?fields=id,total_video_views_unique
+
+				// photo view - 사진은 조회수가 없음.
+
 				// -F ‘batch=[{“method”:”GET”, “relative_url”:”me”},{“method”:”GET”, “relative_url”:”me/friends?limit=50”}]’ \
 				var reqObj = {
 					"method":"GET"
