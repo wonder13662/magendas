@@ -3,14 +3,12 @@
 // common setting
 include_once("../common.inc");
 
+$pageId = $_GET["pageId"];
+
 // @ required
 $wdj_mysql_interface->close();
 
 ?>
-
-
-
-
 
 <html>
 <head>
@@ -22,7 +20,6 @@ $view_render_var_arr = array("[__ROOT_PATH__]"=>$service_root_path);
 ViewRenderer::render("$file_root_path/template/head.include.toast-master.template",$view_render_var_arr);
 
 ?>
-
 </head>
 
 
@@ -36,6 +33,24 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 
     	<div class="well well-lg" style="margin-top:40px;width:500px;background-color:#FFF;">
 			<form id="feedDialog">
+
+				<div class="form-group">
+					<label for="page_selector">Pages</label>
+<?php
+echo "<select class=\"form-control\" id=\"page_selector\" style=\"margin-bottom:10px;\">";
+if(strcmp($pageId,"1347579945268869") == 0) {
+	echo "<option value=\"233311017036635\">Test Community</option>";
+	echo "<option value=\"1347579945268869\" selected>Magendas</option>";
+} else if(strcmp($pageId,"233311017036635") == 0) {
+	echo "<option value=\"233311017036635\" selected>Test Community</option>";
+	echo "<option value=\"1347579945268869\">Magendas</option>";
+} else {
+	echo "<option value=\"233311017036635\">Test Community</option>";
+	echo "<option value=\"1347579945268869\">Magendas</option>";
+}
+echo "</select>";
+?>
+				</div>
 
 				<div class="form-group">
 					<label>Status</label>
@@ -72,12 +87,16 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
 
 <script>
 
+var pageId = <?php echo json_encode($pageId);?>;
+
+console.log("pageId ::: ",pageId);
+
 var pageIdTestCommnity = "233311017036635";
 var pageIdMagendas = "1347579945268869";
-// var pageId = pageIdMagendas;
-var pageId = pageIdTestCommnity;
+if(pageId == null || pageId == "") {
+	pageId = pageIdTestCommnity;
+}
 
-console.log("XXX - 001");
 var callback = function(paramObj) {
 
 	// FB SDK initialized.
@@ -113,6 +132,8 @@ var inputFilePhotoNVideo = feedDialog.find("input#input_file_photo_n_video");
 var checkboxPublished = feedDialog.find("input#checkboxPublished");
 var btnSubmit = feedDialog.find("button#btn_submit");
 var publishModeSelectorJq = feedDialog.find("select#publish_mode_selector");
+
+
 
 // uploadVideo:function(callback, callbackScope, paramObj) { // videoFile, pageId, videoTitle, published, unpublishedContentType
 // Variable to store your files
@@ -207,6 +228,21 @@ btnSubmit.on("click", function(e){
 		
 
 	} // end if
+
+});
+
+
+
+var pageSelectorJq = feedDialog.find("select#page_selector");
+pageSelectorJq.change(function(){
+
+	var _selfJq = $(this);
+	var curValue = _selfJq.val();
+
+	// console.log("curValue ::: ",curValue);
+
+	var url = "/view/facebook_page.php";
+	_link.go_there(url, {pageId:curValue});
 
 });
 

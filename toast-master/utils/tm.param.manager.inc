@@ -33,6 +33,7 @@ class ToastmasterParamManager{
 	}
 
 	public function getParamString($tossed_key, $placeholder=null){
+
 		if( $this->hasNoKey($tossed_key) ) {
 			return "";
 		}
