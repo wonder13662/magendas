@@ -509,12 +509,22 @@ var facebookSDK = {
 				// https://developers.facebook.com/docs/graph-api/reference/video/video_insights/
 				// /{video-id}/video_insights?fields=id,total_video_views_unique
 
+				// if(postObj.video != null) {
+					
+				// 	var reqObj = {
+				// 		"method":"GET"
+				// 		, "relative_url":"/{post-id}/insights/post_video_views/lifetime".replace(/\{video\-id\}/gi, postId)
+				// 	};
+				// 	batchReqJSONArr.push(reqObj);
+
+				// }
+
 				// photo view - 사진은 조회수가 없음.
 
 				// -F ‘batch=[{“method”:”GET”, “relative_url”:”me”},{“method”:”GET”, “relative_url”:”me/friends?limit=50”}]’ \
 				var reqObj = {
 					"method":"GET"
-					, "relative_url":"/{post-id}/insights/post_impressions_unique/lifetime".replace(/\{post\-id\}/gi, postId)
+					, "relative_url":"/{post-id}/insights/post_impressions/lifetime".replace(/\{post\-id\}/gi, postId)
 				};
 				batchReqJSONArr.push(reqObj);
 			}
@@ -545,9 +555,15 @@ var facebookSDK = {
 								}
 								var resultJSONStr = resultObj.body;
 								var resultJSONObj = $.parseJSON(resultJSONStr);
+								var resultObj = resultJSONObj.data[0];
 
-								var viewCnt = resultJSONObj.data[0].values[0].value;
-								var postIdRaw = resultJSONObj.data[0].id;
+								// total_video_views_unique
+
+
+								console.log("QQQ / XXX / YYY / resultObj ::: ",resultObj);
+								var name = resultObj.name;
+								var viewCnt = resultObj.values[0].value;
+								var postIdRaw = resultObj.id;
 								var postId = postIdRaw.split("/")[0];
 
 								viewCntSet[postId] = viewCnt;
