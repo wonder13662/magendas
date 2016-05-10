@@ -783,6 +783,8 @@ var facebookSDK = {
 
 					if (response && !response.error) {
 
+						callback.apply(callbackScope,[paramObj]);
+
 					}
 			    }
 			); // end api   

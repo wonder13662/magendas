@@ -195,6 +195,9 @@ btnSubmit.on("click", function(e){
 
 				facebookSDK.uploadVideo(function(paramObj) {
 
+					var url = "/view/facebook_page.php";
+					_link.go_there(url, {pageId:pageId});
+
 				}, callbackScope, paramObj);
 
 			} else if(-1 < fileObj.type.indexOf("image")) {
@@ -204,6 +207,9 @@ btnSubmit.on("click", function(e){
 				paramObj.caption = caption;
 
 				facebookSDK.uploadPhoto(function(paramObj) {
+
+					var url = "/view/facebook_page.php";
+					_link.go_there(url, {pageId:pageId});
 
 				}, callbackScope, paramObj);
 			} // end inner if
@@ -223,6 +229,11 @@ btnSubmit.on("click", function(e){
 			paramObj.message = status;
 			facebookSDK.writePagePost(function(paramObj) {
 
+				console.log("HERE / 001");
+
+				var url = "/view/facebook_page.php";
+				_link.go_there(url, {pageId:pageId});
+
 			}, callbackScope, paramObj);
 		}
 		
@@ -238,9 +249,6 @@ pageSelectorJq.change(function(){
 
 	var _selfJq = $(this);
 	var curValue = _selfJq.val();
-
-	// console.log("curValue ::: ",curValue);
-
 	var url = "/view/facebook_page.php";
 	_link.go_there(url, {pageId:curValue});
 
