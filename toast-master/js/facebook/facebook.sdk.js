@@ -1044,20 +1044,19 @@ var facebookSDK = {
 
 			if (iframeId.detachEvent){
 
-			  iframeId.detachEvent("onload", eventHandler);
+				iframeId.detachEvent("onload", eventHandler);
 
 			} else {
 
-			  iframeId.removeEventListener("load", eventHandler, false);
+				iframeId.removeEventListener("load", eventHandler, false);
 
 			}
 
 			setTimeout(function() {
 			  try {
-			    $('#upload_iframe').remove();
+					$('#upload_iframe').remove();
 			  } catch (e) {
-			    console.log("e :: ",e);
-
+					console.log("e :: ",e);
 			  }
 			}, 100);
 
