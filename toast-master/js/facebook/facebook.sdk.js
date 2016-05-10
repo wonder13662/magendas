@@ -504,29 +504,32 @@ var facebookSDK = {
 				var postId = postObj.id;
 
 				// TODO - wonder.jung
+				if(postObj.video != null) {
 
-				// video view - total_video_views_unique
-				// https://developers.facebook.com/docs/graph-api/reference/video/video_insights/
-				// /{video-id}/video_insights?fields=id,total_video_views_unique
+					// video view - total_video_views_unique
+					// https://developers.facebook.com/docs/graph-api/reference/video/video_insights/
 
-				// if(postObj.video != null) {
+					//233311017036635_235545043479899 / /233311017036635_235545043479899/insights/post_video_views/lifetime
 					
-				// 	var reqObj = {
-				// 		"method":"GET"
-				// 		, "relative_url":"/{post-id}/insights/post_video_views/lifetime".replace(/\{video\-id\}/gi, postId)
-				// 	};
-				// 	batchReqJSONArr.push(reqObj);
+					var reqObj = {
+						"method":"GET"
+						, "relative_url":"/{post-id}/insights/post_video_views/lifetime".replace(/\{post\-id\}/gi, postId)
+					};
+					batchReqJSONArr.push(reqObj);
 
-				// }
+				} else {
 
-				// photo view - 사진은 조회수가 없음.
+					// photo view - 사진은 조회수가 없음.
 
-				// -F ‘batch=[{“method”:”GET”, “relative_url”:”me”},{“method”:”GET”, “relative_url”:”me/friends?limit=50”}]’ \
-				var reqObj = {
-					"method":"GET"
-					, "relative_url":"/{post-id}/insights/post_impressions/lifetime".replace(/\{post\-id\}/gi, postId)
-				};
-				batchReqJSONArr.push(reqObj);
+					// -F ‘batch=[{“method”:”GET”, “relative_url”:”me”},{“method”:”GET”, “relative_url”:”me/friends?limit=50”}]’ \
+					var reqObj = {
+						"method":"GET"
+						, "relative_url":"/{post-id}/insights/post_impressions/lifetime".replace(/\{post\-id\}/gi, postId)
+					};
+					batchReqJSONArr.push(reqObj);
+
+				}
+
 			}
 			var batchReqJSONArrStr = JSON.stringify(batchReqJSONArr);
 
@@ -550,6 +553,7 @@ var facebookSDK = {
 								var resultCode = resultObj.code;
 
 								if(resultCode != 200) {
+									console.log("resultObj ::: ",resultObj);
 									console.log("!Error! / setPostViewCnt / resultCode != 200");
 									continue;
 								}
@@ -557,10 +561,6 @@ var facebookSDK = {
 								var resultJSONObj = $.parseJSON(resultJSONStr);
 								var resultObj = resultJSONObj.data[0];
 
-								// total_video_views_unique
-
-
-								console.log("QQQ / XXX / YYY / resultObj ::: ",resultObj);
 								var name = resultObj.name;
 								var viewCnt = resultObj.values[0].value;
 								var postIdRaw = resultObj.id;
@@ -663,6 +663,7 @@ var facebookSDK = {
 								var resultCode = resultObj.code;
 
 								if(resultCode != 200) {
+									console.log("XXX / resultObj ::: ",resultObj);
 									console.log("!Error! / setPostViewCnt / resultCode != 200");
 									continue;
 								}
