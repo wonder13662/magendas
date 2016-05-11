@@ -95,39 +95,37 @@ console.log("word_obj ::: ",word_obj);
 console.log("quote_obj ::: ",quote_obj);
 
 var is_editable = true;
-/*
-if((IS_EXTERNAL_SHARE === false && login_user_info.__is_club_member === false) || login_user_info.__is_login === _param.NO) {
-	// 비로그인 상태이거나 클럽 멤버가 아닐 경우, 수정이 불가능합니다.
-	is_editable = false;
-}
-*/
-
-// Header - Log In Treatment
 var table_jq = $("table tbody#list");
-_tm_m_list.addHeaderRow(
-	// login_user_info
-	login_user_info
-	// membership_obj
-	, membership_obj
-	// header_arr
-	,[
-		_link.get_header_link(
-			_link.MOBILE_TOP
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-	]
-	// table_jq
-	,table_jq
-	// color_text
-	, _tm_m_list.COLOR_TEXT_WHITE
-	// bg_color_vmouse_down
-	, _tm_m_list.COLOR_RED_WINE
-	// is_disabled
-	, null
-	// redirect_url_after_log_in
-	, _link.get_link(_link.MOBILE_MEETING_AGENDA_DETAIL)
-);
+if(IS_EXTERNAL_SHARE === false) {
+
+	// Header - Log In Treatment
+	_tm_m_list.addHeaderRow(
+		// login_user_info
+		login_user_info
+		// membership_obj
+		, membership_obj
+		// header_arr
+		,[
+			_link.get_header_link(
+				_link.MOBILE_TOP
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+			)
+		]
+		// table_jq
+		,table_jq
+		// color_text
+		, _tm_m_list.COLOR_TEXT_WHITE
+		// bg_color_vmouse_down
+		, _tm_m_list.COLOR_RED_WINE
+		// is_disabled
+		, null
+		// redirect_url_after_log_in
+		, _link.get_link(_link.MOBILE_MEETING_AGENDA_DETAIL)
+	);
+
+}
+
 
 // Body - Content
 console.log(">>> meeting_agenda_obj :: ",meeting_agenda_obj);
