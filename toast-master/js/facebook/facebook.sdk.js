@@ -67,6 +67,9 @@ var facebookSDK = {
     
 	}
 	// @ Private
+	// @ Desc : log in by user FB account.
+	, FB_PERMISSION_PAGE_MANAGER:{scope: 'email,publish_actions,publish_pages,manage_pages,read_insights'}
+	, FB_PERMISSION_MAGENDAS_USER:{scope: 'email'}
 	, logIn:function(callback, callbackScope, paramObj) { // facebookSDK.logIn()
 
 		if(callback == null) {
@@ -76,6 +79,10 @@ var facebookSDK = {
 		if(callbackScope == null) {
 			console.log("!Error! / logIn / callbackScope == null");
 			return;
+		}
+		var permisson = this.FB_PERMISSION_PAGE_MANAGER;
+		if(paramObj != null && paramObj.permisson != null) {
+			permisson = paramObj.permisson;
 		}
 		var nextParamObj = {
 			callback:callback
@@ -107,7 +114,7 @@ var facebookSDK = {
 						nextParamObj.response = response;
 						callback.apply(callbackScope, [nextParamObj]);
 
-					}, {scope: 'email,publish_actions,publish_pages,manage_pages,read_insights'});          
+					}, permisson);
 
 				}
 
@@ -932,8 +939,10 @@ var facebookSDK = {
 			forceToUpdate = false;
 		}
 		if(this.pageAccessToken.pageId == -1 || (this.pageAccessToken.pageId != -1 && this.pageAccessToken.pageId != pageId)) {
+
 			this.pageAccessToken.pageId=pageId;
 			forceToUpdate = true;
+
 		} else if(!forceToUpdate && this.pageAccessToken.pageId == pageId) {
 
 			paramObj.accessToken = this.pageAccessToken.accessToken;
@@ -1261,33 +1270,6 @@ var facebookSDK = {
 
 	, getMyPage:function(callback, callbackScope, paramObj) {
 
-		// me/accounts
-/*
-			FB.api(
-			"/me/accounts",
-			'GET',
-			{},
-
-				function(response) {
-
-					console.log("response :::: ",response);
-
-					
-				    // if(response != null && response.access_token != null) {
-				    //   if(forceToUpdate) {
-				    //     _self.pageAccessToken.accessToken = response.access_token;
-				    //   }
-				    //   paramObj.accessToken = response.access_token;
-				    //   callback.apply(callbackScope, [paramObj]);
-
-				    // }
-				    
-
-				} // end callback
-
-			); // end FB api
-*/
-
 		this.getPageAccessTokenAsync(function(paramObj) {
 
 			FB.api(
@@ -1308,11 +1290,7 @@ var facebookSDK = {
 
 			); // end FB api
 
-
-
-
 		}, this, paramObj);
-
 
 	}
 
