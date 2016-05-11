@@ -1259,5 +1259,62 @@ var facebookSDK = {
 
 	}
 
+	, getMyPage:function(callback, callbackScope, paramObj) {
+
+		// me/accounts
+/*
+			FB.api(
+			"/me/accounts",
+			'GET',
+			{},
+
+				function(response) {
+
+					console.log("response :::: ",response);
+
+					
+				    // if(response != null && response.access_token != null) {
+				    //   if(forceToUpdate) {
+				    //     _self.pageAccessToken.accessToken = response.access_token;
+				    //   }
+				    //   paramObj.accessToken = response.access_token;
+				    //   callback.apply(callbackScope, [paramObj]);
+
+				    // }
+				    
+
+				} // end callback
+
+			); // end FB api
+*/
+
+		this.getPageAccessTokenAsync(function(paramObj) {
+
+			FB.api(
+			"/me/accounts",
+			'GET',
+			{},
+
+				function(response) {
+
+					console.log("response :::: ",response);
+
+					var pageList = response.data;
+
+					callback.apply(callbackScope,[pageList]);
+
+
+				} // end callback
+
+			); // end FB api
+
+
+
+
+		}, this, paramObj);
+
+
+	}
+
 }
 

@@ -34,20 +34,32 @@ ViewRenderer::render("$file_root_path/template/head.include.toast-master.templat
     	<div class="well well-lg" style="margin-top:40px;width:500px;background-color:#FFF;">
 			<form id="feedDialog">
 
+				<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true"></div>
+
+				<!--
+				<div id="fb_log_in_btn">
+					<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"></div>				
+				</div>
+				<div id="fb_log_out_btn">
+					<fb:login-button autologoutlink="true"></fb:login-button>
+				</div>
+				-->
+
 				<div class="form-group">
 					<label for="page_selector">Pages</label>
+
 <?php
 echo "<select class=\"form-control\" id=\"page_selector\" style=\"margin-bottom:10px;\">";
-if(strcmp($pageId,"1347579945268869") == 0) {
-	echo "<option value=\"233311017036635\">Test Community</option>";
-	echo "<option value=\"1347579945268869\" selected>Magendas</option>";
-} else if(strcmp($pageId,"233311017036635") == 0) {
-	echo "<option value=\"233311017036635\" selected>Test Community</option>";
-	echo "<option value=\"1347579945268869\">Magendas</option>";
-} else {
-	echo "<option value=\"233311017036635\">Test Community</option>";
-	echo "<option value=\"1347579945268869\">Magendas</option>";
-}
+// if(strcmp($pageId,"1347579945268869") == 0) {
+// 	echo "<option value=\"233311017036635\">Test Community</option>";
+// 	echo "<option value=\"1347579945268869\" selected>Magendas</option>";
+// } else if(strcmp($pageId,"233311017036635") == 0) {
+// 	echo "<option value=\"233311017036635\" selected>Test Community</option>";
+// 	echo "<option value=\"1347579945268869\">Magendas</option>";
+// } else {
+// 	echo "<option value=\"233311017036635\">Test Community</option>";
+// 	echo "<option value=\"1347579945268869\">Magendas</option>";
+// }
 echo "</select>";
 ?>
 				</div>
@@ -97,7 +109,109 @@ if(pageId == null || pageId == "") {
 	pageId = pageIdTestCommnity;
 }
 
+var feedDialog = $("form#feedDialog");
+var statusTextareaJq = feedDialog.find("textarea#status_textarea");
+var descTextareaJq = feedDialog.find("textarea#description_textarea");
+var inputFilePhotoNVideo = feedDialog.find("input#input_file_photo_n_video");
+var checkboxPublished = feedDialog.find("input#checkboxPublished");
+var btnSubmit = feedDialog.find("button#btn_submit");
+var publishModeSelectorJq = feedDialog.find("select#publish_mode_selector");
+
+
+var pageSelectorJq = feedDialog.find("select#page_selector");
+
+
+var fbLoginBtnJq = $("div#fb_log_out_btn");
+var fbLogOutBtnJq = $("div#fb_log_out_btn");
+
+console.log("fbLoginBtnJq :: ",fbLoginBtnJq);
+console.log("fbLogOutBtnJq :: ",fbLogOutBtnJq);
+
+fbLoginBtnJq.hide();
+fbLogOutBtnJq.show();
+
+
 var callback = function(paramObj) {
+
+	// get My pages
+	facebookSDK.getMyPage(
+		function(pageList) {
+
+			console.log("HERE / pageList ::: ",pageList);
+
+			/*
+			$('#dropListBuilding').append($('<option/>', { 
+		        value: value,
+		        text : value 
+		    }));	
+		    */	
+
+		    // if(pageList == null || pageList.length == 0) {
+		    // 	fbLoginBtnJq.show();
+		    // 	fbLogOutBtnJq.hide();
+		    // } else {
+		    // 	fbLoginBtnJq.hide();
+		    // 	fbLogOutBtnJq.show();
+		    // }
+
+		    for(var idx = 0; idx < pageList.length; idx++) {
+
+		    	var pageObj = pageList[idx];
+
+			    pageSelectorJq.append($('<option/>', { 
+			        value: pageObj.id,
+			        text : pageObj.name 
+			    }));
+
+			    var lastOptinoJq = pageSelectorJq.children().last();
+			   	if(pageId == pageObj.id) {
+			   		lastOptinoJq.attr("selected", "selected");		
+			   	}
+
+			    // 	
+		    }
+
+		    // show selected page
+
+
+		    // 
+
+
+
+		}
+		, this
+		, paramObj
+	);
+
+	FB.getLoginStatus(function(response) {
+	    console.log("getLoginStatus / response ::: ",response);
+
+		// <div id="fb_log_in_btn">
+		// 	<div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="false"></div>				
+		// </div>
+		// <div id="fb_log_out_btn">
+		// 	<fb:login-button autologoutlink="true"></fb:login-button>
+		// </div>
+
+	    if(response.status === "connected") {
+
+	    	console.log("001");
+
+	    	// fbLoginBtnJq.remove();
+	    	
+
+	    } else {
+
+	    	console.log("002");
+
+	    	// fbLogOutBtnJq.remove();
+
+	    }
+
+	});	
+
+	// check log in status
+
 
 	// FB SDK initialized.
 	console.log("FB SDK initialized.");
@@ -124,14 +238,6 @@ var paramObj = {pageId:pageId,parentJq:postListContainerJq};
 facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, callback, callbackScope, paramObj);
 
 
-
-var feedDialog = $("form#feedDialog");
-var statusTextareaJq = feedDialog.find("textarea#status_textarea");
-var descTextareaJq = feedDialog.find("textarea#description_textarea");
-var inputFilePhotoNVideo = feedDialog.find("input#input_file_photo_n_video");
-var checkboxPublished = feedDialog.find("input#checkboxPublished");
-var btnSubmit = feedDialog.find("button#btn_submit");
-var publishModeSelectorJq = feedDialog.find("select#publish_mode_selector");
 
 
 
@@ -244,7 +350,7 @@ btnSubmit.on("click", function(e){
 
 
 
-var pageSelectorJq = feedDialog.find("select#page_selector");
+
 pageSelectorJq.change(function(){
 
 	var _selfJq = $(this);

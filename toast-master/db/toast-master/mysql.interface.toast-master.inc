@@ -8704,6 +8704,9 @@ class MYSQLInterface{
 		// 다르다면 업데이트!
 		$action_item_news = 
 		$root_action_collection->search_by_context_from_root($params->NEWS_ID);
+		if(is_null($action_item_news)) {
+			return;
+		}
 
 		// news 관련 테이블을 가져옵니다.
 		$parent_action_list = null;
@@ -8926,6 +8929,10 @@ class MYSQLInterface{
 		// wonder.jung
 		$action_item_word = 
 		$root_action_collection->search_by_context_from_root($params->WORD);
+		if(is_null($action_item_word)) {
+			return;
+		}
+
 		if(!is_null($action_item_word) && !empty($__word) && strcmp($action_item_word->get_name(), $__word) != 0) {
 
 			$action_item_word->set_name($__word);
@@ -9002,6 +9009,9 @@ class MYSQLInterface{
 		// 다르다면 업데이트!
 		$action_item_speech = 
 		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+		if(is_null($action_item_speech)) {
+			return;
+		}
 
 		// 스피치 관련 테이블을 가져옵니다.
 		$parent_action_list = null;
