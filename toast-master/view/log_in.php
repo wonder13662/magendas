@@ -62,6 +62,28 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 
 			<div class="fb-login-button" data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="false" scope="basic_info,email" onlogin="onLogIn()" style="margin-left:89px;"></div>
 
+			<!-- modal init -->
+			<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+
+						<div class="alert alert-info" role="alert" style="margin:10px;">
+							<strong>Please let me know your name</strong>
+						</div>
+						<!-- 포커싱되도록 바꿀 것. -->
+						<ul class="list-group" style="margin:10px;">
+							<li class="list-group-item">Cras justo odio</li>
+							<li class="list-group-item">Dapibus ac facilisis in</li>
+							<li class="list-group-item">Morbi leo risus</li>
+							<li class="list-group-item">Porta ac consectetur ac</li>
+							<li class="list-group-item">Vestibulum at eros</li>
+						</ul>
+
+					</div>
+				</div>
+			</div>
+			<!-- modal end -->
+
 		</form>
 
     </div> <!-- /container -->
@@ -344,15 +366,22 @@ var onLogIn = function() {
 
 					if(data.registered_member != null) {
 						// 등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.
+						console.log("등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.");
 
 					} else if(data.member_list != null) {
-						// 등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.
+						// FB user가 등록되어 있지 않습니다. Magendas에서 비슷한 유저를 찾았습니다.
+						console.log("FB user가 등록되어 있지 않습니다. Magendas에서 비슷한 유저를 찾았습니다.");
+						console.log("data.member_list ::: ",data.member_list);
+
+						var modalJq = $("div.modal");
+
+						// 가져온 리스트를 모달에 표시.
+
+						modalJq.modal("show");
 
 					}
 
 					// registered_member
-
-
 
 				},
 				// delegate_scope
