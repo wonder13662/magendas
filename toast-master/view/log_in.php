@@ -68,16 +68,19 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 					<div class="modal-content">
 
 						<div class="alert alert-info" role="alert" style="margin:10px;">
-							<strong>Please let me know your name</strong>
+							<strong>You might be ...</strong>
 						</div>
+
 						<!-- 포커싱되도록 바꿀 것. -->
-						<ul class="list-group" style="margin:10px;">
-							<li class="list-group-item">Cras justo odio</li>
-							<li class="list-group-item">Dapibus ac facilisis in</li>
-							<li class="list-group-item">Morbi leo risus</li>
-							<li class="list-group-item">Porta ac consectetur ac</li>
-							<li class="list-group-item">Vestibulum at eros</li>
-						</ul>
+						<div id="member_guess_list_container" class="list-group" style="margin:10px;">
+							<!--
+							<a href="#" class="list-group-item">Cras justo odio</a>
+							<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+							<a href="#" class="list-group-item">Morbi leo risus</a>
+							<a href="#" class="list-group-item">Porta ac consectetur ac</a>
+							<a href="#" class="list-group-item">Vestibulum at eros</a>
+							-->
+						</div>						
 
 					</div>
 				</div>
@@ -98,6 +101,9 @@ console.log(">>> meeting_membership_id :: ",meeting_membership_id);
 
 var member_list = <?php echo json_encode($member_list);?>;
 console.log(">>> member_list :: ",member_list);
+
+var member_guess_list_container_jq = $("div#member_guess_list_container");
+console.log("member_guess_list_container_jq :: ",member_guess_list_container_jq);
 
 var delegate_on_log_in = 
 _obj.get_delegate(
@@ -336,13 +342,43 @@ var onLogIn = function() {
 		// 4. Picture - url / Magendas로 업로드 필요.
 		var facebook_profile_image = response.picture.data.url;
 
-		console.log("facebook_user_id ::: ",facebook_user_id);
-		console.log("facebook_user_email ::: ",facebook_user_email);
-		console.log("facebook_user_name ::: ",facebook_user_name);
-		console.log("facebook_user_first_name ::: ",facebook_user_first_name);
-		console.log("facebook_user_last_name ::: ",facebook_user_last_name);
-		console.log("facebook_profile_image ::: ",facebook_profile_image);
-		console.log("meeting_membership_id ::: ",meeting_membership_id);
+		// callback function - member와 FB Account를 등록.
+
+		var add_new_relation_member_n_fb_account = function(member_hash_key, fb_user_id) {
+
+			console.log("add_new_relation_member_n_fb_account / member_hash_key ::: ",member_hash_key);
+			console.log("add_new_relation_member_n_fb_account / fb_user_id ::: ",fb_user_id);
+
+			// return;
+
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_DO_TOASTMASTER_LOG_IN)
+				// _param_obj
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+				.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_FACEBOOK_USER_ADD)
+				.get(_param.FACEBOOK_USER_ID, facebook_user_id)
+				.get(_param.MEMBER_HASH_KEY, member_hash_key)
+
+				// _delegate_after_job_done
+				,_obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						console.log("data ::: ",data);
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.	
+
+
+
+
+		}
+
 
 		// api upload - user account
 		_ajax.send_simple_post(
@@ -368,7 +404,9 @@ var onLogIn = function() {
 						// 등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.
 						console.log("등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.");
 
-					} else if(data.member_list != null) {
+						// log in with selected member hash key
+
+					} else if(data.member_list != null && (0 < data.member_list.length)) {
 						// FB user가 등록되어 있지 않습니다. Magendas에서 비슷한 유저를 찾았습니다.
 						console.log("FB user가 등록되어 있지 않습니다. Magendas에서 비슷한 유저를 찾았습니다.");
 						console.log("data.member_list ::: ",data.member_list);
@@ -376,8 +414,43 @@ var onLogIn = function() {
 						var modalJq = $("div.modal");
 
 						// 가져온 리스트를 모달에 표시.
+						var member_guess_tag_list = "";
+						for(var idx = 0; idx < data.member_list.length; idx++) {
+							var member_obj = data.member_list[idx];
+
+							member_guess_tag_list += "" 
+							+ "<a href=\"#\" class=\"list-group-item\" member_hash_key=\"{member_hash_key}\">"
+								.replace(/\{member_hash_key\}/gi, member_obj.__member_hash_key)
+								+ "<h5 class=\"list-group-item-heading\">{name}</h5>"
+									.replace(/\{name\}/gi, member_obj.__member_first_name + " " + member_obj.__member_last_name)
+								+ "<p class=\"list-group-item-text\">{email}</p>"
+									.replace(/\{email\}/gi, member_obj.__member_email)
+							+ "</a>"
+							;
+						}
+
+						member_guess_list_container_jq.append(member_guess_tag_list);
+						var member_guess_list_jq = member_guess_list_container_jq.children();
+						member_guess_list_jq.click(function(e){
+
+							// get row info
+							var _self = $(this);
+							var member_hash_key = _self.attr("member_hash_key");
+							
+							// add a new relation of member & FB Account
+							add_new_relation_member_n_fb_account(member_hash_key, facebook_user_id);
+
+							// log in with selected member hash key
+							// wonder.jung
+
+							// modalJq.modal("hide");
+
+						});
+
 
 						modalJq.modal("show");
+
+
 
 					}
 

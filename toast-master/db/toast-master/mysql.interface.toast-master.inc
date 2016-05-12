@@ -11623,7 +11623,7 @@ class MYSQLInterface{
 
 	// FACEBOOK
 
-	public function has_member_after_fb_login($fb_user_id=-1) {
+	public function has_member_n_facebook($fb_user_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $fb_user_id, "fb_user_id")){
 			return;
@@ -11650,7 +11650,7 @@ class MYSQLInterface{
 
 	}
 
-	public function get_member_after_fb_login($fb_user_id=-1) {
+	public function get_member_n_facebook($fb_user_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $fb_user_id, "fb_user_id")){
 			return;
@@ -11760,7 +11760,7 @@ class MYSQLInterface{
 		return array_merge($matched_head_arr, $matched_tail_arr);
 	}
 
-	private function insert_member_n_facebook($member_id=-1, $fb_account_id=-1) {
+	public function insert_member_n_facebook($member_id=-1, $fb_account_id=-1) {
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
 			return;
@@ -11785,7 +11785,7 @@ class MYSQLInterface{
 
 	}
 
-	public function insert_member_after_fb_login($fb_account_id=-1, $fb_user_first_name="", $fb_user_last_name="", $email=""){
+	public function insert_member_from_fb_login($fb_account_id=-1, $fb_user_first_name="", $fb_user_last_name="", $email=""){
 
 		if($this->is_not_unsigned_number(__FUNCTION__, $fb_account_id, "fb_account_id")){
 			return;
@@ -11812,7 +11812,7 @@ class MYSQLInterface{
 		$this->insert_member_n_facebook($__member_id, $fb_account_id);
 
 		// CHECK
-		return $this->get_member_after_fb_login($fb_account_id);
+		return $this->get_member_n_facebook($fb_account_id);
 	}
 
 }

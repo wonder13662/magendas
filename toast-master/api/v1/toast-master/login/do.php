@@ -32,6 +32,7 @@
 	$FACEBOOK_USER_EMAIL = $params->getParamString($params->FACEBOOK_USER_EMAIL, "");
 	$FACEBOOK_USER_FIRST_NAME = $params->getParamString($params->FACEBOOK_USER_FIRST_NAME, "");
 	$FACEBOOK_USER_LAST_NAME = $params->getParamString($params->FACEBOOK_USER_LAST_NAME, "");
+	$MEMBER_HASH_KEY = $params->getParamString($params->MEMBER_HASH_KEY, "");
 
 	// DEBUG
 	$result->EVENT_PARAM_EVENT_TYPE = $EVENT_PARAM_EVENT_TYPE;
@@ -41,6 +42,7 @@
 	$result->FACEBOOK_USER_EMAIL = $FACEBOOK_USER_EMAIL;
 	$result->FACEBOOK_USER_FIRST_NAME = $FACEBOOK_USER_FIRST_NAME;
 	$result->FACEBOOK_USER_LAST_NAME = $FACEBOOK_USER_LAST_NAME;
+	$result->MEMBER_HASH_KEY = $MEMBER_HASH_KEY;
 
 
 
@@ -95,15 +97,15 @@
 		// CHECK VALID END
 
 		// facebook id로 등록되어 있는지 확인
-		$has_member_after_fb_login = $wdj_mysql_interface->has_member_after_fb_login($FACEBOOK_USER_ID);
-		$result->has_member_after_fb_login = $has_member_after_fb_login;
+		$has_member_n_facebook = $wdj_mysql_interface->has_member_n_facebook($FACEBOOK_USER_ID);
+		$result->has_member_n_facebook = $has_member_n_facebook;
 		
 		$member_list = null;
-		if($has_member_after_fb_login){
+		if($has_member_n_facebook){
 
 			// 멤버에 등록되어 있습니다. 멤버 정보를 가져옵니다.
 			$member_obj = 
-			$wdj_mysql_interface->get_member_after_fb_login($FACEBOOK_USER_ID);
+			$wdj_mysql_interface->get_member_n_facebook($FACEBOOK_USER_ID);
 
 			$result->registered_member = $member_obj;
 
@@ -122,9 +124,40 @@
 
 	} else if(strcmp($params->IS_FACEBOOK_USER_ADD, $EVENT_PARAM_EVENT_TYPE) == 0) {
 
-		// facebook id로 등록되어 있지 않다면 추가등록 합니다.
+		// CHECK VALID INIT
+		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $FACEBOOK_USER_ID)){
+			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$FACEBOOK_USER_ID)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		if(empty($MEMBER_HASH_KEY)){
+			$result->error = "empty(\$MEMBER_HASH_KEY)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$member_id = $wdj_mysql_interface->get_member_id_by_hash_key($MEMBER_HASH_KEY);
+		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $member_id)){
+			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$member_id)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		// CHECK VALID END
 
-		// NEED TO IMPLEMENT
+		// CHECK - 이미 등록되어 있는지 확인.
+		// public function has_member_n_facebook($fb_user_id=-1) {
+		$has_member_n_facebook = $wdj_mysql_interface->has_member_n_facebook($FACEBOOK_USER_ID);
+		if($has_member_n_facebook) {
+			$result->error = "\$has_member_n_facebook";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+
+		// facebook id로 등록되어 있지 않다면 추가등록 합니다.
+		$wdj_mysql_interface->insert_member_n_facebook($member_id, $FACEBOOK_USER_ID);
+
+		// CHECK
+		$member_n_facebook = $wdj_mysql_interface->get_member_n_facebook($FACEBOOK_USER_ID);
+		$result->member_n_facebook = $member_n_facebook;
 
 	}
 
