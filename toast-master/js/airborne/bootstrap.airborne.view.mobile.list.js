@@ -2094,7 +2094,7 @@ airborne.bootstrap.view.mobile.list = {
 			, get_target_jq:function() {
 				return this.target_jq;
 			}
-			, toggle_folder:function(delegate_obj, delegate_data) {
+			, toggle_folder:function(delegate_obj, delegate_data, delegate_resize_obj) {
 
 				if(	delegate_data == undefined || 
 					delegate_data.target_jq == undefined ||
@@ -2121,10 +2121,15 @@ airborne.bootstrap.view.mobile.list = {
 
 					this.hide();
 
+					delegate_resize_obj._apply([this.get_target_jq_arr()]);
+
 				} else {
 
 					delegate_data.target_jq.attr("is_open", "YES");
+
 					this.show();
+
+					delegate_resize_obj._apply([this.get_target_jq_arr()]);
 
 					// TODO 선택된 항목은 제외합니다.
 					var cur_offset = delegate_data.target_jq.offset();

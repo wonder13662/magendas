@@ -10,7 +10,7 @@ if($meeting_membership_id == -1) {
 	ToastMasterLinkManager::go(ToastMasterLinkManager::$MEMBERSHIP_PICKER);
 }
 
-$REDIRECT_URL = $params->getParamString($params->REDIRECT_URL, "");	
+$REDIRECT_URL = $params->getParamString($params->REDIRECT_URL, "");
 
 // @ required
 $wdj_mysql_interface->close();
@@ -56,8 +56,11 @@ echo "<link href=\"$service_root_path/css/bootstrap/signin/signin.css\" rel=\"st
 			<label class="checkbox">
 				<input type="checkbox" value="remember-me"> Remember me
 			</label>
+			<button id="fb_log_in_btn" class="btn btn-lg btn-primary btn-block" type="submit">Log in with Facebook</button>
 			-->
-			<button id="log_in_btn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+			<button id="log_in_btn" class="btn btn-lg btn-primary btn-block" type="submit" style="margin-bottom:18px;">Log in</button>
+
+			<div class="fb-login-button" data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="false" scope="basic_info,email" onlogin="onLogIn()" style="margin-left:89px;"></div>
 
 		</form>
 
@@ -70,6 +73,9 @@ var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 
 console.log(">>> REDIRECT_URL :: ",REDIRECT_URL);
 console.log(">>> meeting_membership_id :: ",meeting_membership_id);
+
+var member_list = <?php echo json_encode($member_list);?>;
+console.log(">>> member_list :: ",member_list);
 
 var delegate_on_log_in = 
 _obj.get_delegate(
@@ -271,6 +277,96 @@ $("button#log_in_btn").on("click", function(e){
 
 });
 
+facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, function(paramObj){
+
+	console.log("callback / facebookSDK.init / paramObj ::: ",paramObj);
+
+}, this);
+
+var onLogIn = function() {
+
+	console.log("페이스북으로 로그인되었습니다.");
+	console.log("해당 유저의 계정정보를 가져옵니다.");
+
+	facebookSDK.getMe(function(response){
+
+		if(response == null) {
+			console.log("!Error! / facebookSDK.getMe / response == null");
+			return;
+		}
+
+		console.log("onLogIn / response ::: ",response);
+
+		// 1. facebook_user_id
+		var facebook_user_id = response.id;
+		// 2. email
+		var facebook_user_email = response.email;
+		// 3. first name & last name
+		var facebook_user_name = response.name;
+		var facebook_user_name_arr = facebook_user_name.split(" ");
+		var facebook_user_first_name = facebook_user_name_arr[0];
+
+		var facebook_user_last_name = "";
+		if(1 < facebook_user_name_arr.length) {
+			facebook_user_last_name = facebook_user_name_arr[facebook_user_name_arr.length - 1];
+		}
+
+		// 4. Picture - url / Magendas로 업로드 필요.
+		var facebook_profile_image = response.picture.data.url;
+
+		console.log("facebook_user_id ::: ",facebook_user_id);
+		console.log("facebook_user_email ::: ",facebook_user_email);
+		console.log("facebook_user_name ::: ",facebook_user_name);
+		console.log("facebook_user_first_name ::: ",facebook_user_first_name);
+		console.log("facebook_user_last_name ::: ",facebook_user_last_name);
+		console.log("facebook_profile_image ::: ",facebook_profile_image);
+		console.log("meeting_membership_id ::: ",meeting_membership_id);
+
+		// api upload - user account
+		_ajax.send_simple_post(
+			// _url
+			_link.get_link(_link.API_DO_TOASTMASTER_LOG_IN)
+			// _param_obj
+			,_param
+			.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+			.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_FACEBOOK_USER_SEARCH)
+			.get(_param.FACEBOOK_USER_ID, facebook_user_id)
+			.get(_param.FACEBOOK_USER_EMAIL, facebook_user_email)
+			.get(_param.FACEBOOK_USER_FIRST_NAME, facebook_user_first_name)
+			.get(_param.FACEBOOK_USER_LAST_NAME, facebook_user_last_name)
+
+			// _delegate_after_job_done
+			,_obj.get_delegate(
+				// delegate_func
+				function(data){
+
+					console.log("XXX / data ::: ",data);
+
+					if(data.registered_member != null) {
+						// 등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.
+
+					} else if(data.member_list != null) {
+						// 등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.
+
+					}
+
+					// registered_member
+
+
+
+				},
+				// delegate_scope
+				this
+			)
+		); // ajax done.	
+
+
+		// api upload - profile image
+		// http://stackoverflow.com/questions/6306935/php-copy-image-to-my-server-direct-from-url
+
+	},this);
+
+}
 
 </script>
 </body>

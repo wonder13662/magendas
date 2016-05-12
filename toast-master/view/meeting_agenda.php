@@ -304,6 +304,8 @@
 
 <script>
 
+console.log("HERE / 001 - XXX");
+
 // php to javascript sample
 var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
@@ -339,9 +341,7 @@ if(tm_officer_std != undefined) {
 	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
 }
 
-// TEST
-//facebookSDK.initLogIn(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION);
-// facebook_sdk.init(_param.FACEBOOK_SDK_APP_ID, _param.FACEBOOK_SDK_VERSION);
+
 console.log("HERE / XXX");
 
 // 과거의 직전 미팅 정보

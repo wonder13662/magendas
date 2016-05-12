@@ -89,6 +89,8 @@ var link_manager = {
 	,API_UPDATE_TOASTMASTER_NEWS:"/api/v1/toast-master/news/update.php"
 	,API_UPDATE_TOASTMASTER_WORD_N_QUOTE:"/api/v1/toast-master/word_n_quote/update.php"
 
+	,API_DO_TOASTMASTER_LOG_IN:"/api/v1/toast-master/login/do.php"
+
 	,API_SELECT_MEMBER:"/api/ajax_post_select_member.php"
 	,API_UPDATE_TIMER:"/api/ajax_post_update_timer.php"
 	,API_JESSIE:"/api/ajax_post_jessie.php"

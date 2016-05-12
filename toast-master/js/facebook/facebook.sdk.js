@@ -200,20 +200,25 @@ var facebookSDK = {
 
 	}
 	// @ Public
-	, getMe:function() {
+	, getMe:function(callback, callbackScope, paramObj) {
 
-		if(!this.isLogIn) {
-			console.log("!Error! / getMe / !this.isLogIn");
-			return; 
+		// wonder.jung
+		if(callback == null) {
+		  console.log("!Error! / getMe / callback == null");
+		  return;
+		}
+		if(callbackScope == null) {
+		  console.log("!Error! / getMe / callbackScope == null");
+		  return;
 		}
 
 		FB.api(
 			'/me',
 			'GET',
-			{"fields":"id,name,picture"},
+			{"fields":"id,name,picture,email"},
 			function(response) {
-			  // Insert your code here
-			  console.log("HERE / 0011 / response :: ",response);
+				// Insert your code here
+				callback.apply(callbackScope, [response]);
 			}
 		);    
 
