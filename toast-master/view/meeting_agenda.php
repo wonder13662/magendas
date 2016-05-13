@@ -119,8 +119,6 @@
 	<!-- nav begins -->
 	<?php
 
-
-
 	$login_user_msg = "";
 	$login_status = "LOG OUT";
 

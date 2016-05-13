@@ -11623,9 +11623,9 @@ class MYSQLInterface{
 
 	// FACEBOOK
 
-	public function has_member_n_facebook($fb_user_id=-1) {
+	public function has_member_n_facebook($fb_user_id="") {
 
-		if($this->is_not_unsigned_number(__FUNCTION__, $fb_user_id, "fb_user_id")){
+		if($this->is_empty(__FUNCTION__, $fb_user_id, "fb_user_id")){
 			return;
 		}
 		
@@ -11650,19 +11650,21 @@ class MYSQLInterface{
 
 	}
 
-	public function get_member_n_facebook($fb_user_id=-1) {
+	public function get_member_n_facebook($fb_user_id="") {
 
-		if($this->is_not_unsigned_number(__FUNCTION__, $fb_user_id, "fb_user_id")){
+		if($this->is_empty(__FUNCTION__, $fb_user_id, "fb_user_id")){
 			return;
 		}
 		
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-				"SELECT IFNULL(`MEMBER_N_FACEBOOK`.`member_id`, -1) AS __member_id,"
-				,"IFNULL(`MEMBER_N_FACEBOOK`.`facebook_id`, -1) AS __facebook_id"
-				,"FROM `magendas`.`MEMBER_N_FACEBOOK`"
-				,"WHERE `MEMBER_N_FACEBOOK`.`facebook_id`=$fb_user_id"
+				"SELECT IFNULL(MNF.`member_id`, -1) AS __member_id"
+				,",IFNULL(`MEMBER`.`hash_key`, \"\") AS __member_hash_key"
+				,",IFNULL(MNF.`facebook_id`, -1) AS __facebook_id"
+				,"FROM `magendas`.`MEMBER_N_FACEBOOK` AS MNF"
+				,"LEFT JOIN `magendas`.`MEMBER` ON `magendas`.`MEMBER`.id=MNF.`member_id`"
+				,"WHERE MNF.`facebook_id`=$fb_user_id"
 			)
 		);
 
@@ -11765,7 +11767,7 @@ class MYSQLInterface{
 		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
 			return;
 		}
-		if($this->is_not_unsigned_number(__FUNCTION__, $fb_account_id, "fb_account_id")){
+		if($this->is_empty(__FUNCTION__, $fb_account_id, "fb_account_id")){
 			return;
 		}
 

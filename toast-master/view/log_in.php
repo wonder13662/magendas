@@ -105,6 +105,25 @@ console.log(">>> member_list :: ",member_list);
 var member_guess_list_container_jq = $("div#member_guess_list_container");
 console.log("member_guess_list_container_jq :: ",member_guess_list_container_jq);
 
+var callback_log_in = function(member_hash_key) {
+
+	if(_v.is_not_valid_str(member_hash_key)) {
+		console.log("!Error! / callback_log_in / _v.is_not_valid_str(member_hash_key)");
+		return;
+	}
+
+	// 1. 로그인 성공.
+	// 1-1. 로그인에 성공한 멤버 아이디를 쿠키에 등록합니다.
+	_server.setCookie(_param.COOKIE_TM_LOGIN_MEMBER_HASHKEY,member_hash_key, 1);
+
+	if(_v.is_valid_str(REDIRECT_URL)) {
+		window.location.href = REDIRECT_URL;
+	} else {
+		_link.go_there(_link.MEETING_AGENDA);
+	}
+
+}
+
 var delegate_on_log_in = 
 _obj.get_delegate(
 	// delegate_func
@@ -124,65 +143,7 @@ _obj.get_delegate(
 
 		} else {
 
-	    	// 1. 로그인 성공.
-	    	// 1-1. 로그인에 성공한 멤버 아이디를 쿠키에 등록합니다.
-	    	_server.setCookie(_param.COOKIE_TM_LOGIN_MEMBER_HASHKEY,data.member_info.__member_hash_key, 1);
-	    	
-	    	var member_info = data.member_info;
-	    	var member_membership_arr = data.member_membership_arr;
-
-	    	if(member_membership_arr == undefined || member_membership_arr.length < 1) {
-
-	    		alert("Membership data is not correct\n\n[Error-511]");
-
-	    	} else if (meeting_membership_id === -1 && 1 < member_membership_arr.length) {
-
-	    		// 1-2. 
-	    		// 클럽 정보가 없고
-	    		// 해당 유저의 가입 클럽이 2개 이상일 경우, 클럽 선택 페이지로 이동합니다.
-				_link.go_there(_link.MEMBERSHIP_PICKER);
-
-			} else if (meeting_membership_id === -1 && 1 == member_membership_arr.length) {
-
-				// 1-3. 
-				// 이전에 선택한 클럽이 없고
-				// 해당 유저의 가입 클럽이 1개일 경우는 해당 클럽의 메인 페이지로 리다이렉트합니다.(클럽이 자동으로 지정.)
-				var cur_membership = member_membership_arr[0];
-				var __member_membership = parseInt(cur_membership.__member_membership);
-
-				// 클럽의 쿠키값을 업데이트.
-				_server.setCookie(_param.COOKIE_TM_MEMBERSHIP_ID,__member_membership, 1);
-
-				if(_v.is_valid_str(REDIRECT_URL)) {
-					window.location.href = REDIRECT_URL;
-				} else {
-					_link.go_there(_link.MEETING_AGENDA);
-				}
-
-			} else if (0 < meeting_membership_id && 1 == member_membership_arr.length) {
-
-				// 이전에 선택한 클럽이 있고
-				// 해당 유저의 가입 클럽이 1개일 경우는 해당 클럽의 메인 페이지로 리다이렉트합니다.(쿠키값으로 지정된 클럽을 사용.)
-
-				if(_v.is_valid_str(REDIRECT_URL)) {
-					window.location.href = REDIRECT_URL;
-				} else {
-					_link.go_there(_link.MEETING_AGENDA);
-				}
-
-	    	} else if(0 < meeting_membership_id && 1 < member_membership_arr.length) {
-
-	    		// 1-4-1. 이미 사용자가 가입한 클럽을 선택 뒤, 로그인한 경우
-	    		// 1-4-2. 이미 사용자가 가입하지 않은 클럽을 선택한 상태에서 사용자가 로그인한 경우
-	    		// 두 경우 모두, 각 페이지단에서 제어 필요.
-
-				if(_v.is_valid_str(REDIRECT_URL)) {
-					window.location.href = REDIRECT_URL;
-				} else {
-					_link.go_there(_link.MEETING_AGENDA);
-				}
-
-	    	}
+			callback_log_in(data.member_info.__member_hash_key);
 
 		} // end if
 
@@ -344,12 +305,10 @@ var onLogIn = function() {
 
 		// callback function - member와 FB Account를 등록.
 
-		var add_new_relation_member_n_fb_account = function(member_hash_key, fb_user_id) {
+		var add_new_relation_member_n_fb_account = function(member_hash_key, fb_user_id, callback_obj) {
 
 			console.log("add_new_relation_member_n_fb_account / member_hash_key ::: ",member_hash_key);
 			console.log("add_new_relation_member_n_fb_account / fb_user_id ::: ",fb_user_id);
-
-			// return;
 
 			_ajax.send_simple_post(
 				// _url
@@ -358,7 +317,7 @@ var onLogIn = function() {
 				,_param
 				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
 				.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_FACEBOOK_USER_ADD)
-				.get(_param.FACEBOOK_USER_ID, facebook_user_id)
+				.get(_param.FACEBOOK_USER_ID, fb_user_id)
 				.get(_param.MEMBER_HASH_KEY, member_hash_key)
 
 				// _delegate_after_job_done
@@ -366,17 +325,15 @@ var onLogIn = function() {
 					// delegate_func
 					function(data){
 
-						console.log("data ::: ",data);
+						console.log("add_new_relation_member_n_fb_account / data ::: ",data);
+
+						callback_obj._apply([]);
 
 					},
 					// delegate_scope
 					this
 				)
-			); // ajax done.	
-
-
-
-
+			); // ajax done.
 		}
 
 
@@ -405,6 +362,7 @@ var onLogIn = function() {
 						console.log("등록 유저를 찾았습니다. Magendas와 FB에 모두 등록되어 있습니다.");
 
 						// log in with selected member hash key
+						callback_log_in(data.registered_member.__member_hash_key);
 
 					} else if(data.member_list != null && (0 < data.member_list.length)) {
 						// FB user가 등록되어 있지 않습니다. Magendas에서 비슷한 유저를 찾았습니다.
@@ -433,25 +391,35 @@ var onLogIn = function() {
 						var member_guess_list_jq = member_guess_list_container_jq.children();
 						member_guess_list_jq.click(function(e){
 
-							// get row info
+							// 사용자가 자신의 유저 정보를 클릭했습니다.
 							var _self = $(this);
 							var member_hash_key = _self.attr("member_hash_key");
 							
 							// add a new relation of member & FB Account
-							add_new_relation_member_n_fb_account(member_hash_key, facebook_user_id);
+							add_new_relation_member_n_fb_account(
+								member_hash_key
+								, facebook_user_id
+								,_obj.get_delegate(
+									// delegate_func
+									function(data){
 
-							// log in with selected member hash key
-							// wonder.jung
+										callback_log_in(member_hash_key);
 
-							// modalJq.modal("hide");
+									},
+									// delegate_scope
+									this
+								)								
+							);
+
+							modalJq.modal("hide");
 
 						});
 
-
 						modalJq.modal("show");
 
-
-
+					} else {
+						// Member, FB user가 모두 등록되어 있지 않습니다.
+						console.log("!Error! / Member, FB user가 모두 등록되어 있지 않습니다.");
 					}
 
 					// registered_member

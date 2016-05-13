@@ -28,7 +28,7 @@
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 
 	$MEETING_MEMBERSHIP_ID = $params->getParamNumber($params->MEETING_MEMBERSHIP_ID, -1);
-	$FACEBOOK_USER_ID = $params->getParamNumber($params->FACEBOOK_USER_ID, -1);
+	$FACEBOOK_USER_ID = $params->getParamString($params->FACEBOOK_USER_ID, "");
 	$FACEBOOK_USER_EMAIL = $params->getParamString($params->FACEBOOK_USER_EMAIL, "");
 	$FACEBOOK_USER_FIRST_NAME = $params->getParamString($params->FACEBOOK_USER_FIRST_NAME, "");
 	$FACEBOOK_USER_LAST_NAME = $params->getParamString($params->FACEBOOK_USER_LAST_NAME, "");
@@ -79,8 +79,8 @@
 	if(strcmp($params->IS_FACEBOOK_USER_SEARCH, $EVENT_PARAM_EVENT_TYPE) == 0) {
 		
 		// CHECK VALID INIT
-		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $FACEBOOK_USER_ID)){
-			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$FACEBOOK_USER_ID)";
+		if(empty($FACEBOOK_USER_ID)){
+			$result->error = "empty(\$FACEBOOK_USER_ID)";
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
@@ -125,8 +125,8 @@
 	} else if(strcmp($params->IS_FACEBOOK_USER_ADD, $EVENT_PARAM_EVENT_TYPE) == 0) {
 
 		// CHECK VALID INIT
-		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $FACEBOOK_USER_ID)){
-			$result->error = "\$wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, \$FACEBOOK_USER_ID)";
+		if(empty($FACEBOOK_USER_ID)){
+			$result->error = "empty(\$FACEBOOK_USER_ID)";
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
@@ -144,7 +144,6 @@
 		// CHECK VALID END
 
 		// CHECK - 이미 등록되어 있는지 확인.
-		// public function has_member_n_facebook($fb_user_id=-1) {
 		$has_member_n_facebook = $wdj_mysql_interface->has_member_n_facebook($FACEBOOK_USER_ID);
 		if($has_member_n_facebook) {
 			$result->error = "\$has_member_n_facebook";
