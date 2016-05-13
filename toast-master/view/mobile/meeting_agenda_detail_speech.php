@@ -300,6 +300,10 @@ _m_list.addTableRowsSelectFolderV2(
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
 		// 내부의 내용은 각 롤에 할당될때 마다 변경됩니다.
+
+		// send_height_to_parent
+		console.log("TOGGLE / SPEECH PROJECT LIST");
+
 	}, this)
 	// delegate_data
 	,_param
@@ -340,7 +344,11 @@ _m_list.addTableRowsSelectFolderV2(
 	, table_jq
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
+
 		// 내부의 내용은 각 롤에 할당될때 마다 변경됩니다.
+		console.log("TOGGLE / MEMBER LIST");
+
+
 	}, this)
 	// delegate_data
 	,_param
@@ -791,8 +799,11 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 			// 선택할 수 있는 스피치 프로젝트 리스트를 보여줍니다.
 			var row_project_jq = delegate_data.target_jq;
 			select_folder_speech_project.toggle_folder(
+
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
+
+					console.log("toggle_folder / XXX / 0021");
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
@@ -860,6 +871,12 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				},this)
 				// delegate_data
 				, delegate_data
+				// delegate_resize
+				, _obj.getDelegate(function(paramObj){
+
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
+
+				},this)
 			);
 
 		}, this)
@@ -924,6 +941,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
 
+					console.log("toggle_folder / XXX / 0001");
+
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
 					var SELECTED_KEY = selected_delegate_data[_param.SELECTED_KEY];
@@ -979,6 +998,12 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				},this)
 				// delegate_data
 				, delegate_data
+				// delegate_resize
+				, _obj.getDelegate(function(paramObj){
+
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
+
+				},this)
 			);
 
 		}, this)
@@ -1036,8 +1061,11 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 			// 선택할 수 있는 스피치 프로젝트 리스트를 보여줍니다.
 			var row_member_jq = delegate_data.target_jq;
 			select_folder_member.toggle_folder(
+
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
+
+					console.log("toggle_folder / XXX / 0002");
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
@@ -1094,6 +1122,12 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				},this)
 				// delegate_data
 				, delegate_data
+				// delegate_resize
+				, _obj.getDelegate(function(paramObj){
+
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
+
+				},this)
 			);
 
 		}, this)

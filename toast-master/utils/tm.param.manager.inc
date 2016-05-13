@@ -33,6 +33,7 @@ class ToastmasterParamManager{
 	}
 
 	public function getParamString($tossed_key, $placeholder=null){
+
 		if( $this->hasNoKey($tossed_key) ) {
 			return "";
 		}
@@ -371,6 +372,26 @@ class ToastmasterParamManager{
 
 	// IFRAME
 	public $IS_IFRAME_VIEW="IS_IFRAME_VIEW";
+
+	// FACEBOOK
+	public $IS_FACEBOOK_LOGIN="IS_FACEBOOK_LOGIN";
+	public $IS_FACEBOOK_USER_SEARCH="IS_FACEBOOK_USER_SEARCH";
+	public $IS_FACEBOOK_USER_ADD="IS_FACEBOOK_USER_ADD";
+
+	public $FACEBOOK_USER_ID="FACEBOOK_USER_ID";
+	public $FACEBOOK_USER_EMAIL="FACEBOOK_USER_EMAIL";
+	public $FACEBOOK_USER_FIRST_NAME="FACEBOOK_USER_FIRST_NAME";
+	public $FACEBOOK_USER_LAST_NAME="FACEBOOK_USER_LAST_NAME";
+
+
+
+		// console.log("facebook_user_id ::: ",facebook_user_id);
+		// console.log("facebook_user_email ::: ",facebook_user_email);
+		// console.log("facebook_user_name ::: ",facebook_user_name);
+		// console.log("facebook_user_first_name ::: ",facebook_user_first_name);
+		// console.log("facebook_user_last_name ::: ",facebook_user_last_name);
+		// console.log("facebook_profile_image ::: ",facebook_profile_image);
+
 
 }
 

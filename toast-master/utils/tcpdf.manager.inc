@@ -14,8 +14,21 @@ class TCPDFManager{
 		$this->service_root_path = $service_root_path;
 	}
 
-	public function show_output(){
-		$this->pdf->Output('example_006.pdf', 'I');
+	public function show_output($title="example.pdf", $dest="D"){
+
+		// $dest (string) Destination where to send the document. 
+
+		// It can take one of the following values:
+
+		// I: send the file inline to the browser (default). The plug-in is used if available. The name given by name is used when one selects the "Save as" option on the link generating the PDF.
+		// D: send to the browser and force a file download with the name given by name.
+		// F: save to a local server file with the name given by name.
+		// S: return the document as a string (name is ignored).
+		// FI: equivalent to F + I option
+		// FD: equivalent to F + D option
+		// E: return the document as base64 mime multi-part email attachment (RFC 2045)
+
+		$this->pdf->Output($title, $dest);
 	}
 
 	public function get_pdf() {
@@ -3543,6 +3556,11 @@ EOD;
 
 
 
+	
+
+
+
+
 
 
 
@@ -4646,6 +4664,19 @@ EOD;
 
 		return $simple_table_cell_prop_arr; // $simple_table_cell_prop_arr / $simple_table_cell_prop_row_arr
 	}
+
+
+	// draw eps type
+	public function draw_eps($file="", $x='', $y='', $w=20, $h=20) {
+
+$html = <<<EOD
+<img src="$file" alt="test alt attribute" width="$w" height="$h" border="0" style="top:100px;left:100px;position:absolute;"/>
+EOD;
+
+		// Print text using writeHTMLCell()
+		return $this->pdf->writeHTMLCell(200, 200, $x, $y, $html, 0, 1, 0, true, '', true);
+
+	}	
 }
 
 ?>

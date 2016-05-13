@@ -2064,38 +2064,156 @@ class MYSQLInterface{
 		@ Public
 		@ Desc : Email 주소를 키로 멤버 데이터를 가져옵니다.
 	*/
-	public function getMemberByEmail($email){
+	public function getMemberByEmail($email=""){
 
-		$function_name = "getMemberByEmail";
-		if(empty($email)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$email)<br/>";
+		if($this->is_empty(__FUNCTION__, $email, "email")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+				,"WHERE `MEMBER`.`email`=\"$email\""
+				,"LIMIT 1"
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}
+
+
+	private function get_member_by_membership_n_email($membership_id=-1, $email=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $email, "email")){
 			return;
 		}
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"SELECT `MEMBER`.id AS __member_id"
-			,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
-			,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
-			,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
-			,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
-			,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
-			,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
-			,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
-			,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
-			,"FROM `MEMBER`"
-			,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
-			,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
-			,"WHERE `MEMBER`.`email`=\"$email\""
-			,"LIMIT 1"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+				,"WHERE MNM.membership_id=\"$membership_id\""
+				,"AND `MEMBER`.`email`=\"$email\""
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
 
-		$result = $this->getSelectOneResult($query_manager->getExecuteQuery());
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
 		return $result;
 	}
+
+	private function get_member_list_by_first_name($first_name=""){
+
+		if($this->is_empty(__FUNCTION__, $first_name, "first_name")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+				,"WHERE `MEMBER`.`first_name`=\"$first_name\""
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}		
+
+	public function getMemberByName($first_name="", $last_name=""){
+
+		if($this->is_empty(__FUNCTION__, $first_name, "first_name")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $last_name, "last_name")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+				,"WHERE `MEMBER`.`first_name`=\"$first_name\""
+				,"AND `MEMBER`.`last_name`=\"$last_name\""
+				,"LIMIT 1"
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}	
 
 	public function getMemberByNameAndEmail($first_name, $last_name, $email, $membership_id){
 
@@ -2414,38 +2532,36 @@ class MYSQLInterface{
 		return $result_merge;
 	}	
 
-	public function insertMember($first_name, $last_name, $email){
+	public function insertMember($first_name="", $last_name="", $email=""){
 
-		$function_name = "insertMember";
-		if(empty($first_name)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$first_name)<br/>";
+		if($this->is_empty(__FUNCTION__, $first_name, "first_name")){
 			return;
 		}
-		if(empty($last_name)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$last_name)<br/>";
+		if($this->is_empty(__FUNCTION__, $last_name, "last_name")){
 			return;
 		}
-		if(empty($email)){
-			echo "$function_name / \$this->isNotUnsignedNumber(\$email)<br/>";
+		if($this->is_empty(__FUNCTION__, $email, "email")){
 			return;
 		}
 
 		// 이메일과 이름을 조합한 해시키를 만듭니다.
 		$member_hash_key = MD5("$first_name $last_name $email");
 
-		$query_manager = new MYSQLQueryManager();
-		$query_array = 
-		array(
-			"INSERT INTO `MEMBER`(`first_name`,`last_name`,`hash_key`,`email`,`regdttm`,`updttm`)"
-			,"VALUES (\"$first_name\",\"$last_name\",\"$member_hash_key\",\"$email\""
-			,",DATE_FORMAT(NOW(),'%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+
+				"INSERT INTO `MEMBER`(`first_name`,`last_name`,`hash_key`,`email`,`regdttm`,`updttm`)"
+				,"VALUES (\"$first_name\",\"$last_name\",\"$member_hash_key\",\"$email\""
+				,",DATE_FORMAT(NOW(),'%Y%m%d%H%i%s'),DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'))"
+
+			)
 		);
-		$query_manager->addQueryLineArr($query_array);
-		// $query_manager->printFormattedQuery();
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
 
-		$json_res_obj = $this->getModifyResult($query_manager->getExecuteQuery());
-
-		return $this->getSimpleResult($json_res_obj);
 	}
 
 	public function insertMemberNMembership($member_id, $membership_id) {
@@ -2648,7 +2764,50 @@ class MYSQLInterface{
 		return $json_res_obj->result;
 	}
 
+	private function get_member_list_by_membership_id($membership_id=-1){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return false;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+
+				"SELECT `MEMBER`.id AS __member_id"
+				," , IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				," , IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				," , IFNULL(CONCAT(`MEMBER`.first_name,\" \",`MEMBER`.last_name),\"\") AS __member_name"
+				," , IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				," , IFNULL(UPPER(SUBSTR(`MEMBER`.first_name,1,1)),\"\") AS __member_name_group"
+				," , IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				," , IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				," , IFNULL(`MEMBERSHIP`.desc,\"\") AS __member_membership_desc"
+				," , IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				," , IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				," FROM `MEMBER`"
+				," LEFT JOIN MEMBER_N_MEMBERSHIP AS MNM ON MNM.member_id=`MEMBER`.id"
+				," LEFT JOIN MEMBERSHIP ON MEMBERSHIP.id=MNM.membership_id"
+				," WHERE MNM.membership_id IN ($membership_id)"
+				," AND MNM.`status`=\"A\""
+				," ORDER BY MNM.`status` ASC, LOWER(`MEMBER`.first_name) ASC"				
+			
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select();
+		if($query_manager->is_failed()) {
+			return -1;
+		}
+		$result = $query_manager->get_result();	
+
+		return $result;
+	}
+
 	public function getMemberListByMembershipId($membership_id=1){
+
+		// wonder.jung
 
 		$query = 
 		"SELECT `MEMBER`.id AS __member_id"
@@ -8704,6 +8863,9 @@ class MYSQLInterface{
 		// 다르다면 업데이트!
 		$action_item_news = 
 		$root_action_collection->search_by_context_from_root($params->NEWS_ID);
+		if(is_null($action_item_news)) {
+			return;
+		}
 
 		// news 관련 테이블을 가져옵니다.
 		$parent_action_list = null;
@@ -8836,6 +8998,8 @@ class MYSQLInterface{
 			if($this->is_empty(__FUNCTION__, $__news_content, "__news_content")){
 				return;
 			}
+			// html escape
+			$__news_content = htmlspecialchars($__news_content, ENT_QUOTES);
 
 			$table_row_field_action_item_list = $cur_table_row_list[$idx];
 			if(empty($table_row_field_action_item_list)) {
@@ -8904,6 +9068,11 @@ class MYSQLInterface{
 
 	}
 
+
+
+
+
+
 	// @ action에 word n quote 관련 정보를 context에 업데이트 합니다.
 	private function update_action_context_about_toastmaster_word_n_quote($meeting_id=-1, $root_action_collection=null) {
 
@@ -8926,7 +9095,11 @@ class MYSQLInterface{
 		// wonder.jung
 		$action_item_word = 
 		$root_action_collection->search_by_context_from_root($params->WORD);
-		if(!is_null($action_item_word) && strcmp($action_item_word->get_name(), $__word) != 0) {
+		if(is_null($action_item_word)) {
+			return;
+		}
+
+		if(!is_null($action_item_word) && !empty($__word) && strcmp($action_item_word->get_name(), $__word) != 0) {
 
 			$action_item_word->set_name($__word);
 
@@ -8943,7 +9116,7 @@ class MYSQLInterface{
 
 		$action_item_word_desc = 
 		$root_action_collection->search_by_context_from_root($params->WORD_DESC);
-		if(!is_null($action_item_word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
+		if(!is_null($action_item_word_desc) && !empty($__word_desc) && strcmp($action_item_word_desc->get_name(), $__word_desc) != 0) {
 
 			$action_item_word_desc->set_name($__word_desc);
 
@@ -8960,7 +9133,7 @@ class MYSQLInterface{
 
 		$action_item_quote = 
 		$root_action_collection->search_by_context_from_root($params->QUOTE);
-		if(!is_null($action_item_quote) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
+		if(!is_null($action_item_quote) && !empty($__quote_content) && strcmp($action_item_quote->get_name(), $__quote_content) != 0) {
 
 			$action_item_quote->set_name($__quote_content);
 
@@ -9002,6 +9175,9 @@ class MYSQLInterface{
 		// 다르다면 업데이트!
 		$action_item_speech = 
 		$root_action_collection->search_by_context_from_root($params->SPEECH_ID);
+		if(is_null($action_item_speech)) {
+			return;
+		}
 
 		// 스피치 관련 테이블을 가져옵니다.
 		$parent_action_list = null;
@@ -11443,6 +11619,202 @@ class MYSQLInterface{
 		} // if end
 
 		return $action_obj;
+	}
+
+	// FACEBOOK
+
+	public function has_member_n_facebook($fb_user_id="") {
+
+		if($this->is_empty(__FUNCTION__, $fb_user_id, "fb_user_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT COUNT(`MEMBER_N_FACEBOOK`.`member_id`) AS __member_cnt"
+				,"FROM `magendas`.`MEMBER_N_FACEBOOK`"
+				,"WHERE `MEMBER_N_FACEBOOK`.`facebook_id`=$fb_user_id"
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+
+		return ($result->__member_cnt > 0)?true:false;
+
+	}
+
+	public function get_member_n_facebook($fb_user_id="") {
+
+		if($this->is_empty(__FUNCTION__, $fb_user_id, "fb_user_id")){
+			return;
+		}
+		
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT IFNULL(MNF.`member_id`, -1) AS __member_id"
+				,",IFNULL(`MEMBER`.`hash_key`, \"\") AS __member_hash_key"
+				,",IFNULL(MNF.`facebook_id`, -1) AS __facebook_id"
+				,"FROM `magendas`.`MEMBER_N_FACEBOOK` AS MNF"
+				,"LEFT JOIN `magendas`.`MEMBER` ON `magendas`.`MEMBER`.id=MNF.`member_id`"
+				,"WHERE MNF.`facebook_id`=$fb_user_id"
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}
+
+	public function search_member_by_fb_account($membership_id=-1, $fb_user_first_name="", $fb_user_last_name="", $email="") {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $fb_user_first_name, "fb_user_first_name")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $fb_user_last_name, "fb_user_last_name")){
+			return;
+		}
+
+		// if user doesn't have a account of Magendas, assume who is he/she by parameters.
+		// 1. is there exact same email? / case sensitive
+		$member_obj = null;
+		if(!empty($email)) {
+			// 3. email address
+			$member_obj = $this->get_member_by_membership_n_email($membership_id, $email);
+		}
+		if(!is_null($member_obj)) {
+			return array($member_obj);
+		}
+
+		// 2. is there exact same name? / first name & last name / case sensitive
+		$member_obj = $this->getMemberByName($fb_user_first_name, $fb_user_last_name);
+		if(!is_null($member_obj)) {
+			return array($member_obj);
+		}		
+
+		// 3. Get memberlist by membership. member status should be available.
+		$member_list = $this->get_member_list_by_membership_id($membership_id);
+		if($this->is_empty(__FUNCTION__, $member_list, "member_list")){
+			return;
+		}
+
+		$matched_head_arr = array();
+		$first_name_head_letter = "";
+
+		// 2-1. head letter of first_name / case insensitive
+		$first_name_head_letter = substr($fb_user_first_name,0,1);
+		for($idx = 0; $idx < count($member_list); $idx++) {
+
+			$member_obj = $member_list[$idx];
+			$__member_first_name = $member_obj->__member_first_name;
+
+			if(empty($__member_first_name)) {
+				continue;
+			}
+
+			$__member_first_name_head = substr($__member_first_name,0,1);
+
+			if(strcasecmp($__member_first_name_head, $first_name_head_letter) == 0) {
+				array_push($matched_head_arr, $member_obj);
+			}
+
+		} // end for
+
+
+		$matched_tail_arr = array();
+		$last_name_tail_letter = "";
+
+		// 2-2. head letter of last_name / case insensitive
+		$last_name_tail_letter = substr($fb_user_last_name,0,1);
+		for($idx = 0; $idx < count($member_list); $idx++) {
+
+			$member_obj = $member_list[$idx];
+			$__member_last_name = $member_obj->__member_last_name;
+
+			if(empty($__member_last_name)) {
+				continue;
+			}
+
+			$__member_last_name_head = substr($__member_last_name,0,1);
+
+			if(strcasecmp($__member_last_name_head, $last_name_head_letter) == 0) {
+				array_push($matched_tail_arr, $member_obj);
+			}
+
+		} // end for
+
+		// return user list
+		return array_merge($matched_head_arr, $matched_tail_arr);
+	}
+
+	public function insert_member_n_facebook($member_id=-1, $fb_account_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $member_id, "member_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $fb_account_id, "fb_account_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+
+				"INSERT INTO `magendas`.`MEMBER_N_FACEBOOK` (`member_id`,`facebook_id`)"
+				,"VALUES($member_id,$fb_account_id)"
+
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}
+
+	}
+
+	public function insert_member_from_fb_login($fb_account_id=-1, $fb_user_first_name="", $fb_user_last_name="", $email=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $fb_account_id, "fb_account_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $fb_user_first_name, "fb_user_first_name")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $fb_user_last_name, "fb_user_last_name")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $email, "email")){
+			return;
+		}
+
+		$this->insertMember($fb_user_first_name, $fb_user_last_name, $email);
+		$member_obj = $this->getMemberByEmail($email);
+		if(is_null($member_obj)) {
+			return;
+		}
+		$__member_id = intval($member_obj->__member_id);
+		if($this->is_not_unsigned_number(__FUNCTION__, $__member_id, "__member_id")){
+			return;
+		}
+		$this->insert_member_n_facebook($__member_id, $fb_account_id);
+
+		// CHECK
+		return $this->get_member_n_facebook($fb_account_id);
 	}
 
 }

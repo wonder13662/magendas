@@ -145,7 +145,7 @@ _m_list.addTableRowMovingArrow(
 
 
 
-
+/*
 // 1. TIMER
 _m_list.addTableRowMovingArrow(
 	// title
@@ -178,6 +178,7 @@ _m_list.addTableRowMovingArrow(
 	// bg_color
 	, _tm_m_list.COLOR_TINT_GRAY
 );
+*/
 
 
 
@@ -186,8 +187,7 @@ _m_list.addTableRowMovingArrow(
 
 
 
-
-
+/*
 // 1. Role Sign Up Sheet
 if(login_user_info.__is_club_member === true) {
 	_m_list.addTableRowMovingArrow(
@@ -222,7 +222,7 @@ if(login_user_info.__is_club_member === true) {
 		, _tm_m_list.COLOR_TINT_GRAY
 	);
 }
-
+*/
 
 
 
