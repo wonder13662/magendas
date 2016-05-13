@@ -79,6 +79,7 @@ airborne.console = {
 
 //airborne.server.getUrlNoParam
 //airborne.server.setCookie(cname, cvalue, exhours)
+// _server.get_root_domain();
 airborne.server = {
 	root_domain:null
 	,get_root_domain:function(){

@@ -266,10 +266,24 @@ $("button#log_in_btn").on("click", function(e){
 
 });
 
-facebookSDK.init(_param.FACEBOOK_SDK_STAGE_APP_ID, _param.FACEBOOK_SDK_STAGE_VERSION, function(paramObj){
 
+// FB SDK
+var rootDomain = _server.get_root_domain();
+var fb_app_id = "";
+var fb_app_ver = "";
+if(rootDomain.indexOf(_param.FACEBOOK_SDK_STAGE_APP_DOMAIN)) {
+
+	fb_app_id = _param.FACEBOOK_SDK_STAGE_APP_ID;
+	fb_app_ver = _param.FACEBOOK_SDK_STAGE_VERSION;
+
+} else if(rootDomain.indexOf(_param.FACEBOOK_SDK_PRODUCT_APP_DOMAIN)) {
+
+	fb_app_id = _param.FACEBOOK_SDK_PRODUCT_APP_ID;
+	fb_app_ver = _param.FACEBOOK_SDK_PRODUCT_VERSION;
+
+}
+facebookSDK.init(fb_app_id, fb_app_ver, function(paramObj){
 	console.log("callback / facebookSDK.init / paramObj ::: ",paramObj);
-
 }, this);
 
 var onLogIn = function() {
