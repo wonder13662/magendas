@@ -14,7 +14,7 @@ class TCPDFManager{
 		$this->service_root_path = $service_root_path;
 	}
 
-	public function show_output($title="example.pdf", $dest="D"){
+	public function show_output($title="example.pdf", $dest="I"){
 
 		// $dest (string) Destination where to send the document. 
 
