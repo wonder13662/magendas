@@ -97,9 +97,21 @@ console.log(">>> login_user_info :: ",login_user_info);
 // print_r($login_user_info);
 // echo "<br/>";
 
+console.log("001");
 
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
+//,addHeaderRow:function(login_user_info, membership_obj, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled, redirect_url_after_log_in){
+var redirect_url_after_log_in = 
+_link.get_header_link(
+	_link.MOBILE_MEMBER_MANAGE
+	,_param
+	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
+);
+
+console.log("002");
+
+console.log("redirect_url_after_log_in ::: ",redirect_url_after_log_in);
 
 _tm_m_list.addHeaderRow(
 	// login_user_info
@@ -121,6 +133,14 @@ _tm_m_list.addHeaderRow(
 	]
 	// table_jq
 	,table_jq
+	// color_text
+	, null
+	// bg_color_vmouse_down
+	, null
+	// is_disabled
+	, null
+	// redirect_url_after_log_in
+	,redirect_url_after_log_in
 );
 
 
