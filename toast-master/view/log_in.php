@@ -271,12 +271,12 @@ $("button#log_in_btn").on("click", function(e){
 var rootDomain = _server.get_root_domain();
 var fb_app_id = "";
 var fb_app_ver = "";
-if(rootDomain.indexOf(_param.FACEBOOK_SDK_STAGE_APP_DOMAIN)) {
+if(-1 < rootDomain.indexOf(_param.FACEBOOK_SDK_STAGE_APP_DOMAIN)) {
 
 	fb_app_id = _param.FACEBOOK_SDK_STAGE_APP_ID;
 	fb_app_ver = _param.FACEBOOK_SDK_STAGE_VERSION;
 
-} else if(rootDomain.indexOf(_param.FACEBOOK_SDK_PRODUCT_APP_DOMAIN)) {
+} else if(-1 < rootDomain.indexOf(_param.FACEBOOK_SDK_PRODUCT_APP_DOMAIN)) {
 
 	fb_app_id = _param.FACEBOOK_SDK_PRODUCT_APP_ID;
 	fb_app_ver = _param.FACEBOOK_SDK_PRODUCT_VERSION;
