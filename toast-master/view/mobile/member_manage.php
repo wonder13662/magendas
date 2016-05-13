@@ -89,29 +89,15 @@ var MEETING_MEMBERSHIP_ID = <?php echo json_encode($MEETING_MEMBERSHIP_ID);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var login_user_info = <?php echo json_encode($login_user_info);?>;
 
-console.log(">>> membership_obj :: ",membership_obj);
-console.log(">>> login_user_info :: ",login_user_info);
-
-// print_r($membership_obj);
-// echo "<br/>";
-// print_r($login_user_info);
-// echo "<br/>";
-
-console.log("001");
 
 // Header - Log In Treatment
 var table_jq = $("table tbody#list");
-//,addHeaderRow:function(login_user_info, membership_obj, header_arr, table_jq, color_text, bg_color_vmouse_down, is_disabled, redirect_url_after_log_in){
 var redirect_url_after_log_in = 
 _link.get_header_link(
 	_link.MOBILE_MEMBER_MANAGE
 	,_param
 	.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
 );
-
-console.log("002");
-
-console.log("redirect_url_after_log_in ::: ",redirect_url_after_log_in);
 
 _tm_m_list.addHeaderRow(
 	// login_user_info
@@ -121,11 +107,6 @@ _tm_m_list.addHeaderRow(
 	// header_arr
 	,[
 		_link.get_header_link(
-			_link.MOBILE_MEMBER_MANAGE
-			,_param
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-		)
-		,_link.get_header_link(
 			_link.MOBILE_TOP
 			,_param
 			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
@@ -140,7 +121,7 @@ _tm_m_list.addHeaderRow(
 	// is_disabled
 	, null
 	// redirect_url_after_log_in
-	,redirect_url_after_log_in
+	,redirect_url_after_log_in.__call_url
 );
 
 
