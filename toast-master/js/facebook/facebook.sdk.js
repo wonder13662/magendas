@@ -27,12 +27,12 @@ var facebookSDK = {
 			console.log("!Error! / init / this.hasInitialized");
 			return;
 		}
-		if(_v.is_not_valid_str(appId)) {
-			console.log("!Error! / init / _v.is_not_valid_str(appId)");
+		if(appId == null) {
+			console.log("!Error! / init / appId == null");
 			return;
 		}
-		if(_v.is_not_valid_str(version)) {
-			console.log("!Error! / init / _v.is_not_valid_str(version)");
+		if(version == null) {
+			console.log("!Error! / init / version == null");
 			return;
 		}
 		if(callback == null) {
