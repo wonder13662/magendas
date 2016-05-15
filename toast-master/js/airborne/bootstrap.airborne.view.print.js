@@ -7,6 +7,12 @@ airborne.bootstrap.view.print = {
 	*/
 	PRINT_FORMAT_A4_PORTRAIT:"PRINT_FORMAT_A4_PORTRAIT"
 	, PRINT_FORMAT_A4_LANDSCAPE:"PRINT_FORMAT_A4_LANDSCAPE"
+	// @ Desc : Web View에서 제어한 내용을 PDF에 1:1로 바뀐 내용을 옮기기 위한 브릿지 뷰를 만듭니다.
+	, draw_bridge_svg_view:function(target_jq, svg_url) {
+
+		// TODO : mouse event on grid view.
+
+	}
 	/*
 		@ Desc : 인쇄를 위한 그리드 뷰를 그립니다. 인쇄할 용지를 선택할 수 있습니다.
 	*/

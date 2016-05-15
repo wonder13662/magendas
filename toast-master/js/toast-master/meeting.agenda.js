@@ -704,9 +704,6 @@ wonglish.meeting_agenda_manager = {
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
 
-						// TEST
-						// return;
-
 						_ajax.send_simple_post(
 							// _url
 							_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_NEWS)
