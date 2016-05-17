@@ -134,12 +134,10 @@ wonglish.meeting_agenda_manager = {
 
 
 
-		// grid view test
-		//grid_view_container
-		var grid_view_container_jq = $("div#grid_view_container");
-		// console.log("grid_view_container_jq ::: ",grid_view_container_jq);
-		var grid_view_url = "{service_root_path}/images/svg/template_a4_grid_unit_10mm.svg".replace(/\{service_root_path\}/gi, service_root_path);
-		_print.draw_bridge_svg_view(grid_view_container_jq, grid_view_url);
+		// grid view
+		// var grid_view_container_jq = $("div#grid_view_container");
+		// var grid_view_url = "{service_root_path}/images/svg/template_a4_grid_unit_10mm.svg".replace(/\{service_root_path\}/gi, service_root_path);
+		// _print.draw_bridge_svg_view(grid_view_container_jq, grid_view_url);
 
 
 

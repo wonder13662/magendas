@@ -43,7 +43,8 @@ airborne.bootstrap.view.print = {
 		// TEST - Cursor
 		var tag = 
 		"<img src=\"{svg_url}\" alt=\"...\" style=\"position:relative;width:{square_unit_mm}px;\"/>"
-		.replace(/\{svg_url\}/gi, "/magendas/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		// .replace(/\{svg_url\}/gi, "/magendas/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		.replace(/\{svg_url\}/gi, "/service/toast-master/images/svg/template_unit_10mm_10mm.svg")
 		.replace(/\{square_unit_mm\}/gi, square_unit_mm)
 		;
 

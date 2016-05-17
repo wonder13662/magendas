@@ -91,13 +91,17 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 		return;
 	}
 
-	var container = $("table tbody#list");
+	var container = $("tbody#list");
 	var container_height = container.height();
 
-	if(0 < container_height) {
-		console.log("container_height ::: ",container_height);
-		accessor_news.set_iframe_height(container_height);	
-	}
+	var prev_height = parseInt(container.attr("prev_height"));
+	if(	(0 < container_height) && 
+		(prev_height != container_height)) {
+
+		accessor_news.set_iframe_height(container_height);
+		container.attr("prev_height", container_height);
+
+	} // end if
 
 }
 
@@ -169,8 +173,6 @@ if(_v.is_valid_array(news_list)) {
 		var news_key = parseInt(news_obj.__news_id);
 		var news_value = news_obj.__news_content;
 
-		console.log(news_obj);
-
 		if(!(news_key > 0)) {
 			console.log("!Error! / news_key is not valid! / idx :: ",idx);
 		} else {
@@ -216,9 +218,6 @@ _m_list.addTableRowTextInputFlexible(
 	 	}
 
 		if(_param.EVENT_INSERT === cur_event && key == -1 && _v.is_valid_str(value)) {
-
-			var linktest = _link.get_link(_link.API_UPDATE_TOASTMASTER_NEWS);
-			console.log("TEST / HERE / 001 / linktest ::: ",linktest);
 
 			// 새로운 뉴스를 추가한 이후, 뉴스의 id를 열에 업데이트 해줘야 합니다.
 			// 이상이 없다면 업데이트!
@@ -275,13 +274,7 @@ _m_list.addTableRowTextInputFlexible(
 					// delegate_func
 					function(data){
 
-						console.log("data ::: ",data);
-
-						// target_jq
-						console.log("target_jq ::: ",target_jq);
-
 						// TODO 사용자에게 업데이트가 완료되었음을 알립니다.
-						// TOAST POPUP 찾아볼 것
 						alert("Updated!");
 
 					}
@@ -317,8 +310,6 @@ _m_list.addTableRowTextInputFlexible(
 					function(data){
 
 						console.log(data);
-
-						console.log(">>> target_jq :: ",target_jq);
 
 						target_jq.remove();
 

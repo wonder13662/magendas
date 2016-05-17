@@ -110,15 +110,17 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 	var container = $("tbody#list");
 	var container_height = container.height();
 
-	if(0 < container_height) {
-		console.log("container_height ::: ",container_height);
-		accessor_speech.set_iframe_height(container_height);	
-	}
+	var prev_height = parseInt(container.attr("prev_height"));
+	if(	(0 < container_height) && 
+		(prev_height != container_height)) {
 
-}
+		accessor_speech.set_iframe_height(container_height);
+		container.attr("prev_height", container_height);
 
+	} // end if
 
-console.log("TEST / DETAIL SPEECH / IS_IFRAME_VIEW ::: ",IS_IFRAME_VIEW);
+} // end function
+
 
 // Header - Log In Treatment
 // 지정된 스피치만 보여주는 경우에는 로그인 탭을 노출하지 않습니다.
@@ -803,7 +805,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
 
-					console.log("toggle_folder / XXX / 0021");
+					// wonder.jung
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
@@ -941,7 +944,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
 
-					console.log("toggle_folder / XXX / 0001");
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
@@ -1065,7 +1068,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
 
-					console.log("toggle_folder / XXX / 0002");
+					send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
 					var SPEECH_ID = selected_delegate_data[_param.SPEECH_ID];
@@ -1154,10 +1157,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 	// 지정된 스피치가 있는 경우에는 공유버튼을 노출할 수 없습니다.
 	if(!IS_EXTERNAL_SHARE && !IS_IFRAME_VIEW && !(0 < SPEECH_ID)) {
-
-		console.log("XXX / IS_EXTERNAL_SHARE ::: ",IS_EXTERNAL_SHARE);
-		console.log("XXX / IS_IFRAME_VIEW ::: ",IS_IFRAME_VIEW);
-		console.log("XXX / SPEECH_ID ::: ",SPEECH_ID);
 
 		// SHARE EXTERNAL
 		var share_msg = 

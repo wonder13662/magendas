@@ -6567,8 +6567,8 @@ airborne.bootstrap.obj.__action = {
 			,rollback_scroll_top:function() {
 
 				var body = $("html, body");
-				body.stop().animate({scrollTop:this.scroll_top}, '300', 'swing', function() { 
-					// To do something.
+				body.stop().animate({scrollTop:this.scroll_top}, '300', 'swing', function() {
+					console.log("rollback_scroll_top / Finished animating");
 				});
 
 			}
