@@ -23,10 +23,13 @@ airborne.bootstrap.view.print = {
 		target_jq.append(tag);
 		var grid_view_jq = target_jq.children().last();
 
+		var roundup = function(num) {
+			return Math.round(num * 100)/100;
+		}
 
 		var height_297mm = null;
 		var width_210mm = grid_view_jq.outerWidth();;
-		var square_unit_mm = Math.round(width_210mm/21);;
+		var square_unit_mm = roundup(width_210mm/42);;
 
 		var prev_offset_x_pos = 0;
 		var prev_offset_y_pos = 0;
@@ -34,11 +37,13 @@ airborne.bootstrap.view.print = {
 		var prev_x_pos = null;
 		var prev_y_pos = null;
 
+		var has_event_from_cursor = false;
+
 
 		// TEST - Cursor
 		var tag = 
 		"<img src=\"{svg_url}\" alt=\"...\" style=\"position:relative;width:{square_unit_mm}px;\"/>"
-		.replace(/\{svg_url\}/gi, "/service/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		.replace(/\{svg_url\}/gi, "/magendas/toast-master/images/svg/template_unit_10mm_10mm.svg")
 		.replace(/\{square_unit_mm\}/gi, square_unit_mm)
 		;
 
@@ -48,11 +53,11 @@ airborne.bootstrap.view.print = {
 
 		var calculate_pos = function(e, self_jq, has_entered) {
 
-			if(square_unit_mm == null) {
+			if(height_297mm == null) {
 				height_297mm = self_jq.outerHeight();
+			}
+			if(width_210mm == null) {
 				width_210mm = self_jq.outerWidth();
-
-				square_unit_mm = Math.round(width_210mm/21);
 			}
 
 			var cur_x_pos = e.pageX - self_jq.offset().left;
@@ -68,60 +73,74 @@ airborne.bootstrap.view.print = {
 			if((prev_x_pos < cur_x_pos) && ((prev_offset_x_pos + square_unit_mm) < cur_x_pos)) {
 				// move to right
 				prev_x_pos = cur_x_pos;
-				prev_offset_x_pos = Math.round(cur_x_pos/square_unit_mm) * square_unit_mm;
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
 
 				has_changed = true;
 
 			} else if((cur_x_pos < prev_x_pos) && (cur_x_pos < prev_offset_x_pos)) {
 				// move to left
 				prev_x_pos = cur_x_pos;
-				prev_offset_x_pos = Math.round((cur_x_pos/square_unit_mm) - 1) * square_unit_mm;
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
 
 				has_changed = true;
+
+			} else if(has_entered === true) {
+
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
 
 			}
 
 			if((prev_y_pos < cur_y_pos) && ((prev_offset_y_pos + square_unit_mm) < cur_y_pos)) {
 				// move to upward
 				prev_y_pos = cur_y_pos;
-				prev_offset_y_pos = Math.round(cur_y_pos/square_unit_mm) * square_unit_mm;
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
 
 				has_changed = true;
 
 			} else if((cur_y_pos < prev_y_pos) && (cur_y_pos < prev_offset_y_pos)) {
 				// move to downward
 				prev_y_pos = cur_y_pos;
-				prev_offset_y_pos = Math.round((cur_y_pos/square_unit_mm) - 1) * square_unit_mm;
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
 
 				has_changed = true;
 
+			} else if(has_entered === true) {
+				
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
+
 			}
 
+
 			if(has_changed === true || has_entered === true) {
-				var idx_h = prev_offset_x_pos/square_unit_mm;
-				var idx_v = prev_offset_y_pos/square_unit_mm;
-				console.log("move to left / idx_h ::: {idx_h} / idx_v ::: {idx_v}".replace(/\{idx_h\}/gi, idx_h).replace(/\{idx_v\}/gi, idx_v));
+				var idx_h = roundup(prev_offset_x_pos/square_unit_mm);
+				var idx_v = roundup(prev_offset_y_pos/square_unit_mm);
+				// console.log("moved! / idx_h ::: {idx_h} / idx_v ::: {idx_v}".replace(/\{idx_h\}/gi, idx_h).replace(/\{idx_v\}/gi, idx_v));
 
-				//{ top: 10, left: 30 }
-				var next_cursor_x_pos = prev_offset_x_pos;
-				var next_cursor_y_pos = (-1*prev_offset_y_pos);
+				var next_cursor_x_pos = "" + prev_offset_x_pos;
+				var next_cursor_y_pos = "" + roundup(prev_offset_y_pos - height_297mm);
 
-				cursor_jq.offset({ top: next_cursor_y_pos, left: next_cursor_x_pos });
+				if(cursor_jq.css("left") != next_cursor_x_pos) {
+					cursor_jq.css("left",next_cursor_x_pos);
+				}
+				if(cursor_jq.css("top") != next_cursor_x_pos) {
+					cursor_jq.css("top",next_cursor_y_pos);
+				}
+				
+			} // end inner if
 
-
-			}			
-
-		}
+		} // end outer if
 
 		grid_view_jq.mouseleave(function(e){
 
-			console.log("grid_view_jq.mouseleave!");
+			// console.log("grid_view_jq.mouseleave!");
+			// do something - initialize?
+			
 
 		});
 
 		grid_view_jq.mouseenter(function(e){
 
-			console.log("grid_view_jq.mouseenter!");
+			// console.log("grid_view_jq.mouseenter!");
 			calculate_pos(e, $(this), true);
 
 		});
