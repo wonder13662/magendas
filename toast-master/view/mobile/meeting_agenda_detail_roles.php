@@ -132,9 +132,23 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 	var container = $("tbody#list");
 	var container_height = container.height();
 
-	if(0 < container_height) {
-		accessor_meeting_role.set_iframe_height(container_height);	
+	var prev_height = parseInt(container.attr("prev_height"));
+	if(	(0 < container_height) && 
+		(prev_height != container_height)) {
+
+		accessor_meeting_role.set_iframe_height(container_height);
+		container.attr("prev_height", container_height);
+
+	} // end if	
+
+}
+var store_scroll_top_return = function(parent_obj) {
+
+	var accessor_meeting_role = parent_obj.accessor_meeting_role;
+	if(accessor_meeting_role == undefined) {
+		return;
 	}
+	accessor_meeting_role.store_scroll_top_return();
 
 }
 
@@ -410,11 +424,14 @@ _m_list.addTableRowTitleNBadge(
 			return;
 		}
 
+		store_scroll_top_return(parent);
+
 		if(_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
 			role_delegate_func(delegate_data, row_member_obj);
 
 		}
+		
 
 	}, this)
 	// delegate_data
@@ -451,6 +468,8 @@ _m_list.addTableRowTitleNBadge(
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
 
+		store_scroll_top_return(parent);
+
 		role_delegate_func(delegate_data, row_member_obj);
 
 	}, this)
@@ -482,6 +501,8 @@ _m_list.addTableRowTitleNBadge(
 	, table_jq
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
+
+		store_scroll_top_return(parent);
 
 		role_delegate_func(delegate_data, row_member_obj);
 
@@ -515,6 +536,8 @@ _m_list.addTableRowTitleNBadge(
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
 
+		store_scroll_top_return(parent);
+
 		role_delegate_func(delegate_data, row_member_obj);
 
 	}, this)
@@ -546,6 +569,8 @@ _m_list.addTableRowTitleNBadge(
 	, table_jq
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
+
+		store_scroll_top_return(parent);
 
 		role_delegate_func(delegate_data, row_member_obj);
 
@@ -581,6 +606,8 @@ _m_list.addTableRowTitleNBadge(
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
 
+		store_scroll_top_return(parent);
+
 		role_delegate_func(delegate_data, row_member_obj);
 
 	}, this)
@@ -615,6 +642,8 @@ _m_list.addTableRowTitleNBadge(
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
 
+		store_scroll_top_return(parent);
+
 		role_delegate_func(delegate_data, row_member_obj);
 
 	}, this)
@@ -648,6 +677,8 @@ _m_list.addTableRowTitleNBadge(
 	, table_jq
 	// delegate_obj_click_row
 	, _obj.getDelegate(function(delegate_data){
+
+		store_scroll_top_return(parent);
 
 		role_delegate_func(delegate_data, row_member_obj);
 

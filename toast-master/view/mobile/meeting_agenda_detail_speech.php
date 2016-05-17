@@ -94,7 +94,7 @@ var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 var table_jq = $("table tbody#list");
 
 // IFRAME - FUNCTION
-var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
+var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj, target_top) {
 
 	if(IS_IFRAME_VIEW == undefined && IS_IFRAME_VIEW !== true) {
 		return;
@@ -114,12 +114,21 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 	if(	(0 < container_height) && 
 		(prev_height != container_height)) {
 
-		accessor_speech.set_iframe_height(container_height);
+		accessor_speech.set_iframe_height(container_height, target_top);
 		container.attr("prev_height", container_height);
 
 	} // end if
 
 } // end function
+var store_scroll_top_return = function(parent_obj) {
+
+	var accessor_speech = parent_obj.accessor_speech;
+	if(accessor_speech == undefined) {
+		return;
+	}
+	accessor_speech.store_scroll_top_return();
+
+}
 
 
 // Header - Log In Treatment
@@ -528,7 +537,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 							console.log(data);
 							//console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
-							alert("Updated!");
+							// alert("Updated!");
 
 							_tm_m_list.hideDocument();
 
@@ -737,7 +746,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 						console.log(data);
 						console.log("사용자에게 업데이트가 완료되었음을 알립니다.");
 
-						alert("Updated!");
+						// alert("Updated!");
 
 					},
 					// delegate_scope
@@ -796,7 +805,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				return;
 			}
 
-
+			store_scroll_top_return(parent);
 
 			// 선택할 수 있는 스피치 프로젝트 리스트를 보여줍니다.
 			var row_project_jq = delegate_data.target_jq;
@@ -805,7 +814,6 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				// delegate_obj
 				_obj.getDelegate(function(selected_delegate_data){
 
-					// wonder.jung
 					send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 					// 사용자가 선택한 스피치 프로젝트로 업데이트합니다.
@@ -843,7 +851,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 								if(is_success) {
 
-									alert("Updated!");
+									// alert("Updated!");
 
 									// 성공했다면 표시된 프로젝트 명, 키값을 변경해준다.
 									var project_title_arr = SELECTED_VALUE.split("<br>");
@@ -938,6 +946,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				return;
 			}
 
+			store_scroll_top_return(parent);
+
 			// 선택할 수 있는 스피치 프로젝트 리스트를 보여줍니다.
 			var row_member_jq = delegate_data.target_jq;
 			select_folder_member.toggle_folder(
@@ -975,7 +985,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 								var updated_speaker_member_id = parseInt(data.updated_speaker_member_id);
 
-								alert("Updated!");
+								// alert("Updated!");
 
 								if(0 < updated_speaker_member_id) {
 									// 성공했다면 표시된 값을 변경해준다.
@@ -1061,6 +1071,8 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 				return;
 			}
 
+			store_scroll_top_return(parent);
+
 			// 선택할 수 있는 스피치 프로젝트 리스트를 보여줍니다.
 			var row_member_jq = delegate_data.target_jq;
 			select_folder_member.toggle_folder(
@@ -1099,7 +1111,7 @@ for (var idx = 0; idx < today_speech_list.length; idx++) {
 
 								var updated_evaluator_member_id = parseInt(data.updated_evaluator_member_id);
 
-								alert("Updated!");
+								// alert("Updated!");
 
 								if(0 < updated_evaluator_member_id) {
 									// 성공했다면 표시된 값을 변경해준다.
