@@ -37,7 +37,7 @@
 
 	$ACTION_NAME = $params->getParamString($params->ACTION_NAME);
 	$ACTION_TEMPLATE_NAME = $params->getParamString($params->ACTION_TEMPLATE_NAME);
-	$ACTION_BEGIN_HH_MM = $params->getParamString($params->ACTION_BEGIN_HH_MM, "19:30");
+	$ACTION_BEGIN_HH_MM = $params->getParamString($params->ACTION_BEGIN_HH_MM, "19:50");
 
 	// DEBUG
 	$result->MEETING_ID = $MEETING_ID;

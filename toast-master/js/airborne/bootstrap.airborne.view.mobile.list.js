@@ -34,37 +34,6 @@ airborne.bootstrap.view.mobile.list = {
 		}
 
 		var _self = this;
-		var time_elapsed_obj = null;
-		target_jq.on("vmousedown", function(e){
-
-			if(is_scrolling){
-				console.log("스크롤 중입니다.");
-
-				if(time_elapsed_obj != undefined) {
-					time_elapsed_obj = _dates.getTimeElapsed(time_elapsed_obj);
-				}
-
-				return;
-			}
-
-			var self_jq = $(this);
-			self_jq.css("background-color", bg_color_vmouse_down);
-			self_jq.css("color", text_color_vmouse_down);
-			self_jq.css("opacity", ".5");
-			self_jq.animate({opacity:1}, _self.TOUCH_DOWN_HOLDING_MILLI_SEC);
-
-			self_jq.css("border-top-color", bg_color_vmouse_down);
-			self_jq.css("border-bottom-color", bg_color_vmouse_down);
-
-			if(self_jq.hasClass('active')){
-				self_jq.removeClass('active').addClass('success');
-			}
-			
-			time_elapsed_obj = _dates.getTimeElapsed();
-
-		});
-
-
 		var initialize_row_look = function(_target_jq){
 
 			_target_jq.css("background-color", bg_color_vmouse_up);
@@ -82,40 +51,15 @@ airborne.bootstrap.view.mobile.list = {
 
 		}
 
-		var is_scrolling = false;
 		target_jq.on("scrollstart",function(){
-
-			var self_jq = $(this);
-			if(is_scrolling === false) {
-				is_scrolling = true;
-				initialize_row_look(self_jq);
-			}
-
-			var prevScrollTop = $(window).scrollTop();
-			var scrollWatcherInterval = setInterval(function(){
-
-				var curScrollTop = $(window).scrollTop();
-
-				if(prevScrollTop != curScrollTop) {
-					// 스크롤중
-					prevScrollTop = curScrollTop;
-				} else {
-					// 스크롤 되지 않음. scroll stop으로 처리.
-					is_scrolling = false;
-					clearTimeout(scrollWatcherInterval);
-				}
-
-			}, 300);
+			// 스크롤이 시작되면 vmousedown은 무조건 취소.
+			is_vmousedown = false;
 			
 		});		
 
-		target_jq.on("scrollstop",function(){
-
-			var self_jq = $(this);
-			
-			if(is_scrolling === true) {
-				is_scrolling = false;
-			}
+		var is_vmousedown = false;
+		target_jq.on("vmousedown", function(e){
+			is_vmousedown = true;
 		});
 
 		target_jq.on("vmouseup", function(e){
@@ -132,11 +76,7 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			delegate_data[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_MOUSE_UP;
 
-			// 모바일 웹 환경에서 사용자가 클릭을 했다고 판단하는 기준은 0.5초 이상 홀딩입니다.
-			time_elapsed_obj = _dates.getTimeElapsed(time_elapsed_obj);
-
-			// if(time_elapsed_obj != null && time_elapsed_obj.time_diff_millsec > _self.TOUCH_DOWN_HOLDING_MILLI_SEC && !is_scrolling){
-			if(time_elapsed_obj != null && !is_scrolling){
+			if(is_vmousedown === true){
 
 				if(_obj.isValidDelegate(delegate_obj)) {
 
@@ -188,35 +128,11 @@ airborne.bootstrap.view.mobile.list = {
 
 				} // if end
 				
-			} else {
-				time_elapsed_obj = null;
-			} // outer if end
+			}
 
-		});
+			// initailize
+			is_vmousedown = false;
 
-		target_jq.on("scrollstart", function(e){
-			e.stopPropagation();
-			initialize_row_look($(this));
-			// 스크롤이 시작되면 터치 홀딩이 초기화됩니다.
-			time_elapsed_obj = null;
-		});
-		target_jq.on("scrollstop", function(e){
-			e.stopPropagation();
-			initialize_row_look($(this));
-			// 스크롤이 멈추면 터치 홀딩이 초기화됩니다.
-			time_elapsed_obj = null;
-		});
-		target_jq.on("vmouseout", function(e){
-			e.stopPropagation();
-			initialize_row_look($(this));
-			// 스크롤이 멈추면 터치 홀딩이 초기화됩니다.
-			time_elapsed_obj = null;
-		});
-		target_jq.on("vmousecancel", function(e){
-			e.stopPropagation();
-			initialize_row_look($(this));
-			// 스크롤이 멈추면 터치 홀딩이 초기화됩니다.
-			time_elapsed_obj = null;
 		});
 
 	}
@@ -1181,6 +1097,10 @@ airborne.bootstrap.view.mobile.list = {
 			,disable_btn_down:function() {
 				this.btn_down_jq.attr("disabled","disabled");
 				this.btn_down_jq.css("opacity",".2")
+			}
+			,row_jq:header_row_jq
+			,get_row_jq:function(){
+				return this.row_jq;
 			}
 		}
 
@@ -3356,11 +3276,8 @@ airborne.bootstrap.view.mobile.list = {
             	, 500
             	, function() {
 
-            		console.log("do_scroll / Finished animation / 001");
-
     				// Animation complete.
     				if(is_close && header_row_iframe_jq != undefined) {
-    					console.log("do_scroll / Finished animation / 002");
     					header_row_iframe_jq.hide();
     				}
 				}
@@ -3398,17 +3315,25 @@ airborne.bootstrap.view.mobile.list = {
 			, set_iframe_height:function(new_height) {
 				this.iframe_jq.height(new_height);
 
-				// 높이 변경 뒤에 스크롤.
-				var header_row_container_jq = this.header_row_container_jq;
-				var scroll_to_y_pos = header_row_container_jq.offset().top;
-				var header_row_iframe_jq = undefined;
-				var is_close = false;
-				// do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
+				var scroll_to_y_pos = this.scroll_top_return;
+				if(!isNaN(scroll_to_y_pos) && 0 < scroll_to_y_pos) {
+					var header_row_container_jq = this.header_row_container_jq;
+					var is_close = false;
+					do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);	
+				}
 
 				// 부모 정보 업데이트.
 				this.delegate_obj_click_row._apply([this]);
-
 			}
+			, scroll_top_return:0
+			, store_scroll_top_return:function() {
+				// 작업 완료 이후에 돌아갈 스크롤 값을 저장합니다.
+				this.scroll_top_return = $("body").scrollTop();
+
+				// wonder.jung
+				console.log("store_scroll_top_return / this.scroll_top_return :::: ",this.scroll_top_return);
+			}
+
 		};
 
 		var delegate_obj = 
