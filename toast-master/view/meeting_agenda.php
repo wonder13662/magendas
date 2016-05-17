@@ -185,9 +185,10 @@
 
 		<!-- TEST / $service_root_path/images/template_a4_grid_unit_10mm.svg-->
 		<?php
-			//echo "<div class=\"container\"><img src=\"$service_root_path/images/svg/template_a4_grid_unit_10mm.svg\" alt=\"...\" width=\"100%\"/></div>";	
-		echo "<div><img src=\"$service_root_path/images/svg/template_a4_grid_unit_10mm.svg\" alt=\"...\" width=\"100%\"/></div>";	
+		//echo "<div><img src=\"$service_root_path/images/svg/template_a4_grid_unit_10mm.svg\" alt=\"...\" width=\"100%\"/></div>";
 		?>
+
+		<div id="grid_view_container"></div>
 
 
 		<!-- meeting agenda creator modal inits-->

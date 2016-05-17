@@ -11,6 +11,126 @@ airborne.bootstrap.view.print = {
 	, draw_bridge_svg_view:function(target_jq, svg_url) {
 
 		// TODO : mouse event on grid view.
+		console.log("draw_bridge_svg_view / target_jq ::: ",target_jq);
+		console.log("draw_bridge_svg_view / svg_url ::: ",svg_url);
+
+		// 
+		var tag = 
+		"<img src=\"{svg_url}\" alt=\"...\" width=\"100%\"/>"
+		.replace(/\{svg_url\}/gi, svg_url)
+		;
+
+		target_jq.append(tag);
+		var grid_view_jq = target_jq.children().last();
+
+
+		var height_297mm = null;
+		var width_210mm = grid_view_jq.outerWidth();;
+		var square_unit_mm = Math.round(width_210mm/21);;
+
+		var prev_offset_x_pos = 0;
+		var prev_offset_y_pos = 0;
+
+		var prev_x_pos = null;
+		var prev_y_pos = null;
+
+
+		// TEST - Cursor
+		var tag = 
+		"<img src=\"{svg_url}\" alt=\"...\" style=\"position:relative;width:{square_unit_mm}px;\"/>"
+		.replace(/\{svg_url\}/gi, "/service/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		.replace(/\{square_unit_mm\}/gi, square_unit_mm)
+		;
+
+		target_jq.append(tag);
+		var cursor_jq = target_jq.children().last();
+
+
+		var calculate_pos = function(e, self_jq, has_entered) {
+
+			if(square_unit_mm == null) {
+				height_297mm = self_jq.outerHeight();
+				width_210mm = self_jq.outerWidth();
+
+				square_unit_mm = Math.round(width_210mm/21);
+			}
+
+			var cur_x_pos = e.pageX - self_jq.offset().left;
+			if(prev_x_pos == null) {
+				prev_x_pos = cur_x_pos;
+			}
+			var cur_y_pos = e.pageY - self_jq.offset().top;
+			if(prev_y_pos == null) {
+				prev_y_pos = cur_y_pos;
+			}
+
+			var has_changed = false;
+			if((prev_x_pos < cur_x_pos) && ((prev_offset_x_pos + square_unit_mm) < cur_x_pos)) {
+				// move to right
+				prev_x_pos = cur_x_pos;
+				prev_offset_x_pos = Math.round(cur_x_pos/square_unit_mm) * square_unit_mm;
+
+				has_changed = true;
+
+			} else if((cur_x_pos < prev_x_pos) && (cur_x_pos < prev_offset_x_pos)) {
+				// move to left
+				prev_x_pos = cur_x_pos;
+				prev_offset_x_pos = Math.round((cur_x_pos/square_unit_mm) - 1) * square_unit_mm;
+
+				has_changed = true;
+
+			}
+
+			if((prev_y_pos < cur_y_pos) && ((prev_offset_y_pos + square_unit_mm) < cur_y_pos)) {
+				// move to upward
+				prev_y_pos = cur_y_pos;
+				prev_offset_y_pos = Math.round(cur_y_pos/square_unit_mm) * square_unit_mm;
+
+				has_changed = true;
+
+			} else if((cur_y_pos < prev_y_pos) && (cur_y_pos < prev_offset_y_pos)) {
+				// move to downward
+				prev_y_pos = cur_y_pos;
+				prev_offset_y_pos = Math.round((cur_y_pos/square_unit_mm) - 1) * square_unit_mm;
+
+				has_changed = true;
+
+			}
+
+			if(has_changed === true || has_entered === true) {
+				var idx_h = prev_offset_x_pos/square_unit_mm;
+				var idx_v = prev_offset_y_pos/square_unit_mm;
+				console.log("move to left / idx_h ::: {idx_h} / idx_v ::: {idx_v}".replace(/\{idx_h\}/gi, idx_h).replace(/\{idx_v\}/gi, idx_v));
+
+				//{ top: 10, left: 30 }
+				var next_cursor_x_pos = prev_offset_x_pos;
+				var next_cursor_y_pos = (-1*prev_offset_y_pos);
+
+				cursor_jq.offset({ top: next_cursor_y_pos, left: next_cursor_x_pos });
+
+
+			}			
+
+		}
+
+		grid_view_jq.mouseleave(function(e){
+
+			console.log("grid_view_jq.mouseleave!");
+
+		});
+
+		grid_view_jq.mouseenter(function(e){
+
+			console.log("grid_view_jq.mouseenter!");
+			calculate_pos(e, $(this), true);
+
+		});
+
+		grid_view_jq.mousemove(function(e){
+
+			calculate_pos(e, $(this));
+
+		});
 
 	}
 	/*
