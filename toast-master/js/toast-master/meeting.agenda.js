@@ -70,6 +70,7 @@ wonglish.meeting_agenda_manager = {
 		var is_not_editable = (is_editable=="NO")?true:false;
 		var is_log_in_user = meeting_agenda_data_set.is_log_in_user;
 		var login_user_info = meeting_agenda_data_set.login_user_info;
+		var service_root_path = meeting_agenda_data_set.service_root_path;
 
 		// contents - search options
 		var search_option_arr_members = [];
@@ -130,6 +131,13 @@ wonglish.meeting_agenda_manager = {
 
 
 
+
+
+
+		// grid view
+		// var grid_view_container_jq = $("div#grid_view_container");
+		// var grid_view_url = "{service_root_path}/images/svg/template_a4_grid_unit_10mm.svg".replace(/\{service_root_path\}/gi, service_root_path);
+		// _print.draw_bridge_svg_view(grid_view_container_jq, grid_view_url);
 
 
 
@@ -703,9 +711,6 @@ wonglish.meeting_agenda_manager = {
 						console.log("TM NEWS DELETE");
 						console.log("cur_action_obj_for_db_update ::: ",cur_action_obj_for_db_update);
 						cur_action_obj_for_db_update[_param.EVENT_PARAM_EVENT_TYPE] = cur_outcome_obj._event;
-
-						// TEST
-						// return;
 
 						_ajax.send_simple_post(
 							// _url

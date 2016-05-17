@@ -90,10 +90,6 @@ var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var word_obj = <?php echo json_encode($word_obj);?>;
 var quote_obj = <?php echo json_encode($quote_obj);?>;
 
-console.log("membership_obj ::: ",membership_obj);
-console.log("word_obj ::: ",word_obj);
-console.log("quote_obj ::: ",quote_obj);
-
 var is_editable = true;
 var table_jq = $("table tbody#list");
 if(IS_EXTERNAL_SHARE === false) {
@@ -128,16 +124,6 @@ if(IS_EXTERNAL_SHARE === false) {
 
 
 // Body - Content
-console.log(">>> meeting_agenda_obj :: ",meeting_agenda_obj);
-
-
-
-
-
-
-
-
-
 // 1. ROUND
 _m_list.addTableRowTitleNBadge(
 	// title
@@ -291,8 +277,6 @@ _m_list.addTableRowTextInputInline(
 	, meeting_agenda_obj.__theme
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
-
-		console.log("accessor_theme / blur / accessor :: ",accessor);
 
 		var cur_theme = accessor.get();
 		var param_obj = accessor.get_param_obj();
@@ -548,8 +532,6 @@ _m_list.add_table_row_badge_n_iframe(
 				// delegate_func
 				function(data){
 
-					console.log("data ::: ",data);
-
 					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
 					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
 					if( EVENT_PARAM_EVENT_TYPE === _param.IS_SELECT_SPEECH && 
@@ -643,8 +625,6 @@ _m_list.add_table_row_badge_n_iframe(
 	// delegate_obj_row_click
 	, _obj.getDelegate(function(accessor){
 
-		console.log("accessor ::: ",accessor);
-
 		// 스피치의 갯수를 조회해서 화면에 다시 표사합니다.
 		console.log("롤이 업데이트되었습니다. 롤의 갯수를 확인해서 변했다면 바꾸어 줍니다.");
 
@@ -663,8 +643,6 @@ _m_list.add_table_row_badge_n_iframe(
 			,_obj.get_delegate(
 				// delegate_func
 				function(data){
-
-					console.log("data ::: ",data);
 
 					// 롤 변경에 따라 롤 갯수를 바꾸어 줍니다.
 					var EVENT_PARAM_EVENT_TYPE = data.EVENT_PARAM_EVENT_TYPE;
@@ -762,8 +740,6 @@ _m_list.addTableRowTextInputInline(
 	, word_obj.__word
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
-
-		console.log("accessor_word / blur / accessor :: ",accessor);
 
 		var cur_word = accessor.get();
 		var param_obj = accessor.get_param_obj();
@@ -872,8 +848,6 @@ _m_list.addTableRowTextAreaInputInline(
 	, word_obj.__word_desc
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
-
-		console.log("accessor_word_desc / blur / accessor :: ",accessor);
 
 		var cur_word_desc = accessor.get();
 		var param_obj = accessor.get_param_obj();
@@ -987,8 +961,6 @@ _m_list.addTableRowTextAreaInputInline(
 	, quote_obj.__quote_content
 	// delegate_on_blur
 	, _obj.getDelegate(function(accessor){
-
-		console.log("accessor_quote / blur / accessor :: ",accessor);
 
 		var cur_quote = accessor.get();
 		var param_obj = accessor.get_param_obj();

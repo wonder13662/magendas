@@ -14,7 +14,7 @@ class TCPDFManager{
 		$this->service_root_path = $service_root_path;
 	}
 
-	public function show_output($title="example.pdf", $dest="D"){
+	public function show_output($title="example.pdf", $dest="I"){
 
 		// $dest (string) Destination where to send the document. 
 
@@ -76,6 +76,11 @@ class TCPDFManager{
 
 		// set default font / http://www.tcpdf.org/fonts.php
 		$pdf->SetFont($this->default_font, '', 10);
+
+		// test - wonder.jung
+		// remove margins
+		// $tagvs = array('p' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n'=> 0)));
+		// $pdf->setHtmlVSpace($tagvs);
 
 		// add a page
 		$pdf->AddPage();
@@ -4665,18 +4670,16 @@ EOD;
 		return $simple_table_cell_prop_arr; // $simple_table_cell_prop_arr / $simple_table_cell_prop_row_arr
 	}
 
+	public function draw_svg($file="", $x='', $y='', $w=0, $h=0) {
+		// ImageSVG($file, $x='', $y='', $w=0, $h=0, $link='', $align='', $palign='', $border=0, $fitonpage=false)
+		$this->pdf->ImageSVG($file, $x, $y, $w, $h, "", "", "", 0, false);
+	}
 
-	// draw eps type
-	public function draw_eps($file="", $x='', $y='', $w=20, $h=20) {
+	public function draw_html_svg($html_svg="", $x='', $y='', $w=0, $h=0) {
+		// writeHTMLCell($w, $h, $x, $y, $html='', $border=0, $ln=0, $fill=false, $reseth=true, $align='', $autopadding=true) 
 
-$html = <<<EOD
-<img src="$file" alt="test alt attribute" width="$w" height="$h" border="0" style="top:100px;left:100px;position:absolute;"/>
-EOD;
-
-		// Print text using writeHTMLCell()
-		return $this->pdf->writeHTMLCell(200, 200, $x, $y, $html, 0, 1, 0, true, '', true);
-
-	}	
+		$this->pdf->writeHTMLCell($w, $h, $x, $y, $html_svg);
+	}
 }
 
 ?>

@@ -37,15 +37,11 @@ airborne.bootstrap.view.mobile.list = {
 		var time_elapsed_obj = null;
 		target_jq.on("vmousedown", function(e){
 
-			// e.stopPropagation();
-			// e.preventDefault();
-
 			if(is_scrolling){
 				console.log("스크롤 중입니다.");
 
 				if(time_elapsed_obj != undefined) {
 					time_elapsed_obj = _dates.getTimeElapsed(time_elapsed_obj);
-					console.log(">>> time_elapsed_obj :: ",time_elapsed_obj);
 				}
 
 				return;
@@ -65,30 +61,6 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			
 			time_elapsed_obj = _dates.getTimeElapsed();
-
-			// 사용자가 지정한 위치를 눌렀을 때에 이벤트를 설정한 메서드의 델리게이트 함수를 호출합니다.
-			// 이를 통해서 사용자의 뷰 중, 제어할 수 없는 부분을 위임합니다.
-			/*
-			if(_obj.isValidDelegate(delegate_obj)) {
-
-				if(delegate_data == undefined) {
-					delegate_data = {};
-				}
-				delegate_data[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_MOUSE_DOWN;
-				delegate_obj._func.apply(
-					// delegate scope
-					delegate_obj._scope,
-					// delegate params
-					[
-						{
-							target_jq:self_jq
-							, delegate_data:delegate_data
-						}
-					]
-				); // delegate_obj_row ends
-
-			} // if end
-			*/
 
 		});
 
@@ -118,10 +90,6 @@ airborne.bootstrap.view.mobile.list = {
 				is_scrolling = true;
 				initialize_row_look(self_jq);
 			}
-
-			// 인터벌로 3초간 스크롤 위치를 확인합니다. 
-			// 변화가 없다면 scroll stop으로 간주합니다.
-			// $(window).scrollTop();
 
 			var prevScrollTop = $(window).scrollTop();
 			var scrollWatcherInterval = setInterval(function(){
@@ -167,7 +135,8 @@ airborne.bootstrap.view.mobile.list = {
 			// 모바일 웹 환경에서 사용자가 클릭을 했다고 판단하는 기준은 0.5초 이상 홀딩입니다.
 			time_elapsed_obj = _dates.getTimeElapsed(time_elapsed_obj);
 
-			if(time_elapsed_obj != null && time_elapsed_obj.time_diff_millsec > _self.TOUCH_DOWN_HOLDING_MILLI_SEC && !is_scrolling){
+			// if(time_elapsed_obj != null && time_elapsed_obj.time_diff_millsec > _self.TOUCH_DOWN_HOLDING_MILLI_SEC && !is_scrolling){
+			if(time_elapsed_obj != null && !is_scrolling){
 
 				if(_obj.isValidDelegate(delegate_obj)) {
 
@@ -845,7 +814,6 @@ airborne.bootstrap.view.mobile.list = {
 							// 사용자가 첫번째 열을 터치. 누른 상태입니다.
 							// 타이틀의 그림자를 지워줍니다.
 							if(delegate_data.target_jq != undefined) {
-								console.log("타이틀의 그림자를 지워줍니다. / delegate_data :: ",delegate_data);
 								delegate_data.target_jq.find("span").css("text-shadow", "");
 							}
 
@@ -853,7 +821,6 @@ airborne.bootstrap.view.mobile.list = {
 
 							// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
 							// 타이틀의 그림자를 다시 보여줍니다.
-							console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
 							delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
 
 							var __call_url = delegate_data.target_jq.attr("__call_url");
@@ -888,45 +855,8 @@ airborne.bootstrap.view.mobile.list = {
 
 					if (_param.EVENT_MOUSE_UP === delegate_data.delegate_data[_param.EVENT_PARAM_EVENT_TYPE]) {
 
-						console.log("delegate_data ::: ",delegate_data);
-						console.log("header_arr ::: ",header_arr);
-
 						var last_header_obj = header_arr[(header_arr.length-1)];
 						location.href = last_header_obj.__call_url;
-
-						// TEST
-						return;
-
-						/*
-						// 사용자가 첫번째 열을 터치 뒤, 뗀 상태입니다.
-						// 타이틀의 그림자를 다시 보여줍니다.
-						console.log("타이틀의 그림자를 다시 보여줍니다. / icon_arrow_clickable_mask_jq :: ",icon_arrow_clickable_mask_jq);
-						delegate_data.target_jq.find("span").css("text-shadow", text_shadow_style);
-
-						var _event = delegate_data._event;
-						var is_hover = _obj.is_hover(_event, icon_arrow_clickable_mask_jq);
-						if(is_hover === true) {
-
-							// console.log("이전 페이지로 돌아갑니다.");
-							var __call_url = header_arr[1].__call_url;
-							location.href = __call_url;
-
-						} else {
-
-							// console.log("이전 페이지 목록을 보여줍니다.");
-							var self_tag_jq = delegate_data.target_jq;
-							var row_status = self_tag_jq.parent().attr("status");
-
-							var next_row_status = (row_status == "close")?"open":"close";
-							self_tag_jq.parent().attr("status",next_row_status);
-							if(next_row_status == "close"){
-								closeAll();
-							} else {
-								openAll();
-							}
-
-						}
-						*/
 
 					} // if end
 
@@ -1011,7 +941,6 @@ airborne.bootstrap.view.mobile.list = {
 					// delegate_obj
 					, _obj.getDelegate(function(delegate_data){
 						var __call_url = delegate_data.target_jq.attr("__call_url");
-						// console.log(">>> __call_url : ",__call_url);
 						location.href = __call_url;
 					}, this)
 					// bg_color_vmouse_down
@@ -1618,17 +1547,17 @@ airborne.bootstrap.view.mobile.list = {
 				var time_table_arr = this.get_time_table_arr();
 				var timer_btn_jq = this.get_timer_btn_jq();
 				if(time_table_arr[0] <= time_stack_sec && time_stack_sec < time_table_arr[1] && !timer_btn_jq.hasClass("btn-success")) {
-					console.log("GREEN ZONE");
+					// console.log("GREEN ZONE");
 					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
 					timer_btn_jq.addClass("btn-success");
 					timer_btn_jq.css("color", _color.COLOR_WHITE);
 				} else if(time_table_arr[1] <= time_stack_sec && time_stack_sec < time_table_arr[2] && !timer_btn_jq.hasClass("btn-warning")) {
-					console.log("YELLOW ZONE");
+					// console.log("YELLOW ZONE");
 					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
 					timer_btn_jq.addClass("btn-warning");
 					timer_btn_jq.css("color", _color.COLOR_WHITE);
 				} else if(time_table_arr[2] <= time_stack_sec && !timer_btn_jq.hasClass("btn-danger")) {
-					console.log("RED ZONE");
+					// console.log("RED ZONE");
 					timer_btn_jq.removeClass("btn-default btn-success btn-warning btn-danger");
 					timer_btn_jq.addClass("btn-danger");
 					timer_btn_jq.css("color", _color.COLOR_WHITE);
@@ -1636,8 +1565,6 @@ airborne.bootstrap.view.mobile.list = {
 
 			}
 			, start_timer:function() {
-
-				console.log(">>> start_timer");
 
 				this.time_elapsed_obj = _dates.getTimeElapsed(this.time_elapsed_obj, this.get_time_stack_millisec());
 
@@ -2075,10 +2002,12 @@ airborne.bootstrap.view.mobile.list = {
 				this.get_target_jq_arr().hide();
 
 				// REFACTOR ME?
-				var body = $("html, body");
-				body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-				   console.log("Finished animating");
-				});
+				if(this.is_auto_scroll === true) {
+					var body = $("html, body");
+					body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
+					   console.log("Finished animating");
+					});
+				}
 			}
 			, target_jq_arr:header_row_jq_arr
 			, set_target_jq_arr:function(target_jq_arr) {
@@ -2093,6 +2022,13 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			, get_target_jq:function() {
 				return this.target_jq;
+			}
+			, is_auto_scroll:false
+			, on_auto_scroll:function() {
+				this.is_auto_scroll = true;
+			}
+			, off_auto_scroll:function() {
+				this.is_auto_scroll = false;
 			}
 			, toggle_folder:function(delegate_obj, delegate_data, delegate_resize_obj) {
 
@@ -2134,10 +2070,12 @@ airborne.bootstrap.view.mobile.list = {
 					// TODO 선택된 항목은 제외합니다.
 					var cur_offset = delegate_data.target_jq.offset();
 
-					var body = $("html, body");
-					body.stop().animate({scrollTop:cur_offset.top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-					   console.log("Finished animating");
-					});
+					if(this.is_auto_scroll === true) {
+						var body = $("html, body");
+						body.stop().animate({scrollTop:cur_offset.top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
+						   console.log("Finished animating");
+						});
+					}
 
 					var _self = this;
 
@@ -2152,9 +2090,9 @@ airborne.bootstrap.view.mobile.list = {
 							delegate_data_return[_param.SELECTED_KEY] = target_key;
 							delegate_data_return[_param.SELECTED_VALUE] = target_value;
 
-							delegate_obj._func.apply(delegate_obj._scope,[delegate_data_return]);
-
 							_self.hide();
+
+							delegate_obj._func.apply(delegate_obj._scope,[delegate_data_return]);
 
 						},this)
 					);
@@ -2379,8 +2317,6 @@ airborne.bootstrap.view.mobile.list = {
 				return;
 			}
 
-			console.log("add_row_event / textarea_jq ::: ",textarea_jq);
-
 			var accessor = {
 				textarea_jq:textarea_jq
 				, get:function(){
@@ -2393,8 +2329,6 @@ airborne.bootstrap.view.mobile.list = {
 					this.textarea_jq.focus();
 				}
 				, set_height:function(new_height){
-					console.log("set_height / new_height ::: ",new_height);
-					// this.textarea_jq.height(new_height);
 					this.textarea_jq.css("height",new_height + "px");
 				}
 				, accessor_parent:accessor_parent
@@ -2469,7 +2403,6 @@ airborne.bootstrap.view.mobile.list = {
 		var accessor_parent = {
 			children_arr:[]
 			, add_child:function(child_accessor) {
-				console.log("HERE / add_child / child_accessor ::: ",child_accessor);
 				this.children_arr.push(child_accessor);
 			}
 			, get_children:function() {
@@ -2486,7 +2419,6 @@ airborne.bootstrap.view.mobile.list = {
 			var btn_add_jq = input_row_jq.find("button#btn_add");
 			if(btn_add_jq != undefined && btn_add_jq.length > 0) {
 				btn_add_jq.click(function(e){
-					console.log("btn_add_jq // click");
 
 					// 1. 새로운 열을 추가합니다.
 					var new_row_tag = ""
@@ -2644,8 +2576,6 @@ airborne.bootstrap.view.mobile.list = {
 			}
 			, delegate_on_blur:delegate_on_blur
 			, call_event_blur:function(select_input_jq) {
-
-				console.log(">>> call_event_blur / this.is_on :: ",this.is_on);
 
 				if(select_input_jq != undefined) {
 					this.set_target_jq(select_input_jq);
@@ -2995,8 +2925,6 @@ airborne.bootstrap.view.mobile.list = {
 			delegate_on_change._func.apply(delegate_on_change._scope, [accessor]);
 		});
 
-		console.log("datepicker_jq :: ",datepicker_jq);
-
 		var title_tag = "<span style=\"float:left;padding-left:0px;padding-top:7px;font-size:14px;\"><strong>Date</strong></span>";
 		datepicker_jq.before(title_tag);
 
@@ -3115,8 +3043,6 @@ airborne.bootstrap.view.mobile.list = {
 		/*
 	    function sendLink() {
 
-	    	console.log(">>> 001");
-
 			Kakao.Link.sendTalkLink({
 				label: '안녕하세요, 꽃다운 ' + Math.floor(Math.random()*(70)+ 15) + '살 개발자입니다.'
 			});
@@ -3129,11 +3055,8 @@ airborne.bootstrap.view.mobile.list = {
 		var link_jq = share_row_jq.find("a#kakao-link-btn").find("img");
 
 		link_jq.click(function(){
-			console.log(">>> 001");
 			sendLink();
 		});
-
-		console.log(">>> link_jq :: ",link_jq);
 
 		return share_row_jq;
 	}
@@ -3432,8 +3355,12 @@ airborne.bootstrap.view.mobile.list = {
             	}
             	, 500
             	, function() {
+
+            		console.log("do_scroll / Finished animation / 001");
+
     				// Animation complete.
     				if(is_close && header_row_iframe_jq != undefined) {
+    					console.log("do_scroll / Finished animation / 002");
     					header_row_iframe_jq.hide();
     				}
 				}
@@ -3476,7 +3403,7 @@ airborne.bootstrap.view.mobile.list = {
 				var scroll_to_y_pos = header_row_container_jq.offset().top;
 				var header_row_iframe_jq = undefined;
 				var is_close = false;
-				do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
+				// do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
 
 				// 부모 정보 업데이트.
 				this.delegate_obj_click_row._apply([this]);
@@ -3599,8 +3526,6 @@ airborne.bootstrap.view.mobile.list = {
 		toggle_input_jq.change(function(){
 
 			var checked = $(this).prop('checked');
-
-			console.log("here! / checked :: ",checked);
 
 			if(delegate_data == undefined) {
 				delegate_data = {};

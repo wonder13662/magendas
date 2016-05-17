@@ -184,8 +184,6 @@ toast_master.mobile_list_manager = {
 			// delegate_on_click_left_slot
 			, _obj.getDelegate(function(delegate_data){
 
-				console.log(">>> delegate_data :: ",delegate_data);
-
 			}, this)
 		);
 		table_row_slot_obj_arr.push(slot_left_obj);
@@ -199,12 +197,6 @@ toast_master.mobile_list_manager = {
 			, _param
 			.get(_param.REDIRECT_URL, encodeURIComponent(redirect_url_after_log_in))
 		);
-		console.log(">>> redirect_url_after_log_in :: ",redirect_url_after_log_in);
-		console.log(">>> url_log_in :: ",url_log_in);
-
-		//_link
-		console.log(">>> _link :: ",_link);
-
 
 		var log_in_row_jq = 
 		_m_list.addTableRowLogInDoubleSlot(
@@ -593,8 +585,6 @@ toast_master.mobile_list_manager = {
 					// delegate_func
 					function(data){
 
-						console.log(">>> TTM / UPDATE TIME / data ::",data);
-
 					},
 					// delegate_scope
 					this
@@ -730,8 +720,6 @@ toast_master.mobile_list_manager = {
 				// delegate_on_finish
 				, _obj.getDelegate(function(delegate_data){
 
-					console.log(">>> TTM / UPDATE MEMBER / delegate_data ::",delegate_data);
-
 					// 선택한 사용자를 업데이트 합니다.
 					var hasChanged = target_controller.add_meta_data(delegate_data);
 					if(!hasChanged) {
@@ -748,8 +736,6 @@ toast_master.mobile_list_manager = {
 					.get(_param.TIMER_RECORD_ID,meta_data[_param.TIMER_RECORD_ID])
 					;
 
-					console.log(">>> TTM / UPDATE MEMBER / param_obj ::",param_obj);
-
 					// UPDATE
 					_ajax.send_simple_post(
 						// _url
@@ -760,8 +746,6 @@ toast_master.mobile_list_manager = {
 						, _obj.get_delegate(
 							// delegate_func
 							function(data){
-
-								console.log(">>> TTM / UPDATE / data ::",data);
 
 							},
 							// delegate_scope
@@ -793,8 +777,6 @@ toast_master.mobile_list_manager = {
 				, _obj.get_delegate(
 					// delegate_func
 					function(data){
-
-						console.log(">>> TTM / DELETE / data ::",data);
 
 					},
 					// delegate_scope
@@ -835,8 +817,6 @@ toast_master.mobile_list_manager = {
 				, _obj.get_delegate(
 					// delegate_func
 					function(data){
-
-						console.log(">>> TTM / INSERT / data ::",data);
 
 						var timer_record_id = -1;
 						if(	data != undefined && 
@@ -884,8 +864,6 @@ toast_master.mobile_list_manager = {
 				, _obj.get_delegate(
 					// delegate_func
 					function(data){
-
-						console.log(">>> TTM / UPDATE TIME / data ::",data);
 
 					},
 					// delegate_scope
@@ -1046,8 +1024,6 @@ toast_master.mobile_list_manager = {
 			if(_v.isNotValidStr(MEMBER_NAME)) {
 				MEMBER_NAME = _param.NOT_ASSIGNED;
 			}
-
-			console.log(">>> time_arr :: ",time_arr);
 
 			var timer_controller = 
 			_m_list.addTableRowTimer(

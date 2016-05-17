@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="10mm"
+   height="9.999999mm"
+   viewBox="0 0 35.433071 35.433067"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="template_unit_10mm_10mm.svg">
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="15.875047"
+     inkscape:cy="-1.8312109"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1736"
+     inkscape:window-height="1105"
+     inkscape:window-x="2"
+     inkscape:window-y="103"
+     inkscape:window-maximized="0"
+     inkscape:snap-page="true"
+     objecttolerance="20"
+     inkscape:snap-to-guides="true"
+     guidetolerance="10000"
+     gridtolerance="10000"
+     inkscape:snap-perpendicular="true"
+     inkscape:snap-tangential="true"
+     inkscape:snap-global="true"
+     inkscape:snap-grids="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:bbox-paths="true"
+     inkscape:object-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:showpageshadow="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <sodipodi:guide
+       position="0,35.433067"
+       orientation="0,1"
+       id="guide4157" />
+    <sodipodi:guide
+       position="0,35.433067"
+       orientation="1,0"
+       id="guide4159" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid4196"
+       units="mm"
+       spacingx="3.5433071"
+       spacingy="3.5433072"
+       empspacing="10"
+       originx="0"
+       originy="-1016.9291" />
+    <sodipodi:guide
+       position="0,-1012.9291"
+       orientation="1,0"
+       id="guide4200" />
+    <sodipodi:guide
+       position="4,-1016.9291"
+       orientation="0,1"
+       id="guide4202" />
+    <sodipodi:guide
+       position="744.09448,35.433067"
+       orientation="1,0"
+       id="guide4216" />
+    <sodipodi:guide
+       position="106.29921,77.952766"
+       orientation="1,0"
+       id="guide4367" />
+    <sodipodi:guide
+       position="70.866141,67.322866"
+       orientation="1,0"
+       id="guide4371" />
+    <sodipodi:guide
+       position="-24.80315,116.92916"
+       orientation="0,1"
+       id="guide6089" />
+    <sodipodi:guide
+       position="-35.433071,95.669365"
+       orientation="1,0"
+       id="guide6091" />
+    <sodipodi:guide
+       position="-21.259843,81.496066"
+       orientation="0,1"
+       id="guide6093" />
+  </sodipodi:namedview>
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="BG"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline"
+     transform="translate(0,-2.6807222e-5)">
+    <rect
+       style="fill:#c46f71;fill-opacity:1"
+       id="rect6095"
+       width="35.433071"
+       height="35.433067"
+       x="0"
+       y="2.6807222e-05" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="10mm Grid"
+     sodipodi:insensitive="true"
+     transform="translate(0,-2.6807222e-5)" />
+</svg>

@@ -7,6 +7,152 @@ airborne.bootstrap.view.print = {
 	*/
 	PRINT_FORMAT_A4_PORTRAIT:"PRINT_FORMAT_A4_PORTRAIT"
 	, PRINT_FORMAT_A4_LANDSCAPE:"PRINT_FORMAT_A4_LANDSCAPE"
+	// @ Desc : Web View에서 제어한 내용을 PDF에 1:1로 바뀐 내용을 옮기기 위한 브릿지 뷰를 만듭니다.
+	, draw_bridge_svg_view:function(target_jq, svg_url) {
+
+		// TODO : mouse event on grid view.
+		console.log("draw_bridge_svg_view / target_jq ::: ",target_jq);
+		console.log("draw_bridge_svg_view / svg_url ::: ",svg_url);
+
+		// 
+		var tag = 
+		"<img src=\"{svg_url}\" alt=\"...\" width=\"100%\"/>"
+		.replace(/\{svg_url\}/gi, svg_url)
+		;
+
+		target_jq.append(tag);
+		var grid_view_jq = target_jq.children().last();
+
+		var roundup = function(num) {
+			return Math.round(num * 100)/100;
+		}
+
+		var height_297mm = null;
+		var width_210mm = grid_view_jq.outerWidth();;
+		var square_unit_mm = roundup(width_210mm/42);;
+
+		var prev_offset_x_pos = 0;
+		var prev_offset_y_pos = 0;
+
+		var prev_x_pos = null;
+		var prev_y_pos = null;
+
+		var has_event_from_cursor = false;
+
+
+		// TEST - Cursor
+		var tag = 
+		"<img src=\"{svg_url}\" alt=\"...\" style=\"position:relative;width:{square_unit_mm}px;\"/>"
+		// .replace(/\{svg_url\}/gi, "/magendas/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		.replace(/\{svg_url\}/gi, "/service/toast-master/images/svg/template_unit_10mm_10mm.svg")
+		.replace(/\{square_unit_mm\}/gi, square_unit_mm)
+		;
+
+		target_jq.append(tag);
+		var cursor_jq = target_jq.children().last();
+
+
+		var calculate_pos = function(e, self_jq, has_entered) {
+
+			if(height_297mm == null) {
+				height_297mm = self_jq.outerHeight();
+			}
+			if(width_210mm == null) {
+				width_210mm = self_jq.outerWidth();
+			}
+
+			var cur_x_pos = e.pageX - self_jq.offset().left;
+			if(prev_x_pos == null) {
+				prev_x_pos = cur_x_pos;
+			}
+			var cur_y_pos = e.pageY - self_jq.offset().top;
+			if(prev_y_pos == null) {
+				prev_y_pos = cur_y_pos;
+			}
+
+			var has_changed = false;
+			if((prev_x_pos < cur_x_pos) && ((prev_offset_x_pos + square_unit_mm) < cur_x_pos)) {
+				// move to right
+				prev_x_pos = cur_x_pos;
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
+
+				has_changed = true;
+
+			} else if((cur_x_pos < prev_x_pos) && (cur_x_pos < prev_offset_x_pos)) {
+				// move to left
+				prev_x_pos = cur_x_pos;
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
+
+				has_changed = true;
+
+			} else if(has_entered === true) {
+
+				prev_offset_x_pos = roundup(parseInt(cur_x_pos/square_unit_mm) * square_unit_mm);
+
+			}
+
+			if((prev_y_pos < cur_y_pos) && ((prev_offset_y_pos + square_unit_mm) < cur_y_pos)) {
+				// move to upward
+				prev_y_pos = cur_y_pos;
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
+
+				has_changed = true;
+
+			} else if((cur_y_pos < prev_y_pos) && (cur_y_pos < prev_offset_y_pos)) {
+				// move to downward
+				prev_y_pos = cur_y_pos;
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
+
+				has_changed = true;
+
+			} else if(has_entered === true) {
+				
+				prev_offset_y_pos = roundup(parseInt(cur_y_pos/square_unit_mm) * square_unit_mm);
+
+			}
+
+
+			if(has_changed === true || has_entered === true) {
+				var idx_h = roundup(prev_offset_x_pos/square_unit_mm);
+				var idx_v = roundup(prev_offset_y_pos/square_unit_mm);
+				// console.log("moved! / idx_h ::: {idx_h} / idx_v ::: {idx_v}".replace(/\{idx_h\}/gi, idx_h).replace(/\{idx_v\}/gi, idx_v));
+
+				var next_cursor_x_pos = "" + prev_offset_x_pos;
+				var next_cursor_y_pos = "" + roundup(prev_offset_y_pos - height_297mm);
+
+				if(cursor_jq.css("left") != next_cursor_x_pos) {
+					cursor_jq.css("left",next_cursor_x_pos);
+				}
+				if(cursor_jq.css("top") != next_cursor_x_pos) {
+					cursor_jq.css("top",next_cursor_y_pos);
+				}
+				
+			} // end inner if
+
+		} // end outer if
+
+		grid_view_jq.mouseleave(function(e){
+
+			// console.log("grid_view_jq.mouseleave!");
+			// do something - initialize?
+			
+
+		});
+
+		grid_view_jq.mouseenter(function(e){
+
+			// console.log("grid_view_jq.mouseenter!");
+			calculate_pos(e, $(this), true);
+
+		});
+
+		grid_view_jq.mousemove(function(e){
+
+			calculate_pos(e, $(this));
+
+		});
+
+	}
 	/*
 		@ Desc : 인쇄를 위한 그리드 뷰를 그립니다. 인쇄할 용지를 선택할 수 있습니다.
 	*/

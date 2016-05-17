@@ -43,6 +43,14 @@ if(0 < $recent_action_id) {
 }
 
 
+// Agent Check
+$IS_MOBILE = false;
+$user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+if ((strpos($user_agent,'iphone') !== false) || (strpos($user_agent,'android') !== false)) {
+	$IS_MOBILE = true;
+}
+
+
 // @ required
 $wdj_mysql_interface->close();
 
@@ -267,7 +275,14 @@ SAMPLE - POLYGON TEST
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$wdj_pdf->show_output();
+// $dest = "D";
+// if($IS_MOBILE == true) {
+// 	// I: send the file inline to the browser (default). The plug-in is used if available. The name given by name is used when one selects the "Save as" option on the link generating the PDF.
+// 	$dest = "I";
+// }
+$meeting_title = $meeting_agenda_obj->__membership_desc ." " . $meeting_agenda_obj->__startdate . " " . $meeting_agenda_obj->__theme;
+// $wdj_pdf->show_output($meeting_title, $dest);
+$wdj_pdf->show_output($meeting_title);
 
 //============================================================+
 // END OF FILE

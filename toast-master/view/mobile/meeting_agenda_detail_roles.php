@@ -103,9 +103,6 @@ var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
 
-console.log(">>> login_user_info :: ",login_user_info);
-console.log(">>> IS_IFRAME_VIEW :: ",IS_IFRAME_VIEW);
-
 var role_id_toastmaster = <?php echo json_encode($role_id_toastmaster);?>;
 var role_id_general_evaluator = <?php echo json_encode($role_id_general_evaluator);?>;
 var role_id_timer = <?php echo json_encode($role_id_timer);?>;
@@ -136,7 +133,6 @@ var send_height_to_parent = function(IS_IFRAME_VIEW, parent_obj) {
 	var container_height = container.height();
 
 	if(0 < container_height) {
-		console.log("container_height ::: ",container_height);
 		accessor_meeting_role.set_iframe_height(container_height);	
 	}
 
@@ -260,7 +256,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 		send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 		body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-		   console.log("Finished animating");
+			console.log("Finished animating");
 		});
 
 	} else {
@@ -276,7 +272,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 		// REFACTOR ME
 		var body = $("html, body");
 		body.stop().animate({scrollTop:cur_offset.top}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-		   console.log("Finished animating");
+			console.log("Finished animating");
 		});
 
 		// 다른 롤의 멤버 리스트가 될 때마다 role id가 변경되어야 합니다.
@@ -297,8 +293,6 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 				.get(_param.EVENT_PARAM_EVENT_TYPE,_param.IS_UPDATE_TODAY_ROLE)
 				;
 
-				console.log("HERE / param_obj ::: ",param_obj);
-
 				_ajax.send_simple_post(
 					// _url
 					_link.get_link(_link.API_UPDATE_ACTION_TOASTMASTER_ROLE)
@@ -309,8 +303,6 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 						// delegate_func
 						function(data){
 
-							console.log("data ::: ",data);
-							
 							// 역할을 업데이트 했을 경우의 화면 변경.
 							var MEMBER_NAME = data.NEW_ACTION_NAME;
 
@@ -334,7 +326,7 @@ var role_delegate_func = function(delegate_data, row_member_obj) {
 							send_height_to_parent(IS_IFRAME_VIEW, parent);
 
 							body.stop().animate({scrollTop:0}, _m_list.TOUCH_DOWN_HOLDING_MILLI_SEC, 'swing', function() { 
-							   console.log("Finished animating");
+								console.log("Finished animating");
 							});
 
 						},
@@ -394,8 +386,6 @@ var role_idx=0;
 var role_name = "Toast Master"
 var role_member_name = _param.NOT_ASSIGNED;
 var role_obj = today_role_list[role_idx++];
-
-console.log("role_obj ::: ",role_obj);
 
 if(parseInt(role_obj.__member_id) > 0){
 	role_member_name = role_obj.__role_cnt + " " + role_obj.__member_first_name + " " + role_obj.__member_last_name;

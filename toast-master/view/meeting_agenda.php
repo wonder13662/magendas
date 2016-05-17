@@ -171,8 +171,6 @@
 	<!-- nav ends -->
 
 
-
-
 	<!-- meeting agenda container begins -->
 	<div id="meeting_agenda_container" class="container" role="main" data-toggle="modal" data-target="#row_modal">
 
@@ -184,6 +182,14 @@
 		echo "</div>";
 		?>
 		<!-- Membership banner ends -->
+
+		<!-- TEST / $service_root_path/images/template_a4_grid_unit_10mm.svg-->
+		<?php
+		//echo "<div><img src=\"$service_root_path/images/svg/template_a4_grid_unit_10mm.svg\" alt=\"...\" width=\"100%\"/></div>";
+		?>
+
+		<div id="grid_view_container"></div>
+
 
 		<!-- meeting agenda creator modal inits-->
 		<div class="modal fade" id="modal-new-meeting-dialog" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" cur-meeting-id="-1">
@@ -282,6 +288,8 @@
 	<!-- meeting agenda container ends -->
 
 
+
+
 	<!-- officer list container begins -->
 	<div id="officer_list_container" class="container" role="main" data-toggle="modal" data-target="#row_modal">
 	</div>
@@ -339,8 +347,6 @@ if(tm_officer_std != undefined) {
 	tm_officer_action_list = _action.get_action_obj(tm_officer_std);
 }
 
-
-console.log("HERE / XXX");
 
 // 과거의 직전 미팅 정보
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
