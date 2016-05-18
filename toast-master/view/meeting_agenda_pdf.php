@@ -280,7 +280,7 @@ SAMPLE - POLYGON TEST
 // 	// I: send the file inline to the browser (default). The plug-in is used if available. The name given by name is used when one selects the "Save as" option on the link generating the PDF.
 // 	$dest = "I";
 // }
-$meeting_title = $meeting_agenda_obj->__membership_desc ." " . $meeting_agenda_obj->__startdate . " " . $meeting_agenda_obj->__theme;
+$meeting_title = $meeting_agenda_obj->__membership_desc ." " . $meeting_agenda_obj->__startdate . " " . $meeting_agenda_obj->__theme . ".pdf";
 // $wdj_pdf->show_output($meeting_title, $dest);
 $wdj_pdf->show_output($meeting_title);
 
