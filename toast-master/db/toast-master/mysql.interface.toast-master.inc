@@ -11717,7 +11717,7 @@ class MYSQLInterface{
 		$first_name_head_letter = "";
 
 		// 2-1. head letter of first_name / case insensitive
-		$first_name_head_letter = substr($fb_user_first_name,0,1);
+		$first_name_head_letter = substr($fb_user_first_name,0,2);
 		for($idx = 0; $idx < count($member_list); $idx++) {
 
 			$member_obj = $member_list[$idx];
@@ -11727,7 +11727,7 @@ class MYSQLInterface{
 				continue;
 			}
 
-			$__member_first_name_head = substr($__member_first_name,0,1);
+			$__member_first_name_head = substr($__member_first_name,0,2);
 
 			if(strcasecmp($__member_first_name_head, $first_name_head_letter) == 0) {
 				array_push($matched_head_arr, $member_obj);
@@ -11740,7 +11740,7 @@ class MYSQLInterface{
 		$last_name_tail_letter = "";
 
 		// 2-2. head letter of last_name / case insensitive
-		$last_name_tail_letter = substr($fb_user_last_name,0,1);
+		$last_name_tail_letter = substr($fb_user_last_name,0,2);
 		for($idx = 0; $idx < count($member_list); $idx++) {
 
 			$member_obj = $member_list[$idx];
@@ -11750,7 +11750,7 @@ class MYSQLInterface{
 				continue;
 			}
 
-			$__member_last_name_head = substr($__member_last_name,0,1);
+			$__member_last_name_head = substr($__member_last_name,0,2);
 
 			if(strcasecmp($__member_last_name_head, $last_name_head_letter) == 0) {
 				array_push($matched_tail_arr, $member_obj);

@@ -313,9 +313,10 @@ var onLogIn = function() {
 		// 2. email
 		var facebook_user_email = response.email;
 		// 3. first name & last name
+		// 공백 포함된 이름의 처리.
 		var facebook_user_name = response.name;
 		var facebook_user_name_arr = facebook_user_name.split(" ");
-		var facebook_user_first_name = facebook_user_name_arr[0];
+		var facebook_user_first_name = facebook_user_name_arr.slice(0, facebook_user_name_arr.length - 1).join(" ");
 
 		var facebook_user_last_name = "";
 		if(1 < facebook_user_name_arr.length) {
@@ -349,13 +350,42 @@ var onLogIn = function() {
 
 						console.log("add_new_relation_member_n_fb_account / data ::: ",data);
 
-						callback_obj._apply([]);
+						callback_obj._apply([data]);
 
 					},
 					// delegate_scope
 					this
 				)
 			); // ajax done.
+		}
+
+		var add_new_member = function(fb_user_id, fb_user_email, fb_user_first_name, fb_user_last_name, callback_obj){
+
+			_ajax.send_simple_post(
+				// _url
+				_link.get_link(_link.API_DO_TOASTMASTER_LOG_IN)
+				// _param_obj
+				,_param
+				.get(_param.MEETING_MEMBERSHIP_ID, meeting_membership_id)
+				.get(_param.EVENT_PARAM_EVENT_TYPE, _param.IS_MAGENDAS_USER_ADD)
+				.get(_param.FACEBOOK_USER_ID, facebook_user_id)
+				.get(_param.FACEBOOK_USER_EMAIL, facebook_user_email)
+				.get(_param.FACEBOOK_USER_FIRST_NAME, facebook_user_first_name)
+				.get(_param.FACEBOOK_USER_LAST_NAME, facebook_user_last_name)
+
+				// _delegate_after_job_done
+				,_obj.get_delegate(
+					// delegate_func
+					function(data){
+
+						callback_obj._apply([data]);
+
+					},
+					// delegate_scope
+					this
+				)
+			); // ajax done.			
+
 		}
 
 
@@ -393,8 +423,19 @@ var onLogIn = function() {
 
 						var modalJq = $("div.modal");
 
+						// 첫 아이템은 자신과 동일한 이름이 없는 것을 나타냅니다.
+						var member_guess_tag_list = ""
+						+ "<a href=\"#\" class=\"list-group-item\" member_hash_key=\"{member_hash_key}\" fb_id=\"{fb_id}\">"
+							.replace(/\{member_hash_key\}/gi, "")
+							.replace(/\{fb_id\}/gi, data.FACEBOOK_USER_ID)
+							+ "<h5 class=\"list-group-item-heading\">{name}</h5>"
+								.replace(/\{name\}/gi, data.FACEBOOK_USER_FIRST_NAME + " " + data.FACEBOOK_USER_LAST_NAME)
+							+ "<p class=\"list-group-item-text\">{email}</p>"
+								.replace(/\{email\}/gi, data.FACEBOOK_USER_EMAIL)
+						+ "</a>"
+						;
+
 						// 가져온 리스트를 모달에 표시.
-						var member_guess_tag_list = "";
 						for(var idx = 0; idx < data.member_list.length; idx++) {
 							var member_obj = data.member_list[idx];
 
@@ -409,6 +450,8 @@ var onLogIn = function() {
 							;
 						}
 
+
+
 						member_guess_list_container_jq.append(member_guess_tag_list);
 						var member_guess_list_jq = member_guess_list_container_jq.children();
 						member_guess_list_jq.click(function(e){
@@ -416,22 +459,84 @@ var onLogIn = function() {
 							// 사용자가 자신의 유저 정보를 클릭했습니다.
 							var _self = $(this);
 							var member_hash_key = _self.attr("member_hash_key");
+							var fb_id = _self.attr("fb_id");
+
+							console.log("HERE / member_hash_key ::: ",member_hash_key);
+							console.log("HERE / fb_id ::: ",fb_id);
+
+							if(_v.is_not_valid_str(member_hash_key) && _v.is_valid_str(fb_id)) {
+
+								// 자신의 계정이 없습니다. 새로 추가합니다.
+								console.log("자신의 Magendas 계정이 없습니다. 새로 추가합니다.");
+
+								// var add_new_member = function(fb_user_id, fb_user_email, fb_user_first_name, fb_user_last_name, callback_obj){
+
+								add_new_member(
+									// fb_user_id
+									data.FACEBOOK_USER_ID
+									// fb_user_email
+									, data.FACEBOOK_USER_EMAIL
+									// fb_user_first_name
+									, data.FACEBOOK_USER_FIRST_NAME
+									// fb_user_last_name
+									, data.FACEBOOK_USER_LAST_NAME
+									// callback_obj
+									,_obj.get_delegate(
+										// delegate_func
+										function(data){
+
+											console.log("delegate_func / add_new_member / data ::: ",data);
+											var member_n_facebook = data.member_n_facebook;
+											if(	member_n_facebook != null && 
+												_v.is_valid_str(member_n_facebook.__member_hash_key)) {
+
+												// 돌아가려는 페이지로 리다이렉트합니다.
+												console.log("돌아가려는 페이지로 리다이렉트합니다.");
+
+												if(_v.is_not_valid_str(REDIRECT_URL)) {
+													_link.go_there(_link.MEETING_AGENDA);
+												} else {
+													window.location.href = REDIRECT_URL;
+												}
+
+											} else {
+
+												// 유저 추가가 진행되지 않았습니다. 사용자에게 실패 메시지를 보여줍니다.
+												alert("Sorry, Unexpected Error Occurred!");
+
+											}
+
+										},
+										// delegate_scope
+										this
+									)
+								);
+
+							} else {
+
+								// 자신의 계정이 있습니다. FB 계정과 연동합니다.
+								// add a new relation of member & FB Account
+
+								console.log("자신의 Magendas 계정이 있습니다. FB 계정과 연동합니다.");
+
+								/*
+								add_new_relation_member_n_fb_account(
+									member_hash_key
+									, facebook_user_id
+									,_obj.get_delegate(
+										// delegate_func
+										function(data){
+
+											callback_log_in(member_hash_key);
+
+										},
+										// delegate_scope
+										this
+									)								
+								);
+								*/
+							}
 							
-							// add a new relation of member & FB Account
-							add_new_relation_member_n_fb_account(
-								member_hash_key
-								, facebook_user_id
-								,_obj.get_delegate(
-									// delegate_func
-									function(data){
-
-										callback_log_in(member_hash_key);
-
-									},
-									// delegate_scope
-									this
-								)								
-							);
 
 							modalJq.modal("hide");
 
@@ -440,8 +545,12 @@ var onLogIn = function() {
 						modalJq.modal("show");
 
 					} else {
+
 						// Member, FB user가 모두 등록되어 있지 않습니다.
 						console.log("!Error! / Member, FB user가 모두 등록되어 있지 않습니다.");
+
+						// FB에서 가져온 데이터로 새로운 유저를 추가합니다.
+
 					}
 
 					// registered_member

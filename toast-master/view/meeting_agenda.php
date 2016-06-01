@@ -133,7 +133,7 @@
 			"[__ACTIVE_MEETING_AGENDA__]"=>"active"
 			,"[__MEETING_MEMBERSHIP_ID__]"=>$meeting_membership_id
 			,"[__LOG_IN_USER__]"=>$login_user_msg
-			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_out.php?redirect_url=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
+			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_out.php?$params->REDIRECT_URL=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
 			,"[__LOG_IN_STATUS__]"=>$login_status
 			,"[__ROOT_PATH__]"=>$service_root_path
 		);
@@ -148,7 +148,7 @@
 		array(
 			"[__ACTIVE_MEETING_AGENDA__]"=>"active"
 			,"[__MEETING_MEMBERSHIP_ID__]"=>$meeting_membership_id
-			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_in.php?redirect_url=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
+			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_in.php?$params->REDIRECT_URL=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
 			,"[__LOG_IN_STATUS__]"=>$login_status
 			,"[__ROOT_PATH__]"=>$service_root_path
 		);
