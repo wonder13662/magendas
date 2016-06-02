@@ -331,7 +331,7 @@ airborne.bootstrap.obj.__action = {
 
 			}
 			// @ Public
-			// @ Desc : 레이어별로 정리된 액션 객체 배열을 돌려줍니다. 이중 배열을 돌려줍니다.
+			// @ Desc : 레이어 별로 정리된 액션 객체 배열을 돌려줍니다. 이중 배열을 돌려줍니다.
 			,get_action_depth_arr:function() {
 				return this.action_depth_arr;
 			}
