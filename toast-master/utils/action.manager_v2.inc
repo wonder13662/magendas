@@ -18,7 +18,6 @@ class ActionObject implements Action{
 
 	private $parent_action_obj;
 	private $children_action_obj_list;
-	private $action_id;
 	private $action_name;
 	private $action_collection_type;
 	private $action_collection_type_name;
@@ -29,7 +28,6 @@ class ActionObject implements Action{
 	private $action_is_shy;
 	private $coordinate;
 	private $search_map;
-	private $has_changed;
 	private $context;
 
 	public function test() { return 'ActionObject'; }
@@ -113,14 +111,16 @@ class ActionObject implements Action{
 	}
 	public function add_child($child_action_obj, $idx_insert=-1) {
 
-		// DEBUG
-		$cur_name = $this->get_name();
-		$cur_child_name = $child_action_obj->get_name();
 
 		if(ActionObject::is_not_action_obj($child_action_obj)) {
 			echo "!Error! / add_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj)<br/>";
 			return;
 		}
+
+		// DEBUG
+		$cur_name = $this->get_name();
+		$cur_child_name = $child_action_obj->get_name();
+
 
 		if(is_null($this->children_action_object_list)) {
 			$this->children_action_object_list = array();
@@ -131,13 +131,30 @@ class ActionObject implements Action{
 			$child_action_name = $child_action_obj->get_name();
 
 			if(-1 < $idx_insert) {
+				// add child element into the specific index
 				$array_replacement = array($child_action_obj);
 				array_splice( $this->children_action_object_list, $idx_insert, 0, $array_replacement );	
 			} else {
+				// add child element to the last
 				array_push($this->children_action_object_list, $child_action_obj);	
 			}
 
 			$child_action_obj->set_parent($this);
+		}
+
+		// wonder.jung
+		// TODO - sibling idx(첫번째 형제로부터 거리)와 depth idx(부모로 부터 거리)로 id를 만듦.
+		$cur_depth = $this->get_depth();
+		$cur_children_cnt = $this->get_children_cnt();
+		$child_action_hash_key = MD5($cur_child_name + " " + $cur_depth + " " + $cur_children_cnt + " " + date("Y-m-d h:i:sa"));
+		$child_action_obj->set_hash_key($child_action_hash_key);
+
+		if(ActionCollection::is_instance($this) && $this->is_root_collection()) {
+			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
+			// hash_key는 action_name + 현재 시간 으로 만듦
+			$action_hash_key = MD5(date("Ymdhisa") + $cur_name);
+
+			$this->set_hash_key($action_hash_key);
 		}
 
 	}
@@ -299,13 +316,6 @@ class ActionObject implements Action{
 		return $this->action_item_type_name;
 	}
 
-	public function set_id($action_id) {
-		$this->action_id = $action_id;
-	}
-	public function get_id() {
-		return $this->action_id;
-	}
-
 	public function set_hash_key($action_hash_key) {
 		$this->action_hash_key = $action_hash_key;
 	}
@@ -401,7 +411,6 @@ class ActionObject implements Action{
 	public function get_coordinate() {
 		return $this->coordinate;
 	}
-	// TODO 서버에서 검색 매핑 정보를 만들어 주므로 js 단에서는 사라져야 합니다.
 	// $foo->{$start . $end}
 	public function set_search_map($search_map=null) {
 
@@ -415,31 +424,31 @@ class ActionObject implements Action{
 			$search_map = new stdClass();
 		}
 
-		$cur_coordinate = $this->get_coordinate();
-		if(!is_null($cur_coordinate) && !empty($cur_coordinate)) {
-			// echo "$cur_name / set_search_map / \$cur_coordinate :: $cur_coordinate<br/>";
-			$search_map->{$cur_coordinate} = $this;
-		}
 		$cur_hash_key = $this->get_hash_key();
 		if(!is_null($cur_hash_key) && !empty($cur_hash_key)) {
-			// echo "$cur_name / set_search_map / \$cur_hash_key :: $cur_hash_key<br/>";
 			$search_map->{$cur_hash_key} = $this;
-		}		
+		}
 
 		$this->search_map = $search_map;
 	}
 	public function get_search_map() {
 		return $this->search_map;
 	}
-	public function search($coordinate) {
+	public function search($action_hash_key=null) {
+
+		if(empty($action_hash_key)) {
+			echo "!Error! / search / empty(\$action_hash_key)<br/>";
+			return null;
+		}
+
 		if(is_null($this->search_map)) {
 			$this->search_map = new stdClass();
 		}
 		
-		$action_obj_from_search = $this->search_map->{$coordinate};
+		$action_obj_from_search = $this->search_map->{$action_hash_key};
 		$cur_name = $this->get_name();
 		if(is_null($action_obj_from_search)) {
-			echo "$cur_name / search / \$coordinate :: $coordinate is null!<br/>";			
+			echo "$cur_name / search / \$action_hash_key :: $action_hash_key is null!<br/>";			
 			return null;
 		}
 
@@ -467,10 +476,6 @@ class ActionObject implements Action{
 		if(is_null($context_key) || empty($context_key)) {
 			return null;
 		}
-		// REMOVE ME
-		// if(is_null($context_value) || empty($context_value)) {
-		// 	return null;
-		// }
 
 		// DEBUG
 		// $cur_actino_name = $this->get_name();
@@ -527,35 +532,12 @@ class ActionObject implements Action{
 	}
 
 
-	public function has_changed() {
-		if(is_null($this->has_changed)) {
-			$this->has_changed = false;
-		}
-		return $this->has_changed;
-	}
-	public function set_changed($has_changed) {
-
-		if(is_null($has_changed)) {
-			$has_changed = false;
-		}
-
-		$this->has_changed = $has_changed;
-
-		// set_parent_changed
-		$parent_action_obj = $this->get_parent();
-		if($this->has_parent()) {
-			$parent_action_obj->set_changed($has_changed);	
-		}
-	}
-
-
 	public function get_std_obj($std_obj=null) {
 
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();
 		}
 
-		$std_obj->action_id = intval($this->action_id);
 		$std_obj->action_hash_key = $this->action_hash_key;
 		$std_obj->action_order = intval($this->action_order);
 		$std_obj->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
@@ -593,7 +575,6 @@ class ActionObject implements Action{
 				$std_obj_child = $child_action_obj->get_std_obj();
 
 				$std_obj_child_parent = new stdClass();
-				$std_obj_child_parent->action_id = intval($this->action_id);
 				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
 				$std_obj_child_parent->action_order = intval($this->action_order);
 				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
@@ -645,7 +626,6 @@ class ActionObject implements Action{
 		$this->set_hash_key($action_obj->get_hash_key());
 		$this->set_order($action_obj->get_order());
 		$this->set_is_shy($action_obj->get_is_shy());
-		$this->set_changed($action_obj->has_changed());
 
 	}
 
@@ -815,11 +795,6 @@ class ActionObject implements Action{
 	// @ Desc : 자신과 파라미터로 넘어온 action obj가 동일한지 id, hash_key값을 비교해 알려줍니다.
 	public function is_equal($target_action_obj=null) {
 
-		$cur_action_id = $this->get_id();
-		if(is_null($cur_action_id) || $cur_action_id < 1) {
-			return false;
-		}
-
 		$cur_action_hash_key = $this->get_hash_key();
 		if(empty($cur_action_hash_key)) {
 			return false;
@@ -829,18 +804,9 @@ class ActionObject implements Action{
 			return false;
 		}
 
-		$cur_action_id_target = $target_action_obj->get_id();
-		if(is_null($cur_action_id_target) || $cur_action_id_target < 1) {
-			return false;
-		}
-
 		$cur_action_hash_key_target = $target_action_obj->get_hash_key();
 		if(empty($cur_action_hash_key_target)) {
 			return false;
-		}
-
-		if($cur_action_id == $cur_action_id_target) {
-			return true;
 		}
 
 		if(strcmp($cur_action_hash_key, $cur_action_hash_key_target) == 0) {
@@ -1000,7 +966,7 @@ class ActionCollection extends ActionObject{
 		return false;
 	}
 
-	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0, $has_changed=true) {
+	public function ActionCollection($action_name="", $action_collection_type=1, $is_shy=0) {
 		parent::set_name($action_name);
 		parent::set_collection_type($action_collection_type);
 
@@ -1010,43 +976,10 @@ class ActionCollection extends ActionObject{
 			parent::set_collection_type_name(ActionCollection::$ACTION_COLLECTION_TYPE_NAME_TABLE);
 		}
 
-		$this->set_meeting_agenda_id($meeting_agenda_id);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 	}
 
-	private $meeting_agenda_id;
-	public function set_meeting_agenda_id($meeting_agenda_id) {
-		$this->meeting_agenda_id = $meeting_agenda_id;
-	}
-	public function get_meeting_agenda_id() {
-		if(is_null($this->meeting_agenda_id)) {
-			$this->meeting_agenda_id = 0;
-		}
-		return $this->meeting_agenda_id;
-	}
-
-	private $meeting_agenda_theme;
-	public function set_meeting_agenda_theme($meeting_agenda_theme) {
-		$this->meeting_agenda_theme = $meeting_agenda_theme;
-	}
-	public function get_meeting_agenda_theme() {
-		if(is_null($this->meeting_agenda_theme)) {
-			$this->meeting_agenda_theme = "No theme";
-		}
-		return $this->meeting_agenda_theme;
-	}
-
-	private $meeting_agenda_round;
-	public function set_meeting_agenda_round($meeting_agenda_round) {
-		$this->meeting_agenda_round = $meeting_agenda_round;
-	}
-	public function get_meeting_agenda_round() {
-		if(is_null($this->meeting_agenda_round)) {
-			$this->meeting_agenda_round = 0;
-		}
-		return $this->meeting_agenda_round;
-	}
+	// REMOVE ME?
 
 	public static $ACTION_COLLECTION_TYPE_LIST=1; 		// ActionCollection::$ACTION_COLLECTION_TYPE_LIST
 	public static $ACTION_COLLECTION_TYPE_TABLE=2;		// ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
@@ -1206,9 +1139,6 @@ class ActionCollection extends ActionObject{
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();	
 		}
-		$std_obj->meeting_agenda_id = intval($this->meeting_agenda_id);
-		$std_obj->meeting_agenda_theme = $this->meeting_agenda_theme;
-		$std_obj->meeting_agenda_round = intval($this->meeting_agenda_round);
 
 		return parent::get_std_obj($std_obj);
 	}
@@ -1223,9 +1153,6 @@ class ActionCollection extends ActionObject{
 			return;
 		}
 
-		$this->set_meeting_agenda_id($action_collection_obj->get_meeting_agenda_id());
-		$this->set_meeting_agenda_theme($action_collection_obj->get_meeting_agenda_theme());
-		$this->set_meeting_agenda_round($action_collection_obj->get_meeting_agenda_round());
 		parent::inject($action_collection_obj);
 	}
 
@@ -1286,11 +1213,10 @@ class ActionCollection extends ActionObject{
 
 class ActionItem extends ActionObject{
 
-	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=true) {
+	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
 		parent::set_name($action_name);
 		parent::set_item_type($action_item_type);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 	}
 
 	/*
@@ -1509,11 +1435,6 @@ class ActionItem extends ActionObject{
 		return "";
 	}
 	
-	// @ Override
-	public function get_meeting_agenda_id() {
-		return -1;
-	}
-
 	// @ Override
 	public function set_coordinate($coordinate=null, $search_map=null) {
 		return parent::set_coordinate($coordinate, $search_map);
@@ -1757,12 +1678,11 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return $time_seconds;
 	}
 
-	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0, $has_changed=true) {
+	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0) {
 
 		parent::set_name($action_name);
 		parent::set_item_type(ActionItem::$TITLE_N_TIME_HH_MM);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 
 		$time_sec_initial = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_init);
 		$time_sec_specific = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_specific);
@@ -1879,10 +1799,6 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return $context_time_hh_mm;
 	}
 
-	// @ Override
-	public function get_meeting_agenda_id() {
-		return parent::get_meeting_agenda_id();
-	}
 
 	// @ Override
 	public function set_coordinate($coordinate=null, $search_map=null) {

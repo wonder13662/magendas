@@ -15,7 +15,13 @@ include_once(__DIR__."/db/config/mysql.config.inc");
 include_once(__DIR__."/db/toast-master/mysql.interface.toast-master.inc");
 include_once(__DIR__."/utils/mysql.manager.inc");
 include_once(__DIR__."/utils/mysql.query.manager.inc");
-include_once(__DIR__."/utils/action.manager.inc");
+
+include_once(__DIR__."/utils/time.manager.inc");
+include_once(__DIR__."/utils/validation.manager.inc");
+
+include_once(__DIR__."/utils/action.file.manager.inc");
+// include_once(__DIR__."/utils/action.manager.inc");
+include_once(__DIR__."/utils/action.manager_v2.inc");	// TEST
 include_once(__DIR__."/utils/action.template.manager.inc");
 
 // @ requried - DB Setting
@@ -29,6 +35,9 @@ $params = new ToastmasterParamManager();
 //$path_arr = (explode("/",__DIR__));
 $path_arr = (explode("/",$_SERVER['REQUEST_URI']));
 $service_root_path = "/" . $path_arr[1] . "/" . $path_arr[2];
+
+// @ required - Action File Manager Setting
+ActionFileManager::set_service_root_path($service_root_path);
 
 // get full file path
 $file_root_path = __DIR__;
