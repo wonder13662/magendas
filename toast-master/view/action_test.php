@@ -9,6 +9,8 @@
 	// echo "\$cur_hash_key :: $cur_hash_key<br/>";
 	// ActionFileManager::save("2016-06-03", $action_obj);
 
+	// 파일이 처음으로 만들어지는 날짜?
+
 	// TEST - LOAD
 	$target_YYYYMMDD = "2016-06-03";
 	// $target_hash_key = "2b5033aaa9b7dc03a4138f4082e4cee9"; // OFFICER TABLE

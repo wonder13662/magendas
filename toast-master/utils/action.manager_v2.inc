@@ -1,5 +1,6 @@
 <?php
 
+
 interface Action {
 
 	public function set_parent($parent_action_obj);
@@ -12,9 +13,71 @@ interface Action {
 
 class ActionObject implements Action{
 
-	// TODO - ActionObject에 id를 추가로 만들수 있는 기능을 제공해야 합니다.
+	// ActionObject::$COLLECTION_TYPE_LIST
+	public static $COLLECTION_TYPE_LIST=1;
+	public static $COLLECTION_TYPE_TABLE=2;
 
-	// 객체 내에서의 변화로 DB 업데이트를 진행합니다.
+	public static $ITEM_TYPE_TITLE_ONLY=1;
+	public static $ITEM_TYPE_TITLE_N_TIME_HH_MM=2;
+	public static $ITEM_TYPE_TITLE_N_TIME_MM_SS=3;
+	public static $ITEM_TYPE_SELECT_BOX=4;
+	public static $ITEM_TYPE_TITLE_ONLY_FIXED=5;
+	public static $ITEM_TYPE_TITLE_ONLY_ADDABLE=6;
+	public static $ITEM_TYPE_SELECT_BOX_ADDABLE=7;
+
+	public static function _IS_LIST($collection_type=-1) {
+		return (ActionObject::$COLLECTION_TYPE_LIST == $collection_type)?true:false;
+	}
+	public static function _IS_TABLE($collection_type=-1) {
+		return (ActionObject::$COLLECTION_TYPE_TABLE == $collection_type)?true:false;
+	}
+	public static function _IS_COLLECTION($collection_type=-1) {
+		return (ActionObject::_IS_LIST($collection_type) || ActionObject::_IS_TABLE($collection_type));
+	}
+
+	public static function _IS_TITLE_ONLY($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_N_TIME_HH_MM($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_N_TIME_HH_MM == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_N_TIME_MM_SS($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_N_TIME_MM_SS == $item_type)?true:false;
+	}
+	public static function _IS_SELECT_BOX($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_ONLY_FIXED($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY_FIXED == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_ONLY_ADDABLE($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY_ADDABLE == $item_type)?true:false;
+	}
+	public static function _IS_SELECT_BOX_ADDABLE($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX_ADDABLE == $item_type)?true:false;
+	}
+	public static function _IS_ITEM($item_type=-1) {
+
+		if(ActionObject::_IS_TITLE_ONLY($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_N_TIME_HH_MM($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_N_TIME_MM_SS($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_ONLY_FIXED($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_ONLY_ADDABLE($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX_ADDABLE($item_type)) {
+			return true;
+		}
+
+		return false;
+	}
+
+
 
 	private $parent_action_obj;
 	private $children_action_obj_list;
@@ -24,7 +87,7 @@ class ActionObject implements Action{
 	private $action_item_type;
 	private $action_item_type_name;
 	private $action_hash_key;
-	private $action_order;
+	// private $action_order; // REMOVE ME
 	private $action_is_shy;
 	private $coordinate;
 	private $search_map;
@@ -142,14 +205,18 @@ class ActionObject implements Action{
 			$child_action_obj->set_parent($this);
 		}
 
-		// wonder.jung
-		// TODO - sibling idx(첫번째 형제로부터 거리)와 depth idx(부모로 부터 거리)로 id를 만듦.
-		$cur_depth = $this->get_depth();
-		$cur_children_cnt = $this->get_children_cnt();
-		$child_action_hash_key = MD5($cur_child_name + " " + $cur_depth + " " + $cur_children_cnt + " " + date("Y-m-d h:i:sa"));
-		$child_action_obj->set_hash_key($child_action_hash_key);
+		// Set Hash key
+		if(empty($child_action_obj->get_hash_key())) {
+			$cur_depth = $this->get_depth();
+			$cur_children_cnt = $this->get_children_cnt();
+			$child_action_hash_key = MD5($cur_child_name + " " + $cur_depth + " " + $cur_children_cnt + " " + date("Y-m-d h:i:sa"));
+			$child_action_obj->set_hash_key($child_action_hash_key);
+		}
 
-		if(ActionCollection::is_instance($this) && $this->is_root_collection()) {
+		if( ActionCollection::is_instance($this) && 
+			$this->is_root_collection() && 
+			empty($this->get_hash_key())) {
+
 			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
 			// hash_key는 action_name + 현재 시간 으로 만듦
 			$action_hash_key = MD5(date("Ymdhisa") + $cur_name);
@@ -323,6 +390,8 @@ class ActionObject implements Action{
 		return $this->action_hash_key;
 	}
 
+	// REMOVE ME
+	/*
 	public function set_order($action_order) {
 		$this->action_order = $action_order;
 	}
@@ -332,6 +401,7 @@ class ActionObject implements Action{
 		}
 		return $this->action_order;
 	}
+	*/
 
 	public function set_is_shy($action_is_shy) {
 		$this->action_is_shy = $action_is_shy;
@@ -539,7 +609,7 @@ class ActionObject implements Action{
 		}
 
 		$std_obj->action_hash_key = $this->action_hash_key;
-		$std_obj->action_order = intval($this->action_order);
+		// $std_obj->action_order = intval($this->action_order); // REMOVE ME
 		$std_obj->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 		$std_obj->action_name = $this->action_name;
 		$std_obj->action_collection_type = intval($this->action_collection_type);
@@ -576,7 +646,7 @@ class ActionObject implements Action{
 
 				$std_obj_child_parent = new stdClass();
 				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
-				$std_obj_child_parent->action_order = intval($this->action_order);
+				// $std_obj_child_parent->action_order = intval($this->action_order); // REMOVE ME
 				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 				$std_obj_child_parent->action_name = $this->action_name;
 				
@@ -624,7 +694,7 @@ class ActionObject implements Action{
 		$this->set_context($action_obj->get_context());
 
 		$this->set_hash_key($action_obj->get_hash_key());
-		$this->set_order($action_obj->get_order());
+		// $this->set_order($action_obj->get_order()); // REMOVE ME
 		$this->set_is_shy($action_obj->get_is_shy());
 
 	}
@@ -946,6 +1016,242 @@ class ActionObject implements Action{
 
 		return $depth;
 	}
+
+	// @ desc : action std 와 action obj간의 데이터 일치성 확인. recursive check. 
+	// @ Usage : ActionObject::compare_with_std($action_obj, $action_std);
+	public static function compare_with_std($action_obj=null, $action_std=null) {
+
+		echo "!!HERE!!<br/>";
+
+		// check validation of 2 objects.
+		if(ActionObject::is_not_action_obj($action_obj)) {
+			echo "!Error! / compare_with_std / ActionObject::is_not_action_obj(\$action_obj)<br/>";
+			return false;
+		} 
+		if(is_null($action_std)) {
+			echo "!Error! / compare_with_std / is_null(\$action_std)<br/>";
+			return false;
+		}
+
+		// wonder.jung
+
+		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
+
+			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
+				$hash_key = $action_obj->get_hash_key();
+				echo "col / false : \$hash_key : $hash_key<br/>";
+				return false;
+			}
+			if($action_obj->get_collection_type() != intval($action_std->action_collection_type)) {
+				$collection_type = $action_obj->get_collection_type();
+				echo "col / false : \$collection_type : $collection_type<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_collection_type_name(),$action_std->action_collection_type_name) != 0) {
+				$collection_type_name = $action_obj->get_collection_type_name();
+				echo "col / false : \$collection_type_name : $collection_type_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_name(),$action_std->action_name) != 0) {
+				$cur_name = $action_obj->get_name();
+				echo "col / false : \$cur_name : $cur_name<br/>";
+				return false;
+			}
+			if($action_obj->get_is_shy() != $action_std->action_is_shy) {
+				$is_shy = $action_obj->get_is_shy();
+				echo "col / false : \$is_shy : $is_shy<br/>";
+				return false;
+			}
+
+			// treat children
+			$children_action_std_list = $action_std->children_action_object_list;
+
+			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
+				echo "col / false : children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = $action_obj->get_child($idx);
+
+				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+			}
+
+		} else if(ActionObject::_IS_ITEM($action_std->action_item_type)) {
+
+			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
+				$hash_key = $action_obj->get_hash_key();
+				echo "item / false : \$hash_key : $hash_key<br/>";
+				return false;
+			}
+			if($action_obj->get_item_type() != intval($action_std->action_item_type)) {
+				$item_type = $action_obj->get_item_type();
+				echo "item / false : \$item_type : $item_type<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_item_type_name(),$action_std->action_item_type_name) != 0) {
+				$item_type_name = $action_obj->get_item_type_name();
+				echo "item / false : \$item_type_name : $item_type_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_name(),$action_std->action_name) != 0) {
+				$cur_name = $action_obj->get_name();
+				echo "item / false : \$cur_name : $cur_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_context(),$action_std->context) != 0) {
+				$cur_context = $action_obj->get_context();
+				echo "item / false : \$cur_context : $cur_context<br/>";
+				return false;
+			}
+			if($action_obj->get_is_shy() != $action_std->action_is_shy) {
+				$cur_is_shy = $action_obj->get_is_shy();
+				echo "item / false : \$cur_is_shy : $cur_is_shy<br/>";
+				return false;
+			}
+
+			// treat children
+			// children_action_object_list - wonder.jung / TODO
+
+			$children_action_std_list = $action_std->children_action_object_list;
+
+			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
+				echo "item / false : children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = $action_obj->get_child($idx);
+
+				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+
+			}
+
+			// treat add on children
+			// add_on_action_object_list
+
+			$add_on_action_std_list = $action_std->add_on_action_object_list;
+			$cur_add_on_list = $action_obj->get_add_on_list();
+
+			if(count($cur_add_on_list) != count($add_on_action_std_list)) {
+				echo "item / false : add on children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($add_on_action_std_list); $idx++) {
+
+				$add_on_children_action_std = $add_on_action_std_list[$idx];
+				$add_on_children_action_obj = $cur_add_on_list[$idx];
+
+				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+
+			} // end for
+
+		} // end if
+
+		return true;
+
+	}
+
+
+	// @ desc : action std --> action obj로 변경 / ActionObject::convert($action_std);
+	public static function convert($action_std) {
+
+		// 1. 파라미터로 가져온 객체를 root 객체로 가정, action obj로 바꾸는 작업을 진행합니다.
+
+		// 1-1. type check
+		// 1-1-1. prop
+		// A.action_collection_type
+		// B.action_item_type
+
+		// 1-2. 자신의 데이터로 action obj를 만듭니다.
+		$action_obj = null;
+		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
+
+			// get_action_table_object
+			// property는 list와 table이 동일
+
+			$action_obj = new ActionCollection();
+			$action_obj->set_hash_key($action_std->action_hash_key);
+			$action_obj->set_collection_type(intval($action_std->action_collection_type));
+			$action_obj->set_collection_type_name($action_std->action_collection_type_name);
+			$action_obj->set_name($action_std->action_name);
+			$action_obj->set_is_shy($action_std->action_is_shy);
+
+			// treat children
+			$children_action_std_list = $action_std->children_action_object_list;
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = ActionObject::convert($children_action_std);
+
+				$action_obj->add_child($children_action_obj);
+			}
+
+		} else if(ActionObject::_IS_ITEM($action_std->action_item_type)) {
+
+			//  property
+			if(ActionObject::_IS_TITLE_N_TIME_HH_MM($action_std->action_item_type)) {
+				$action_obj = new ActionItemTitleNTimeHHMM();
+			} else {
+				$action_obj = new ActionItem();
+			}
+
+			$action_obj->set_hash_key($action_std->action_hash_key);
+			$action_obj->set_item_type(intval($action_std->action_item_type));
+
+			$action_obj->set_item_type_name($action_std->action_item_type_name);
+			$action_obj->set_name($action_std->action_name);
+
+			$action_obj->set_context($action_std->context);
+			$action_obj->set_is_shy($action_std->action_is_shy);
+
+
+			// treat children
+			// children_action_object_list - wonder.jung / TODO
+
+			$children_action_std_list = $action_std->children_action_object_list;
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = ActionObject::convert($children_action_std);
+
+				$action_obj->add_child($children_action_obj);
+			}
+
+
+			// treat add on children
+			// add_on_action_object_list
+
+			$add_on_action_std_list = $action_std->add_on_action_object_list;
+			for($idx = 0; $idx < count($add_on_action_std_list); $idx++) {
+
+				$add_on_children_action_std = $add_on_action_std_list[$idx];
+				$add_on_children_action_obj = ActionObject::convert($add_on_children_action_std);
+
+				$action_obj->push_add_on($add_on_children_action_obj);
+			} // end for
+		} // end if
+
+		return $action_obj;
+
+	} // end function 
 
 }
 

@@ -83,11 +83,8 @@
 
 	// TEMPLATE
 	// 템플릿을 적용합니다.
+	$action_obj = null;
 	if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_BUNDANG) == 0) {
-
-
-
-
 
 		// CHECK VALIDATION - INIT
 		if(empty($ACTION_BEGIN_HH_MM)) {
@@ -102,38 +99,10 @@
 		}
 		// CHECK VALIDATION - END
 
-
-
-
-
 		// 기본 템플릿 적용
-		$action_obj_BDTM = ActionTemplate::get_BDTM($wdj_mysql_interface, $ACTION_BEGIN_HH_MM, $MEETING_ID, $ACTION_NAME);
-		$root_action_obj = $wdj_mysql_interface->add_action($action_obj_BDTM);
-		if(ActionCollection::is_not_instance($root_action_obj)) {
-			$result->error = "ActionCollection::is_not_instance(\$root_action_obj)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-
-		}
-
-		// DEBUG / 업데이트된 root_action_list를 가져옵니다.
-		$root_action_obj = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($MEETING_ID);
-		if(ActionCollection::is_not_instance($root_action_obj)) {
-			$result->error = "ActionCollection::is_not_instance(\$root_action_obj)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-
-		}
-		$result->root_action_obj_std = $root_action_obj->get_std_obj();
-
-
+		$action_obj = ActionTemplate::get_TM_Default($ACTION_BEGIN_HH_MM, $ACTION_NAME);
 
 	} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_PREV_MEETING) == 0) {
-
-
-
-
-
 
 		// CHECK VALIDATION - INIT
 		if($wdj_mysql_interface->is_not_unsigned_number(__FUNCTION__, $MEETING_ID_SRC)){
@@ -143,38 +112,38 @@
 		}
 		// CHECK VALIDATION - END
 
-
-
-
-
-
 		// 직전 미팅 템플릿 적용
 		// 1. 직전 미팅 템플릿 정보를 가져온다.
-		$recent_action_id = $wdj_mysql_interface->select_recent_action_id_collection_by_meeting_id($MEETING_ID_SRC);
-		
-		$recent_root_action_collection = null;
-		if(0 < $recent_action_id) {
-			$recent_root_action_collection = $wdj_mysql_interface->get_root_action_collection_toastmasters($recent_action_id, $MEETING_ID_SRC);	
-		}
+		$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
 
-		$root_action_collection_copy = null;
-		if(!is_null($recent_root_action_collection)) {
-			$root_action_collection_copy = $wdj_mysql_interface->add_action($recent_root_action_collection);
-		}
-		if(!is_null($root_action_collection_copy) && ($root_action_collection_copy->get_id() != $recent_action_id)) {
-
-			$root_action_collection_copy_id = $root_action_collection_copy->get_id();
-			$result->root_action_collection_copy_id = $root_action_collection_copy_id;
-
-		}
+		$action_file_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);
+		$action_obj = json_decode($action_file_json_str);
 
 	} // end inner if
 
-	// SPEECH, ROLE에 대한 정보가 DB에 있다면 업데이트해줍니다.
-	$action_collection_obj_updated = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($MEETING_ID);
-	if(!is_null($root_action_collection_copy)) {
-		$result->root_action_collection_updated = $action_collection_obj_updated->get_std_obj();	
+	$action_file_info = null;
+	if(!is_null($action_obj)) {
+
+		// 가져온 템플릿을 파일로 저장합니다.
+		$YYYYMMDD = date("Y-m-d");
+		$cur_action_file_path = ActionFileManager::save($YYYYMMDD, $action_obj);
+
+		// DB에 저장
+		$cur_action_hash_key = $action_obj->get_hash_key();
+		$wdj_mysql_interface->insert_action_file_path($cur_action_hash_key, $MEETING_ID, $YYYYMMDD);
+
+		// CHECK - 저장한 파일에서 json str을 가져옵니다.
+		$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
+		$result->action_file_info = $action_file_info;
+
 	}
+	if(!is_null($action_file_info)) {
+
+		$action_file_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);
+		$result->action_file_json_str = $action_file_json_str;
+
+	}
+
 
 	// FIN
 	terminate($wdj_mysql_interface, $result);

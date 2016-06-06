@@ -68,36 +68,30 @@
 	
 	
 
-	/*
-	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
-	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
-	$action_collection_obj_immediate_past = null;
-	if($has_immediate_past_action_collection) {
 
-		// 최근의 ACTION COLLECTION이 있습니다.
-		$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
-		$action_collection_obj_immediate_past_std = null;
-		$meeting_obj_immediate_past = null;
-		if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
-			$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
-			$MEETING_ID_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
-			$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID_immediate_past);
-		}
-	}
 
-	// 화면에 표시할 action list.
-	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($MEETING_ID);
+
+
+
+	$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
 	$meeting_action_list_std = null;
-	if(ActionCollection::is_instance($action_collection_obj_recent)) {
-		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
+	if(!is_null($action_file_info)) {
+
+		$__action_hash_key = $action_file_info->__action_hash_key;
+		$__action_regdate = $action_file_info->__action_regdate;
+
+		$action_content = ActionFileManager::load($__action_regdate, $__action_hash_key);
+		$meeting_action_list_std = json_decode($action_content);
+
 	}
 
-	$tm_officer_table_obj = $wdj_mysql_interface->get_toastmaster_officer_by_meeting_id($meeting_membership_id);
-	$tm_officer_std = null;
-	if(ActionCollection::is_instance($tm_officer_table_obj)) {
-		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
-	}
-	*/
+
+
+
+
+
+
+
 
 	// @ required
 	$wdj_mysql_interface->close();

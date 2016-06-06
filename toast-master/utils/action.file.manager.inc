@@ -63,7 +63,7 @@ class ActionFileManager{
 		return 	$file_path;
 	}
 
-	//ActionFileManager::load
+	// ActionFileManager::load
 	public static function load($YYYYMMDD = null, $action_hash_key = null) {
 
 		if(empty($YYYYMMDD)) {
@@ -97,6 +97,7 @@ class ActionFileManager{
 		return $content;
 	}
 
+	// ActionFileManager::save($YYYYMMDD = null, $target_action_obj = null)
 	public static function save($YYYYMMDD = null, $target_action_obj = null){
 
 		if(empty($YYYYMMDD)) {

@@ -111,23 +111,13 @@ airborne.bootstrap.obj.__action = {
 			console.log("!Error! / is_valid_action_data_obj / action_data_obj == undefined");
 			return false;
 		}
-		if(_v.is_not_unsigned_number(action_data_obj.action_id)) {
-			console.log("!Error! / is_valid_action_data_obj / _v.is_not_unsigned_number(action_data_obj.action_id)");
-			return false;
-		}
 		if(_v.is_not_valid_str(action_data_obj.action_name)) {
 			console.log("!Error! / is_valid_action_data_obj / _v.is_not_valid_str(action_data_obj.action_name)");
 			return false;
 		}
 
-		// REMOVE ME
-
-		// if(_v.is_not_valid_str(action_data_obj.action_hash_key)) {
-		// 	console.log("!Error! / is_valid_action_data_obj / _v.is_not_valid_str(action_data_obj.action_hash_key)");
-		// 	return false;
-		// }
-
 		return true;
+		
 	}
 	,is_not_valid_action_item_obj:function(action_item_obj){
 		return !this.is_valid_action_item_obj(action_item_obj);
@@ -2072,8 +2062,6 @@ airborne.bootstrap.obj.__action = {
 
 						var cur_column_child_action_list_field_child_action_item_obj = cur_column_child_action_list_obj.get_child(idx_row);
 						if(_action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj)) {
-
-							// wonder.jung - action type의 이슈가 발생.
 
 							console.log("!Error! / get_table_action_item_obj_list / _action.is_not_valid_action_item_obj(cur_column_child_action_list_field_child_action_item_obj) / idx_row ::: ",idx_row);
 							console.log("!Error! / get_table_action_item_obj_list / action id ::: ",cur_column_child_action_list_field_child_action_item_obj.get_action_id());
@@ -4756,6 +4744,8 @@ airborne.bootstrap.obj.__action = {
 
 					this.show_input_mode_default(event_mode);
 
+					console.log("그 외의 상황 / event_mode ::: ",event_mode);
+
 					// set event on input buttons	
 					this.set_event_btn_ok_on_input_group(event_mode);
 					this.set_event_btn_cancel_on_input_group(event_mode);
@@ -4954,7 +4944,10 @@ airborne.bootstrap.obj.__action = {
 
 					event_manager_after.show_focusing_mode();
 
+					// wonder.jung - 타입을 변경하게 되면, INSERT_TYPE으로 해야 될 것 같은데, 현재는 UPDATE_TYPE
 					var event_mode = _obj.EVENT_TYPE_UPDATE_ITEM;
+					// var event_mode = _obj.EVENT_TYPE_ADD_ROW;
+					// var event_mode = _obj.EVENT_TYPE_INSERT_ITEM;
 
 					event_manager_after.show_input_mode(event_mode);
 					// 새로 추가된 열은 빈 텍스트로 시작합니다.
@@ -4993,7 +4986,7 @@ airborne.bootstrap.obj.__action = {
 					this.show_btn_time_minus();
 					this.show_title_input_btn_ok_jq();
 
-					// SET EVENT - wonder.jung
+					// SET EVENT
 					this.set_event_time_btns();
 					this.show_child();
 					
@@ -5928,12 +5921,14 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
+				// wonder.jung
+
 				var _self = this;
 				var do_on_event = function(e, event_type) {
 					// 이벤트 전파를 막습니다.
 					e.stopPropagation();
 
-					console.log("set_event_btn_ok_on_input_group / do_on_event /cur_action_item_obj ::: ",cur_action_item_obj);
+					console.log("do_on_event / event_type ::: ",event_type);
 
 					// 입력된 텍스트 내용을 검사합니다.
 					var cur_title_input_jq_value = _self.get_title_input_jq_value();
@@ -6015,6 +6010,7 @@ airborne.bootstrap.obj.__action = {
 
 				var is_force_change = true;
 				this.set_btn_event_color(cur_title_input_btn_ok_jq, is_force_change);
+				cur_title_input_btn_ok_jq.off();
 				cur_title_input_btn_ok_jq.click(function(e){
 					do_on_event(e, cur_event_type);
 				});
@@ -6174,7 +6170,6 @@ airborne.bootstrap.obj.__action = {
 					}
 
 					_self.hide_all();
-					// wonder.jung - 자식 객체가 있다면 보여줘야 합니다.
 					_self.show_view_mode();
 					_self.release();
 

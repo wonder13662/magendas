@@ -1443,30 +1443,6 @@ class ActionTemplate{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public static function get_TM_Default($hh_mm_begins="", $root_action_obj_name="") {
 
 		if(TimeManager::is_not_valid_time_format_hh24_mm($hh_mm_begins)) {
