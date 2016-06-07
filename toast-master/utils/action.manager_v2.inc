@@ -13,6 +13,11 @@ interface Action {
 
 class ActionObject implements Action{
 
+	private static $AUTO_INCREMENT_IDX=0;
+	public static function GET_NEXT_IDX() { //ActionObject::GET_NEXT_IDX();
+		return ActionObject::$AUTO_INCREMENT_IDX++;
+	}
+
 	// ActionObject::$COLLECTION_TYPE_LIST
 	public static $COLLECTION_TYPE_LIST=1;
 	public static $COLLECTION_TYPE_TABLE=2;
@@ -30,7 +35,7 @@ class ActionObject implements Action{
 	}
 	public static function _IS_TABLE($collection_type=-1) {
 		return (ActionObject::$COLLECTION_TYPE_TABLE == $collection_type)?true:false;
-	}
+	} // ActionObject::_IS_COLLECTION
 	public static function _IS_COLLECTION($collection_type=-1) {
 		return (ActionObject::_IS_LIST($collection_type) || ActionObject::_IS_TABLE($collection_type));
 	}
@@ -207,9 +212,9 @@ class ActionObject implements Action{
 
 		// Set Hash key
 		if(empty($child_action_obj->get_hash_key())) {
-			$cur_depth = $this->get_depth();
-			$cur_children_cnt = $this->get_children_cnt();
-			$child_action_hash_key = MD5($cur_child_name + " " + $cur_depth + " " + $cur_children_cnt + " " + date("Y-m-d h:i:sa"));
+
+			$next_idx = ActionObject::GET_NEXT_IDX();
+			$child_action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
 			$child_action_obj->set_hash_key($child_action_hash_key);
 		}
 
@@ -219,7 +224,8 @@ class ActionObject implements Action{
 
 			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
 			// hash_key는 action_name + 현재 시간 으로 만듦
-			$action_hash_key = MD5(date("Ymdhisa") + $cur_name);
+			$next_idx = ActionObject::GET_NEXT_IDX();
+			$action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
 
 			$this->set_hash_key($action_hash_key);
 		}
@@ -1007,7 +1013,7 @@ class ActionObject implements Action{
 			$cur_parent = $this->get_parent();	
 			return $cur_parent->get_depth($depth + 1);
 
-		} else if($this->has_add_on_parent()) {
+		} else if(ActionCollection::is_instance($this) && $this->has_add_on_parent()) {
 
 			$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();	
 			return $cur_add_on_action_parent_obj->get_depth($depth + 1);
@@ -1021,10 +1027,19 @@ class ActionObject implements Action{
 	// @ Usage : ActionObject::compare_with_std($action_obj, $action_std);
 	public static function compare_with_std($action_obj=null, $action_std=null) {
 
-		echo "!!HERE!!<br/>";
+		$action_name = $action_std->action_name;
+		$action_hash_key = $action_std->action_hash_key;
+		$coordinate = $action_std->coordinate;
+		//coordinate
+		// echo "!!HERE!! / \$action_name ::: $action_name<br/>";
 
 		// check validation of 2 objects.
 		if(ActionObject::is_not_action_obj($action_obj)) {
+
+			echo "!!HERE!! / \$action_name ::: $action_name<br/>";
+			echo "!!HERE!! / \$action_hash_key ::: $action_hash_key<br/>";
+			echo "!!HERE!! / \$coordinate ::: $coordinate<br/>";
+
 			echo "!Error! / compare_with_std / ActionObject::is_not_action_obj(\$action_obj)<br/>";
 			return false;
 		} 
@@ -1033,13 +1048,17 @@ class ActionObject implements Action{
 			return false;
 		}
 
+
+
 		// wonder.jung
 
 		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
 
 			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
-				$hash_key = $action_obj->get_hash_key();
-				echo "col / false : \$hash_key : $hash_key<br/>";
+				$hash_key_from_obj = $action_obj->get_hash_key();
+				$hash_key_from_std = $action_std->action_hash_key;
+				echo "col / false : \$hash_key_from_obj : $hash_key_from_obj<br/>";
+				echo "col / false : \$hash_key_from_std : $hash_key_from_std<br/>";
 				return false;
 			}
 			if($action_obj->get_collection_type() != intval($action_std->action_collection_type)) {
@@ -1118,7 +1137,7 @@ class ActionObject implements Action{
 
 			// treat children
 			// children_action_object_list - wonder.jung / TODO
-
+			
 			$children_action_std_list = $action_std->children_action_object_list;
 
 			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
@@ -1141,7 +1160,6 @@ class ActionObject implements Action{
 
 			// treat add on children
 			// add_on_action_object_list
-
 			$add_on_action_std_list = $action_std->add_on_action_object_list;
 			$cur_add_on_list = $action_obj->get_add_on_list();
 
@@ -1155,7 +1173,7 @@ class ActionObject implements Action{
 				$add_on_children_action_std = $add_on_action_std_list[$idx];
 				$add_on_children_action_obj = $cur_add_on_list[$idx];
 
-				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+				$is_same = ActionObject::compare_with_std($add_on_children_action_obj, $add_on_children_action_std);
 
 				if(!$is_same) {
 					return false;
@@ -1623,6 +1641,15 @@ class ActionItem extends ActionObject{
 		if(!is_null($add_on_collection)) {
 			$add_on_collection->set_add_on_action_parent_obj($this);
 			array_push($this->add_on_action_object_list, $add_on_collection);
+		}
+
+		// $cur_coordinate = $this->get_coordinate();
+		if(empty($add_on_collection->get_hash_key())) {
+
+			$next_idx = ActionObject::GET_NEXT_IDX();
+			$cur_add_on_action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
+			$add_on_collection->set_hash_key($cur_add_on_action_hash_key);
+
 		}
 
 	}

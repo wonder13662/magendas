@@ -46,7 +46,7 @@ class TimeManager{
 	}
 	public static function convert_seconds_to_hh24_mm($seconds) {
 
-		if(ValidationManager::is_not_unsigned_number($seconds)) {
+		if(ValidationManager::is_not_unsigned_number(__FUNCTION__, $seconds)) {
 			return -1;
 		}
 
@@ -54,7 +54,7 @@ class TimeManager{
 	}
 	public static function convert_seconds_to_YYYYMMHHMMSS($seconds) {
 
-		if(ValidationManager::is_not_unsigned_number($seconds)) {
+		if(ValidationManager::is_not_unsigned_number(__FUNCTION__, $seconds)) {
 			return -1;
 		}
 

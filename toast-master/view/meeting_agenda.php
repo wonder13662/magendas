@@ -85,6 +85,20 @@
 
 	}
 
+	// TEST
+	// 2. action_std --> action_obj로 변환.
+	$action_std = $meeting_action_list_std;
+	$action_obj = ActionObject::convert($action_std);
+	if(ActionObject::is_not_action_obj($action_obj)) {
+		$result->error = "ActionObject::is_not_action_obj(\$action_obj)";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+
+	// 3. CHECK IDENTICAL DATA
+	$is_same = ActionObject::compare_with_std($action_obj, $action_std);
+	$result->is_same = $is_same;
+
 
 
 
@@ -231,6 +245,11 @@
 							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다.
 							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
 							echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+							echo "</div>";
+
+							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다. / 수원 클럽
+							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
+							echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_SUWON\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Suwon TM<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
 							echo "</div>";
 
 							?>

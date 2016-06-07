@@ -102,6 +102,20 @@
 		// 기본 템플릿 적용
 		$action_obj = ActionTemplate::get_TM_Default($ACTION_BEGIN_HH_MM, $ACTION_NAME);
 
+	} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_SUWON) == 0) {
+
+		// CHECK VALIDATION - INIT
+		if(empty($ACTION_NAME)) {
+			$result->error = "empty(\$ACTION_NAME)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		// CHECK VALIDATION - END
+
+		// 기본 템플릿 적용
+		$ACTION_BEGIN_HH_MM = "19:30";
+		$action_obj = ActionTemplate::get_SUWON_TM($ACTION_BEGIN_HH_MM, $ACTION_NAME);
+
 	} else if(strcmp($ACTION_TEMPLATE_NAME, $params->ACTION_TEMPLATE_PREV_MEETING) == 0) {
 
 		// CHECK VALIDATION - INIT
