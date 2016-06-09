@@ -13,11 +13,6 @@ interface Action {
 
 class ActionObject implements Action{
 
-	private static $AUTO_INCREMENT_IDX=0;
-	public static function GET_NEXT_IDX() { //ActionObject::GET_NEXT_IDX();
-		return ActionObject::$AUTO_INCREMENT_IDX++;
-	}
-
 	// ActionObject::$COLLECTION_TYPE_LIST
 	public static $COLLECTION_TYPE_LIST=1;
 	public static $COLLECTION_TYPE_TABLE=2;
@@ -80,6 +75,13 @@ class ActionObject implements Action{
 		}
 
 		return false;
+	}
+	// @ Usage : ActionObject::GET_UNIQUE_HASH_KEY();
+	public static function GET_UNIQUE_HASH_KEY() {
+		$now_micro = TimeManager::get_now_micro();
+		$unique_hash_key = MD5($now_micro);
+
+		return $unique_hash_key;
 	}
 
 
@@ -213,8 +215,7 @@ class ActionObject implements Action{
 		// Set Hash key
 		if(empty($child_action_obj->get_hash_key())) {
 
-			$next_idx = ActionObject::GET_NEXT_IDX();
-			$child_action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
+			$child_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
 			$child_action_obj->set_hash_key($child_action_hash_key);
 		}
 
@@ -224,8 +225,7 @@ class ActionObject implements Action{
 
 			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
 			// hash_key는 action_name + 현재 시간 으로 만듦
-			$next_idx = ActionObject::GET_NEXT_IDX();
-			$action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
+			$action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
 
 			$this->set_hash_key($action_hash_key);
 		}
@@ -345,6 +345,151 @@ class ActionObject implements Action{
 			$next_idx = ($idx + 1);
 			return $sibling_action_object_list[$next_idx];
 		}
+	}
+
+	// wonder.jung
+	// @ desc : 현재 action obj를 기본값만 가진 객체로 복사.
+	private function copy_empty() {
+
+		$action_obj_clone = null;
+		if(ActionCollection::is_instance($this) && $this->is_list()) {
+
+			$action_obj_clone = 
+			new ActionCollection(
+				// $action_name=""
+				$this->get_name()
+				// $action_collection_type=1
+				, $this->get_collection_type()
+				// $is_shy=0
+				, 0
+			);			
+
+			$first_child_action_obj = $this->get_first_child();
+			$first_child_action_obj_clone = $first_child_action_obj->copy_empty();
+
+			$action_obj_clone->add_child($first_child_action_obj_clone);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
+
+			// 자식 아이템이 있다면, 추가합니다. shy item 1개만 포함합니다.
+			$first_child_action_item = $this->get_first_child();
+			$first_child_action_item_clone = $first_child_action_item->copy_empty();
+			$first_child_action_item_clone->set_is_shy(1);
+
+			$action_obj_clone->add_child($first_child_action_item_clone);
+
+			return $action_obj_clone;
+
+		} else if(ActionItemTitleNTimeHHMM::is_instance($this)) {
+
+			$action_obj_clone = 
+			new ActionItemTitleNTimeHHMM(
+				// $action_name=""
+				$this->get_name()
+				// $time_str_hhmm_init=""
+				, ""
+				// $time_str_hhmm_specific=""
+				, ""				
+				// $is_shy=0
+				, 0
+			);
+			$action_obj_clone->inject($this);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
+
+			// 자식 컬렉션이 있다면, 추가합니다.
+			$first_child_action_collection = $this->get_first_child();
+			$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+
+			$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			return $action_obj_clone;
+
+		} else if(ActionItem::is_instance($this)) {
+
+			// public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
+			$action_obj_clone = 
+			new ActionItem(
+				// $action_name="New Item"
+				$this->get_name()
+				// $action_item_type=1
+				, $this->get_item_type()
+				// $is_shy=0
+				, 0
+			);
+			$action_obj_clone->inject($this);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());			
+
+			// 자식 컬렉션이 있다면, 추가합니다.
+			$first_child_action_collection = $this->get_first_child();
+			$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+
+			$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			return $action_obj_clone;
+
+		}		
+
+	}
+
+	// wonder.jung
+	// @ desc : 사용자가 있던 아이템에서 새로운 형제 아이템을 추가(+)했을 때의 처리
+	public function add_empty_sibling_after() {
+
+		// 0. 자신의 action type에 따라 다르게 동작합니다.
+
+		// 0-1. 자신의 action type의 빈 객체를 만듭니다.
+		$action_obj_clone = null;
+		if(ActionItemTitleNTimeHHMM::is_instance($this)) {
+
+			$action_obj_clone = 
+			new ActionItemTitleNTimeHHMM(
+				// $action_name=""
+				$this->get_name()
+				// $time_str_hhmm_init=""
+				, ""
+				// $time_str_hhmm_specific=""
+				, ""				
+				// $is_shy=0
+				, 1
+			);
+			$action_obj_clone->inject($this);
+
+			// 자식 컬렉션이 있다면, 추가합니다. shy item 1개만 포함합니다.
+
+		} else if(ActionItem::is_instance($this)) {
+
+			// public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
+			$action_obj_clone = 
+			new ActionItem(
+				// $action_name="New Item"
+				$this->get_name()
+				// $action_item_type=1
+				, $this->get_item_type()
+				// $is_shy=0
+				, 1
+			);
+			$action_obj_clone->inject($this);
+
+			// 자식 컬렉션이 있다면, 추가합니다. shy item 1개만 포함합니다.
+
+		}
+
+
+		// 0-2. 공통 데이터를 옮깁니다.
+
+		// 1. 자신의 데이터를 기준으로 기본 값을 가진 아이템을 만듭니다.
+
+		// 2. 자식 객체가 있고, shy mode라면 이것도 복제, 자식 객체로 추가합니다.
+
+		// 3. 자신의 다음 형제 객체로 추가합니다.
+
+		// 4. 두 객체의 hash_key 할당은 어떻게 할까요?
+
 	}
 
 
@@ -487,7 +632,36 @@ class ActionObject implements Action{
 	public function get_coordinate() {
 		return $this->coordinate;
 	}
-	// $foo->{$start . $end}
+
+	public function set_search_map_recursive($search_map=null) {
+
+		if(is_null($search_map)) {
+			$cur_action_name = $this->get_name();
+			echo "!Error! / set_search_map_recursive / $cur_action_name / is_null($cur_search_map)";
+			return;
+		}
+
+		$this->set_search_map($search_map);
+
+		$children_action_list = $this->get_children();
+		for($idx = 0; $idx < count($children_action_list); $idx++) {
+			$child_action_obj = $children_action_list[$idx];
+			$child_action_obj->set_search_map_recursive($search_map);
+		}
+
+		if(ActionItem::is_instance($this) && $this->has_add_on_list()) {
+
+			$cur_children = $this->get_add_on_list();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_add_on_action_obj = $cur_children[$idx];
+
+				$cur_add_on_action_obj->set_search_map_recursive($search_map);
+			} // end for
+
+		} // end if
+	} // end function
+
+	
 	public function set_search_map($search_map=null) {
 
 		// DEBUG
@@ -1050,8 +1224,6 @@ class ActionObject implements Action{
 
 
 
-		// wonder.jung
-
 		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
 
 			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
@@ -1136,8 +1308,7 @@ class ActionObject implements Action{
 			}
 
 			// treat children
-			// children_action_object_list - wonder.jung / TODO
-			
+			// children_action_object_list
 			$children_action_std_list = $action_std->children_action_object_list;
 
 			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
@@ -1212,14 +1383,21 @@ class ActionObject implements Action{
 			$action_obj->set_name($action_std->action_name);
 			$action_obj->set_is_shy($action_std->action_is_shy);
 
+
+
 			// treat children
 			$children_action_std_list = $action_std->children_action_object_list;
 			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
 
 				$children_action_std = $children_action_std_list[$idx];
 				$children_action_obj = ActionObject::convert($children_action_std);
-
 				$action_obj->add_child($children_action_obj);
+
+			}
+
+			// set search map recursively
+			if($action_obj->is_root_collection()) {
+				$action_obj->set_search_map_recursive(new stdClass());
 			}
 
 		} else if(ActionObject::_IS_ITEM($action_std->action_item_type)) {
@@ -1242,14 +1420,12 @@ class ActionObject implements Action{
 
 
 			// treat children
-			// children_action_object_list - wonder.jung / TODO
-
+			// children_action_object_list
 			$children_action_std_list = $action_std->children_action_object_list;
 			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
 
 				$children_action_std = $children_action_std_list[$idx];
 				$children_action_obj = ActionObject::convert($children_action_std);
-
 				$action_obj->add_child($children_action_obj);
 			}
 
@@ -1262,7 +1438,6 @@ class ActionObject implements Action{
 
 				$add_on_children_action_std = $add_on_action_std_list[$idx];
 				$add_on_children_action_obj = ActionObject::convert($add_on_children_action_std);
-
 				$action_obj->push_add_on($add_on_children_action_obj);
 			} // end for
 		} // end if
@@ -1559,7 +1734,7 @@ class ActionItem extends ActionObject{
 			return true;
 		}
 		return false;
-	}
+	} 
 
 	public function is_not_table_field_item() {
 		return !$this->is_table_field_item();
@@ -1646,10 +1821,8 @@ class ActionItem extends ActionObject{
 		// $cur_coordinate = $this->get_coordinate();
 		if(empty($add_on_collection->get_hash_key())) {
 
-			$next_idx = ActionObject::GET_NEXT_IDX();
-			$cur_add_on_action_hash_key = MD5($next_idx . "" . date("Ymdhisa"));
+			$cur_add_on_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
 			$add_on_collection->set_hash_key($cur_add_on_action_hash_key);
-
 		}
 
 	}

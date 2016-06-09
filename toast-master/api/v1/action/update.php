@@ -83,26 +83,6 @@
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
 
-		// CHECK VALIDATION - INIT
-		/*
-		if(empty($ACTION_HASH_KEY)) {
-			$result->error = "empty(\$ACTION_HASH_KEY)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-		*/
-		// CHECK VALIDATION - END
-
-
-		if(empty($ACTION_HASH_KEY)) {
-
-			// 1. 새로운 아이템을 추가하는 경우
-
-		} else {
-
-			// 2. 기존의 아이템을 업데이트하는 경우.
-
-		}
 
 
 
@@ -141,6 +121,41 @@
 		// 3. CHECK IDENTICAL DATA
 		$is_same = ActionObject::compare_with_std($action_obj, $action_std);
 		$result->is_same = $is_same;
+
+
+
+
+
+
+
+		if(empty($ACTION_HASH_KEY)) {
+
+			// 1. 새로운 아이템을 추가하는 경우
+			$result->PROCESS = "1. 새로운 아이템을 추가하는 경우";
+
+			$target_action_obj = $action_obj->search($ACTION_HASH_KEY_BEFORE);
+			if(ActionObject::is_not_action_obj($target_action_obj)) {
+				$result->error = "ActionObject::is_not_action_obj(\$target_action_obj)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			$target_action_std = $target_action_obj->get_std_obj();
+			$result->target_action_std = $target_action_std;
+
+
+			// wonder.jung
+			// 검색 결과로 나온 객체에 add_empty_sibling_after로 새로운 형제 객체 추가.
+
+			// 파라미터로 전달받은 내부 정보를 지정해줍니다.
+
+		} else {
+
+			// 2. 기존의 아이템을 업데이트하는 경우.
+			$result->PROCESS = "2. 기존의 아이템을 업데이트하는 경우.";
+
+		}
+
 
 
 

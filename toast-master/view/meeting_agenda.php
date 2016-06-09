@@ -85,19 +85,18 @@
 
 	}
 
-	// TEST
-	// 2. action_std --> action_obj로 변환.
-	$action_std = $meeting_action_list_std;
-	$action_obj = ActionObject::convert($action_std);
-	if(ActionObject::is_not_action_obj($action_obj)) {
-		$result->error = "ActionObject::is_not_action_obj(\$action_obj)";
-		terminate($wdj_mysql_interface, $result);
-		return;
-	}
 
-	// 3. CHECK IDENTICAL DATA
-	$is_same = ActionObject::compare_with_std($action_obj, $action_std);
-	$result->is_same = $is_same;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
