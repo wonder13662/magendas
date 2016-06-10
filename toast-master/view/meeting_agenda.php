@@ -95,17 +95,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 	// @ required
 	$wdj_mysql_interface->close();
 	
@@ -414,9 +403,6 @@ if (navigator.geolocation) {
 	var startPos;
 	var geoSuccess = function(position) {
 		startPos = position;
-		console.log(">>> startPos :: ",startPos);
-		// document.getElementById('startLat').innerHTML = startPos.coords.latitude;
-		// document.getElementById('startLon').innerHTML = startPos.coords.longitude;
 	};
 	navigator.geolocation.getCurrentPosition(geoSuccess);	
 }

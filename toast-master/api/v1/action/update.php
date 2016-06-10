@@ -143,6 +143,13 @@
 			$target_action_std = $target_action_obj->get_std_obj();
 			$result->target_action_std = $target_action_std;
 
+			// add new item & set new name received
+			$copy_action_obj = $target_action_obj->copy_empty();
+			$copy_action_obj->set_name($ACTION_NAME);
+
+			$copy_action_std = $copy_action_obj->get_std_obj();
+			$result->copy_action_std = $copy_action_std;
+
 
 			// wonder.jung
 			// 검색 결과로 나온 객체에 add_empty_sibling_after로 새로운 형제 객체 추가.

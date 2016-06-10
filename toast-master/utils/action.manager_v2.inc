@@ -145,10 +145,12 @@ class ActionObject implements Action{
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
 			$child_action_obj = $child_action_obj_list[$idx];
 
-			if($child_action_obj->get_id() == $this->get_id()) {
+			if($this->is_equal($child_action_obj)) {
 				return $idx;
 			}
 		}
+
+		return -1;
 	}
 	public function remove_child($child_action_obj_remove) {
 
@@ -171,7 +173,7 @@ class ActionObject implements Action{
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
 			$child_action_obj = $child_action_obj_list[$idx];
 
-			if($child_action_obj->get_id() != $child_action_obj_remove->get_id()) {
+			if($child_action_obj->is_not_equal($child_action_obj_remove)) {
 				array_push($child_action_obj_list_next, $child_action_obj);	
 			}
 		}
@@ -349,7 +351,7 @@ class ActionObject implements Action{
 
 	// wonder.jung
 	// @ desc : 현재 action obj를 기본값만 가진 객체로 복사.
-	private function copy_empty() {
+	public function copy_empty() {
 
 		$action_obj_clone = null;
 		if(ActionCollection::is_instance($this) && $this->is_list()) {
@@ -362,22 +364,22 @@ class ActionObject implements Action{
 				, $this->get_collection_type()
 				// $is_shy=0
 				, 0
-			);			
-
-			$first_child_action_obj = $this->get_first_child();
-			$first_child_action_obj_clone = $first_child_action_obj->copy_empty();
-
-			$action_obj_clone->add_child($first_child_action_obj_clone);
+			);
+			$action_obj_clone->inject($this);
 
 			// set hash_key
 			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
 
 			// 자식 아이템이 있다면, 추가합니다. shy item 1개만 포함합니다.
 			$first_child_action_item = $this->get_first_child();
-			$first_child_action_item_clone = $first_child_action_item->copy_empty();
-			$first_child_action_item_clone->set_is_shy(1);
+			if(!is_null($first_child_action_item)) {
 
-			$action_obj_clone->add_child($first_child_action_item_clone);
+				$first_child_action_item_clone = $first_child_action_item->copy_empty();
+				$first_child_action_item_clone->set_is_shy(1);
+
+				$action_obj_clone->add_child($first_child_action_item_clone);
+
+			}
 
 			return $action_obj_clone;
 
@@ -401,9 +403,12 @@ class ActionObject implements Action{
 
 			// 자식 컬렉션이 있다면, 추가합니다.
 			$first_child_action_collection = $this->get_first_child();
-			$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+			if(!is_null($first_child_action_collection)) {
 
-			$action_obj_clone->add_child($first_child_action_collection_clone);
+				$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+				$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			}
 
 			return $action_obj_clone;
 
@@ -426,9 +431,12 @@ class ActionObject implements Action{
 
 			// 자식 컬렉션이 있다면, 추가합니다.
 			$first_child_action_collection = $this->get_first_child();
-			$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+			if(!is_null($first_child_action_collection)) {
 
-			$action_obj_clone->add_child($first_child_action_collection_clone);
+				$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+				$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			}
 
 			return $action_obj_clone;
 
@@ -863,17 +871,18 @@ class ActionObject implements Action{
 			return;
 		}
 
-		$this->set_id($action_obj->get_id());
+		// $this->set_id($action_obj->get_id()); // REOMVE ME
 		$this->set_name($action_obj->get_name());
 
 		$this->set_collection_type($action_obj->get_collection_type());
 		$this->set_collection_type_name($action_obj->get_collection_type_name());
-		$this->set_item_type($action_obj->get_item_type());
 
+		$this->set_item_type($action_obj->get_item_type());
 		$this->set_item_type_name($action_obj->get_item_type_name());
+
 		$this->set_context($action_obj->get_context());
 
-		$this->set_hash_key($action_obj->get_hash_key());
+		// $this->set_hash_key($action_obj->get_hash_key()); // REMOVE ME - 고유한 값이므로 새로 만들어야 합니다.
 		// $this->set_order($action_obj->get_order()); // REMOVE ME
 		$this->set_is_shy($action_obj->get_is_shy());
 
@@ -1066,9 +1075,13 @@ class ActionObject implements Action{
 		return false;
 	}
 
+	public function is_not_equal($target_action_obj=null) {
+		return !$this->is_equal($target_action_obj);
+	}
+
 	public function show_info() {
 
-		$cur_id = $this->get_id();
+		// $cur_id = $this->get_id(); // REMOVE ME
 		$cur_hash_key = $this->get_hash_key();
 		$cur_name = $this->get_name();
 		$cur_collection_type_name = $this->get_collection_type_name();
@@ -1077,10 +1090,12 @@ class ActionObject implements Action{
 
 		$cur_collection_type = $this->get_collection_type();
 
+		// REMOVE ME
 		// $is_table = $this->is_table();
 		// $is_list = $this->is_list();
 
-		echo "\$cur_id :: $cur_id<br/>";
+		// echo "\$cur_id :: $cur_id<br/>";
+
 		echo "\$cur_hash_key :: $cur_hash_key<br/>";
 		echo "\$cur_name :: $cur_name<br/>";
 		echo "\$cur_collection_type_name :: $cur_collection_type_name<br/>";
@@ -1764,7 +1779,7 @@ class ActionItem extends ActionObject{
 		}
 
 		$this->set_context($action_item_obj->get_context());
-		$this->set_add_on_list($action_item_obj->get_add_on_list());
+		// $this->set_add_on_list($action_item_obj->get_add_on_list()); // REMOVE ME
 
 		parent::inject($action_item_obj);
 	}
