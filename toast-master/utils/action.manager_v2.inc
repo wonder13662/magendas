@@ -77,9 +77,12 @@ class ActionObject implements Action{
 		return false;
 	}
 	// @ Usage : ActionObject::GET_UNIQUE_HASH_KEY();
+	private static $AUTO_INCREASE_CNT=0;
 	public static function GET_UNIQUE_HASH_KEY() {
 		$now_micro = TimeManager::get_now_micro();
-		$unique_hash_key = MD5($now_micro);
+		$unique_hash_key = MD5(ActionObject::$AUTO_INCREASE_CNT . "" . $now_micro);
+
+		ActionObject::$AUTO_INCREASE_CNT++;
 
 		return $unique_hash_key;
 	}
@@ -215,9 +218,18 @@ class ActionObject implements Action{
 		}
 
 		// Set Hash key
+		$root_action_obj = $this->get_root_action_obj();
 		if(empty($child_action_obj->get_hash_key())) {
 
 			$child_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($child_action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / add_child / !is_null(\$search_result)<br/>";
+				return;
+			}
+
 			$child_action_obj->set_hash_key($child_action_hash_key);
 		}
 
@@ -228,6 +240,13 @@ class ActionObject implements Action{
 			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
 			// hash_key는 action_name + 현재 시간 으로 만듦
 			$action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / add_child / !is_null(\$search_result)<br/>";
+				return;
+			}
 
 			$this->set_hash_key($action_hash_key);
 		}
@@ -349,11 +368,11 @@ class ActionObject implements Action{
 		}
 	}
 
-	// wonder.jung
 	// @ desc : 현재 action obj를 기본값만 가진 객체로 복사.
 	public function copy_empty() {
 
 		$action_obj_clone = null;
+		$root_action_obj = $this->get_root_action_obj();
 		if(ActionCollection::is_instance($this) && $this->is_list()) {
 
 			$action_obj_clone = 
@@ -369,6 +388,14 @@ class ActionObject implements Action{
 
 			// set hash_key
 			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
+
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
+
 
 			// 자식 아이템이 있다면, 추가합니다. shy item 1개만 포함합니다.
 			$first_child_action_item = $this->get_first_child();
@@ -401,6 +428,13 @@ class ActionObject implements Action{
 			// set hash_key
 			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
 
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
+
 			// 자식 컬렉션이 있다면, 추가합니다.
 			$first_child_action_collection = $this->get_first_child();
 			if(!is_null($first_child_action_collection)) {
@@ -427,7 +461,14 @@ class ActionObject implements Action{
 			$action_obj_clone->inject($this);
 
 			// set hash_key
-			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());			
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());	
+
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
 
 			// 자식 컬렉션이 있다면, 추가합니다.
 			$first_child_action_collection = $this->get_first_child();
@@ -446,58 +487,22 @@ class ActionObject implements Action{
 
 	// wonder.jung
 	// @ desc : 사용자가 있던 아이템에서 새로운 형제 아이템을 추가(+)했을 때의 처리
-	public function add_empty_sibling_after() {
+	public function add_empty_sibling_after($new_action_name="") {
 
-		// 0. 자신의 action type에 따라 다르게 동작합니다.
+		// 0. 자신의 action type의 빈 객체를 만듭니다.
+		$copy_action_obj = $this->copy_empty();
+		$copy_action_obj->set_name($new_action_name);
 
-		// 0-1. 자신의 action type의 빈 객체를 만듭니다.
-		$action_obj_clone = null;
-		if(ActionItemTitleNTimeHHMM::is_instance($this)) {
-
-			$action_obj_clone = 
-			new ActionItemTitleNTimeHHMM(
-				// $action_name=""
-				$this->get_name()
-				// $time_str_hhmm_init=""
-				, ""
-				// $time_str_hhmm_specific=""
-				, ""				
-				// $is_shy=0
-				, 1
-			);
-			$action_obj_clone->inject($this);
-
-			// 자식 컬렉션이 있다면, 추가합니다. shy item 1개만 포함합니다.
-
-		} else if(ActionItem::is_instance($this)) {
-
-			// public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
-			$action_obj_clone = 
-			new ActionItem(
-				// $action_name="New Item"
-				$this->get_name()
-				// $action_item_type=1
-				, $this->get_item_type()
-				// $is_shy=0
-				, 1
-			);
-			$action_obj_clone->inject($this);
-
-			// 자식 컬렉션이 있다면, 추가합니다. shy item 1개만 포함합니다.
-
+		// 1. 자신의 앞객체 뒤에 자신을 추가합니다.
+		$parent_action_obj = $this->get_parent();
+		if(is_null($parent_action_obj)) {
+			echo "!Error! / add_empty_sibling_after / is_null(\$parent_action_obj)<br/>";
+			return;
 		}
+		$next_idx = ($this->get_idx() + 1);
+		$parent_action_obj->add_child($copy_action_obj, $next_idx);
 
-
-		// 0-2. 공통 데이터를 옮깁니다.
-
-		// 1. 자신의 데이터를 기준으로 기본 값을 가진 아이템을 만듭니다.
-
-		// 2. 자식 객체가 있고, shy mode라면 이것도 복제, 자식 객체로 추가합니다.
-
-		// 3. 자신의 다음 형제 객체로 추가합니다.
-
-		// 4. 두 객체의 hash_key 할당은 어떻게 할까요?
-
+		return $copy_action_obj;
 	}
 
 
@@ -706,7 +711,6 @@ class ActionObject implements Action{
 		$action_obj_from_search = $this->search_map->{$action_hash_key};
 		$cur_name = $this->get_name();
 		if(is_null($action_obj_from_search)) {
-			echo "$cur_name / search / \$action_hash_key :: $action_hash_key is null!<br/>";			
 			return null;
 		}
 
@@ -808,7 +812,8 @@ class ActionObject implements Action{
 
 		$std_obj->coordinate = $this->coordinate;
 
-		$std_obj->parent_action_obj = null;
+		// REMOVE ME
+		// $std_obj->parent_action_obj = null;
 
 		$children_action_obj_list = array();
 
@@ -846,7 +851,8 @@ class ActionObject implements Action{
 
 				$std_obj_child_parent->coordinate = $this->coordinate;
 
-				$std_obj_child->parent_action_obj = $std_obj_child_parent;
+				// REMOVE ME
+				//$std_obj_child->parent_action_obj = $std_obj_child_parent;
 
 				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
@@ -1225,16 +1231,15 @@ class ActionObject implements Action{
 		// check validation of 2 objects.
 		if(ActionObject::is_not_action_obj($action_obj)) {
 
-			echo "!!HERE!! / \$action_name ::: $action_name<br/>";
-			echo "!!HERE!! / \$action_hash_key ::: $action_hash_key<br/>";
-			echo "!!HERE!! / \$coordinate ::: $coordinate<br/>";
-
 			echo "!Error! / compare_with_std / ActionObject::is_not_action_obj(\$action_obj)<br/>";
 			return false;
+
 		} 
 		if(is_null($action_std)) {
+
 			echo "!Error! / compare_with_std / is_null(\$action_std)<br/>";
 			return false;
+
 		}
 
 
@@ -1834,9 +1839,18 @@ class ActionItem extends ActionObject{
 		}
 
 		// $cur_coordinate = $this->get_coordinate();
+		$root_action_obj = $this->get_root_action_obj();
 		if(empty($add_on_collection->get_hash_key())) {
 
 			$cur_add_on_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($cur_add_on_action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / push_add_on / !is_null(\$search_result)<br/>";
+				return;
+			}
+
 			$add_on_collection->set_hash_key($cur_add_on_action_hash_key);
 		}
 

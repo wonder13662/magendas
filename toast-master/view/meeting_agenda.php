@@ -95,6 +95,11 @@
 
 
 
+
+
+
+
+
 	// @ required
 	$wdj_mysql_interface->close();
 	

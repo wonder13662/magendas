@@ -87,15 +87,19 @@
 
 
 
+
+
 		// 1,2,3번의 과정은 공통 작업 부분.
 		// 1. 해당 미팅의 아젠다를 로딩합니다.
 		$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
+		if(is_null($action_file_info)) {
+			$result->error = "is_null(\$action_file_info)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
 		$result->action_file_info = $action_file_info;
 
-		$action_json_str = "";
-		if(!is_null($action_file_info)) {
-			$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-		}
+		$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
 		if(empty($action_json_str)) {
 			$result->error = "empty(\$action_json_str)";
 			terminate($wdj_mysql_interface, $result);
@@ -133,33 +137,94 @@
 			// 1. 새로운 아이템을 추가하는 경우
 			$result->PROCESS = "1. 새로운 아이템을 추가하는 경우";
 
-			$target_action_obj = $action_obj->search($ACTION_HASH_KEY_BEFORE);
-			if(ActionObject::is_not_action_obj($target_action_obj)) {
-				$result->error = "ActionObject::is_not_action_obj(\$target_action_obj)";
+			// 1-1. 대상 아이템을 가져옵니다. (공통 로직?)
+			if(empty($ACTION_HASH_KEY_BEFORE)) {
+				$result->error = "empty(\$ACTION_HASH_KEY_BEFORE)";
 				terminate($wdj_mysql_interface, $result);
 				return;
 			}
 
-			$target_action_std = $target_action_obj->get_std_obj();
-			$result->target_action_std = $target_action_std;
+			$target_action_obj = $action_obj->search($ACTION_HASH_KEY_BEFORE);
+			if(ActionItem::is_not_instance($target_action_obj)) {
+				$result->error = "ActionItem::is_not_instance(\$target_action_obj)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
 
-			// add new item & set new name received
-			$copy_action_obj = $target_action_obj->copy_empty();
-			$copy_action_obj->set_name($ACTION_NAME);
+			// 1-2. add new item & set new name received
+			$copy_action_obj = $target_action_obj->add_empty_sibling_after($ACTION_NAME);
 
-			$copy_action_std = $copy_action_obj->get_std_obj();
-			$result->copy_action_std = $copy_action_std;
+			// 1-3. save changed action obj
+			$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
 
+			// 1-4. CHECK
+			$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
+			if(empty($action_json_str)) {
+				$result->error = "empty(\$action_json_str)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
 
-			// wonder.jung
-			// 검색 결과로 나온 객체에 add_empty_sibling_after로 새로운 형제 객체 추가.
+			$action_std = json_decode($action_json_str);
+			if(is_null($action_std)) {
+				$result->error = "is_null(\$action_std)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+			$result->action_std_updated = $action_std;
 
-			// 파라미터로 전달받은 내부 정보를 지정해줍니다.
+			$result->ACTION_HASH_KEY = $copy_action_obj->get_hash_key();
 
 		} else {
 
 			// 2. 기존의 아이템을 업데이트하는 경우.
 			$result->PROCESS = "2. 기존의 아이템을 업데이트하는 경우.";
+
+			// 2-1. 대상 아이템을 가져옵니다. (공통 로직?)
+			if(empty($ACTION_HASH_KEY)) {
+				$result->error = "empty(\$ACTION_HASH_KEY)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			$target_action_obj = $action_obj->search($ACTION_HASH_KEY);
+			if(ActionItem::is_not_instance($target_action_obj)) {
+				$result->error = "ActionItem::is_not_instance(\$target_action_obj)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			// 2-2. update name & context
+			if(empty($ACTION_NAME)) {
+				$result->error = "empty(\$ACTION_NAME)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			$target_action_obj->set_name($ACTION_NAME);
+			if(!empty($ACTION_CONTEXT)) {
+				$target_action_obj->set_context($ACTION_CONTEXT);
+			}
+			$result->target_action_std_updated = $target_action_obj->get_std_obj();
+
+			// 2-3. save changed action obj
+			$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
+
+			// 2-4. CHECK
+			$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
+			if(empty($action_json_str)) {
+				$result->error = "empty(\$action_json_str)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			$action_std = json_decode($action_json_str);
+			if(is_null($action_std)) {
+				$result->error = "is_null(\$action_std)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+			$result->action_std_updated = $action_std;			
 
 		}
 

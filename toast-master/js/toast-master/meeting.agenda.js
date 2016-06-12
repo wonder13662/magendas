@@ -240,7 +240,6 @@ wonglish.meeting_agenda_manager = {
 					
 					console.log("action_context_obj ::: ",action_context_obj);
 					console.log("_param_obj ::: ",_param_obj);
-					
 
 					// 추가된 내용을 파일에도 동일하게 추가합니다.
 					_ajax.send_simple_post(
@@ -253,7 +252,16 @@ wonglish.meeting_agenda_manager = {
 							// delegate_func
 							function(data){
 
-								console.log("data ::: ",data);
+								console.log("data ::: ",data);	
+
+								if( data.EVENT_PARAM_EVENT_TYPE === _param.EVENT_TYPE_UPDATE_ITEM && 
+									data.ACTION_HASH_KEY != null &&
+									action_item_obj.action_hash_key == "" ) {
+
+									// set hashkey of new sibling item.
+									console.log("set hashkey of new sibling item.");
+									action_item_obj.set_action_hash_key(data.ACTION_HASH_KEY);
+								}
 
 							},
 							// delegate_scope
@@ -501,7 +509,7 @@ wonglish.meeting_agenda_manager = {
 
 				_ajax.send_simple_post(
 					// _url
-					_link.get_link(_link.API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE)
+					_link.get_link(_link.API_UPDATE_ACTION_TEMPLATE)
 					// _param_obj
 					,request_param_obj
 					// _delegate_after_job_done
@@ -509,7 +517,7 @@ wonglish.meeting_agenda_manager = {
 						// delegate_func
 						function(data){
 							
-							console.log("API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE");
+							console.log("API_UPDATE_ACTION_TEMPLATE");
 							console.log(">>> data : ",data);
 
 							// 새로운 템플릿으로 화면 내용을 변경합니다.

@@ -11835,11 +11835,9 @@ class MYSQLInterface{
 		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
 		$query_manager->addQueryLineArr(
 			array(
-
-				"INSERT INTO `magendas`.`ACTION_N_MEETING_AGENDA`"
-				,"(`hash_key`,`meeting_agenda_id`,`regdate`)"
+				"INSERT INTO `magendas`.`ACTION_N_MEETING_AGENDA` (`hash_key`,`meeting_agenda_id`,`regdate`)"
 				,"VALUES(\"$hash_key\",$meeting_agenda_id,\"$regdate\")"
-
+				,"ON DUPLICATE KEY UPDATE `hash_key`=\"$hash_key\""
 			)
 		);
 		$query_manager->modify();
