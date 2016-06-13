@@ -34,7 +34,7 @@
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
-	$ACTION_ORDER = $params->getParamNumber($params->ACTION_ORDER);
+	$ACTION_ORDER = $params->getParamNumber($params->ACTION_ORDER, -1);
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
 	
 
@@ -104,7 +104,7 @@
 
 
 
-	
+
 
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
@@ -158,10 +158,10 @@
 
 		if(empty($ACTION_HASH_KEY)) {
 
-			// 1. 새로운 아이템을 추가하는 경우
-			$result->PROCESS = "1. 새로운 아이템을 추가하는 경우";
+			// 2-1. 새로운 아이템을 추가하는 경우
+			$result->PROCESS = "2-1. 새로운 아이템을 추가하는 경우";
 
-			// 1-1. 대상 아이템을 가져옵니다. (공통 로직?)
+			// 2-1-1. 대상 아이템을 가져옵니다. (공통 로직?)
 			if(empty($ACTION_HASH_KEY_BEFORE)) {
 				$result->error = "empty(\$ACTION_HASH_KEY_BEFORE)";
 				terminate($wdj_mysql_interface, $result);
@@ -175,19 +175,19 @@
 				return;
 			}
 
-			// 1-2. add new item & set new name received
+			// 2-1-2. add new item & set new name received
 			$copy_action_obj = $target_action_obj->add_empty_sibling_after($ACTION_NAME);
 			$result->ACTION_HASH_KEY = $copy_action_obj->get_hash_key();
 
-			// 1-3. save changed action obj
+			// 2-1-3. save changed action obj & check
 			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
-		} else {
+		} else if(-1 < $ACTION_ORDER) {
 
-			// 2. 기존의 아이템을 업데이트하는 경우.
-			$result->PROCESS = "2. 기존의 아이템을 업데이트하는 경우.";
+			// 2-2. 리스트의 아이템의 순서를 변경하는 경우.
+			$result->PROCESS = "2-2. 리스트의 아이템의 순서를 변경하는 경우.";
 
-			// 2-1. 대상 아이템을 가져옵니다. (공통 로직?)
+			// 2-2-1. 대상 아이템을 가져옵니다. (공통 로직?)
 			if(empty($ACTION_HASH_KEY)) {
 				$result->error = "empty(\$ACTION_HASH_KEY)";
 				terminate($wdj_mysql_interface, $result);
@@ -201,7 +201,31 @@
 				return;
 			}
 
-			// 2-2. update name & context
+			$target_action_obj->shift($ACTION_ORDER);
+
+			// 2-3-3. save changed action obj & check
+			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);	
+
+		} else {
+
+			// 2-3. 기존의 아이템을 업데이트하는 경우.
+			$result->PROCESS = "2-3. 기존의 아이템을 업데이트하는 경우.";
+
+			// 2-3-1. 대상 아이템을 가져옵니다. (공통 로직?)
+			if(empty($ACTION_HASH_KEY)) {
+				$result->error = "empty(\$ACTION_HASH_KEY)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			$target_action_obj = $action_obj->search($ACTION_HASH_KEY);
+			if(ActionItem::is_not_instance($target_action_obj)) {
+				$result->error = "ActionItem::is_not_instance(\$target_action_obj)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			// 2-3-2. update name & context
 			if(empty($ACTION_NAME)) {
 				$result->error = "empty(\$ACTION_NAME)";
 				terminate($wdj_mysql_interface, $result);
@@ -214,8 +238,7 @@
 			}
 			$result->target_action_std_updated = $target_action_obj->get_std_obj();
 
-			// 2-3. save changed action obj
-			// 2-4. CHECK
+			// 2-3-3. save changed action obj & check
 			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);	
 
 		}
@@ -242,8 +265,7 @@
 		// 2-2. 있다면 삭제!
 		$target_action_obj->remove();
 
-		// 2-3. save changed action obj
-		// 2-4. CHECK
+		// 2-3. save changed action obj & check
 		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_TABLE_ROW_ORDER) == 0) {
@@ -286,7 +308,8 @@
 		foreach($cur_table_row_field_action_item_list AS $action_item) {
 			$action_item->shift($ACTION_ORDER);
 		}
-
+		
+		// 2-3. save changed action obj & check
 		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 		
 	}

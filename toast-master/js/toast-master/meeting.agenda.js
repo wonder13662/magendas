@@ -241,6 +241,9 @@ wonglish.meeting_agenda_manager = {
 					console.log("action_context_obj ::: ",action_context_obj);
 					console.log("_param_obj ::: ",_param_obj);
 
+					// TEST 
+					// return;
+
 					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||

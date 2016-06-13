@@ -56,6 +56,12 @@ class ToastmasterParamManager{
 		}
 
 		$value = $this->getParam($tossed_key);
+
+		// 넘겨 받은 값이 숫자 0인 경우의 처리
+		if(intval($value) == 0) {
+			return 0;
+		}
+
 		// 값이 비어있고, 기본값이 있다면 이를 반환합니다.
 		if(!is_null($placeholder) && (is_null($value) || empty($value))) {
 			$value = $placeholder;
