@@ -171,6 +171,42 @@ class ActionObject implements Action{
 
 	}
 
+	public function shift($idx_insert=-1) {
+
+		if(ActionObject::is_not_action_obj($this)) {
+			echo "!Error! / shift / ActionObject::is_not_action_obj(\$this)<br/>";
+			return;
+		}
+		if(!(-1 < $idx_insert)) {
+			echo "!Error! / shift / !(-1 < \$idx_insert)<br/>";
+			return;
+		}
+		if($this->has_no_parent()) {
+			echo "!Error! / shift / \$this->has_no_parent()<br/>";
+			return;
+		}
+
+		$parent_action_obj = $this->get_parent();
+		$parent_action_obj->shift_child($this, $idx_insert);
+
+	}
+
+	public function shift_child($child_action_obj, $idx_insert=-1) {
+
+		if(ActionObject::is_not_action_obj($child_action_obj)) {
+			echo "!Error! / shift_child / ActionObject::is_not_action_obj(\$child_action_obj)<br/>";
+			return;
+		}
+		if(!(-1 < $idx_insert)) {
+			echo "!Error! / shift_child / !(-1 < \$idx_insert)<br/>";
+			return;
+		}
+
+		$this->remove_child($child_action_obj);
+		$this->add_child($child_action_obj, $idx_insert);
+
+	}
+
 	public function remove_child($child_action_obj_remove) {
 
 		// DEBUG
@@ -178,12 +214,12 @@ class ActionObject implements Action{
 		$cur_child_name = $child_action_obj_remove->get_name();
 
 		if(ActionObject::is_not_action_obj($child_action_obj_remove)) {
-			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
+			echo "!Error! / remove_child / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
 			return;
 		}
 
 		if($this->has_no_child()) {
-			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->has_no_child()<br/>";
+			echo "!Error! / remove_child / \$this->has_no_child()<br/>";
 			return;
 		}
 
@@ -202,9 +238,8 @@ class ActionObject implements Action{
 	}
 	public function add_child($child_action_obj, $idx_insert=-1) {
 
-
 		if(ActionObject::is_not_action_obj($child_action_obj)) {
-			echo "!Error! / add_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj)<br/>";
+			echo "!Error! / add_child / \$this->is_not_action_obj(\$child_action_obj)<br/>";
 			return;
 		}
 
@@ -570,19 +605,6 @@ class ActionObject implements Action{
 		return $this->action_hash_key;
 	}
 
-	// REMOVE ME
-	/*
-	public function set_order($action_order) {
-		$this->action_order = $action_order;
-	}
-	public function get_order() {
-		if(is_null($this->action_order)) {
-			return -1;
-		}
-		return $this->action_order;
-	}
-	*/
-
 	public function set_is_shy($action_is_shy) {
 		$this->action_is_shy = $action_is_shy;
 	}
@@ -872,7 +894,9 @@ class ActionObject implements Action{
 
 				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
-					$std_obj_child->action_item_sibling_before = $before_std_obj_child;
+
+					// REMOVE ME
+					// $std_obj_child->action_item_sibling_before = $before_std_obj_child;
 				}
 
 				array_push($children_action_obj_list, $std_obj_child);

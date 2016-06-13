@@ -243,7 +243,8 @@ wonglish.meeting_agenda_manager = {
 
 					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
-						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ) {
+						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ||
+						_action.EVENT_TYPE_UPDATE_TABLE_ROW_ORDER === cur_outcome_obj._event ) {
 
 						// 추가된 내용을 파일에도 동일하게 추가합니다.
 						_ajax.send_simple_post(
@@ -265,6 +266,24 @@ wonglish.meeting_agenda_manager = {
 										// set hashkey of new sibling item.
 										console.log("set hashkey of new sibling item.");
 										action_item_obj.set_action_hash_key(data.ACTION_HASH_KEY);
+
+									} else if( 	data.EVENT_PARAM_EVENT_TYPE === _param.EVENT_TYPE_INSERT_ITEM && 
+												_v.is_valid_array(data.new_table_row_item_list)
+										) {
+										
+										var new_table_row_item_list = data.new_table_row_item_list;
+										var cur_table_row_sibling_arr = action_item_obj.get_table_row_sibling_arr();
+										if(new_table_row_item_list.length != cur_table_row_sibling_arr.length) {
+											console.log("!Error! / new_table_row_item_list.length != cur_table_row_sibling_arr.length");
+											return;
+										}
+
+										for(var idx=0;idx < cur_table_row_sibling_arr.length; idx++) {
+											var table_field_action_item = cur_table_row_sibling_arr[idx];
+											var new_table_field_action_item = new_table_row_item_list[idx];
+											table_field_action_item.set_action_hash_key(new_table_field_action_item.action_hash_key);
+										}
+
 									}
 
 								},

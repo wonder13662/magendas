@@ -34,7 +34,10 @@
 	$PARENT_ACTION_HASH_KEY = $params->getParamString($params->PARENT_ACTION_HASH_KEY);
 	$ROOT_ACTION_HASH_KEY = $params->getParamString($params->ROOT_ACTION_HASH_KEY);
 	$ACTION_CONTEXT = $params->getParamString($params->ACTION_CONTEXT);
+	$ACTION_ORDER = $params->getParamNumber($params->ACTION_ORDER);
 	$EVENT_PARAM_EVENT_TYPE = $params->getParamString($params->EVENT_PARAM_EVENT_TYPE);
+	
+
 
 	// DEBUG
 	$result->MEETING_ID = $MEETING_ID;
@@ -46,6 +49,7 @@
 	$result->PARENT_ACTION_HASH_KEY = $PARENT_ACTION_HASH_KEY;
 	$result->ROOT_ACTION_HASH_KEY = $ROOT_ACTION_HASH_KEY;
 	$result->ACTION_CONTEXT = $ACTION_CONTEXT;
+	$result->ACTION_ORDER = $ACTION_ORDER;
 	$result->EVENT_PARAM_EVENT_TYPE = $EVENT_PARAM_EVENT_TYPE;
 
 
@@ -86,44 +90,69 @@
 	}
 	$result->action_file_info = $action_file_info;
 
-	$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-	if(empty($action_json_str)) {
-		$result->error = "empty(\$action_json_str)";
-		terminate($wdj_mysql_interface, $result);
-		return;
-	}
-
-	$action_std = json_decode($action_json_str);
-	if(is_null($action_std)) {
-		$result->error = "is_null(\$action_std)";
-		terminate($wdj_mysql_interface, $result);
-		return;
-	}
-	$result->action_std = $action_std;
-
-	// 2. action_std --> action_obj로 변환.
-	$action_obj = ActionObject::convert($action_std);
+	// 1-1. 아젠다의 action obj를 가져옵니다.
+	$action_obj = ActionFileManager::load_action_obj($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
 	if(ActionObject::is_not_action_obj($action_obj)) {
 		$result->error = "ActionObject::is_not_action_obj(\$action_obj)";
 		terminate($wdj_mysql_interface, $result);
 		return;
 	}
 
-	// 3. CHECK IDENTICAL DATA
-	$is_same = ActionObject::compare_with_std($action_obj, $action_std);
-	if($is_same == false) {
-		$result->error = "\$is_same == false";
-		terminate($wdj_mysql_interface, $result);
-		return;
-	}
-
-	// EVENT_TYPE_INSERT_ITEM
 
 
 
-	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
+
+
+
+	
+
+	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_INSERT_ITEM) == 0) {
 
 		$result->PROCESS = "0. 테이블에 새로운 아이템을 추가하는 경우";
+
+		if(empty($ACTION_HASH_KEY_BEFORE)) {
+			$result->error = "empty(\$ACTION_HASH_KEY_BEFORE)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+
+		$target_action_obj = $action_obj->search($ACTION_HASH_KEY_BEFORE);
+		if(ActionObject::is_not_action_obj($target_action_obj)) {
+			$result->error = "ActionObject::is_not_action_obj(\$target_action_obj)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$result->target_action_std = $target_action_obj->get_std_obj();
+
+		// 복사할 대상인 테이블 열의 모든 action item의 리스트를 가져옵니다.
+		$cur_table_row_field_action_item_list = null;
+		if(ActionItem::is_instance($target_action_obj) && $target_action_obj->is_table_field_item()) {
+			// action item인 경우, 부모 객체를 불러옵니다.
+			$cur_table_row_field_action_item_list = $target_action_obj->get_table_row_field_action_item_list();
+		}
+		if(is_null($cur_table_row_field_action_item_list)) {
+			$result->error = "is_null(\$cur_table_row_field_action_item_list)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+
+		$new_table_row_item_list = array();
+		foreach($cur_table_row_field_action_item_list AS $action_item) {
+			$copy_action_obj = $action_item->add_empty_sibling_after($params->NOT_ASSIGNED);
+
+			if(is_null($copy_action_obj)) {
+				$result->error = "is_null(\$copy_action_obj)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			array_push($new_table_row_item_list, $copy_action_obj->get_std_obj());
+		}
+		$result->new_table_row_item_list = $new_table_row_item_list;
+
+		// 0-3. save changed action obj
+		// 0-4. CHECK
+		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
@@ -148,27 +177,10 @@
 
 			// 1-2. add new item & set new name received
 			$copy_action_obj = $target_action_obj->add_empty_sibling_after($ACTION_NAME);
+			$result->ACTION_HASH_KEY = $copy_action_obj->get_hash_key();
 
 			// 1-3. save changed action obj
-			$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
-
-			// 1-4. CHECK
-			$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-			if(empty($action_json_str)) {
-				$result->error = "empty(\$action_json_str)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-
-			$action_std = json_decode($action_json_str);
-			if(is_null($action_std)) {
-				$result->error = "is_null(\$action_std)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-			$result->action_std_updated = $action_std;
-
-			$result->ACTION_HASH_KEY = $copy_action_obj->get_hash_key();
+			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
 		} else {
 
@@ -203,30 +215,15 @@
 			$result->target_action_std_updated = $target_action_obj->get_std_obj();
 
 			// 2-3. save changed action obj
-			$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
-
 			// 2-4. CHECK
-			$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-			if(empty($action_json_str)) {
-				$result->error = "empty(\$action_json_str)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-
-			$action_std = json_decode($action_json_str);
-			if(is_null($action_std)) {
-				$result->error = "is_null(\$action_std)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-			$result->action_std_updated = $action_std;			
+			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);	
 
 		}
 
 	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) {
 
-		// 2. 아이템을 삭제하는 경우
-		$result->PROCESS = "1. 아이템을 삭제하는 경우";
+		// 3. 아이템을 삭제하는 경우
+		$result->PROCESS = "3. 아이템을 삭제하는 경우";
 
 		if(empty($ACTION_HASH_KEY)) {
 			$result->error = "empty(\$ACTION_HASH_KEY)";
@@ -246,26 +243,53 @@
 		$target_action_obj->remove();
 
 		// 2-3. save changed action obj
-		$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
-
 		// 2-4. CHECK
-		$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-		if(empty($action_json_str)) {
-			$result->error = "empty(\$action_json_str)";
+		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
+
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_TABLE_ROW_ORDER) == 0) {
+
+		// 4. 테이블의 열의 순서를 변경하는 경우
+		$result->PROCESS = "4. 테이블의 열의 순서를 변경하는 경우";
+
+		if(!(-1 < $ACTION_ORDER)) {
+			$result->error = "!(-1 < \$ACTION_ORDER)";
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
 
-		$action_std = json_decode($action_json_str);
-		if(is_null($action_std)) {
-			$result->error = "is_null(\$action_std)";
+		if(empty($ACTION_HASH_KEY)) {
+			$result->error = "empty(\$ACTION_HASH_KEY)";
 			terminate($wdj_mysql_interface, $result);
 			return;
 		}
-		$result->action_std_updated = $action_std;
+
+		$target_action_obj = $action_obj->search($ACTION_HASH_KEY);
+		if(ActionObject::is_not_action_obj($target_action_obj)) {
+			$result->error = "ActionObject::is_not_action_obj(\$target_action_obj)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$result->target_action_std = $target_action_obj->get_std_obj();
+
+		// 복사할 대상인 테이블 열의 모든 action item의 리스트를 가져옵니다.
+		$cur_table_row_field_action_item_list = null;
+		if(ActionItem::is_instance($target_action_obj) && $target_action_obj->is_table_field_item()) {
+			// action item인 경우, 부모 객체를 불러옵니다.
+			$cur_table_row_field_action_item_list = $target_action_obj->get_table_row_field_action_item_list();
+		}
+		if(is_null($cur_table_row_field_action_item_list)) {
+			$result->error = "is_null(\$cur_table_row_field_action_item_list)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+
+		foreach($cur_table_row_field_action_item_list AS $action_item) {
+			$action_item->shift($ACTION_ORDER);
+		}
+
+		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 		
 	}
-
 
 
 
