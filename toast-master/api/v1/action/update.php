@@ -182,34 +182,7 @@
 			// 2-1-3. save changed action obj & check
 			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
-		} else if(-1 < $ACTION_ORDER) {
-
-			// 2-2. 리스트의 아이템의 순서를 변경하는 경우.
-			$result->PROCESS = "2-2. 리스트의 아이템의 순서를 변경하는 경우.";
-
-			// 2-2-1. 대상 아이템을 가져옵니다. (공통 로직?)
-			if(empty($ACTION_HASH_KEY)) {
-				$result->error = "empty(\$ACTION_HASH_KEY)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-
-			$target_action_obj = $action_obj->search($ACTION_HASH_KEY);
-			if(ActionItem::is_not_instance($target_action_obj)) {
-				$result->error = "ActionItem::is_not_instance(\$target_action_obj)";
-				terminate($wdj_mysql_interface, $result);
-				return;
-			}
-
-			$target_action_obj->shift($ACTION_ORDER);
-
-			// 2-3-3. save changed action obj & check
-			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);	
-
 		} else {
-
-			// 2-3. 기존의 아이템을 업데이트하는 경우.
-			$result->PROCESS = "2-3. 기존의 아이템을 업데이트하는 경우.";
 
 			// 2-3-1. 대상 아이템을 가져옵니다. (공통 로직?)
 			if(empty($ACTION_HASH_KEY)) {
@@ -225,18 +198,32 @@
 				return;
 			}
 
-			// 2-3-2. update name & context
-			if(empty($ACTION_NAME)) {
-				$result->error = "empty(\$ACTION_NAME)";
-				terminate($wdj_mysql_interface, $result);
-				return;
+			if(-1 < $ACTION_ORDER && ($ACTION_ORDER != $target_action_obj->get_idx())) {
+
+				// 2-2. 리스트의 아이템의 순서를 변경하는 경우.
+				$result->PROCESS = "2-2. 리스트의 아이템의 순서를 변경하는 경우.";
+				$target_action_obj->shift($ACTION_ORDER);
+
+			} else {
+
+				// 2-3. 기존의 아이템을 업데이트하는 경우.
+				$result->PROCESS = "2-3. 기존의 아이템을 업데이트하는 경우.";
+
+				// 2-3-2. update name & context
+				if(empty($ACTION_NAME)) {
+					$result->error = "empty(\$ACTION_NAME)";
+					terminate($wdj_mysql_interface, $result);
+					return;
+				}
+
+				$target_action_obj->set_name($ACTION_NAME);
+				if(!empty($ACTION_CONTEXT)) {
+					$target_action_obj->set_context($ACTION_CONTEXT);
+				}
+				$result->target_action_std_updated = $target_action_obj->get_std_obj();
+
 			}
 
-			$target_action_obj->set_name($ACTION_NAME);
-			if(!empty($ACTION_CONTEXT)) {
-				$target_action_obj->set_context($ACTION_CONTEXT);
-			}
-			$result->target_action_std_updated = $target_action_obj->get_std_obj();
 
 			// 2-3-3. save changed action obj & check
 			$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);	
@@ -262,8 +249,25 @@
 			return;
 		}
 
-		// 2-2. 있다면 삭제!
-		$target_action_obj->remove();
+		if($target_action_obj->is_table_field_item()) {
+			// 2-2-2. table field item 삭제
+			$result->PROCESS = "3. 아이템을 삭제하는 경우 / 2-2-2. table field item 삭제";
+			$cur_table_row_field_action_item_list = $target_action_obj->get_table_row_field_action_item_list();
+			if(is_null($cur_table_row_field_action_item_list)) {
+				$result->error = "is_null(\$cur_table_row_field_action_item_list)";
+				terminate($wdj_mysql_interface, $result);
+				return;
+			}
+
+			foreach($cur_table_row_field_action_item_list AS $action_item) {
+				$action_item->remove();
+			}
+
+		} else {
+			// 2-2-3. list item 삭제
+			$result->PROCESS = "3. 아이템을 삭제하는 경우 / 2-2-3. list item 삭제";
+			$target_action_obj->remove();
+		}
 
 		// 2-3. save changed action obj & check
 		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
@@ -308,7 +312,7 @@
 		foreach($cur_table_row_field_action_item_list AS $action_item) {
 			$action_item->shift($ACTION_ORDER);
 		}
-		
+
 		// 2-3. save changed action obj & check
 		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 		

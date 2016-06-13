@@ -14,41 +14,56 @@ if(COUNT($meeting_agenda_list) > 0){
 }
 
 // SELECT INFOS
-$today_news_list = $wdj_mysql_interface->getNews($meeting_id);
 
-$schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
-
-$today_speech_speaker_v2_list = $wdj_mysql_interface->sel_speech_speaker($meeting_id);
-
-$speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
-
-$today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(7,2,9,5,10,6,11,4));
-
-$member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
-$member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
-$executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
-
-$FONT_SIZE = $params->getParamString($params->FONT_SIZE_LARGE);
+// REMOVE ME
+// $today_news_list = $wdj_mysql_interface->getNews($meeting_id);
+// $schedule_timeline_list_V2 = $wdj_mysql_interface->getTimeline_V2($meeting_id);
+// $today_speech_speaker_v2_list = $wdj_mysql_interface->sel_speech_speaker($meeting_id);
+// $speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
+// $today_role_list = $wdj_mysql_interface->getTodayRoleList($meeting_membership_id, $meeting_id, array(7,2,9,5,10,6,11,4));
+// $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
+// $member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
 
 // LEGACY
 // 액션 리스트로 출력합니다.
 // $action_list = $wdj_mysql_interface->get_root_action_collection(6507, 134); 	// 판교
 
 // 액션 리스트로 출력합니다.
+/*
 $recent_action_id = $wdj_mysql_interface->select_recent_action_id_collection_by_meeting_id($meeting_id);
 $action_list = null;
 $recent_root_action_collection = null;
 if(0 < $recent_action_id) {
 	$action_list = $wdj_mysql_interface->get_root_action_collection($recent_action_id, $meeting_id);	
 }
-
-
 // Agent Check
 $IS_MOBILE = false;
 $user_agent = strtolower($_SERVER['HTTP_USER_AGENT']);
 if ((strpos($user_agent,'iphone') !== false) || (strpos($user_agent,'android') !== false)) {
 	$IS_MOBILE = true;
 }
+*/
+
+$executive_member_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
+$FONT_SIZE = $params->getParamString($params->FONT_SIZE_LARGE);
+
+// 1. 해당 미팅의 아젠다를 로딩합니다.
+$action_file_info = $wdj_mysql_interface->select_action_file_info($meeting_id);
+if(is_null($action_file_info)) {
+	echo "!Error! / is_null(\$action_file_info)";
+	return;
+}
+$result->action_file_info = $action_file_info;
+
+// 2. 아젠다의 action obj를 가져옵니다.
+$action_obj = ActionFileManager::load_action_obj($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
+if(ActionObject::is_not_action_obj($action_obj)) {
+	echo "!Error! / ActionObject::is_not_action_obj(\$action_obj)";
+	return;
+}
+
+
+
 
 
 // @ required
@@ -223,12 +238,12 @@ $wdj_pdf->draw_card_board_timeline_V2(
 */
 
 // wonder.jung11
-$action_list->set_cell_x_pos(2);
-$action_list->set_cell_y_pos($wdj_first_row_y_pos);
-$action_list->set_cell_width(133);
-$action_list->set_font_type($FONT_SIZE);
+$action_obj->set_cell_x_pos(2);
+$action_obj->set_cell_y_pos($wdj_first_row_y_pos);
+$action_obj->set_cell_width(133);
+$action_obj->set_font_type($FONT_SIZE);
 
-$wdj_pdf->draw_element($action_list);
+$wdj_pdf->draw_element($action_obj);
 
 // TEST 직접 사각형을 그림.
 $cur_pdf = $wdj_pdf->get_pdf();
@@ -281,7 +296,6 @@ SAMPLE - POLYGON TEST
 // 	$dest = "I";
 // }
 $meeting_title = $meeting_agenda_obj->__membership_desc ." " . $meeting_agenda_obj->__startdate . " " . $meeting_agenda_obj->__theme . ".pdf";
-// $wdj_pdf->show_output($meeting_title, $dest);
 $wdj_pdf->show_output($meeting_title);
 
 //============================================================+

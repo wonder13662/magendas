@@ -701,7 +701,7 @@ class MYSQLInterface{
 				, $meeting_membership_id
 			);
 
-			$new_meeting_id = $meeting_agenda_added->__meeting_id;
+			$new_meeting_id = $result->__meeting_id;
 			$new_meeting_id = intval($new_meeting_id);
 
 			return $new_meeting_id;

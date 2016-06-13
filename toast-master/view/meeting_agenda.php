@@ -42,7 +42,7 @@
 
 	// 가장 최신의 미팅 ID를 가져옵니다.
 	$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
-	if((0 == $MEETING_ID) && (0 < $latest_meeting_id)) {
+	if((!(0 < $MEETING_ID)) && (0 < $latest_meeting_id)) {
 		// param으로 받은 미팅 아이디가 없을 경우, upcoming meeting id를 사용합니다.
 		$MEETING_ID = $latest_meeting_id;
 	}
@@ -50,7 +50,7 @@
 
 
 	$meeting_agenda_obj = null;
-	if($MEETING_ID > 0) {
+	if(0 < $MEETING_ID) {
 
 		// 지정한 meeting_id가 있는 경우.
 		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
@@ -320,8 +320,6 @@
 
 <script>
 
-console.log("HERE / 001 - XXX");
-
 // php to javascript sample
 var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
@@ -364,6 +362,10 @@ var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_p
 
 var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
+
+// TEST - MEETING_ID
+var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
+console.log("MEETING_ID ::: ",MEETING_ID);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

@@ -139,7 +139,7 @@
 	if(!is_null($action_obj)) {
 
 		// 가져온 템플릿을 파일로 저장합니다.
-		$YYYYMMDD = date("Y-m-d");
+		$YYYYMMDD = ActionFileManager::get_date_today();
 		$cur_action_file_path = ActionFileManager::save($YYYYMMDD, $action_obj);
 
 		// DB에 저장

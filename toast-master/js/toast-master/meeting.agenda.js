@@ -307,8 +307,6 @@ wonglish.meeting_agenda_manager = {
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
 
-							console.log("search_option_arr_speech_projects ::: ",search_option_arr_speech_projects);
-
 							return search_option_arr_speech_projects;
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
@@ -579,13 +577,12 @@ wonglish.meeting_agenda_manager = {
 							console.log(">>> data : ",data);
 
 							// 새로운 템플릿으로 화면 내용을 변경합니다.
-							var action_file_json_str = data.action_file_json_str;
-							var action_obj_std = $.parseJSON(action_file_json_str);
-							var new_meeting_action_list = undefined;
-							if(action_obj_std != undefined) {
+							var action_obj_std = data.action_std_updated;
+							var new_meeting_action_list = null;
+							if(action_obj_std != null) {
 								new_meeting_action_list = _action.get_action_obj(action_obj_std);
 							}
-							if(new_meeting_action_list != undefined) {
+							if(new_meeting_action_list != null) {
 								remove_action_timeline(container_jq);
 								activate_action_timeline(new_meeting_action_list, container_jq);
 							}

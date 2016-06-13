@@ -11,6 +11,11 @@ class ActionFileManager{
 		return ActionFileManager::$SERVICE_ROOT_PATH;
 	}
 
+	//ActionFileManager::get_date_today
+	public static function get_date_today() {
+		return date("Y-m-d");
+	}
+
 	//ActionFileManager::get_action_file_path
 	public static function get_action_file_path($YYYYMMDD = null, $action_hash_key = null) {
 

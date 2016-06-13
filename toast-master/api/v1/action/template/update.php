@@ -137,24 +137,20 @@
 
 	$action_file_info = null;
 	if(!is_null($action_obj)) {
+		
+		$YYYYMMDD = ActionFileManager::get_date_today();
 
-		// 가져온 템플릿을 파일로 저장합니다.
-		$YYYYMMDD = date("Y-m-d");
-		$cur_action_file_path = ActionFileManager::save($YYYYMMDD, $action_obj);
-
-		// DB에 파일 경로 저장.
+		// DB에 저장
 		$cur_action_hash_key = $action_obj->get_hash_key();
 		$wdj_mysql_interface->insert_action_file_path($cur_action_hash_key, $MEETING_ID, $YYYYMMDD);
 
-		// CHECK - 저장한 파일에서 json str을 가져옵니다.
-		$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
-		$result->action_file_info = $action_file_info;
+		// save changed action obj & check
+		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($YYYYMMDD, $action_obj);
 
-	}
-	if(!is_null($action_file_info)) {
+	} else if(!is_null($action_file_info)) {
 
-		$action_file_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);
-		$result->action_file_json_str = $action_file_json_str;
+		// save changed action obj & check
+		$result->action_std_updated = ActionFileManager::save_n_reload_action_std($action_file_info->__action_regdate, $action_obj);
 
 	}
 
