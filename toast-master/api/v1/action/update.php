@@ -77,60 +77,50 @@
 
 
 
+	// 1. 해당 미팅의 아젠다를 로딩합니다.
+	$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
+	if(is_null($action_file_info)) {
+		$result->error = "is_null(\$action_file_info)";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+	$result->action_file_info = $action_file_info;
+
+	$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
+	if(empty($action_json_str)) {
+		$result->error = "empty(\$action_json_str)";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+
+	$action_std = json_decode($action_json_str);
+	if(is_null($action_std)) {
+		$result->error = "is_null(\$action_std)";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+	$result->action_std = $action_std;
+
+	// 2. action_std --> action_obj로 변환.
+	$action_obj = ActionObject::convert($action_std);
+	if(ActionObject::is_not_action_obj($action_obj)) {
+		$result->error = "ActionObject::is_not_action_obj(\$action_obj)";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+
+	// 3. CHECK IDENTICAL DATA
+	$is_same = ActionObject::compare_with_std($action_obj, $action_std);
+	if($is_same == false) {
+		$result->error = "\$is_same == false";
+		terminate($wdj_mysql_interface, $result);
+		return;
+	}
+
 
 
 
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
-
-
-
-
-
-
-
-
-		// 1,2,3번의 과정은 공통 작업 부분.
-		// 1. 해당 미팅의 아젠다를 로딩합니다.
-		$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
-		if(is_null($action_file_info)) {
-			$result->error = "is_null(\$action_file_info)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-		$result->action_file_info = $action_file_info;
-
-		$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
-		if(empty($action_json_str)) {
-			$result->error = "empty(\$action_json_str)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-
-		$action_std = json_decode($action_json_str);
-		if(is_null($action_std)) {
-			$result->error = "is_null(\$action_std)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-		$result->action_std = $action_std;
-
-		// 2. action_std --> action_obj로 변환.
-		$action_obj = ActionObject::convert($action_std);
-		if(ActionObject::is_not_action_obj($action_obj)) {
-			$result->error = "ActionObject::is_not_action_obj(\$action_obj)";
-			terminate($wdj_mysql_interface, $result);
-			return;
-		}
-
-		// 3. CHECK IDENTICAL DATA
-		$is_same = ActionObject::compare_with_std($action_obj, $action_std);
-		$result->is_same = $is_same;
-
-
-
-
-
-
 
 		if(empty($ACTION_HASH_KEY)) {
 
@@ -228,14 +218,51 @@
 
 		}
 
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_DELETE_ITEM) == 0) {
 
+		// 2. 아이템을 삭제하는 경우
+		$result->PROCESS = "1. 아이템을 삭제하는 경우";
 
+		if(empty($ACTION_HASH_KEY)) {
+			$result->error = "empty(\$ACTION_HASH_KEY)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
 
+		// 2-1. 아이템이 실제로 있는지 확인.
+		$target_action_obj = $action_obj->search($ACTION_HASH_KEY);
+		if(ActionItem::is_not_instance($target_action_obj)) {
+			$result->error = "ActionItem::is_not_instance(\$target_action_obj)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
 
+		// 2-2. 있다면 삭제!
+		$target_action_obj->remove();
 
+		// 2-3. save changed action obj
+		$action_json_str = ActionFileManager::save($action_file_info->__action_regdate, $action_obj);	
 
+		// 2-4. CHECK
+		$action_json_str = ActionFileManager::load($action_file_info->__action_regdate, $action_file_info->__action_hash_key);	
+		if(empty($action_json_str)) {
+			$result->error = "empty(\$action_json_str)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
 
+		$action_std = json_decode($action_json_str);
+		if(is_null($action_std)) {
+			$result->error = "is_null(\$action_std)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		$result->action_std_updated = $action_std;
+		
 	}
+
+
+
 
 	// FIN
 	terminate($wdj_mysql_interface, $result);

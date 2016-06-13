@@ -155,6 +155,22 @@ class ActionObject implements Action{
 
 		return -1;
 	}
+
+	public function remove() {
+
+		if($this->has_no_parent()) {
+			return;
+		}
+
+		$parent_action_obj = $this->get_parent();
+		if(ActionObject::is_not_action_obj($parent_action_obj)) {
+			return;
+		}
+
+		$parent_action_obj->remove_child($this);
+
+	}
+
 	public function remove_child($child_action_obj_remove) {
 
 		// DEBUG
