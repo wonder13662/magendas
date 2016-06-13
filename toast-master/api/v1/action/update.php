@@ -117,10 +117,15 @@
 		return;
 	}
 
+	// EVENT_TYPE_INSERT_ITEM
 
 
 
 	if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
+
+		$result->PROCESS = "0. 테이블에 새로운 아이템을 추가하는 경우";
+
+	} else if(strcmp($EVENT_PARAM_EVENT_TYPE, $params->EVENT_TYPE_UPDATE_ITEM) == 0) {
 
 		if(empty($ACTION_HASH_KEY)) {
 

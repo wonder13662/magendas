@@ -241,33 +241,69 @@ wonglish.meeting_agenda_manager = {
 					console.log("action_context_obj ::: ",action_context_obj);
 					console.log("_param_obj ::: ",_param_obj);
 
-					// 추가된 내용을 파일에도 동일하게 추가합니다.
-					_ajax.send_simple_post(
-						// _url
-						_link.get_link(_link.API_UPDATE_ACTION)
-						// _param_obj
-						,_param_obj
-						// _delegate_after_job_done
-						,_obj.get_delegate(
-							// delegate_func
-							function(data){
+					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
+						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
+						_action.EVENT_TYPE_DELETE_ITEM === cur_outcome_obj._event ) {
 
-								console.log("data ::: ",data);	
+						// 추가된 내용을 파일에도 동일하게 추가합니다.
+						_ajax.send_simple_post(
+							// _url
+							_link.get_link(_link.API_UPDATE_ACTION)
+							// _param_obj
+							,_param_obj
+							// _delegate_after_job_done
+							,_obj.get_delegate(
+								// delegate_func
+								function(data){
 
-								if( data.EVENT_PARAM_EVENT_TYPE === _param.EVENT_TYPE_UPDATE_ITEM && 
-									data.ACTION_HASH_KEY != null &&
-									action_item_obj.action_hash_key == "" ) {
+									console.log("data ::: ",data);	
 
-									// set hashkey of new sibling item.
-									console.log("set hashkey of new sibling item.");
-									action_item_obj.set_action_hash_key(data.ACTION_HASH_KEY);
-								}
+									if( data.EVENT_PARAM_EVENT_TYPE === _param.EVENT_TYPE_UPDATE_ITEM && 
+										data.ACTION_HASH_KEY != null &&
+										action_item_obj.action_hash_key == "" ) {
 
-							},
-							// delegate_scope
-							this
-						)
-					); // ajax done.
+										// set hashkey of new sibling item.
+										console.log("set hashkey of new sibling item.");
+										action_item_obj.set_action_hash_key(data.ACTION_HASH_KEY);
+									}
+
+								},
+								// delegate_scope
+								this
+							)
+						); // ajax done.
+
+					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
+
+						// SELECT BOX를 선택했을 때의 처리.
+
+						var cur_action_context_obj = action_item_obj.get_action_context_obj();
+						if(cur_action_context_obj == undefined) {
+
+							console.log("!Error! / cur_action_context_obj == undefined");
+							return;
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
+
+							console.log("search_option_arr_speech_projects ::: ",search_option_arr_speech_projects);
+
+							return search_option_arr_speech_projects;
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
+
+							return search_option_arr_members;	
+
+						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
+
+							return search_option_arr_members;	
+
+						}
+
+					}					
 
 					cur_element_event_manager.release();
 					
