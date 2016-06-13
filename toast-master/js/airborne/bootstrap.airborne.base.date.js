@@ -364,6 +364,8 @@ airborne.dates = {
 			console.log("!Error / date / getDttmStrFromDate / date_obj == null");
 		}
 
+		// 타이머 개선
+
 		if(date_format_type == this.DATE_TYPE_YYYYMMDDHHMMSS){
 
 			var cur_year = date_obj.getFullYear();
@@ -380,6 +382,33 @@ airborne.dates = {
 			cur_seconds = this.getDoubleDigit(cur_seconds);
 
 			return cur_year + cur_month + cur_days + cur_hours + cur_minutes + cur_seconds;
+
+		} else if(date_format_type == this.DATE_TYPE_H_YYYY_MM_DD_HH_MM_SS){
+
+			var cur_year = date_obj.getFullYear();
+			var cur_month = date_obj.getMonth() + 1;
+			cur_month = this.getDoubleDigit(cur_month);
+			var cur_days = date_obj.getDate();
+			cur_days = this.getDoubleDigit(cur_days);
+
+			var cur_hours = date_obj.getHours();
+			cur_hours = this.getDoubleDigit(cur_hours);
+			var cur_minutes = date_obj.getMinutes();
+			cur_minutes = this.getDoubleDigit(cur_minutes);
+			var cur_seconds = date_obj.getSeconds();
+			cur_seconds = this.getDoubleDigit(cur_seconds);
+
+			var output = 
+			"{YEAR}년 {MONTH}월 {DAY}일 {HOUR}:{MINUTE}:{SECOND}"
+			.replace(/\{YEAR\}/gi, cur_year)
+			.replace(/\{MONTH\}/gi, cur_month)
+			.replace(/\{DAY\}/gi, cur_days)
+			.replace(/\{HOUR\}/gi, cur_hours)
+			.replace(/\{MINUTE\}/gi, cur_minutes)
+			.replace(/\{SECOND\}/gi, cur_seconds)
+			;
+
+			return output;
 
 		} else if(date_format_type == this.DATE_TYPE_YYYY_MM_DD){
 
@@ -478,7 +507,7 @@ airborne.dates = {
 		var now_time_stack_millisec = start_time_obj.time_stack + time_diff_millsec;
 		var now_time_stack_sec = parseInt(now_time_stack_millisec / 1000);
 
-		return {start_time:now_time, time_diff_millsec:time_diff_millsec, time_stack:now_time_stack_millisec, time_stack_sec:now_time_stack_sec};
+		return {past_time:start_time, start_time:now_time, time_diff_millsec:time_diff_millsec, time_stack:now_time_stack_millisec, time_stack_sec:now_time_stack_sec};
 	}
 	,getDoubleDigit:function(target_number){
 		if(target_number < 10){

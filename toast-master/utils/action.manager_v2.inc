@@ -1,5 +1,6 @@
 <?php
 
+
 interface Action {
 
 	public function set_parent($parent_action_obj);
@@ -12,24 +13,94 @@ interface Action {
 
 class ActionObject implements Action{
 
-	// TODO - ActionObject에 id를 추가로 만들수 있는 기능을 제공해야 합니다.
+	// ActionObject::$COLLECTION_TYPE_LIST
+	public static $COLLECTION_TYPE_LIST=1;
+	public static $COLLECTION_TYPE_TABLE=2;
 
-	// 객체 내에서의 변화로 DB 업데이트를 진행합니다.
+	public static $ITEM_TYPE_TITLE_ONLY=1;
+	public static $ITEM_TYPE_TITLE_N_TIME_HH_MM=2;
+	public static $ITEM_TYPE_TITLE_N_TIME_MM_SS=3;
+	public static $ITEM_TYPE_SELECT_BOX=4;
+	public static $ITEM_TYPE_TITLE_ONLY_FIXED=5;
+	public static $ITEM_TYPE_TITLE_ONLY_ADDABLE=6;
+	public static $ITEM_TYPE_SELECT_BOX_ADDABLE=7;
+
+	public static function _IS_LIST($collection_type=-1) {
+		return (ActionObject::$COLLECTION_TYPE_LIST == $collection_type)?true:false;
+	}
+	public static function _IS_TABLE($collection_type=-1) {
+		return (ActionObject::$COLLECTION_TYPE_TABLE == $collection_type)?true:false;
+	} // ActionObject::_IS_COLLECTION
+	public static function _IS_COLLECTION($collection_type=-1) {
+		return (ActionObject::_IS_LIST($collection_type) || ActionObject::_IS_TABLE($collection_type));
+	}
+
+	public static function _IS_TITLE_ONLY($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_N_TIME_HH_MM($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_N_TIME_HH_MM == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_N_TIME_MM_SS($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_N_TIME_MM_SS == $item_type)?true:false;
+	}
+	public static function _IS_SELECT_BOX($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_ONLY_FIXED($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY_FIXED == $item_type)?true:false;
+	}
+	public static function _IS_TITLE_ONLY_ADDABLE($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_TITLE_ONLY_ADDABLE == $item_type)?true:false;
+	}
+	public static function _IS_SELECT_BOX_ADDABLE($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX_ADDABLE == $item_type)?true:false;
+	}
+	public static function _IS_ITEM($item_type=-1) {
+
+		if(ActionObject::_IS_TITLE_ONLY($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_N_TIME_HH_MM($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_N_TIME_MM_SS($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_ONLY_FIXED($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_TITLE_ONLY_ADDABLE($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX_ADDABLE($item_type)) {
+			return true;
+		}
+
+		return false;
+	}
+	// @ Usage : ActionObject::GET_UNIQUE_HASH_KEY();
+	private static $AUTO_INCREASE_CNT=0;
+	public static function GET_UNIQUE_HASH_KEY() {
+		$now_micro = TimeManager::get_now_micro();
+		$unique_hash_key = MD5(ActionObject::$AUTO_INCREASE_CNT . "" . $now_micro);
+
+		ActionObject::$AUTO_INCREASE_CNT++;
+
+		return $unique_hash_key;
+	}
+
+
 
 	private $parent_action_obj;
 	private $children_action_obj_list;
-	private $action_id;
 	private $action_name;
 	private $action_collection_type;
 	private $action_collection_type_name;
 	private $action_item_type;
 	private $action_item_type_name;
 	private $action_hash_key;
-	private $action_order;
+	// private $action_order; // REMOVE ME
 	private $action_is_shy;
 	private $coordinate;
 	private $search_map;
-	private $has_changed;
 	private $context;
 
 	public function test() { return 'ActionObject'; }
@@ -77,11 +148,65 @@ class ActionObject implements Action{
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
 			$child_action_obj = $child_action_obj_list[$idx];
 
-			if($child_action_obj->get_id() == $this->get_id()) {
+			if($this->is_equal($child_action_obj)) {
 				return $idx;
 			}
 		}
+
+		return -1;
 	}
+
+	public function remove() {
+
+		if($this->has_no_parent()) {
+			return;
+		}
+
+		$parent_action_obj = $this->get_parent();
+		if(ActionObject::is_not_action_obj($parent_action_obj)) {
+			return;
+		}
+
+		$parent_action_obj->remove_child($this);
+
+	}
+
+	public function shift($idx_insert=-1) {
+
+		if(ActionObject::is_not_action_obj($this)) {
+			echo "!Error! / shift / ActionObject::is_not_action_obj(\$this)<br/>";
+			return;
+		}
+		if(!(-1 < $idx_insert)) {
+			echo "!Error! / shift / !(-1 < \$idx_insert)<br/>";
+			return;
+		}
+		if($this->has_no_parent()) {
+			echo "!Error! / shift / \$this->has_no_parent()<br/>";
+			return;
+		}
+
+		$parent_action_obj = $this->get_parent();
+		$parent_action_obj->shift_child($this, $idx_insert);
+
+	}
+
+	public function shift_child($child_action_obj, $idx_insert=-1) {
+
+		if(ActionObject::is_not_action_obj($child_action_obj)) {
+			echo "!Error! / shift_child / ActionObject::is_not_action_obj(\$child_action_obj)<br/>";
+			return;
+		}
+		if(!(-1 < $idx_insert)) {
+			echo "!Error! / shift_child / !(-1 < \$idx_insert)<br/>";
+			return;
+		}
+
+		$this->remove_child($child_action_obj);
+		$this->add_child($child_action_obj, $idx_insert);
+
+	}
+
 	public function remove_child($child_action_obj_remove) {
 
 		// DEBUG
@@ -89,12 +214,12 @@ class ActionObject implements Action{
 		$cur_child_name = $child_action_obj_remove->get_name();
 
 		if(ActionObject::is_not_action_obj($child_action_obj_remove)) {
-			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
+			echo "!Error! / remove_child / \$this->is_not_action_obj(\$child_action_obj_remove)<br/>";
 			return;
 		}
 
 		if($this->has_no_child()) {
-			echo "!Error! / remove_child / $cur_name <-> $cur_child_name / \$this->has_no_child()<br/>";
+			echo "!Error! / remove_child / \$this->has_no_child()<br/>";
 			return;
 		}
 
@@ -103,7 +228,7 @@ class ActionObject implements Action{
 		for($idx = 0; $idx < count($child_action_obj_list); $idx++) {
 			$child_action_obj = $child_action_obj_list[$idx];
 
-			if($child_action_obj->get_id() != $child_action_obj_remove->get_id()) {
+			if($child_action_obj->is_not_equal($child_action_obj_remove)) {
 				array_push($child_action_obj_list_next, $child_action_obj);	
 			}
 		}
@@ -113,14 +238,15 @@ class ActionObject implements Action{
 	}
 	public function add_child($child_action_obj, $idx_insert=-1) {
 
+		if(ActionObject::is_not_action_obj($child_action_obj)) {
+			echo "!Error! / add_child / \$this->is_not_action_obj(\$child_action_obj)<br/>";
+			return;
+		}
+
 		// DEBUG
 		$cur_name = $this->get_name();
 		$cur_child_name = $child_action_obj->get_name();
 
-		if(ActionObject::is_not_action_obj($child_action_obj)) {
-			echo "!Error! / add_child / $cur_name <-> $cur_child_name / \$this->is_not_action_obj(\$child_action_obj)<br/>";
-			return;
-		}
 
 		if(is_null($this->children_action_object_list)) {
 			$this->children_action_object_list = array();
@@ -131,13 +257,49 @@ class ActionObject implements Action{
 			$child_action_name = $child_action_obj->get_name();
 
 			if(-1 < $idx_insert) {
+				// add child element into the specific index
 				$array_replacement = array($child_action_obj);
 				array_splice( $this->children_action_object_list, $idx_insert, 0, $array_replacement );	
 			} else {
+				// add child element to the last
 				array_push($this->children_action_object_list, $child_action_obj);	
 			}
 
 			$child_action_obj->set_parent($this);
+		}
+
+		// Set Hash key
+		$root_action_obj = $this->get_root_action_obj();
+		if(empty($child_action_obj->get_hash_key())) {
+
+			$child_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($child_action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / add_child / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+			$child_action_obj->set_hash_key($child_action_hash_key);
+		}
+
+		if( ActionCollection::is_instance($this) && 
+			$this->is_root_collection() && 
+			empty($this->get_hash_key())) {
+
+			// 1. root action인 경우, 자신의 id, hash_key를 직접 만들어 저장.
+			// hash_key는 action_name + 현재 시간 으로 만듦
+			$action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / add_child / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+			$this->set_hash_key($action_hash_key);
 		}
 
 	}
@@ -257,6 +419,143 @@ class ActionObject implements Action{
 		}
 	}
 
+	// @ desc : 현재 action obj를 기본값만 가진 객체로 복사.
+	public function copy_empty() {
+
+		$action_obj_clone = null;
+		$root_action_obj = $this->get_root_action_obj();
+		if(ActionCollection::is_instance($this) && $this->is_list()) {
+
+			$action_obj_clone = 
+			new ActionCollection(
+				// $action_name=""
+				$this->get_name()
+				// $action_collection_type=1
+				, $this->get_collection_type()
+				// $is_shy=0
+				, 0
+			);
+			$action_obj_clone->inject($this);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
+
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+
+			// 자식 아이템이 있다면, 추가합니다. shy item 1개만 포함합니다.
+			$first_child_action_item = $this->get_first_child();
+			if(!is_null($first_child_action_item)) {
+
+				$first_child_action_item_clone = $first_child_action_item->copy_empty();
+				$first_child_action_item_clone->set_is_shy(1);
+
+				$action_obj_clone->add_child($first_child_action_item_clone);
+
+			}
+
+			return $action_obj_clone;
+
+		} else if(ActionItemTitleNTimeHHMM::is_instance($this)) {
+
+			$action_obj_clone = 
+			new ActionItemTitleNTimeHHMM(
+				// $action_name=""
+				$this->get_name()
+				// $time_str_hhmm_init=""
+				, ""
+				// $time_str_hhmm_specific=""
+				, ""				
+				// $is_shy=0
+				, 0
+			);
+			$action_obj_clone->inject($this);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());
+
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+			// 자식 컬렉션이 있다면, 추가합니다.
+			$first_child_action_collection = $this->get_first_child();
+			if(!is_null($first_child_action_collection)) {
+
+				$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+				$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			}
+
+			return $action_obj_clone;
+
+		} else if(ActionItem::is_instance($this)) {
+
+			// public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
+			$action_obj_clone = 
+			new ActionItem(
+				// $action_name="New Item"
+				$this->get_name()
+				// $action_item_type=1
+				, $this->get_item_type()
+				// $is_shy=0
+				, 0
+			);
+			$action_obj_clone->inject($this);
+
+			// set hash_key
+			$action_obj_clone->set_hash_key(ActionObject::GET_UNIQUE_HASH_KEY());	
+
+			// check unique
+			$search_result = $root_action_obj->search($action_obj_clone->get_hash_key());
+			if(!is_null($search_result)) {
+				echo "!Error! / copy_empty / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+			// 자식 컬렉션이 있다면, 추가합니다.
+			$first_child_action_collection = $this->get_first_child();
+			if(!is_null($first_child_action_collection)) {
+
+				$first_child_action_collection_clone = $first_child_action_collection->copy_empty();
+				$action_obj_clone->add_child($first_child_action_collection_clone);
+
+			}
+
+			return $action_obj_clone;
+
+		}		
+
+	}
+
+	// wonder.jung
+	// @ desc : 사용자가 있던 아이템에서 새로운 형제 아이템을 추가(+)했을 때의 처리
+	public function add_empty_sibling_after($new_action_name="") {
+
+		// 0. 자신의 action type의 빈 객체를 만듭니다.
+		$copy_action_obj = $this->copy_empty();
+		$copy_action_obj->set_name($new_action_name);
+
+		// 1. 자신의 앞객체 뒤에 자신을 추가합니다.
+		$parent_action_obj = $this->get_parent();
+		if(is_null($parent_action_obj)) {
+			echo "!Error! / add_empty_sibling_after / is_null(\$parent_action_obj)<br/>";
+			return;
+		}
+		$next_idx = ($this->get_idx() + 1);
+		$parent_action_obj->add_child($copy_action_obj, $next_idx);
+
+		return $copy_action_obj;
+	}
+
 
 	public function set_name($action_name) {
 		$this->action_name = $action_name;
@@ -299,28 +598,11 @@ class ActionObject implements Action{
 		return $this->action_item_type_name;
 	}
 
-	public function set_id($action_id) {
-		$this->action_id = $action_id;
-	}
-	public function get_id() {
-		return $this->action_id;
-	}
-
 	public function set_hash_key($action_hash_key) {
 		$this->action_hash_key = $action_hash_key;
 	}
 	public function get_hash_key() {
 		return $this->action_hash_key;
-	}
-
-	public function set_order($action_order) {
-		$this->action_order = $action_order;
-	}
-	public function get_order() {
-		if(is_null($this->action_order)) {
-			return -1;
-		}
-		return $this->action_order;
 	}
 
 	public function set_is_shy($action_is_shy) {
@@ -401,8 +683,36 @@ class ActionObject implements Action{
 	public function get_coordinate() {
 		return $this->coordinate;
 	}
-	// TODO 서버에서 검색 매핑 정보를 만들어 주므로 js 단에서는 사라져야 합니다.
-	// $foo->{$start . $end}
+
+	public function set_search_map_recursive($search_map=null) {
+
+		if(is_null($search_map)) {
+			$cur_action_name = $this->get_name();
+			echo "!Error! / set_search_map_recursive / $cur_action_name / is_null($cur_search_map)";
+			return;
+		}
+
+		$this->set_search_map($search_map);
+
+		$children_action_list = $this->get_children();
+		for($idx = 0; $idx < count($children_action_list); $idx++) {
+			$child_action_obj = $children_action_list[$idx];
+			$child_action_obj->set_search_map_recursive($search_map);
+		}
+
+		if(ActionItem::is_instance($this) && $this->has_add_on_list()) {
+
+			$cur_children = $this->get_add_on_list();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+				$cur_add_on_action_obj = $cur_children[$idx];
+
+				$cur_add_on_action_obj->set_search_map_recursive($search_map);
+			} // end for
+
+		} // end if
+	} // end function
+
+	
 	public function set_search_map($search_map=null) {
 
 		// DEBUG
@@ -415,31 +725,30 @@ class ActionObject implements Action{
 			$search_map = new stdClass();
 		}
 
-		$cur_coordinate = $this->get_coordinate();
-		if(!is_null($cur_coordinate) && !empty($cur_coordinate)) {
-			// echo "$cur_name / set_search_map / \$cur_coordinate :: $cur_coordinate<br/>";
-			$search_map->{$cur_coordinate} = $this;
-		}
 		$cur_hash_key = $this->get_hash_key();
 		if(!is_null($cur_hash_key) && !empty($cur_hash_key)) {
-			// echo "$cur_name / set_search_map / \$cur_hash_key :: $cur_hash_key<br/>";
 			$search_map->{$cur_hash_key} = $this;
-		}		
+		}
 
 		$this->search_map = $search_map;
 	}
 	public function get_search_map() {
 		return $this->search_map;
 	}
-	public function search($coordinate) {
+	public function search($action_hash_key=null) {
+
+		if(empty($action_hash_key)) {
+			echo "!Error! / search / empty(\$action_hash_key)<br/>";
+			return null;
+		}
+
 		if(is_null($this->search_map)) {
 			$this->search_map = new stdClass();
 		}
 		
-		$action_obj_from_search = $this->search_map->{$coordinate};
+		$action_obj_from_search = $this->search_map->{$action_hash_key};
 		$cur_name = $this->get_name();
 		if(is_null($action_obj_from_search)) {
-			echo "$cur_name / search / \$coordinate :: $coordinate is null!<br/>";			
 			return null;
 		}
 
@@ -467,10 +776,6 @@ class ActionObject implements Action{
 		if(is_null($context_key) || empty($context_key)) {
 			return null;
 		}
-		// REMOVE ME
-		// if(is_null($context_value) || empty($context_value)) {
-		// 	return null;
-		// }
 
 		// DEBUG
 		// $cur_actino_name = $this->get_name();
@@ -527,37 +832,14 @@ class ActionObject implements Action{
 	}
 
 
-	public function has_changed() {
-		if(is_null($this->has_changed)) {
-			$this->has_changed = false;
-		}
-		return $this->has_changed;
-	}
-	public function set_changed($has_changed) {
-
-		if(is_null($has_changed)) {
-			$has_changed = false;
-		}
-
-		$this->has_changed = $has_changed;
-
-		// set_parent_changed
-		$parent_action_obj = $this->get_parent();
-		if($this->has_parent()) {
-			$parent_action_obj->set_changed($has_changed);	
-		}
-	}
-
-
 	public function get_std_obj($std_obj=null) {
 
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();
 		}
 
-		$std_obj->action_id = intval($this->action_id);
 		$std_obj->action_hash_key = $this->action_hash_key;
-		$std_obj->action_order = intval($this->action_order);
+		// $std_obj->action_order = intval($this->action_order); // REMOVE ME
 		$std_obj->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 		$std_obj->action_name = $this->action_name;
 		$std_obj->action_collection_type = intval($this->action_collection_type);
@@ -568,7 +850,8 @@ class ActionObject implements Action{
 
 		$std_obj->coordinate = $this->coordinate;
 
-		$std_obj->parent_action_obj = null;
+		// REMOVE ME
+		// $std_obj->parent_action_obj = null;
 
 		$children_action_obj_list = array();
 
@@ -593,9 +876,8 @@ class ActionObject implements Action{
 				$std_obj_child = $child_action_obj->get_std_obj();
 
 				$std_obj_child_parent = new stdClass();
-				$std_obj_child_parent->action_id = intval($this->action_id);
 				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
-				$std_obj_child_parent->action_order = intval($this->action_order);
+				// $std_obj_child_parent->action_order = intval($this->action_order); // REMOVE ME
 				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 				$std_obj_child_parent->action_name = $this->action_name;
 				
@@ -607,11 +889,14 @@ class ActionObject implements Action{
 
 				$std_obj_child_parent->coordinate = $this->coordinate;
 
-				$std_obj_child->parent_action_obj = $std_obj_child_parent;
+				// REMOVE ME
+				//$std_obj_child->parent_action_obj = $std_obj_child_parent;
 
 				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
-					$std_obj_child->action_item_sibling_before = $before_std_obj_child;
+
+					// REMOVE ME
+					// $std_obj_child->action_item_sibling_before = $before_std_obj_child;
 				}
 
 				array_push($children_action_obj_list, $std_obj_child);
@@ -632,20 +917,20 @@ class ActionObject implements Action{
 			return;
 		}
 
-		$this->set_id($action_obj->get_id());
+		// $this->set_id($action_obj->get_id()); // REOMVE ME
 		$this->set_name($action_obj->get_name());
 
 		$this->set_collection_type($action_obj->get_collection_type());
 		$this->set_collection_type_name($action_obj->get_collection_type_name());
-		$this->set_item_type($action_obj->get_item_type());
 
+		$this->set_item_type($action_obj->get_item_type());
 		$this->set_item_type_name($action_obj->get_item_type_name());
+
 		$this->set_context($action_obj->get_context());
 
-		$this->set_hash_key($action_obj->get_hash_key());
-		$this->set_order($action_obj->get_order());
+		// $this->set_hash_key($action_obj->get_hash_key()); // REMOVE ME - 고유한 값이므로 새로 만들어야 합니다.
+		// $this->set_order($action_obj->get_order()); // REMOVE ME
 		$this->set_is_shy($action_obj->get_is_shy());
-		$this->set_changed($action_obj->has_changed());
 
 	}
 
@@ -815,11 +1100,6 @@ class ActionObject implements Action{
 	// @ Desc : 자신과 파라미터로 넘어온 action obj가 동일한지 id, hash_key값을 비교해 알려줍니다.
 	public function is_equal($target_action_obj=null) {
 
-		$cur_action_id = $this->get_id();
-		if(is_null($cur_action_id) || $cur_action_id < 1) {
-			return false;
-		}
-
 		$cur_action_hash_key = $this->get_hash_key();
 		if(empty($cur_action_hash_key)) {
 			return false;
@@ -829,18 +1109,9 @@ class ActionObject implements Action{
 			return false;
 		}
 
-		$cur_action_id_target = $target_action_obj->get_id();
-		if(is_null($cur_action_id_target) || $cur_action_id_target < 1) {
-			return false;
-		}
-
 		$cur_action_hash_key_target = $target_action_obj->get_hash_key();
 		if(empty($cur_action_hash_key_target)) {
 			return false;
-		}
-
-		if($cur_action_id == $cur_action_id_target) {
-			return true;
 		}
 
 		if(strcmp($cur_action_hash_key, $cur_action_hash_key_target) == 0) {
@@ -850,9 +1121,13 @@ class ActionObject implements Action{
 		return false;
 	}
 
+	public function is_not_equal($target_action_obj=null) {
+		return !$this->is_equal($target_action_obj);
+	}
+
 	public function show_info() {
 
-		$cur_id = $this->get_id();
+		// $cur_id = $this->get_id(); // REMOVE ME
 		$cur_hash_key = $this->get_hash_key();
 		$cur_name = $this->get_name();
 		$cur_collection_type_name = $this->get_collection_type_name();
@@ -861,10 +1136,12 @@ class ActionObject implements Action{
 
 		$cur_collection_type = $this->get_collection_type();
 
+		// REMOVE ME
 		// $is_table = $this->is_table();
 		// $is_list = $this->is_list();
 
-		echo "\$cur_id :: $cur_id<br/>";
+		// echo "\$cur_id :: $cur_id<br/>";
+
 		echo "\$cur_hash_key :: $cur_hash_key<br/>";
 		echo "\$cur_name :: $cur_name<br/>";
 		echo "\$cur_collection_type_name :: $cur_collection_type_name<br/>";
@@ -971,7 +1248,7 @@ class ActionObject implements Action{
 			$cur_parent = $this->get_parent();	
 			return $cur_parent->get_depth($depth + 1);
 
-		} else if($this->has_add_on_parent()) {
+		} else if(ActionCollection::is_instance($this) && $this->has_add_on_parent()) {
 
 			$cur_add_on_action_parent_obj = $this->get_add_on_action_parent_obj();	
 			return $cur_add_on_action_parent_obj->get_depth($depth + 1);
@@ -980,6 +1257,254 @@ class ActionObject implements Action{
 
 		return $depth;
 	}
+
+	// @ desc : action std 와 action obj간의 데이터 일치성 확인. recursive check. 
+	// @ Usage : ActionObject::compare_with_std($action_obj, $action_std);
+	public static function compare_with_std($action_obj=null, $action_std=null) {
+
+		$action_name = $action_std->action_name;
+		$action_hash_key = $action_std->action_hash_key;
+		$coordinate = $action_std->coordinate;
+		//coordinate
+		// echo "!!HERE!! / \$action_name ::: $action_name<br/>";
+
+		// check validation of 2 objects.
+		if(ActionObject::is_not_action_obj($action_obj)) {
+
+			echo "!Error! / compare_with_std / ActionObject::is_not_action_obj(\$action_obj)<br/>";
+			return false;
+
+		} 
+		if(is_null($action_std)) {
+
+			echo "!Error! / compare_with_std / is_null(\$action_std)<br/>";
+			return false;
+
+		}
+
+
+
+		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
+
+			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
+				$hash_key_from_obj = $action_obj->get_hash_key();
+				$hash_key_from_std = $action_std->action_hash_key;
+				echo "col / false : \$hash_key_from_obj : $hash_key_from_obj<br/>";
+				echo "col / false : \$hash_key_from_std : $hash_key_from_std<br/>";
+				return false;
+			}
+			if($action_obj->get_collection_type() != intval($action_std->action_collection_type)) {
+				$collection_type = $action_obj->get_collection_type();
+				echo "col / false : \$collection_type : $collection_type<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_collection_type_name(),$action_std->action_collection_type_name) != 0) {
+				$collection_type_name = $action_obj->get_collection_type_name();
+				echo "col / false : \$collection_type_name : $collection_type_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_name(),$action_std->action_name) != 0) {
+				$cur_name = $action_obj->get_name();
+				echo "col / false : \$cur_name : $cur_name<br/>";
+				return false;
+			}
+			if($action_obj->get_is_shy() != $action_std->action_is_shy) {
+				$is_shy = $action_obj->get_is_shy();
+				echo "col / false : \$is_shy : $is_shy<br/>";
+				return false;
+			}
+
+			// treat children
+			$children_action_std_list = $action_std->children_action_object_list;
+
+			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
+				echo "col / false : children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = $action_obj->get_child($idx);
+
+				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+			}
+
+		} else if(ActionObject::_IS_ITEM($action_std->action_item_type)) {
+
+			if(strcmp($action_obj->get_hash_key(),$action_std->action_hash_key) != 0) {
+				$hash_key = $action_obj->get_hash_key();
+				echo "item / false : \$hash_key : $hash_key<br/>";
+				return false;
+			}
+			if($action_obj->get_item_type() != intval($action_std->action_item_type)) {
+				$item_type = $action_obj->get_item_type();
+				echo "item / false : \$item_type : $item_type<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_item_type_name(),$action_std->action_item_type_name) != 0) {
+				$item_type_name = $action_obj->get_item_type_name();
+				echo "item / false : \$item_type_name : $item_type_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_name(),$action_std->action_name) != 0) {
+				$cur_name = $action_obj->get_name();
+				echo "item / false : \$cur_name : $cur_name<br/>";
+				return false;
+			}
+			if(strcmp($action_obj->get_context(),$action_std->context) != 0) {
+				$cur_context = $action_obj->get_context();
+				echo "item / false : \$cur_context : $cur_context<br/>";
+				return false;
+			}
+			if($action_obj->get_is_shy() != $action_std->action_is_shy) {
+				$cur_is_shy = $action_obj->get_is_shy();
+				echo "item / false : \$cur_is_shy : $cur_is_shy<br/>";
+				return false;
+			}
+
+			// treat children
+			// children_action_object_list
+			$children_action_std_list = $action_std->children_action_object_list;
+
+			if($action_obj->get_children_cnt() != count($children_action_std_list)) {
+				echo "item / false : children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = $action_obj->get_child($idx);
+
+				$is_same = ActionObject::compare_with_std($children_action_obj, $children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+
+			}
+
+			// treat add on children
+			// add_on_action_object_list
+			$add_on_action_std_list = $action_std->add_on_action_object_list;
+			$cur_add_on_list = $action_obj->get_add_on_list();
+
+			if(count($cur_add_on_list) != count($add_on_action_std_list)) {
+				echo "item / false : add on children cnt is not equal<br/>";
+				return false;
+			}
+
+			for($idx = 0; $idx < count($add_on_action_std_list); $idx++) {
+
+				$add_on_children_action_std = $add_on_action_std_list[$idx];
+				$add_on_children_action_obj = $cur_add_on_list[$idx];
+
+				$is_same = ActionObject::compare_with_std($add_on_children_action_obj, $add_on_children_action_std);
+
+				if(!$is_same) {
+					return false;
+				}
+
+			} // end for
+
+		} // end if
+
+		return true;
+
+	}
+
+
+	// @ desc : action std --> action obj로 변경 / ActionObject::convert($action_std);
+	public static function convert($action_std) {
+
+		// 1. 파라미터로 가져온 객체를 root 객체로 가정, action obj로 바꾸는 작업을 진행합니다.
+
+		// 1-1. type check
+		// 1-1-1. prop
+		// A.action_collection_type
+		// B.action_item_type
+
+		// 1-2. 자신의 데이터로 action obj를 만듭니다.
+		$action_obj = null;
+		if(ActionObject::_IS_COLLECTION($action_std->action_collection_type)) {
+
+			// get_action_table_object
+			// property는 list와 table이 동일
+
+			$action_obj = new ActionCollection();
+			$action_obj->set_hash_key($action_std->action_hash_key);
+			$action_obj->set_collection_type(intval($action_std->action_collection_type));
+			$action_obj->set_collection_type_name($action_std->action_collection_type_name);
+			$action_obj->set_name($action_std->action_name);
+			$action_obj->set_is_shy($action_std->action_is_shy);
+
+
+
+			// treat children
+			$children_action_std_list = $action_std->children_action_object_list;
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = ActionObject::convert($children_action_std);
+				$action_obj->add_child($children_action_obj);
+
+			}
+
+			// set search map recursively
+			if($action_obj->is_root_collection()) {
+				$action_obj->set_search_map_recursive(new stdClass());
+			}
+
+		} else if(ActionObject::_IS_ITEM($action_std->action_item_type)) {
+
+			//  property
+			if(ActionObject::_IS_TITLE_N_TIME_HH_MM($action_std->action_item_type)) {
+				$action_obj = new ActionItemTitleNTimeHHMM();
+			} else {
+				$action_obj = new ActionItem();
+			}
+
+			$action_obj->set_hash_key($action_std->action_hash_key);
+			$action_obj->set_item_type(intval($action_std->action_item_type));
+
+			$action_obj->set_item_type_name($action_std->action_item_type_name);
+			$action_obj->set_name($action_std->action_name);
+
+			$action_obj->set_context($action_std->context);
+			$action_obj->set_is_shy($action_std->action_is_shy);
+
+
+			// treat children
+			// children_action_object_list
+			$children_action_std_list = $action_std->children_action_object_list;
+			for($idx = 0; $idx < count($children_action_std_list); $idx++) {
+
+				$children_action_std = $children_action_std_list[$idx];
+				$children_action_obj = ActionObject::convert($children_action_std);
+				$action_obj->add_child($children_action_obj);
+			}
+
+
+			// treat add on children
+			// add_on_action_object_list
+
+			$add_on_action_std_list = $action_std->add_on_action_object_list;
+			for($idx = 0; $idx < count($add_on_action_std_list); $idx++) {
+
+				$add_on_children_action_std = $add_on_action_std_list[$idx];
+				$add_on_children_action_obj = ActionObject::convert($add_on_children_action_std);
+				$action_obj->push_add_on($add_on_children_action_obj);
+			} // end for
+		} // end if
+
+		return $action_obj;
+
+	} // end function 
 
 }
 
@@ -1000,7 +1525,7 @@ class ActionCollection extends ActionObject{
 		return false;
 	}
 
-	public function ActionCollection($action_name="", $action_collection_type=1, $meeting_agenda_id=-1, $is_shy=0, $has_changed=true) {
+	public function ActionCollection($action_name="", $action_collection_type=1, $is_shy=0) {
 		parent::set_name($action_name);
 		parent::set_collection_type($action_collection_type);
 
@@ -1010,43 +1535,10 @@ class ActionCollection extends ActionObject{
 			parent::set_collection_type_name(ActionCollection::$ACTION_COLLECTION_TYPE_NAME_TABLE);
 		}
 
-		$this->set_meeting_agenda_id($meeting_agenda_id);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 	}
 
-	private $meeting_agenda_id;
-	public function set_meeting_agenda_id($meeting_agenda_id) {
-		$this->meeting_agenda_id = $meeting_agenda_id;
-	}
-	public function get_meeting_agenda_id() {
-		if(is_null($this->meeting_agenda_id)) {
-			$this->meeting_agenda_id = 0;
-		}
-		return $this->meeting_agenda_id;
-	}
-
-	private $meeting_agenda_theme;
-	public function set_meeting_agenda_theme($meeting_agenda_theme) {
-		$this->meeting_agenda_theme = $meeting_agenda_theme;
-	}
-	public function get_meeting_agenda_theme() {
-		if(is_null($this->meeting_agenda_theme)) {
-			$this->meeting_agenda_theme = "No theme";
-		}
-		return $this->meeting_agenda_theme;
-	}
-
-	private $meeting_agenda_round;
-	public function set_meeting_agenda_round($meeting_agenda_round) {
-		$this->meeting_agenda_round = $meeting_agenda_round;
-	}
-	public function get_meeting_agenda_round() {
-		if(is_null($this->meeting_agenda_round)) {
-			$this->meeting_agenda_round = 0;
-		}
-		return $this->meeting_agenda_round;
-	}
+	// REMOVE ME?
 
 	public static $ACTION_COLLECTION_TYPE_LIST=1; 		// ActionCollection::$ACTION_COLLECTION_TYPE_LIST
 	public static $ACTION_COLLECTION_TYPE_TABLE=2;		// ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
@@ -1206,9 +1698,6 @@ class ActionCollection extends ActionObject{
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();	
 		}
-		$std_obj->meeting_agenda_id = intval($this->meeting_agenda_id);
-		$std_obj->meeting_agenda_theme = $this->meeting_agenda_theme;
-		$std_obj->meeting_agenda_round = intval($this->meeting_agenda_round);
 
 		return parent::get_std_obj($std_obj);
 	}
@@ -1223,9 +1712,6 @@ class ActionCollection extends ActionObject{
 			return;
 		}
 
-		$this->set_meeting_agenda_id($action_collection_obj->get_meeting_agenda_id());
-		$this->set_meeting_agenda_theme($action_collection_obj->get_meeting_agenda_theme());
-		$this->set_meeting_agenda_round($action_collection_obj->get_meeting_agenda_round());
 		parent::inject($action_collection_obj);
 	}
 
@@ -1286,11 +1772,10 @@ class ActionCollection extends ActionObject{
 
 class ActionItem extends ActionObject{
 
-	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0, $has_changed=true) {
+	public function ActionItem($action_name="New Item", $action_item_type=1, $is_shy=0) {
 		parent::set_name($action_name);
 		parent::set_item_type($action_item_type);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 	}
 
 	/*
@@ -1309,7 +1794,7 @@ class ActionItem extends ActionObject{
 			return true;
 		}
 		return false;
-	}
+	} 
 
 	public function is_not_table_field_item() {
 		return !$this->is_table_field_item();
@@ -1339,7 +1824,7 @@ class ActionItem extends ActionObject{
 		}
 
 		$this->set_context($action_item_obj->get_context());
-		$this->set_add_on_list($action_item_obj->get_add_on_list());
+		// $this->set_add_on_list($action_item_obj->get_add_on_list()); // REMOVE ME
 
 		parent::inject($action_item_obj);
 	}
@@ -1391,6 +1876,22 @@ class ActionItem extends ActionObject{
 		if(!is_null($add_on_collection)) {
 			$add_on_collection->set_add_on_action_parent_obj($this);
 			array_push($this->add_on_action_object_list, $add_on_collection);
+		}
+
+		// $cur_coordinate = $this->get_coordinate();
+		$root_action_obj = $this->get_root_action_obj();
+		if(empty($add_on_collection->get_hash_key())) {
+
+			$cur_add_on_action_hash_key = ActionObject::GET_UNIQUE_HASH_KEY();
+
+			// check unique
+			$search_result = $root_action_obj->search($cur_add_on_action_hash_key);
+			if(!is_null($search_result)) {
+				echo "!Error! / push_add_on / !is_null(\$search_result)<br/>";
+				return;
+			}
+
+			$add_on_collection->set_hash_key($cur_add_on_action_hash_key);
 		}
 
 	}
@@ -1509,11 +2010,6 @@ class ActionItem extends ActionObject{
 		return "";
 	}
 	
-	// @ Override
-	public function get_meeting_agenda_id() {
-		return -1;
-	}
-
 	// @ Override
 	public function set_coordinate($coordinate=null, $search_map=null) {
 		return parent::set_coordinate($coordinate, $search_map);
@@ -1757,12 +2253,11 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return $time_seconds;
 	}
 
-	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0, $has_changed=true) {
+	public function ActionItemTitleNTimeHHMM($action_name="", $time_str_hhmm_init="", $time_str_hhmm_specific="", $is_shy=0) {
 
 		parent::set_name($action_name);
 		parent::set_item_type(ActionItem::$TITLE_N_TIME_HH_MM);
 		parent::set_is_shy($is_shy);
-		parent::set_changed($has_changed);
 
 		$time_sec_initial = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_init);
 		$time_sec_specific = $this->convert_time_str_hhmm_to_sec($time_str_hhmm_specific);
@@ -1879,10 +2374,6 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 		return $context_time_hh_mm;
 	}
 
-	// @ Override
-	public function get_meeting_agenda_id() {
-		return parent::get_meeting_agenda_id();
-	}
 
 	// @ Override
 	public function set_coordinate($coordinate=null, $search_map=null) {

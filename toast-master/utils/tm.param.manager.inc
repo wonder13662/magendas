@@ -56,6 +56,12 @@ class ToastmasterParamManager{
 		}
 
 		$value = $this->getParam($tossed_key);
+
+		// 넘겨 받은 값이 숫자 0인 경우의 처리
+		if(intval($value) == 0) {
+			return 0;
+		}
+
 		// 값이 비어있고, 기본값이 있다면 이를 반환합니다.
 		if(!is_null($placeholder) && (is_null($value) || empty($value))) {
 			$value = $placeholder;
@@ -366,12 +372,16 @@ class ToastmasterParamManager{
 	public $ACTION_TEMPLATE_NAME="ACTION_TEMPLATE_NAME";
 	public $ACTION_TEMPLATE_PREV_MEETING="ACTION_TEMPLATE_PREV_MEETING";
 	public $ACTION_TEMPLATE_BUNDANG="ACTION_TEMPLATE_BUNDANG";
+	public $ACTION_TEMPLATE_SUWON="ACTION_TEMPLATE_SUWON";
 	public $ACTION_BEGIN_HH_MM="ACTION_BEGIN_HH_MM";
 
 	public $SELECTED_VALUE="SELECTED_VALUE";
 
 	// IFRAME
 	public $IS_IFRAME_VIEW="IS_IFRAME_VIEW";
+
+	// MAGENDAS
+	public $IS_MAGENDAS_USER_ADD="IS_MAGENDAS_USER_ADD";
 
 	// FACEBOOK
 	public $IS_FACEBOOK_LOGIN="IS_FACEBOOK_LOGIN";

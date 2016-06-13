@@ -701,7 +701,7 @@ class MYSQLInterface{
 				, $meeting_membership_id
 			);
 
-			$new_meeting_id = $meeting_agenda_added->__meeting_id;
+			$new_meeting_id = $result->__meeting_id;
 			$new_meeting_id = intval($new_meeting_id);
 
 			return $new_meeting_id;
@@ -11717,7 +11717,7 @@ class MYSQLInterface{
 		$first_name_head_letter = "";
 
 		// 2-1. head letter of first_name / case insensitive
-		$first_name_head_letter = substr($fb_user_first_name,0,1);
+		$first_name_head_letter = substr($fb_user_first_name,0,2);
 		for($idx = 0; $idx < count($member_list); $idx++) {
 
 			$member_obj = $member_list[$idx];
@@ -11727,7 +11727,7 @@ class MYSQLInterface{
 				continue;
 			}
 
-			$__member_first_name_head = substr($__member_first_name,0,1);
+			$__member_first_name_head = substr($__member_first_name,0,2);
 
 			if(strcasecmp($__member_first_name_head, $first_name_head_letter) == 0) {
 				array_push($matched_head_arr, $member_obj);
@@ -11740,7 +11740,7 @@ class MYSQLInterface{
 		$last_name_tail_letter = "";
 
 		// 2-2. head letter of last_name / case insensitive
-		$last_name_tail_letter = substr($fb_user_last_name,0,1);
+		$last_name_tail_letter = substr($fb_user_last_name,0,2);
 		for($idx = 0; $idx < count($member_list); $idx++) {
 
 			$member_obj = $member_list[$idx];
@@ -11750,7 +11750,7 @@ class MYSQLInterface{
 				continue;
 			}
 
-			$__member_last_name_head = substr($__member_last_name,0,1);
+			$__member_last_name_head = substr($__member_last_name,0,2);
 
 			if(strcasecmp($__member_last_name_head, $last_name_head_letter) == 0) {
 				array_push($matched_tail_arr, $member_obj);
@@ -11815,6 +11815,67 @@ class MYSQLInterface{
 
 		// CHECK
 		return $this->get_member_n_facebook($fb_account_id);
+	}
+
+
+
+	// wonder.jung - action file path
+	public function insert_action_file_path($hash_key="", $meeting_agenda_id=-1, $regdate="") {
+
+		if($this->is_empty(__FUNCTION__, $hash_key, "hash_key")){
+			return;
+		}
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $regdate, "regdate")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"INSERT INTO `magendas`.`ACTION_N_MEETING_AGENDA` (`hash_key`,`meeting_agenda_id`,`regdate`)"
+				,"VALUES(\"$hash_key\",$meeting_agenda_id,\"$regdate\")"
+				,"ON DUPLICATE KEY UPDATE `hash_key`=\"$hash_key\""
+			)
+		);
+		$query_manager->modify();
+		if($query_manager->is_failed()) {
+			return;
+		}		
+
+	}
+
+	public function select_action_file_info($meeting_agenda_id=-1) {
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $meeting_agenda_id, "meeting_agenda_id")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT ANM.`hash_key` AS __action_hash_key"
+				,", ANM.`meeting_agenda_id` AS __action_meeting_agenda_id"
+				,", ANM.`regdate` AS __action_regdate"
+				,"FROM ACTION_N_MEETING_AGENDA AS ANM"
+				,", CONCAT(`magendas`.`regdate`,"/",`magendas`.`hash_key`,\".gz\") AS __action_file_path"
+				,"WHERE ANM.`meeting_agenda_id`=\"$meeting_agenda_id\""
+				,"ORDER BY ANM.`regdate` DESC"
+				,"LIMIT 1"
+			)
+		);
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();		
+
+		return $result;
+
 	}
 
 }

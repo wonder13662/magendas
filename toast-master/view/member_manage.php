@@ -371,6 +371,8 @@ var list_search_tab = {
 
 					} else {
 
+						// wonder.jung - member update를 api에 추가. 멤버 업데이트가 불가한 경우, 원인을 구체적으로 알려줘야 한다.
+
 						// 새로운 멤버를 추가하는 경우.
 						// 이미 등록된 멤버인지 확인한다. 
 						var insert_new_member = function(_param_obj) {
@@ -401,7 +403,9 @@ var list_search_tab = {
 											);
 
 										} else {
+
 											alert("Error has occured!");
+
 										} // if end
 
 									},

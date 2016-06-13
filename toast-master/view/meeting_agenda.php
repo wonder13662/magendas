@@ -34,25 +34,26 @@
 		);
 	}
 
-	$meeting_id = $params->getParamNumber($params->MEETING_ID, 0);
-	$membership = $wdj_mysql_interface->get_membership($meeting_membership_id);
+	$MEETING_ID = $params->getParamNumber($params->MEETING_ID, 0);
+	$MEMBERSHIP_OBJ = $wdj_mysql_interface->get_membership($meeting_membership_id);
 	$window_scroll_y = $params->getParamNumber($params->WINDOW_SCROLL_Y);
+
+	// FIXME : 모바일에서는 정상 작동. PC 버전은 문제가 있습니다. wonder.jung
 
 	// 가장 최신의 미팅 ID를 가져옵니다.
 	$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
-	if((0 == $meeting_id) && (0 < $latest_meeting_id)) {
+	if((!(0 < $MEETING_ID)) && (0 < $latest_meeting_id)) {
 		// param으로 받은 미팅 아이디가 없을 경우, upcoming meeting id를 사용합니다.
-		$meeting_id = $latest_meeting_id;
+		$MEETING_ID = $latest_meeting_id;
 	}
-
 	$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($meeting_membership_id);
 
 
 	$meeting_agenda_obj = null;
-	if($meeting_id > 0) {
+	if(0 < $MEETING_ID) {
 
 		// 지정한 meeting_id가 있는 경우.
-		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_id);
+		$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
 
 	}
 
@@ -61,39 +62,43 @@
 	
 	$role_list = $wdj_mysql_interface->getRoleList();
 	$time_guide_line = $wdj_mysql_interface->getTimeGuideLine();
-
-	// $speech_project_list = $wdj_mysql_interface->getSpeechProjectList();
+	
 	$speech_project_list = $wdj_mysql_interface->select_speech_project_list();
+
+	
 	
 
-	// 가장 최근의 ACTION COLLECTION을 가져옵니다. / 모달에서 복제 대상으로 사용합니다.
-	$has_immediate_past_action_collection = $wdj_mysql_interface->has_immediate_past_action_collection_by_membership_id($meeting_membership_id);
-	$action_collection_obj_immediate_past = null;
-	if($has_immediate_past_action_collection) {
 
-		// 최근의 ACTION COLLECTION이 있습니다.
-		$action_collection_obj_immediate_past = $wdj_mysql_interface->get_immediate_past_root_action_collection_by_membership_id($meeting_membership_id);
-		$action_collection_obj_immediate_past_std = null;
-		$meeting_obj_immediate_past = null;
-		if(ActionCollection::is_instance($action_collection_obj_immediate_past)) {
-			$action_collection_obj_immediate_past_std = $action_collection_obj_immediate_past->get_std_obj();
-			$meeting_id_immediate_past = $action_collection_obj_immediate_past->get_meeting_agenda_id();
-			$meeting_obj_immediate_past = $wdj_mysql_interface->get_meeting_agenda_by_id($meeting_id_immediate_past);
-		}
-	}
 
-	// 화면에 표시할 action list.
-	$action_collection_obj_recent = $wdj_mysql_interface->get_recent_action_collection_by_meeting_id($meeting_id);
+
+
+
+	$action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
 	$meeting_action_list_std = null;
-	if(ActionCollection::is_instance($action_collection_obj_recent)) {
-		$meeting_action_list_std = $action_collection_obj_recent->get_std_obj();	
+	if(!is_null($action_file_info)) {
+
+		$__action_hash_key = $action_file_info->__action_hash_key;
+		$__action_regdate = $action_file_info->__action_regdate;
+
+		$action_content = ActionFileManager::load($__action_regdate, $__action_hash_key);
+		$meeting_action_list_std = json_decode($action_content);
+
 	}
 
-	$tm_officer_table_obj = $wdj_mysql_interface->get_toastmaster_officer_by_meeting_id($meeting_membership_id);
-	$tm_officer_std = null;
-	if(ActionCollection::is_instance($tm_officer_table_obj)) {
-		$tm_officer_std = $tm_officer_table_obj->get_std_obj();	
-	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -133,7 +138,7 @@
 			"[__ACTIVE_MEETING_AGENDA__]"=>"active"
 			,"[__MEETING_MEMBERSHIP_ID__]"=>$meeting_membership_id
 			,"[__LOG_IN_USER__]"=>$login_user_msg
-			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_out.php?redirect_url=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
+			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_out.php?$params->REDIRECT_URL=$service_root_path/view/meeting_agenda.php?MEETING_ID=$MEETING_ID"
 			,"[__LOG_IN_STATUS__]"=>$login_status
 			,"[__ROOT_PATH__]"=>$service_root_path
 		);
@@ -148,7 +153,7 @@
 		array(
 			"[__ACTIVE_MEETING_AGENDA__]"=>"active"
 			,"[__MEETING_MEMBERSHIP_ID__]"=>$meeting_membership_id
-			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_in.php?redirect_url=$service_root_path/view/meeting_agenda.php?MEETING_ID=$meeting_id"
+			,"[__LOG_IN_URL__]"=>"$service_root_path/view/log_in.php?$params->REDIRECT_URL=$service_root_path/view/meeting_agenda.php?MEETING_ID=$MEETING_ID"
 			,"[__LOG_IN_STATUS__]"=>$login_status
 			,"[__ROOT_PATH__]"=>$service_root_path
 		);
@@ -177,7 +182,7 @@
 		<!-- Membership banner begins -->
 		<?php
 		echo "<div id=\"club_title\" class=\"jumbotron\" style=\"background-color:#8e323f;background-image:url($service_root_path/images/MaroonandYellowBannerShort.jpg);background-repeat:no-repeat;height:195px;display:none;\">";	
-		echo "<div><span style=\"position:relative;color:#FFFFFF;text-shadow:2px 2px 2px #491111;text-align:center;left:100px;\"><h2>$membership->__membership_desc</h2></span></div>";
+		echo "<div><span style=\"position:relative;color:#FFFFFF;text-shadow:2px 2px 2px #491111;text-align:center;left:100px;\"><h2>$MEMBERSHIP_OBJ->__membership_desc</h2></span></div>";
 		echo "<div id=\"dynamic_header_bg_line\" style=\"background-color:#f8e48b;width:497px;height:42px;position:relative;top:32px;left:383px;float:left;\"></div>";
 		echo "</div>";
 		?>
@@ -226,13 +231,18 @@
 								$immediate_prev_meeting_startdate = $meeting_obj_immediate_past->__startdate;
 
 								echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
-								echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"$immediate_prev_meeting_id\" action_template=\"$params->ACTION_TEMPLATE_PREV_MEETING\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">$immediate_prev_meeting_startdate<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+								echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"$immediate_prev_meeting_id\" action_template=\"$params->ACTION_TEMPLATE_PREV_MEETING\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">$immediate_prev_meeting_startdate<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
 								echo "</div>";
 							}
 
 							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다.
 							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
-							echo "<a id=\"agenda_template\" meeting_id=\"$meeting_id\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+							echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_BUNDANG\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Default<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
+							echo "</div>";
+
+							// 여기서부터 템플릿 정보 - 코드로 제어합니다. DB에 의존하지 않습니다. / 수원 클럽
+							echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
+							echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"-1\" action_template=\"$params->ACTION_TEMPLATE_SUWON\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">Suwon TM<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
 							echo "</div>";
 
 							?>
@@ -310,8 +320,6 @@
 
 <script>
 
-console.log("HERE / 001 - XXX");
-
 // php to javascript sample
 var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
@@ -319,7 +327,7 @@ var member_list = <?php echo json_encode($member_list);?>;
 var meeting_membership_id = <?php echo json_encode($meeting_membership_id);?>;
 var member_role_cnt_list = <?php echo json_encode($member_role_cnt_list);?>;
 var role_list = <?php echo json_encode($role_list);?>;
-var meeting_id = <?php echo json_encode($meeting_id);?>;
+var meeting_id = <?php echo json_encode($MEETING_ID);?>;
 var recent_club_schedule_timeline_list = <?php echo json_encode($recent_club_schedule_timeline_list);?>;
 var schedule_timeline_template_list = <?php echo json_encode($schedule_timeline_template_list);?>;
 var speech_speaker_cnt_list = <?php echo json_encode($speech_speaker_cnt_list);?>;
@@ -354,6 +362,10 @@ var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_p
 
 var recent_action_collection_id = <?php echo json_encode($recent_action_collection_id);?>;
 var service_root_path = <?php echo json_encode($service_root_path);?>;
+
+// TEST - MEETING_ID
+var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
+console.log("MEETING_ID ::: ",MEETING_ID);
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;
@@ -398,9 +410,6 @@ if (navigator.geolocation) {
 	var startPos;
 	var geoSuccess = function(position) {
 		startPos = position;
-		console.log(">>> startPos :: ",startPos);
-		// document.getElementById('startLat').innerHTML = startPos.coords.latitude;
-		// document.getElementById('startLon').innerHTML = startPos.coords.longitude;
 	};
 	navigator.geolocation.getCurrentPosition(geoSuccess);	
 }

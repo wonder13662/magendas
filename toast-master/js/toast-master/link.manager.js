@@ -76,6 +76,11 @@ var link_manager = {
 	,API_SELECT_TOASTMASTER_ROLE:"/api/v1/toast-master/role/select.php"
 	,API_UPDATE_TOASTMASTER_SCHEDULE_TEMPLATE:"/api/v1/action/toast-master/schedule/template/update.php"
 	,API_UPDATE_TOASTMASTER_SCHEDULE:"/api/v1/action/toast-master/schedule/update.php"
+
+	,API_UPDATE_ACTION_TEMPLATE:"/api/v1/action/template/update.php"
+
+	,API_UPDATE_ACTION:"/api/v1/action/update.php"
+	
 	,API_UPDATE_ACTION_TOASTMASTER_SPEECH:"/api/v1/action/toast-master/speech/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_NEWS:"/api/v1/action/toast-master/news/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_WORD_N_QUOTE:"/api/v1/action/toast-master/word_n_quote/update.php"

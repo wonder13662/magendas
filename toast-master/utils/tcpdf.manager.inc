@@ -1796,7 +1796,8 @@ class TCPDFManager{
 				!strpos($simple_table_value->name,$today_role_obj->__member_name)) {
 
 				if(!is_null($today_role_obj->__role_cnt) && 0 < intval($today_role_obj->__role_cnt)) {
-					$simple_table_value->name = $today_role_obj->__role_cnt . " " . $today_role_obj->__member_name;
+					// $simple_table_value->name = $today_role_obj->__role_cnt . " " . $today_role_obj->__member_name;
+					$simple_table_value->name = $today_role_obj->__member_name;
 				} else {
 					$simple_table_value->name = $today_role_obj->__member_name;
 				}
@@ -3427,7 +3428,7 @@ $tbl = <<<EOD
 <table cellspacing="0" cellpadding="0" border="0">
     <tr style="text-align:center;">
         <td>
-            <b><span color="#FFFFFF" style="font-size:x-large;">The $round_desc $meeting_agenda_obj->__membership_desc Meeting</span></b>
+            <b><span color="#FFFFFF" style="font-size:x-large;">$meeting_agenda_obj->__membership_desc Meeting</span></b>
         </td>
     </tr>
 </table>    

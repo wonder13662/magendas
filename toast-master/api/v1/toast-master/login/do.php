@@ -122,6 +122,45 @@
 			$result->member_list = $member_list;
 		}
 
+	} else if(strcmp($params->IS_MAGENDAS_USER_ADD, $EVENT_PARAM_EVENT_TYPE) == 0) {
+
+		// CHECK VALID INIT
+		if(empty($FACEBOOK_USER_ID)){
+			$result->error = "empty(\$FACEBOOK_USER_ID)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		if(empty($FACEBOOK_USER_EMAIL)){
+			$result->error = "empty(\$FACEBOOK_USER_EMAIL)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		if(empty($FACEBOOK_USER_FIRST_NAME)){
+			$result->error = "empty(\$FACEBOOK_USER_FIRST_NAME)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		if(empty($FACEBOOK_USER_LAST_NAME)){
+			$result->error = "empty(\$FACEBOOK_USER_LAST_NAME)";
+			terminate($wdj_mysql_interface, $result);
+			return;
+		}
+		// CHECK VALID END
+
+		// ADD NEW MAGENDAS USER
+		$member_n_facebook = 
+		$wdj_mysql_interface->insert_member_from_fb_login(	
+			// $fb_account_id=-1
+			$FACEBOOK_USER_ID
+			// $fb_user_first_name=""
+			, $FACEBOOK_USER_FIRST_NAME
+			// $fb_user_last_name=""
+			, $FACEBOOK_USER_LAST_NAME
+			// $email=""
+			, $FACEBOOK_USER_EMAIL
+		);
+		$result->member_n_facebook = $member_n_facebook;
+
 	} else if(strcmp($params->IS_FACEBOOK_USER_ADD, $EVENT_PARAM_EVENT_TYPE) == 0) {
 
 		// CHECK VALID INIT
