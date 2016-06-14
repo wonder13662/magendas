@@ -348,6 +348,7 @@ if(meeting_action_list_std != undefined) {
 // TEST
 console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
 console.log("meeting_action_list_std ::: ",meeting_action_list_std);
+console.log("meeting_action_list ::: ",meeting_action_list);
 
 var tm_officer_std = <?php echo json_encode($tm_officer_std);?>;
 var tm_officer_action_list = undefined;
@@ -365,7 +366,10 @@ var service_root_path = <?php echo json_encode($service_root_path);?>;
 
 // TEST - MEETING_ID
 var MEETING_ID = <?php echo json_encode($MEETING_ID);?>;
-console.log("MEETING_ID ::: ",MEETING_ID);
+
+var action_file_info = <?php echo json_encode($action_file_info);?>;
+console.log("action_file_info ::: ",action_file_info);
+
 
 // 로그인 여부를 확인하기 위해 
 var login_user_info = <?php echo json_encode($login_user_info);?>;

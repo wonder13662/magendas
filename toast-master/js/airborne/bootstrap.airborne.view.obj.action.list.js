@@ -195,10 +195,13 @@ airborne.bootstrap.view.obj.__action_list = {
 					var cur_action_add_on_obj_name = cur_action_add_on_obj.get_action_name();
 
 					if(cur_action_add_on_obj.is_list()) {
+
 						// 1. add on list
 						// Not implemented.
+						console.log("1. add on list / Not implemented.");
 
 					} else if(cur_action_add_on_obj.is_table()) {
+
 						// 2. add on table
 
 						var cur_element_jq = cur_action_item_obj.get_event_manager().get_element_jq();
@@ -221,6 +224,24 @@ airborne.bootstrap.view.obj.__action_list = {
 					} // if end
 
 				} // inner for end
+
+				// wonder.jung
+				// 부모 아이템 컬렉션이 있다면, jump spot에 추가합니다.
+				// 부모 아이템 컬렉션에 새로운 아이템이 추가된다면? jump spot에 추가될 add_on들을 관리하는 list가 있어야 할까?
+
+				// 1. 부모 아이템 컬렉션을 모두 조회, add_on을 모아 배열을 만듭니다.
+				// 2. 부모 아이템 컬렉션을 모두 조회, add_on을 jump spot으로 추가합니다. add_on을 추가할 경우, 중복 확인은 내부적으로 진행합니다.
+
+				/*
+				var cur_sibling_action_obj_list = cur_action_item_obj.get_sibling_action_obj_list();
+				for(inner_idx = 0; inner_idx < cur_sibling_action_obj_list.length; inner_idx++){
+					var cur_sibling_action_obj = cur_sibling_action_obj_list[inner_idx];
+					cur_sibling_action_obj;
+
+
+				}
+				*/
+
 
 			}
 

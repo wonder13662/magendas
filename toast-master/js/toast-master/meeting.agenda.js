@@ -241,8 +241,8 @@ wonglish.meeting_agenda_manager = {
 					console.log("action_context_obj ::: ",action_context_obj);
 					console.log("_param_obj ::: ",_param_obj);
 
-					// TEST 
-					// return;
+					// TEST
+					return;
 
 					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
@@ -758,23 +758,6 @@ wonglish.meeting_agenda_manager = {
 
 				}, this));
 
-				/*
-				this._self.addExtraBtn(
-					// btn_title
-					"NEW"
-					// desc
-					, "Create new agenda"
-					// delegate_scope
-					, this
-					// delegate_btn_clicked
-					, function(selected_key, selected_value){	
-						_action.get_event_hierarchy_manager().lock();
-
-						$('#modal-new-meeting-dialog').modal('show');
-					}
-				);
-				*/
-
 				// edit meeting theme & date
 				this._self.addExtraBtn(
 					// btn_title
@@ -949,6 +932,5 @@ wonglish.meeting_agenda_manager = {
 
 
 // TODO
-
-// 1. add on element 이동 관련 업데이트 수정
-// 2. mobile sleeping mode 업데이트 수정
+// update_table_jump_spot
+// add_element_set_jump_spot

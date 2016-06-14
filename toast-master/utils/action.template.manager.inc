@@ -1830,11 +1830,11 @@ class ActionTemplate{
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
-		// 3-1-2-1-3-4. Column List Field - Mini Debate Master
+		// 3-1-2-1-3-4. Column List Field - Magazine Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"Mini Debate Master"
+			"Magazine Master"
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
