@@ -2179,6 +2179,8 @@ airborne.bootstrap.obj.__action = {
 			// @ Desc 	: table 객체가 이동할 수 있는 상위 엘리먼트의 배열을 업데이트한다.
 			,update_table_jump_spot:function() {
 
+				console.log("update_table_jump_spot");
+
 				if(this.is_not_table()) {
 					console.log("!Error! / update_table_jump_spot / this.is_not_table()");
 					return;
@@ -2201,7 +2203,9 @@ airborne.bootstrap.obj.__action = {
 					var cur_action_obj_depth = cur_action_depth_arr[idx];
 
 					// 현재 자신이 포함된 부모 parent action obj는 제외한다.
-					if(this.get_parent_add_on().get_coordinate() == cur_action_obj_depth.get_coordinate()) {
+					// REMOVE ME
+					// if(this.get_parent_add_on().get_coordinate() == cur_action_obj_depth.get_coordinate()) {
+					if(this.get_parent_add_on().get_action_hash_key() == cur_action_obj_depth.get_action_hash_key()) {
 						continue;
 					}
 
@@ -4011,16 +4015,6 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 				this.searchable_combo_box_jq.hide();
-			}
-			// TODO
-			,add_element_to_searchable_combo_box_jq:function(){
-
-			}
-			,remove_element_to_searchable_combo_box_jq:function(){
-
-			}
-			,search_keyword_in_searchable_combo_box_jq:function(){
-
 			}
 			,search_output_list_jq:null
 			,set_search_output_list_jq:function(search_output_list_jq){

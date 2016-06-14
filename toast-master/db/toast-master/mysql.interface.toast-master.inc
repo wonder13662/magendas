@@ -11837,7 +11837,7 @@ class MYSQLInterface{
 			array(
 				"INSERT INTO `magendas`.`ACTION_N_MEETING_AGENDA` (`hash_key`,`meeting_agenda_id`,`regdate`)"
 				,"VALUES(\"$hash_key\",$meeting_agenda_id,\"$regdate\")"
-				,"ON DUPLICATE KEY UPDATE `hash_key`=\"$hash_key\""
+				,"ON DUPLICATE KEY UPDATE `hash_key`=\"$hash_key\", `regdate`=\"$regdate\""
 			)
 		);
 		$query_manager->modify();
