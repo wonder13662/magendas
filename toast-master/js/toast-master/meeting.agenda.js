@@ -209,6 +209,8 @@ wonglish.meeting_agenda_manager = {
 				// delegate_save_n_reload
 				, _obj.get_delegate(function(cur_outcome_obj){
 
+					console.log("cur_outcome_obj ::: ",cur_outcome_obj);
+
 					if(	cur_outcome_obj == undefined ) {
 						console.log("!Error! / delegate_save_n_reload / cur_outcome_obj == undefined");
 						return;
@@ -240,9 +242,6 @@ wonglish.meeting_agenda_manager = {
 					
 					console.log("action_context_obj ::: ",action_context_obj);
 					console.log("_param_obj ::: ",_param_obj);
-
-					// TEST
-					return;
 
 					if( _action.EVENT_TYPE_INSERT_ITEM === cur_outcome_obj._event || 
 						_action.EVENT_TYPE_UPDATE_ITEM === cur_outcome_obj._event || 
@@ -311,6 +310,8 @@ wonglish.meeting_agenda_manager = {
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
 
+
+
 							return search_option_arr_members;	
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
@@ -318,6 +319,8 @@ wonglish.meeting_agenda_manager = {
 							return search_option_arr_members;	
 
 						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
+
+							console.log("search_option_arr_members ::: ",search_option_arr_members);
 
 							return search_option_arr_members;	
 
