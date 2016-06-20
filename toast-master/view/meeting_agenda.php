@@ -85,19 +85,8 @@
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	$meeting_agenda_obj_immediate_past = 
+	$wdj_mysql_interface->get_immediate_past_meeting_agenda($meeting_membership_id);
 
 
 	// @ required
@@ -206,7 +195,7 @@
 					
 					<?php
 						if(!is_null($meeting_agenda_obj) && !empty($meeting_agenda_obj->__theme)) {
-							$meeting_title = $meeting_agenda_obj->__round . "th / " . $meeting_agenda_obj->__startdate . " / " . $meeting_agenda_obj->__theme;
+							$meeting_title = $meeting_agenda_obj->__startdate . " / " . $meeting_agenda_obj->__theme;
 							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">$meeting_title</h4>";
 						} else {
 							echo "<h4 class=\"modal-title\" id=\"modal-title\" style=\"color:#8A6D65;\">New meeting</h4>";
@@ -225,10 +214,10 @@
 							<?php
 
 							// 지난번의 아젠다 정보
-							if(!is_null($action_collection_obj_immediate_past)) {
+							if(!is_null($meeting_agenda_obj_immediate_past)) {
 
-								$immediate_prev_meeting_id = $action_collection_obj_immediate_past->get_meeting_agenda_id();
-								$immediate_prev_meeting_startdate = $meeting_obj_immediate_past->__startdate;
+								$immediate_prev_meeting_id = $meeting_agenda_obj_immediate_past->__meeting_id;
+								$immediate_prev_meeting_startdate = $meeting_agenda_obj_immediate_past->__startdate;
 
 								echo "<div class=\"col-xs-6 col-md-3\" style=\"padding-left:0px;\">";
 								echo "<a id=\"agenda_template\" meeting_id=\"$MEETING_ID\" src_meeting_id=\"$immediate_prev_meeting_id\" action_template=\"$params->ACTION_TEMPLATE_PREV_MEETING\" class=\"thumbnail\" style=\"width:120px;text-decoration:none;font-size:10px;text-align:center;\">$immediate_prev_meeting_startdate<img src=\"$service_root_path/images/AGENDA_THUMBNAIL_240x339.png\" alt=\"Recent Agenda\"></a>";
@@ -358,6 +347,7 @@ if(tm_officer_std != undefined) {
 
 
 // 과거의 직전 미팅 정보
+// REMOVE ME
 var action_collection_obj_immediate_past_std = <?php echo json_encode($action_collection_obj_immediate_past_std);?>;
 var meeting_obj_immediate_past = <?php echo json_encode($meeting_obj_immediate_past);?>;
 
