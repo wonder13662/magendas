@@ -2136,6 +2136,75 @@ class MYSQLInterface{
 		return $result;
 	}
 
+	public function get_member_by_membership_n_hash_key($membership_id=-1, $member_hash_key=""){
+
+		if($this->is_not_unsigned_number(__FUNCTION__, $membership_id, "membership_id")){
+			return;
+		}
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBERSHIP`.id,-1) AS __member_membership"
+				,", IFNULL(`MEMBERSHIP`.name,\"\") AS __member_membership_name"
+				,", IFNULL(MNM.`status`,\"\") AS __member_membership_status"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"LEFT JOIN `MEMBER_N_MEMBERSHIP` AS MNM ON MNM.member_id=`MEMBER`.id"
+				,"LEFT JOIN `MEMBERSHIP` ON `MEMBERSHIP`.id=MNM.membership_id"
+				,"WHERE MNM.membership_id=$membership_id"
+				,"AND `MEMBER`.`hash_key`=\"$member_hash_key\""
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}	
+
+	public function get_member_by_hash_key($member_hash_key=""){
+
+		if($this->is_empty(__FUNCTION__, $member_hash_key, "member_hash_key")){
+			return;
+		}
+
+		$query_manager = new MYSQLQueryManager($this->mysql_manager, __FUNCTION__);
+		$query_manager->addQueryLineArr(
+			array(
+				"SELECT `MEMBER`.id AS __member_id"
+				,", IFNULL(`MEMBER`.first_name,\"\") AS __member_first_name"
+				,", IFNULL(`MEMBER`.last_name,\"\") AS __member_last_name"
+				,", CONCAT(`MEMBER`.first_name,\" \",last_name) AS __member_name"
+				,", IFNULL(`MEMBER`.hash_key,\"\") AS __member_hash_key"
+				,", IFNULL(`MEMBER`.email,\"\") AS __member_email"
+				,"FROM `MEMBER`"
+				,"WHERE `MEMBER`.`hash_key`=\"$member_hash_key\""
+			)
+		);
+
+		// $query_manager->printFormattedQuery();
+		$query_manager->select_one();
+		if($query_manager->is_failed()) {
+			return;
+		}
+		
+		$result = $query_manager->get_result();
+		return $result;
+	}		
+
 	private function get_member_list_by_first_name($first_name=""){
 
 		if($this->is_empty(__FUNCTION__, $first_name, "first_name")){
@@ -2558,9 +2627,10 @@ class MYSQLInterface{
 			return;
 		}
 
+		return $member_hash_key;
 	}
 
-	public function insertMemberNMembership($member_id, $membership_id) {
+	public function insertMemberNMembership($member_id=-1, $membership_id=-1) {
 
 		$function_name = "insertMemberNMembership";
 		if($this->isNotUnsignedNumber($membership_id)){
@@ -2581,9 +2651,9 @@ class MYSQLInterface{
 		. " `status`"
 		. ")"
 		. " VALUES ("
-		. "\"$member_id\""
+		. "$member_id"
 		. ","
-		. "\"$membership_id\""
+		. "$membership_id"
 		. ","
 		. "\"A\""
 		. ")"

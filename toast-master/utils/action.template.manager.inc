@@ -294,7 +294,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
@@ -314,7 +314,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Grammarian
@@ -333,7 +333,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Timer
@@ -352,7 +352,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Table Topic Master
@@ -430,7 +430,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - General Evaluator
@@ -449,7 +449,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Ah & Vote Counter
@@ -469,7 +469,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Word & Quote Master
@@ -489,7 +489,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Mini Debate Master
@@ -877,7 +877,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -887,7 +887,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_SPEAKER_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -919,7 +919,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -929,7 +929,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
@@ -1721,7 +1721,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
@@ -1741,7 +1741,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Grammarian
@@ -1760,7 +1760,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Timer
@@ -1779,7 +1779,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Table Topic Master
@@ -1857,7 +1857,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - General Evaluator
@@ -1876,7 +1876,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Ah & Vote Counter
@@ -1896,7 +1896,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Word & Quote Master
@@ -1916,7 +1916,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Mini Debate Master
@@ -2224,7 +2224,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -2234,7 +2234,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_SPEAKER_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -2266,7 +2266,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -2276,7 +2276,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
@@ -3135,7 +3135,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
@@ -3154,7 +3154,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Grammarian
@@ -3172,7 +3172,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Timer
@@ -3190,7 +3190,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Table Topic Master
@@ -3267,7 +3267,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - General Evaluator
@@ -3285,7 +3285,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Ah & Vote Counter
@@ -3304,7 +3304,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Word & Quote Master
@@ -3323,7 +3323,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Mini Debate Master
@@ -3708,7 +3708,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -3717,7 +3717,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER;
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_SPEAKER_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -3749,7 +3749,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX_ADDABLE
+			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
 
 		// DB interface prop
@@ -3758,7 +3758,7 @@ class ActionTemplate{
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_EVALUATOR;
 		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_EVALUATOR_MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
@@ -4431,7 +4431,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
 		$context = new stdClass();
@@ -4450,7 +4450,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - Immediate Past President
@@ -4470,7 +4470,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPE
@@ -4491,7 +4491,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPE Deputy
@@ -4512,7 +4512,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM
@@ -4533,7 +4533,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM Deputy
@@ -4554,7 +4554,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM Deputy
@@ -4575,7 +4575,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM Deputy
@@ -4596,7 +4596,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM Deputy
@@ -4617,7 +4617,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - VPM Deputy
@@ -4639,7 +4639,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - SAA
@@ -4662,7 +4662,7 @@ class ActionTemplate{
 			// $action_name="New Item"
 			"NOT ASSIGNED"
 			// $action_item_type=1
-			, ActionItem::$SELECT_BOX
+			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
 
 		// DB interface prop - SAA Deputy

@@ -24,6 +24,8 @@ class ActionObject implements Action{
 	public static $ITEM_TYPE_TITLE_ONLY_FIXED=5;
 	public static $ITEM_TYPE_TITLE_ONLY_ADDABLE=6;
 	public static $ITEM_TYPE_SELECT_BOX_ADDABLE=7;
+	public static $ITEM_TYPE_SELECT_BOX_ADDABLE_PERSON_NAME=8;
+	public static $ITEM_TYPE_SELECT_BOX_PERSON_NAME=9;
 
 	public static function _IS_LIST($collection_type=-1) {
 		return (ActionObject::$COLLECTION_TYPE_LIST == $collection_type)?true:false;
@@ -56,6 +58,12 @@ class ActionObject implements Action{
 	public static function _IS_SELECT_BOX_ADDABLE($item_type=-1) {
 		return (ActionObject::$ITEM_TYPE_SELECT_BOX_ADDABLE == $item_type)?true:false;
 	}
+	public static function _IS_SELECT_BOX_ADDABLE_PERSON_NAME($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX_ADDABLE_PERSON_NAME == $item_type)?true:false;
+	}
+	public static function _IS_SELECT_BOX_PERSON_NAME($item_type=-1) {
+		return (ActionObject::$ITEM_TYPE_SELECT_BOX_PERSON_NAME == $item_type)?true:false;
+	}
 	public static function _IS_ITEM($item_type=-1) {
 
 		if(ActionObject::_IS_TITLE_ONLY($item_type)) {
@@ -71,6 +79,10 @@ class ActionObject implements Action{
 		} else if(ActionObject::_IS_TITLE_ONLY_ADDABLE($item_type)) {
 			return true;
 		} else if(ActionObject::_IS_SELECT_BOX_ADDABLE($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX_ADDABLE_PERSON_NAME($item_type)) {
+			return true;
+		} else if(ActionObject::_IS_SELECT_BOX_PERSON_NAME($item_type)) {
 			return true;
 		}
 
@@ -1952,14 +1964,15 @@ class ActionItem extends ActionObject{
 	}	
 
 	// 아이템 타입별로 context 내용을 구성하는 방식이 다르다.
-	public static $TITLE_ONLY=1;			// ActionItem::$TITLE_ONLY
-	public static $TITLE_N_TIME_HH_MM=2;	// ActionItem::$TITLE_N_TIME_HH_MM
-	public static $TITLE_N_TIME_MM_SS=3;	// ActionItem::$TITLE_N_TIME_MM_SS
-	public static $SELECT_BOX=4;			// ActionItem::$SELECT_BOX
-	public static $TITLE_ONLY_FIXED=5;		// ActionItem::$TITLE_ONLY_FIXED
-	public static $TITLE_ONLY_ADDABLE=6;	// ActionItem::$TITLE_ONLY_ADDABLE
-	public static $SELECT_BOX_ADDABLE=7;	// ActionItem::$SELECT_BOX_ADDABLE
-
+	public static $TITLE_ONLY=1;						// ActionItem::$TITLE_ONLY
+	public static $TITLE_N_TIME_HH_MM=2;				// ActionItem::$TITLE_N_TIME_HH_MM
+	public static $TITLE_N_TIME_MM_SS=3;				// ActionItem::$TITLE_N_TIME_MM_SS
+	public static $SELECT_BOX=4;						// ActionItem::$SELECT_BOX
+	public static $TITLE_ONLY_FIXED=5;					// ActionItem::$TITLE_ONLY_FIXED
+	public static $TITLE_ONLY_ADDABLE=6;				// ActionItem::$TITLE_ONLY_ADDABLE
+	public static $SELECT_BOX_ADDABLE=7;				// ActionItem::$SELECT_BOX_ADDABLE
+	public static $SELECT_BOX_ADDABLE_PERSON_NAME=8;	// ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
+	public static $SELECT_BOX_PERSON_NAME=9;			// ActionItem::$SELECT_BOX_PERSON_NAME
 	
 	// @ Public
 	// @ Usage : ActionItem::is_valid_action_item_type($action_item_type);
@@ -1975,7 +1988,9 @@ class ActionItem extends ActionObject{
 			ActionItem::$SELECT_BOX == $action_item_type ||
 			ActionItem::$TITLE_ONLY_FIXED == $action_item_type ||
 			ActionItem::$TITLE_ONLY_ADDABLE == $action_item_type ||
-			ActionItem::$SELECT_BOX_ADDABLE == $action_item_type ) {
+			ActionItem::$SELECT_BOX_ADDABLE == $action_item_type ||
+			ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME == $action_item_type ||
+			ActionItem::$SELECT_BOX_PERSON_NAME == $action_item_type ) {
 
 			return true;
 		}
@@ -2005,6 +2020,10 @@ class ActionItem extends ActionObject{
 			return "TITLE_ONLY_ADDABLE";
 		} else if(ActionItem::$SELECT_BOX_ADDABLE == $action_item_type) {
 			return "SELECT_BOX_ADDABLE";
+		} else if(ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME == $action_item_type) {
+			return "SELECT_BOX_ADDABLE_PERSON_NAME";
+		} else if(ActionItem::$SELECT_BOX_PERSON_NAME == $action_item_type) {
+			return "SELECT_BOX_PERSON_NAME";
 		}
 
 		return "";

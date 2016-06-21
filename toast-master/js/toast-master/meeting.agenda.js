@@ -261,6 +261,7 @@ wonglish.meeting_agenda_manager = {
 
 									console.log("data ::: ",data);	
 
+									// UPDATE NEW ACTION HASH_KEY
 									if( data.EVENT_PARAM_EVENT_TYPE === _param.EVENT_TYPE_UPDATE_ITEM && 
 										data.ACTION_HASH_KEY != null &&
 										action_item_obj.action_hash_key == "" ) {
@@ -294,31 +295,73 @@ wonglish.meeting_agenda_manager = {
 							)
 						); // ajax done.
 
+						// INSERT NEW MEMBER
+						var is_new_member = 
+						(
+							action_item_obj.is_select_box_person_name_group() && 
+							action_context_obj.MEMBER_HASH_KEY == "" &&
+							action_context_obj.SELECTED_KEY != ""
+						);
+						
+						if(is_new_member) {
+
+							// ? 동명 이인일 경우의 처리는 ?
+
+							console.log("is_new_member :: ",is_new_member);
+
+							// API_UPDATE_V1_MEMBER
+							_param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_TYPE_INSERT_MEMBER;
+							_param_obj[_param.MEETING_MEMBERSHIP_ID] = meeting_membership_id;
+							_param_obj[_param.MEMBER_FIRST_NAME] = action_item_obj.get_action_context_attr(_param.MEMBER_FIRST_NAME);
+							_param_obj[_param.MEMBER_LAST_NAME] = action_item_obj.get_action_context_attr(_param.MEMBER_LAST_NAME);
+
+							_ajax.send_simple_post(
+								// _url
+								_link.get_link(_link.API_UPDATE_V1_MEMBER)
+								// _param_obj
+								,_param_obj
+								// _delegate_after_job_done
+								,_obj.get_delegate(
+									// delegate_func
+									function(data){
+
+										console.log("is_new_member / data :: ",data);
+
+										if(	data != null && 
+											data.success == true && 
+											_v.is_valid_str(data.MEMBER_HASH_KEY)) {
+
+											search_option_arr_members[0].set_value(data.MEMBER_HASH_KEY);
+
+										}
+									},
+									// delegate_scope
+									this
+								)
+							); // ajax done.
+						}
+
 					} else if( _action.EVENT_TYPE_ADD_SELECT_OPTION == cur_outcome_obj._event ) {
 
 						// SELECT BOX를 선택했을 때의 처리.
+						if(action_context_obj == undefined) {
 
-						var cur_action_context_obj = action_item_obj.get_action_context_obj();
-						if(cur_action_context_obj == undefined) {
-
-							console.log("!Error! / cur_action_context_obj == undefined");
+							console.log("!Error! / action_context_obj == undefined");
 							return;
 
-						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
+						} else if(action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_PROJECT) {
 
 							return search_option_arr_speech_projects;
 
-						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
-
-
+						} else if(action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_SPEAKER) {
 
 							return search_option_arr_members;	
 
-						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
+						} else if(action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_SPEECH_EVALUATOR) {
 
 							return search_option_arr_members;	
 
-						} else if(cur_action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
+						} else if(action_context_obj.ACTION_DB_UPDATE_MSG === _param.IS_UPDATE_TODAY_ROLE) {
 
 							console.log("search_option_arr_members ::: ",search_option_arr_members);
 
