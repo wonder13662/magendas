@@ -80,6 +80,8 @@ var link_manager = {
 	,API_UPDATE_ACTION_TEMPLATE:"/api/v1/action/template/update.php"
 
 	,API_UPDATE_ACTION:"/api/v1/action/update.php"
+
+	,API_UPDATE_V1_MEMBER:"/api/v1/member/update.php"
 	
 	,API_UPDATE_ACTION_TOASTMASTER_SPEECH:"/api/v1/action/toast-master/speech/update.php"
 	,API_UPDATE_ACTION_TOASTMASTER_NEWS:"/api/v1/action/toast-master/news/update.php"
