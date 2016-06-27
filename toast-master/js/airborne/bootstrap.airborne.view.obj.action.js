@@ -58,6 +58,65 @@ airborne.bootstrap.obj.__action = {
 	,INPUT_TYPE_TITLE:"INPUT_TYPE_TITLE"
 	,INPUT_TYPE_TIME:"INPUT_TYPE_TIME"
 
+	// wonder.jung
+	// ACTION TABLE ITEM의 경우, ITEM간의 관계를 정의하는 타입 정보.
+	// ACTION_TABLE_ITEM_RELATION
+
+	// PC <--> MOBILE 버전의 레이아웃 변경을 위해 row안의 item간의 관계를 정의합니다.
+
+	// 1. PAIR_TYPE - ACTION_TABLE_ITEM_RELATION_TYPE_PAIR
+	// (PC)
+	// ROW | TOASTMASTER(title) 	JOHN DOE(text) 		GENERAL EVALUATOR(title) 	JANE DOE(text)
+	// ROW | TIMER(title) 			PETER PARKER(text) 	AH COUNTER(title) 			BLACK WIDOW(text)
+	// ...
+	// (MOBILE)
+	// ROW | TOASTMASTER(title) - JOHN DOE(text)
+	// ROW | GENERAL EVALUATOR(title) - JANE DOE(text)
+	// ROW | TIMER(title) - PETER PARKER(text)
+	// ROW | AH COUNTER(title) - BLACK WIDOW(text)
+	// ...
+
+	// 2. CHAIN_TYPE - ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN
+	// (PC)
+	// ROW | PROJECT 			SPEECH TITLE 	SPEAKER 	EVALUATOR
+	// ROW | "ICE BREAKER"(text)		"HELLO THERE"(text) 	JOHN DOE(text) 		JANE DOE(text)
+	// ROW | "YOUR BODY SPEAKS"(text)	"WELCOME BACK"(text) 	PETER PAKER(text) 	BLACK WIDOW(text)
+	// ...
+	// (MOBILE)
+	// ROW | PROJECT - "ICE BREAKER"
+	// ROW | SPEECH TITLE - "HELLO THERE"
+	// ROW | SPEAKER - JOHN DOE
+	// ROW | EVALUATOR - JANE DOE
+	// -----
+	// ROW | PROJECT - "YOUR BODY SPEAKS"
+	// ROW | SPEECH TITLE - "WELCOME BACK"
+	// ROW | SPEAKER - PETER PAKER
+	// ROW | EVALUATOR - BLACK WIDOW
+	// -----
+	// ...
+
+	,ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE:1;
+	,ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT:2;
+	,ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE:3;
+	,ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT:4;
+	,is_not_valid_relation_type:function(relation_type) {
+		return !this.is_valid_relation_type(relation_type);
+	}
+	,is_valid_relation_type:function(relation_type) {
+
+
+		if(	this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE == relation_type ||
+			this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT == relation_type ||
+			this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE == relation_type ||
+			this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT == relation_type ) {
+
+			return true;
+		}
+
+		return false;
+
+	}	
+
 	,ACTION_COLLECTION_TYPE_LIST:1
 	,ACTION_COLLECTION_TYPE_TABLE:2
 	,ACTION_ITEM_TYPE_TITLE_ONLY:1
