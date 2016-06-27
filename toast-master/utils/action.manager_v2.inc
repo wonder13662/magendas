@@ -548,7 +548,6 @@ class ActionObject implements Action{
 
 	}
 
-	// wonder.jung
 	// @ desc : 사용자가 있던 아이템에서 새로운 형제 아이템을 추가(+)했을 때의 처리
 	public function add_empty_sibling_after($new_action_name="") {
 
@@ -1550,7 +1549,7 @@ class ActionCollection extends ActionObject{
 		parent::set_is_shy($is_shy);
 	}
 
-	// REMOVE ME?
+	
 
 	public static $ACTION_COLLECTION_TYPE_LIST=1; 		// ActionCollection::$ACTION_COLLECTION_TYPE_LIST
 	public static $ACTION_COLLECTION_TYPE_TABLE=2;		// ActionCollection::$ACTION_COLLECTION_TYPE_TABLE
@@ -1962,6 +1961,82 @@ class ActionItem extends ActionObject{
 
 		return null;
 	}	
+
+	// wonder.jung
+	// ACTION TABLE ITEM의 경우, ITEM간의 관계를 정의하는 타입 정보.
+	// ACTION_TABLE_ITEM_RELATION
+
+	// PC <--> MOBILE 버전의 레이아웃 변경을 위해 row안의 item간의 관계를 정의합니다.
+
+	// 1. PAIR_TYPE - ACTION_TABLE_ITEM_RELATION_TYPE_PAIR
+	// (PC)
+	// ROW | TOASTMASTER(title) 	JOHN DOE(text) 		GENERAL EVALUATOR(title) 	JANE DOE(text)
+	// ROW | TIMER(title) 			PETER PARKER(text) 	AH COUNTER(title) 			BLACK WIDOW(text)
+	// ...
+	// (MOBILE)
+	// ROW | TOASTMASTER(title) - JOHN DOE(text)
+	// ROW | GENERAL EVALUATOR(title) - JANE DOE(text)
+	// ROW | TIMER(title) - PETER PARKER(text)
+	// ROW | AH COUNTER(title) - BLACK WIDOW(text)
+	// ...
+
+	// 2. CHAIN_TYPE - ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN
+	// (PC)
+	// ROW | PROJECT 			SPEECH TITLE 	SPEAKER 	EVALUATOR
+	// ROW | "ICE BREAKER"(text)		"HELLO THERE"(text) 	JOHN DOE(text) 		JANE DOE(text)
+	// ROW | "YOUR BODY SPEAKS"(text)	"WELCOME BACK"(text) 	PETER PAKER(text) 	BLACK WIDOW(text)
+	// ...
+	// (MOBILE)
+	// ROW | PROJECT - "ICE BREAKER"
+	// ROW | SPEECH TITLE - "HELLO THERE"
+	// ROW | SPEAKER - JOHN DOE
+	// ROW | EVALUATOR - JANE DOE
+	// -----
+	// ROW | PROJECT - "YOUR BODY SPEAKS"
+	// ROW | SPEECH TITLE - "WELCOME BACK"
+	// ROW | SPEAKER - PETER PAKER
+	// ROW | EVALUATOR - BLACK WIDOW
+	// -----
+	// ...
+
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE=1;
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT=2;
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE=3;
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT=4;
+	public static function is_not_valid_relation_type($relation_type) {
+		return !ActionItem::is_valid_relation_type($relation_type);
+	}
+	public static function is_valid_relation_type($relation_type) {
+
+		if(is_null($relation_type) || !is_numeric($relation_type)) {
+			return false;
+		}
+
+		if(	ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE == $relation_type ||
+			ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT == $relation_type ||
+			ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE == $relation_type ||
+			ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT == $relation_type ) {
+
+			return true;
+		}
+
+		return false;
+
+	}
+
+	private $relation_type;
+	public function set_relation_type($relation_type=-1) {
+
+		if(ActionItem::is_not_valid_relation_type($relation_type)) {
+			return;
+		}
+
+		$this->relation_type = $relation_type;
+
+	}
+	public function get_relation_type() {
+		return $this->relation_type;
+	}
 
 	// 아이템 타입별로 context 내용을 구성하는 방식이 다르다.
 	public static $TITLE_ONLY=1;						// ActionItem::$TITLE_ONLY

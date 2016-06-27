@@ -302,7 +302,6 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TOASTMASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -321,7 +320,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GRAMMARIAN;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -340,7 +338,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TIMER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -359,7 +356,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TABLE_TOPIC_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -437,7 +433,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GENERAL_EVALUATOR;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -456,7 +451,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_AH_COUNTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -476,7 +470,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_WORD_N_QUOTE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -496,7 +489,6 @@ class ActionTemplate{
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_MINI_DEBATE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -798,12 +790,8 @@ class ActionTemplate{
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_PROJECT;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_PROJECT_ID} = -1;
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -840,12 +828,8 @@ class ActionTemplate{
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_TITLE;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_TITLE} = "NO TITLE";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -882,11 +866,8 @@ class ActionTemplate{
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -924,11 +905,8 @@ class ActionTemplate{
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_EVALUATOR;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1298,17 +1276,6 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_NEWS;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_NEWS;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_NEWS;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->NEWS_ID} = -1;
-		$context->{$params->NEWS_CONTENTS} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
-
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
 
@@ -1675,7 +1642,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
+
 		// 3-1-2-1-1-2. Column List Field - Grammarian
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -1684,6 +1657,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 3-1-2-1-1-3. Column List Field - Timer
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
@@ -1693,6 +1670,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 3-1-2-1-1-4. Column List Field - Table Topic Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
@@ -1702,6 +1683,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 
@@ -1723,13 +1708,15 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
 		$context = new stdClass();
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TOASTMASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1743,12 +1730,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Grammarian
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GRAMMARIAN;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1762,12 +1751,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Timer
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TIMER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1781,12 +1772,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Table Topic Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TABLE_TOPIC_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1811,6 +1804,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 3-1-2-1-3-2. Column List Field - Ah & Vote Counter
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
@@ -1820,6 +1817,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 3-1-2-1-3-3. Column List Field - Word & Quote Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
@@ -1829,6 +1830,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 		// 3-1-2-1-3-4. Column List Field - Magazine Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
@@ -1838,6 +1843,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
 
@@ -1859,12 +1868,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - General Evaluator
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GENERAL_EVALUATOR;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1878,12 +1889,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Ah & Vote Counter
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_AH_COUNTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1898,12 +1911,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Word & Quote Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_WORD_N_QUOTE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -1918,12 +1933,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Mini Debate Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_MINI_DEBATE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -2132,6 +2149,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-1-2. Column List Field - Speech Project Editable
@@ -2142,15 +2163,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_PROJECT;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_PROJECT_ID} = -1;
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -2174,6 +2194,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-2-2. Column List Field - Speech Title Editable
@@ -2184,15 +2208,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_TITLE;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_TITLE} = "NO TITLE";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -2216,6 +2239,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-3-2. Column List Field - Speaker Editable
@@ -2226,14 +2253,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -2258,6 +2285,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-4-2. Column List Field - Evaluator Editable
@@ -2268,14 +2299,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_EVALUATOR;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
 		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -2718,16 +2749,9 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
-
-		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_NEWS;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_NEWS;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_NEWS;
-		$context->{$params->MEETING_ID} = $meeting_agenda_id;
-		$context->{$params->NEWS_ID} = -1;
-		$context->{$params->NEWS_CONTENTS} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
@@ -2829,6 +2853,12 @@ class ActionTemplate{
 
 		return $root_action_obj;
 	}
+
+
+
+
+
+
 
 
 
@@ -3137,14 +3167,18 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Toastmaster / 이 정보를 외부에서 변경하는 필요가 있음.
 		$context = new stdClass();
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TOASTMASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
+
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
@@ -3156,11 +3190,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Grammarian
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GRAMMARIAN;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3174,13 +3210,16 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Timer
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TIMER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
@@ -3192,11 +3231,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Table Topic Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_TABLE_TOPIC_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3221,7 +3262,12 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-3-2. Column List Field - Ah & Vote Counter
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -3230,7 +3276,12 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-3-3. Column List Field - Word & Quote Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -3239,7 +3290,12 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
+
 		// 3-1-2-1-3-4. Column List Field - Mini Debate Master
 		$child_action_sub_list_child_action_item_sub_table_column_list_field =  
 		new ActionItem(
@@ -3248,8 +3304,11 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
-		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
+		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 3-1-2-1-4. Column List - Right Role Name List
 		$child_action_sub_list_child_action_item_sub_table_column_list = 
@@ -3269,11 +3328,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - General Evaluator
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_GENERAL_EVALUATOR;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3287,11 +3348,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop - Ah & Vote Counter
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_AH_COUNTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3306,11 +3369,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);		
 
 		// DB interface prop - Word & Quote Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_WORD_N_QUOTE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3325,11 +3390,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);		
 
 		// DB interface prop - Mini Debate Master
 		$context = new stdClass();
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_TODAY_ROLE;
-		$context->{$params->ROLE_ID} = $params->ROLE_ID_MINI_DEBATE_MASTER;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3618,6 +3685,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-1-2. Column List Field - Speech Project Editable
@@ -3628,14 +3699,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_PROJECT;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_PROJECT_ID} = -1;
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -3659,6 +3729,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-2-2. Column List Field - Speech Title Editable
@@ -3669,14 +3743,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);		
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_TITLE;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->SPEECH_ID} = -1;
-		$context->{$params->SPEECH_TITLE} = "NO TITLE";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
@@ -3700,6 +3773,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-3-2. Column List Field - Speaker Editable
@@ -3710,13 +3787,13 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_SPEAKER;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -3741,6 +3818,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);
 
 		// 5-1-1-1-4-2. Column List Field - Evaluator Editable
@@ -3751,13 +3832,14 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_ADDABLE_PERSON_NAME
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT;
+		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_relation_type($relation_type);
+
 
 		// DB interface prop
 		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_SPEECH;
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_SPEECH_EVALUATOR;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_SPEECH;
-		$context->{$params->SPEECH_ID} = -1;
 		$context->{$params->MEMBER_HASH_KEY} = "";
 		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
@@ -4130,14 +4212,15 @@ class ActionTemplate{
 			, ActionItem::$TITLE_ONLY_ADDABLE
 		);
 
+		// REMOVE ME
 		// DB interface prop
-		$context = new stdClass();
-		$context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_NEWS;
-		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_NEWS;
-		$context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_NEWS;
-		$context->{$params->NEWS_ID} = -1;
-		$context->{$params->NEWS_CONTENTS} = "";
-		$child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
+		// $context = new stdClass();
+		// $context->{$params->ACTION_DB_INSERT_MSG} = $params->IS_INSERT_NEWS;
+		// $context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_NEWS;
+		// $context->{$params->ACTION_DB_DELETE_MSG} = $params->IS_DELETE_NEWS;
+		// $context->{$params->NEWS_ID} = -1;
+		// $context->{$params->NEWS_CONTENTS} = "";
+		// $child_action_sub_list_child_action_item_sub_table_column_list_field->set_context(json_encode($context));
 
 		$child_action_sub_list_child_action_item_sub_table_column_list->add_child($child_action_sub_list_child_action_item_sub_table_column_list_field);		
 
@@ -4309,6 +4392,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-2. Column List Field - Immediate Past President 
 		$table_club_officer_column_list_field =  
@@ -4318,6 +4405,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-3. Column List Field - Vice president education (VPE)
 		$table_club_officer_column_list_field =  
@@ -4327,6 +4418,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-4. Column List Field - Vice president education (VPE) Deputy
 		$table_club_officer_column_list_field =  
@@ -4336,6 +4431,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-5. Column List Field - Vice president membership (VPM)
 		$table_club_officer_column_list_field =  
@@ -4345,6 +4444,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-6. Column List Field - Vice president membership (VPM) Deputy
 		$table_club_officer_column_list_field =  
@@ -4354,6 +4457,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-7. Column List Field - Table Topic Master
 		$table_club_officer_column_list_field =  
@@ -4363,6 +4470,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-8. Column List Field - Vice president public relations (VPPR) Deputy
 		$table_club_officer_column_list_field =  
@@ -4372,6 +4483,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-9. Column List Field - Secretary
 		$table_club_officer_column_list_field =  
@@ -4381,6 +4496,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-10. Column List Field - Treasurer
 		$table_club_officer_column_list_field =  
@@ -4390,6 +4509,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-11. Column List Field - Sergeant at arms (S.A.A)
 		$table_club_officer_column_list_field =  
@@ -4399,6 +4522,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 		// 1-1-1-12. Column List Field - Sergeant at arms (S.A.A) Deputy
 		$table_club_officer_column_list_field =  
@@ -4408,6 +4535,10 @@ class ActionTemplate{
 			// $action_item_type=1
 			, ActionItem::$TITLE_ONLY_FIXED
 		);
+		// set relation type
+		$relation_type = ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE;
+		$table_club_officer_column_list_field->set_relation_type($relation_type);
+
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 
 
