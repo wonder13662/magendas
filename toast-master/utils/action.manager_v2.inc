@@ -109,7 +109,6 @@ class ActionObject implements Action{
 	private $action_item_type;
 	private $action_item_type_name;
 	private $action_hash_key;
-	// private $action_order; // REMOVE ME
 	private $action_is_shy;
 	private $coordinate;
 	private $search_map;
@@ -765,6 +764,69 @@ class ActionObject implements Action{
 
 		return $action_obj_from_search;
 	}
+	
+	public function search_mobile_table_std_from_root() {
+
+		$mobile_table_arr = $this->search_mobile_table_from_root();
+		$mobile_table_std_arr = array();
+
+		$count = count($mobile_table_arr);
+		echo "search_mobile_table_std_from_root / \$count :: $count<br/>";
+
+		for($idx=0;$idx < count($mobile_table_arr);$idx++) {
+			$mobile_table_action = $mobile_table_arr[$idx];
+			array_push($mobile_table_std_arr, $mobile_table_action->get_std_obj());
+		}
+
+		return $mobile_table_std_arr;
+
+	}
+	// @ desc : mobile에서 표시 가능한 table action obj의 배열을 돌려줍니다.
+	public function search_mobile_table_from_root() {
+
+		$cur_root_action_obj = $this;
+		if($this->is_not_root_collection()) {
+			$cur_root_action_obj = $this->get_root_action_obj();
+		}
+
+		return $cur_root_action_obj->search_mobile_table();
+
+	}
+	public function search_mobile_table($mobile_table_arr=null) {
+
+		if(is_null($mobile_table_arr)) {
+			$mobile_table_arr = array();
+		}
+
+		if($this->has_children()) {
+			$cur_children = $this->get_children();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+
+				$cur_child_action_obj = $cur_children[$idx];
+
+				$mobile_table_arr = $cur_child_action_obj->search_mobile_table($mobile_table_arr);
+
+			}
+		}
+
+		if(ActionItem::is_instance($this) && $this->has_add_on_list()) {
+			$cur_children = $this->get_add_on_list();
+			for($idx=0;$idx < count($cur_children);$idx++) {
+
+				$cur_add_on_action_obj = $cur_children[$idx];
+
+				$mobile_table_arr = $cur_add_on_action_obj->search_mobile_table($mobile_table_arr);
+
+			}
+		}
+
+		if(ActionCollection::is_instance($this) && $this->is_table() && $this->is_mobile_table()) {
+			array_push($mobile_table_arr, $this);
+		}
+
+		return $mobile_table_arr;
+	}
+
 	// @ desc : action obj context의 일치된 속성을 가지고 있는 action obj을 돌려줍니다. root action obj부터 검색을 시작합니다.
 	public function search_by_context_from_root($context_key="", $context_value="") {
 
@@ -850,7 +912,6 @@ class ActionObject implements Action{
 		}
 
 		$std_obj->action_hash_key = $this->action_hash_key;
-		// $std_obj->action_order = intval($this->action_order); // REMOVE ME
 		$std_obj->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 		$std_obj->action_name = $this->action_name;
 		$std_obj->action_collection_type = intval($this->action_collection_type);
@@ -860,9 +921,6 @@ class ActionObject implements Action{
 		$std_obj->context = $this->context;
 
 		$std_obj->coordinate = $this->coordinate;
-
-		// REMOVE ME
-		// $std_obj->parent_action_obj = null;
 
 		$children_action_obj_list = array();
 
@@ -886,9 +944,10 @@ class ActionObject implements Action{
 
 				$std_obj_child = $child_action_obj->get_std_obj();
 
+				// REMOVE ME
+				/*
 				$std_obj_child_parent = new stdClass();
 				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
-				// $std_obj_child_parent->action_order = intval($this->action_order); // REMOVE ME
 				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
 				$std_obj_child_parent->action_name = $this->action_name;
 				
@@ -899,15 +958,11 @@ class ActionObject implements Action{
 				$std_obj_child_parent->context = $this->context;
 
 				$std_obj_child_parent->coordinate = $this->coordinate;
-
-				// REMOVE ME
-				//$std_obj_child->parent_action_obj = $std_obj_child_parent;
+				*/
 
 				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
 
-					// REMOVE ME
-					// $std_obj_child->action_item_sibling_before = $before_std_obj_child;
 				}
 
 				array_push($children_action_obj_list, $std_obj_child);
@@ -928,7 +983,6 @@ class ActionObject implements Action{
 			return;
 		}
 
-		// $this->set_id($action_obj->get_id()); // REOMVE ME
 		$this->set_name($action_obj->get_name());
 
 		$this->set_collection_type($action_obj->get_collection_type());
@@ -939,8 +993,6 @@ class ActionObject implements Action{
 
 		$this->set_context($action_obj->get_context());
 
-		// $this->set_hash_key($action_obj->get_hash_key()); // REMOVE ME - 고유한 값이므로 새로 만들어야 합니다.
-		// $this->set_order($action_obj->get_order()); // REMOVE ME
 		$this->set_is_shy($action_obj->get_is_shy());
 
 	}
@@ -1138,7 +1190,6 @@ class ActionObject implements Action{
 
 	public function show_info() {
 
-		// $cur_id = $this->get_id(); // REMOVE ME
 		$cur_hash_key = $this->get_hash_key();
 		$cur_name = $this->get_name();
 		$cur_collection_type_name = $this->get_collection_type_name();
@@ -1146,10 +1197,6 @@ class ActionObject implements Action{
 		$has_parent = $this->has_parent();
 
 		$cur_collection_type = $this->get_collection_type();
-
-		// REMOVE ME
-		// $is_table = $this->is_table();
-		// $is_list = $this->is_list();
 
 		// echo "\$cur_id :: $cur_id<br/>";
 
@@ -1453,8 +1500,7 @@ class ActionObject implements Action{
 			$action_obj->set_collection_type_name($action_std->action_collection_type_name);
 			$action_obj->set_name($action_std->action_name);
 			$action_obj->set_is_shy($action_std->action_is_shy);
-
-
+			$action_obj->toggle_mobile_table((!is_null($action_std->is_mobile_table) && $action_std->is_mobile_table==true)?true:false);
 
 			// treat children
 			$children_action_std_list = $action_std->children_action_object_list;
@@ -1488,6 +1534,11 @@ class ActionObject implements Action{
 
 			$action_obj->set_context($action_std->context);
 			$action_obj->set_is_shy($action_std->action_is_shy);
+
+			if(!is_null($action_std->relation_type)) {
+				$action_obj->set_relation_type(intval($action_std->relation_type));	
+			}
+			
 
 
 			// treat children
@@ -1596,6 +1647,21 @@ class ActionCollection extends ActionObject{
 
 	public function is_not_table() {
 		return !$this->is_table();
+	}
+
+	private $is_mobile_table;
+	public function is_not_mobile_table() {
+		return !$this->is_mobile_table();
+	}
+	public function is_mobile_table() {
+		return $this->is_mobile_table;		
+	}
+	public function toggle_mobile_table($is_mobile_table) {
+		if(is_null($is_mobile_table)) {
+			$is_mobile_table = false;
+		}
+
+		$this->is_mobile_table = $is_mobile_table;
 	}
 	/*	
 		@ Public
@@ -1708,6 +1774,11 @@ class ActionCollection extends ActionObject{
 
 		if(is_null($std_obj)) {
 			$std_obj = new stdClass();	
+		}
+
+		// wonder.jung
+		if($this->is_table()) {
+			$std_obj->is_mobile_table = $this->is_mobile_table;	
 		}
 
 		return parent::get_std_obj($std_obj);
@@ -1835,7 +1906,6 @@ class ActionItem extends ActionObject{
 		}
 
 		$this->set_context($action_item_obj->get_context());
-		// $this->set_add_on_list($action_item_obj->get_add_on_list()); // REMOVE ME
 
 		parent::inject($action_item_obj);
 	}
@@ -1868,6 +1938,7 @@ class ActionItem extends ActionObject{
 		}		
 		
 		$std_obj->add_on_action_object_list = $cur_add_on_std_list;
+		$std_obj->relation_type = $this->get_relation_type();
 
 		return parent::get_std_obj($std_obj);
 	}	
@@ -2003,14 +2074,10 @@ class ActionItem extends ActionObject{
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT=2;
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE=3;
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT=4;
-	public static function is_not_valid_relation_type($relation_type) {
+	public static function is_not_valid_relation_type($relation_type=-1) {
 		return !ActionItem::is_valid_relation_type($relation_type);
 	}
-	public static function is_valid_relation_type($relation_type) {
-
-		if(is_null($relation_type) || !is_numeric($relation_type)) {
-			return false;
-		}
+	public static function is_valid_relation_type($relation_type=-1) {
 
 		if(	ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE == $relation_type ||
 			ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT == $relation_type ||
@@ -2024,7 +2091,7 @@ class ActionItem extends ActionObject{
 
 	}
 
-	private $relation_type;
+	private $relation_type=-1;
 	public function set_relation_type($relation_type=-1) {
 
 		if(ActionItem::is_not_valid_relation_type($relation_type)) {

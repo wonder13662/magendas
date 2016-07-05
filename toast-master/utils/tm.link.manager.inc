@@ -15,9 +15,13 @@ class ToastMasterLinkManager{
 	public static $LOG_OUT="/view/log_out.php";
 	public static $MEMBERSHIP_PICKER="/view/membership_picker.php";
 	public static $PC_MEETING_AGENDA="/view/meeting_agenda.php";
+	
+	public static $MOBILE_TABLE_PAIR="/view/mobile/meeting_agenda_mobile_table_pair.php";
+	public static $MOBILE_TABLE_CHAIN="/view/mobile/meeting_agenda_mobile_table_chain.php";
 
 	public static $MOBILE_TOP="/view/mobile/top.php";
 	public static $MOBILE_MEETING_AGENDA_LIST="/view/mobile/meeting_agenda_list.php";
+	public static $MOBILE_MEETING_AGENDA_TEMPLATE="/view/mobile/meeting_agenda_template.php";
 	public static $MOBILE_MEETING_AGENDA_DETAIL="/view/mobile/meeting_agenda_detail.php";
 	public static $MOBILE_MEETING_AGENDA_DETAIL_ADD_NEW_ONE="/view/mobile/meeting_agenda_detail_add_new_one.php";
 	public static $MOBILE_MEMBER_MANAGE="/view/mobile/member_manage.php";

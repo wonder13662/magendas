@@ -50,6 +50,7 @@ var link_manager = {
 	,MOBILE_TOP:"/view/mobile/top.php"
 
 	,MOBILE_MEETING_AGENDA_LIST:"/view/mobile/meeting_agenda_list.php"
+	,MOBILE_MEETING_AGENDA_TEMPLATE:"/view/mobile/meeting_agenda_template.php"
 	,MOBILE_ROLE_SIGN_UP_LIST:"/view/mobile/role_sign_up.php"
 
 	,MOBILE_MEETING_AGENDA_DETAIL:"/view/mobile/meeting_agenda_detail.php"

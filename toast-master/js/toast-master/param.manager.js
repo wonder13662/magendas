@@ -298,6 +298,11 @@ var param_manager = {
 	, FACEBOOK_USER_FIRST_NAME:"FACEBOOK_USER_FIRST_NAME"
 	, FACEBOOK_USER_LAST_NAME:"FACEBOOK_USER_LAST_NAME"
 
+	// GOOGLE
+
+	// IFRAME
+	, IFRAME_PARENT_ACCESS_NAME:"IFRAME_PARENT_ACCESS_NAME"
+
 	,get:function(param_name, param_value){
 		var param_obj = {
 			get:function(param_name, param_value) {

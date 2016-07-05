@@ -395,15 +395,10 @@ class ToastmasterParamManager{
 	public $FACEBOOK_USER_FIRST_NAME="FACEBOOK_USER_FIRST_NAME";
 	public $FACEBOOK_USER_LAST_NAME="FACEBOOK_USER_LAST_NAME";
 
+	// GOOGLE
 
-
-		// console.log("facebook_user_id ::: ",facebook_user_id);
-		// console.log("facebook_user_email ::: ",facebook_user_email);
-		// console.log("facebook_user_name ::: ",facebook_user_name);
-		// console.log("facebook_user_first_name ::: ",facebook_user_first_name);
-		// console.log("facebook_user_last_name ::: ",facebook_user_last_name);
-		// console.log("facebook_profile_image ::: ",facebook_profile_image);
-
+	// IFRAME
+	public $IFRAME_PARENT_ACCESS_NAME="IFRAME_PARENT_ACCESS_NAME";
 
 }
 

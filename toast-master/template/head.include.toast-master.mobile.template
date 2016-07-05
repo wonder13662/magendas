@@ -41,6 +41,12 @@
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.column.js"></script>
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.mobile.list.js"></script>
+
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.list.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.table.js"></script>
+<script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.obj.action.modal.js"></script>
+
 <script src="[__ROOT_PATH__]/js/airborne/bootstrap.airborne.view.print.js"></script>
 
 <script src="[__ROOT_PATH__]/js/toast-master/mobile.list.manager.js"></script>
@@ -74,17 +80,6 @@
 <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 
 
-<!-- Google Analytics -->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-52998934-2', 'auto');
-  ga('send', 'pageview');
-</script>
-
 <!-- Mobile Javascript Library -->
 <script>
 
@@ -105,6 +100,11 @@
   var _tm_m_list = toast_master.mobile_list_manager;
   var _jessie = jessie;
 
+  var _action = airborne.bootstrap.obj.__action;
+  var _action_list = airborne.bootstrap.view.obj.__action_list;
+  var _action_table = airborne.bootstrap.view.obj.__action_table;
+  var _action_modal = airborne.bootstrap.view.obj.__action_modal;
+  
   var _param = param_manager;
   var _link = link_manager.init(service_root_path, _server, _param);
   

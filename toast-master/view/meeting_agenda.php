@@ -58,7 +58,8 @@
 	}
 
 	$member_list = $wdj_mysql_interface->getMemberList($meeting_membership_id, $params->MEMBER_MEMBERSHIP_STATUS_AVAILABLE);
-	$member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
+	// REMOVE ME
+	// $member_role_cnt_list = $wdj_mysql_interface->getMemberRoleCntList($meeting_membership_id);
 	
 	$role_list = $wdj_mysql_interface->getRoleList();
 	$time_guide_line = $wdj_mysql_interface->getTimeGuideLine();

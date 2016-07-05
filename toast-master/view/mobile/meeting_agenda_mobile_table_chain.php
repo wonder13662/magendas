@@ -22,15 +22,12 @@ if($MEETING_MEMBERSHIP_ID == -1) {
 $MEETING_ID = $params->getParamString($params->MEETING_ID, -1);
 
 // 가장 최신의 미팅 ID를 가져옵니다.
-$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($MEETING_MEMBERSHIP_ID);
+$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($meeting_membership_id);
 if((!(0 < $MEETING_ID)) && (0 < $latest_meeting_id)) {
 	// param으로 받은 미팅 아이디가 없을 경우, upcoming meeting id를 사용합니다.
 	$MEETING_ID = $latest_meeting_id;
 }
-$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($MEETING_MEMBERSHIP_ID);
-if($MEETING_ID > 0) {
-	$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
-}
+$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($meeting_membership_id);
 
 $action_file_info = $wdj_mysql_interface->select_action_file_info($MEETING_ID);
 $meeting_action_list_std = null;
@@ -42,17 +39,11 @@ if(!is_null($action_file_info)) {
 	$action_content = ActionFileManager::load($__action_regdate, $__action_hash_key);
 	$meeting_action_list_std = json_decode($action_content);
 
-	// convert
-	$meeting_action_list = ActionObject::convert($meeting_action_list_std);
-	$mobile_table_std_arr = $meeting_action_list->search_mobile_table_std_from_root();
-
 }
 
-// TEST
-$test_action_obj = ActionTemplate::get_TM_Default("09:30", "TEST");
-$test_action_std = $test_action_obj->get_std_obj();
-
 // ? 모바일에서는 템플릿을 정할수 없을까 ? --> 템플릿을 정하는 페이지가 있어야 함.
+
+
 
 /*
 // 가장 최신의 미팅 ID를 가져옵니다.
@@ -71,12 +62,11 @@ if($MEETING_ID > 0) {
 
 }
 
-// REMOVE ME
-// 다음 미팅 날짜를 가져옵니다.
-$start_date = date('Y-m-d');
+$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($MEETING_MEMBERSHIP_ID);
 */
 
-$meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($MEETING_MEMBERSHIP_ID);
+// 다음 미팅 날짜를 가져옵니다.
+$start_date = date('Y-m-d');
 
 // 외부 공유로 링크를 전달했을 경우 여부 - 외부 공유시에는 업데이트가 허용됩니다.
 $IS_EXTERNAL_SHARE = $params->isYes($params->IS_EXTERNAL_SHARE);
@@ -118,40 +108,6 @@ var IS_EXTERNAL_SHARE = <?php echo json_encode($IS_EXTERNAL_SHARE);?>;
 
 var membership_obj = <?php echo json_encode($membership_obj);?>;
 var meeting_agenda_obj = <?php echo json_encode($meeting_agenda_obj);?>;
-
-var meeting_action_list_std = <?php echo json_encode($meeting_action_list_std);?>;
-console.log("MEETING_MEMBERSHIP_ID ::: ",MEETING_MEMBERSHIP_ID);
-console.log("meeting_action_list_std ::: ",meeting_action_list_std);
-console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
-
-var mobile_table_std_arr = <?php echo json_encode($mobile_table_std_arr);?>;
-console.log("mobile_table_std_arr ::: ",mobile_table_std_arr);
-
-var test_action_std = <?php echo json_encode($test_action_std);?>;
-console.log("test_action_std ::: ",test_action_std);
-
-// $mobile_table_std_arr
-
-// COMMON PROPS
-var is_editable = true;
-var table_jq = $("table tbody#list");
-
-
-
-
-
-
-
-
-
-
-
-
-
-// meeting_action_list_std
-
-// REMOVE ME
-/*
 var today_role_list = <?php echo json_encode($today_role_list);?>;
 var today_speech_list = <?php echo json_encode($today_speech_list);?>;
 var today_news_list = <?php echo json_encode($today_news_list);?>;
@@ -159,8 +115,9 @@ var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
 
 var word_obj = <?php echo json_encode($word_obj);?>;
 var quote_obj = <?php echo json_encode($quote_obj);?>;
-*/
 
+var is_editable = true;
+var table_jq = $("table tbody#list");
 if(IS_EXTERNAL_SHARE === false) {
 
 	// Header - Log In Treatment
@@ -190,6 +147,21 @@ if(IS_EXTERNAL_SHARE === false) {
 	);
 
 }
+
+
+// Body - Content
+// 1. ROUND
+_m_list.addTableRowTitleNBadge(
+	// title
+	"Round"
+	// textInBadge
+	, meeting_agenda_obj.__round + "th"
+	// append_target_jq
+	, table_jq
+	// delegate_obj_click_row
+	, null
+);
+
 
 
 
@@ -409,57 +381,6 @@ if(!is_editable) {
 
 
 
-if(meeting_action_list_std == null) {
-
-	// 아젠다가 설정되지 않은 경우라면 템플릿을 노출해줍니다.
-	var accessor_agenda_template = 
-	_m_list.add_table_row_n_iframe(
-		// title
-		"Template"
-		// append_target_jq
-		, table_jq
-		// delegate_obj_row_click
-		, _obj.getDelegate(function(accessor){
-
-			console.log("accessor :: ",accessor);
-
-		}, this)
-		// is_bold
-		, true
-		// param_obj
-		, _param.get(_param.MEETING_ID, MEETING_ID)
-		// text_color
-		, null
-		// bg_color
-		, null
-		// iframe_page_link
-		, _link.get_link(
-			_link.MOBILE_MEETING_AGENDA_TEMPLATE
-			,_param
-			.get(_param.MEETING_ID, MEETING_ID)
-			.get(_param.MEETING_MEMBERSHIP_ID, MEETING_MEMBERSHIP_ID)
-			.get(_param.IS_IFRAME_VIEW, _param.YES)
-			.get(_param.IFRAME_PARENT_ACCESS_NAME, "accessor_agenda_template")
-		)
-		// delegate_update_iframe_height
-		, 416
-		// 
-	);
-
-	console.log("accessor_agenda_template :: ",accessor_agenda_template);
-	accessor_agenda_template.show_iframe();
-	
-}
-
-
-console.log("HERE / _action ::: ",_action);
-
-var meeting_action_list = undefined;
-if(meeting_action_list_std != undefined) {
-	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
-}
-
-console.log("HERE / meeting_action_list ::: ",meeting_action_list);
 
 
 
@@ -477,22 +398,6 @@ console.log("HERE / meeting_action_list ::: ",meeting_action_list);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// REMOVE ME
-
-/*
 var msg_guide_not_club_member = ""; 
 if(login_user_info.__is_login === _param.YES && membership_obj != undefined) {
 	msg_guide_not_club_member = 
@@ -507,11 +412,8 @@ if(login_user_info.__is_login === _param.YES && membership_obj != undefined) {
 	.replace(/\<CLUB_NAME\>/gi, membership_obj.__membership_desc)
 	;
 }
-*/
 
-// wonder.jung
 // 4. Today's Role
-/*
 var role_cnt = 0;
 for(var idx = 0; idx < today_role_list.length; idx++) {
 	var today_role_obj = today_role_list[idx];
@@ -589,7 +491,6 @@ _m_list.add_table_row_badge_n_iframe(
 if(!is_editable) {
 	accessor_meeting_role.off_iframe();	
 }
-*/
 
 
 
@@ -627,7 +528,6 @@ if(!is_editable) {
 
 
 // 5. Today's Speech
-/*
 var accessor_speech = 
 _m_list.add_table_row_badge_n_iframe(
 	// title
@@ -699,7 +599,7 @@ _m_list.add_table_row_badge_n_iframe(
 if(!is_editable) {
 	accessor_speech.off_iframe();	
 }
-*/
+
 
 
 
@@ -740,7 +640,6 @@ if(!is_editable) {
 
 
 // 6. News
-/*
 var accessor_news = 
 _m_list.add_table_row_badge_n_iframe(
 	// title
@@ -811,7 +710,7 @@ _m_list.add_table_row_badge_n_iframe(
 if(!is_editable) {
 	accessor_news.off_iframe();	
 }
-*/
+
 
 
 
@@ -855,7 +754,6 @@ if(!is_editable) {
 
 
 // 7. WORD
-/*
 var accessor_word =
 _m_list.addTableRowTextInputInline(
 	// title
@@ -920,7 +818,7 @@ _m_list.addTableRowTextInputInline(
 if(!is_editable) {
 	accessor_word.off();
 }
-*/
+
 
 
 
@@ -964,7 +862,6 @@ if(!is_editable) {
 
 
 // 8. WORD DESC
-/*
 var accessor_word_desc =
 _m_list.addTableRowTextAreaInputInline(
 	// title
@@ -1027,7 +924,6 @@ _m_list.addTableRowTextAreaInputInline(
 if(!is_editable) {
 	accessor_word_desc.off();
 }
-*/
 
 
 
@@ -1073,7 +969,8 @@ if(!is_editable) {
 
 
 
-/*
+
+
 
 
 
@@ -1228,7 +1125,7 @@ _m_list.addTableRowBtn(
 	, table_jq
 );
 
-*/
+
 
 
 // REMOVE Loading message

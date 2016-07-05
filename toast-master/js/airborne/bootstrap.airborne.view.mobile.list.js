@@ -3162,6 +3162,220 @@ airborne.bootstrap.view.mobile.list = {
 	}
 	// @ Public
 	// @ Desc : 클릭시, 지정한 주소의 페이지를 iframe으로 보여줍니다. 추가 정보를 제공하는 배지가 있습니다.
+	,add_table_row_n_iframe:function(title, append_target_jq, delegate_obj_click_row, is_bold, param_obj, text_color, bg_color, iframe_page_link, iframe_height){
+
+		var _obj = airborne.bootstrap.obj;
+
+		if(_v.isNotValidStr(title)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_n_iframe / _v.isNotValidStr(title)");
+			return;
+		}
+		if(append_target_jq==null){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_n_iframe / append_target_jq==null");
+			return;
+		}
+		if(_obj.isNotValidDelegate(delegate_obj_click_row)){
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_n_iframe / _obj.isNotValidDelegate(delegate_obj_click_row)");
+			return;
+		}
+		if(is_bold == undefined) {
+			is_bold = false;
+		}
+		if(text_color == undefined) {
+			text_color = _color.COLOR_MEDIUM_GRAY;
+		}
+		if(bg_color == undefined) {
+			bg_color = _color.COLOR_TINT_GRAY;
+		}
+		if(_v.is_not_valid_str(iframe_page_link)) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_n_iframe / _v.is_not_valid_str(iframe_page_link)");
+			return;
+		}
+		if(_v.is_not_unsigned_number(iframe_height)) {
+			console.log("!Error! / airborne.bootstrap.view.mobile.list / add_table_row_n_iframe / _v.is_not_unsigned_number(iframe_height)");
+			return;
+		}
+
+		var row_id = airborne.html.getIdRandomTail("TableRowMovingArrow_" + title);
+		var row_id_iframe = row_id + "_iframe";
+		var iframe_id = row_id + "_iframe_entity";
+
+		// Set Title
+		var row_tag = "";
+		if(is_bold) {
+
+			row_tag += ""
+			+ "<tr class=\"active\" id=\"<_v>\" status=\"close\">".replace(/\<_v\>/gi, row_id)
+				+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;\">"
+					.replace(/\<COLOR\>/gi, text_color)
+					.replace(/\<BG_COLOR\>/gi, bg_color)
+					+ "<h5>"
+						+ "<span style=\"text-center\" class=\"no_selection\"><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
+					+ "</h5>"
+				+ "</td>"
+			+ "</tr>"
+			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
+				+ "<td style=\"background-color:#DDD;\">"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\" scrolling=\"no\"></iframe>"
+					.replace(/\<LINK\>/gi, iframe_page_link)
+					.replace(/\<_v\>/gi, iframe_id)
+					.replace(/\<HEIGHT\>/gi, iframe_height)
+				+ "</td>"
+			+ "</tr>"
+			;
+
+		} else {
+
+			row_tag += ""
+			+ "<tr class=\"active\" id=\"<_v>\" status=\"close\">".replace(/\<_v\>/gi, row_id)
+				+ "<td style=\"color:<COLOR>;background-color:<BG_COLOR>;padding:15px;\">"
+					.replace(/\<COLOR\>/gi, text_color)
+					.replace(/\<BG_COLOR\>/gi, bg_color)
+					+ "<span style=\"text-center;font-size:small;\" class=\"no_selection\"><_v></span>".replace(/\<_v\>/gi, title)
+				+ "</td>"
+			+ "</tr>"
+			+ "<tr class=\"active\" id=\"<_v>\" style=\"display:none;\">".replace(/\<_v\>/gi, row_id_iframe)
+				+ "<td style=\"background-color:#DDD;\">"
+					+ "<iframe id=\"<_v>\" src=\"<LINK>\" width=\"100%\" height=\"<HEIGHT>px\" frameborder=\"0\" scrolling=\"no\"></iframe>"
+					.replace(/\<LINK\>/gi, iframe_page_link)
+					.replace(/\<_v\>/gi, iframe_id)
+					.replace(/\<HEIGHT\>/gi, iframe_height)
+				+ "</td>"
+			+ "</tr>"
+			;
+
+		}
+
+		append_target_jq.append(row_tag);
+
+		// Set Event
+		var header_row_container_jq = append_target_jq.find("tr#" + row_id);
+		var header_row_jq = append_target_jq.find("tr#" + row_id).find("td");
+		var badge_jq = header_row_jq.find("span.badge strong");
+		var header_row_iframe_jq = append_target_jq.find("tr#" + row_id_iframe);
+		var iframe_jq = header_row_iframe_jq.find("iframe");
+
+		param_obj.header_row_iframe_jq = header_row_iframe_jq;
+
+		var do_scroll = function(scroll_to_y_pos, is_close, header_row_iframe_jq) {
+
+			if(is_close == undefined) {
+				is_close = false;
+			}
+
+			$('html, body').animate(
+				{
+                    scrollTop:scroll_to_y_pos
+            	}
+            	, 500
+            	, function() {
+
+    				// Animation complete.
+    				if(is_close && header_row_iframe_jq != undefined) {
+    					header_row_iframe_jq.hide();
+    				}
+				}
+			);
+		}
+
+		var accessor = {
+			is_iframe_enable:true
+			, on_iframe:function(){
+				this.is_iframe_enable = true;
+			}
+			, off_iframe:function(){
+				this.is_iframe_enable = false;
+			}
+			, get_iframe_enable:function() {
+				return this.is_iframe_enable;
+			}
+			, header_row_iframe_jq:header_row_iframe_jq
+			, delegate_obj_click_row:delegate_obj_click_row
+			, header_row_container_jq:header_row_container_jq
+			, iframe_jq:iframe_jq
+			, set_iframe_height:function(new_height) {
+				this.iframe_jq.height(new_height);
+
+				var scroll_to_y_pos = this.scroll_top_return;
+				if(!isNaN(scroll_to_y_pos) && 0 < scroll_to_y_pos) {
+					var header_row_container_jq = this.header_row_container_jq;
+					var is_close = false;
+					do_scroll(scroll_to_y_pos, is_close, this.header_row_iframe_jq);	
+				}
+
+				// 부모 정보 업데이트.
+				this.delegate_obj_click_row._apply([this]);
+			}
+			, show_iframe:function() {
+				this.header_row_iframe_jq.show();
+			}
+			, hide_iframe:function() {
+				this.header_row_iframe_jq.hide();				
+			}
+			, scroll_top_return:0
+			, store_scroll_top_return:function() {
+				// 작업 완료 이후에 돌아갈 스크롤 값을 저장합니다.
+				this.scroll_top_return = $("body").scrollTop();
+
+				// wonder.jung
+				console.log("store_scroll_top_return / this.scroll_top_return :::: ",this.scroll_top_return);
+			}
+
+		};
+
+		// wonder.jung
+
+		var delegate_obj = 
+		_obj.getDelegate(function(delegate_data){
+
+			if(!accessor.get_iframe_enable()) {
+				return;
+			}
+
+			var status = header_row_container_jq.attr("status");
+			var is_close = false;
+			if(status === "close") {
+				header_row_container_jq.attr("status","open");
+				header_row_iframe_jq.show();
+				is_close = false;
+			} else {
+				header_row_container_jq.attr("status","close");
+				is_close = true;
+			}
+
+			// 외부 delegate로 파라미터를 넘겨줍니다.
+			delegate_obj_click_row._apply([delegate_data.delegate_data]);
+
+			// scroll screen
+			var scroll_to_y_pos = header_row_container_jq.offset().top;
+			if(is_close) {
+				scroll_to_y_pos = 0;
+			}
+			do_scroll(scroll_to_y_pos, is_close, header_row_iframe_jq);
+
+		}, this);
+
+		// 제목 열이 클릭 되었을 때, 배경 색깔 바뀌는 등의 이벤트를 제어합니다.
+		var bg_color_vmouse_down = text_color;
+		var text_color_vmouse_down = bg_color;
+		this.setTableRowEvent(
+			// row_jq
+			header_row_jq
+			// delegate_obj
+			, delegate_obj
+			// bg_color_vmouse_down
+			, bg_color_vmouse_down
+			// delegate_data
+			, param_obj
+			// text_color_vmouse_down
+			, text_color_vmouse_down
+		);
+
+		return accessor;
+	}
+
+	// @ Public
+	// @ Desc : 클릭시, 지정한 주소의 페이지를 iframe으로 보여줍니다. 추가 정보를 제공하는 배지가 있습니다.
 	,add_table_row_badge_n_iframe:function(title, title_on_badge, append_target_jq, delegate_obj_click_row, is_bold, param_obj, text_color, bg_color, iframe_page_link, iframe_height){
 
 		var _obj = airborne.bootstrap.obj;
