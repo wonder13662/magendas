@@ -89,6 +89,10 @@
 	$meeting_agenda_obj_immediate_past = 
 	$wdj_mysql_interface->get_immediate_past_meeting_agenda($meeting_membership_id);
 
+	// officers
+	$officer_list = $wdj_mysql_interface->getExcutiveMemberList($meeting_membership_id);
+	$officer_action_table = ActionTemplate::get_TOASTMASTER_OFFICERS($officer_list);
+	$officer_action_table_std = $officer_action_table->get_std_obj();
 
 	// @ required
 	$wdj_mysql_interface->close();
@@ -329,6 +333,13 @@ var is_editable = <?php echo json_encode($is_editable);?>;
 var is_edit_anyway = <?php echo json_encode($is_edit_anyway);?>;
 var window_scroll_y = <?php echo json_encode($window_scroll_y);?>;
 
+var officer_list = <?php echo json_encode($officer_list);?>;
+var officer_action_table_std = <?php echo json_encode($officer_action_table_std);?>;
+var officer_action_table = null;
+if(officer_action_table_std != undefined) {
+	officer_action_table = _action.get_action_obj(officer_action_table_std);
+}
+
 var meeting_action_list_std = <?php echo json_encode($meeting_action_list_std);?>;
 var meeting_action_list = undefined;
 if(meeting_action_list_std != undefined) {
@@ -389,7 +400,7 @@ var meeting_agenda_data_obj =
 	, is_log_in_user:is_log_in_user 
 	, login_user_info:login_user_info
 	, meeting_action_list:meeting_action_list
-	, tm_officer_action_list:tm_officer_action_list
+	, tm_officer_action_list:officer_action_table
 	, service_root_path:service_root_path
 	, recent_action_collection_id:recent_action_collection_id
 };

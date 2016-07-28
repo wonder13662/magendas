@@ -771,7 +771,6 @@ class ActionObject implements Action{
 		$mobile_table_std_arr = array();
 
 		$count = count($mobile_table_arr);
-		echo "search_mobile_table_std_from_root / \$count :: $count<br/>";
 
 		for($idx=0;$idx < count($mobile_table_arr);$idx++) {
 			$mobile_table_action = $mobile_table_arr[$idx];
@@ -943,22 +942,6 @@ class ActionObject implements Action{
 				// echo "\$cur_action_name :: $cur_action_name / get_std_obj / \$cur_child_action_name :: $cur_child_action_name<br/>";
 
 				$std_obj_child = $child_action_obj->get_std_obj();
-
-				// REMOVE ME
-				/*
-				$std_obj_child_parent = new stdClass();
-				$std_obj_child_parent->action_hash_key = $this->action_hash_key;
-				$std_obj_child_parent->action_is_shy = (intval($this->action_is_shy)==1)?true:false;
-				$std_obj_child_parent->action_name = $this->action_name;
-				
-				$std_obj_child_parent->action_collection_type = intval($this->action_collection_type);
-				$std_obj_child_parent->action_collection_type_name = $this->action_collection_type_name;
-				$std_obj_child_parent->action_item_type = intval($this->action_item_type);
-				$std_obj_child_parent->action_item_type_name = $this->action_item_type_name;
-				$std_obj_child_parent->context = $this->context;
-
-				$std_obj_child_parent->coordinate = $this->coordinate;
-				*/
 
 				if((0 < $action_idx) && ActionItem::is_instance($child_action_obj)) {
 					$before_std_obj_child = $children_action_obj_list[($action_idx - 1)];
@@ -1776,7 +1759,6 @@ class ActionCollection extends ActionObject{
 			$std_obj = new stdClass();	
 		}
 
-		// wonder.jung
 		if($this->is_table()) {
 			$std_obj->is_mobile_table = $this->is_mobile_table;	
 		}
@@ -1939,6 +1921,7 @@ class ActionItem extends ActionObject{
 		
 		$std_obj->add_on_action_object_list = $cur_add_on_std_list;
 		$std_obj->relation_type = $this->get_relation_type();
+		$std_obj->relation_type_name = ActionItem::get_relation_type_name($this->get_relation_type());
 
 		return parent::get_std_obj($std_obj);
 	}	
@@ -2074,6 +2057,12 @@ class ActionItem extends ActionObject{
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT=2;
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE=3;
 	public static $ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT=4;
+
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TITLE="PAIR_TITLE";
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TEXT="PAIR_TEXT";
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TITLE="CHAIN_TITLE";
+	public static $ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TEXT="CHAIN_TEXT";
+
 	public static function is_not_valid_relation_type($relation_type=-1) {
 		return !ActionItem::is_valid_relation_type($relation_type);
 	}
@@ -2089,6 +2078,28 @@ class ActionItem extends ActionObject{
 
 		return false;
 
+	}
+	public static function get_relation_type_name($relation_type=-1) {
+
+		if(	strcmp(ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE,$relation_type) == 0 ) {
+
+			return ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TITLE;
+
+		} else if( strcmp(ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT,$relation_type) == 0 ) {
+
+			return ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TEXT;
+
+		} else if( strcmp(ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE,$relation_type) == 0 ) {
+
+			return ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TITLE;
+
+		} else if( strcmp(ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT,$relation_type) == 0 ) {
+
+			return ActionItem::$ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TEXT;
+
+		}
+
+		return "";
 	}
 
 	private $relation_type=-1;

@@ -48,34 +48,6 @@ if(!is_null($action_file_info)) {
 
 }
 
-// TEST
-$test_action_obj = ActionTemplate::get_TM_Default("09:30", "TEST");
-$test_action_std = $test_action_obj->get_std_obj();
-
-// ? 모바일에서는 템플릿을 정할수 없을까 ? --> 템플릿을 정하는 페이지가 있어야 함.
-
-/*
-// 가장 최신의 미팅 ID를 가져옵니다.
-$latest_meeting_id = $wdj_mysql_interface->get_meeting_agenda_id_upcoming($MEETING_MEMBERSHIP_ID);
-if($MEETING_ID == -1) {
-	$MEETING_ID = $latest_meeting_id;
-}
-if($MEETING_ID > 0) {
-
-	$meeting_agenda_obj = $wdj_mysql_interface->get_meeting_agenda_by_id($MEETING_ID);
-	$today_role_list = $wdj_mysql_interface->getTodayRoleList($MEETING_MEMBERSHIP_ID, $MEETING_ID);
-	$today_speech_list = $wdj_mysql_interface->sel_speech_speaker($MEETING_ID);
-	$today_news_list = $wdj_mysql_interface->getNews($MEETING_ID);
-	$word_obj = $wdj_mysql_interface->get_word_of_the_day($MEETING_ID);
-	$quote_obj = $wdj_mysql_interface->get_quote_of_the_day($MEETING_ID);
-
-}
-
-// REMOVE ME
-// 다음 미팅 날짜를 가져옵니다.
-$start_date = date('Y-m-d');
-*/
-
 $meeting_agenda_list = $wdj_mysql_interface->getMeetingAgendaList($MEETING_MEMBERSHIP_ID);
 
 // 외부 공유로 링크를 전달했을 경우 여부 - 외부 공유시에는 업데이트가 허용됩니다.
@@ -125,12 +97,7 @@ console.log("meeting_action_list_std ::: ",meeting_action_list_std);
 console.log("meeting_agenda_obj ::: ",meeting_agenda_obj);
 
 var mobile_table_std_arr = <?php echo json_encode($mobile_table_std_arr);?>;
-console.log("mobile_table_std_arr ::: ",mobile_table_std_arr);
 
-var test_action_std = <?php echo json_encode($test_action_std);?>;
-console.log("test_action_std ::: ",test_action_std);
-
-// $mobile_table_std_arr
 
 // COMMON PROPS
 var is_editable = true;
@@ -148,18 +115,6 @@ var table_jq = $("table tbody#list");
 
 
 
-// meeting_action_list_std
-
-// REMOVE ME
-/*
-var today_role_list = <?php echo json_encode($today_role_list);?>;
-var today_speech_list = <?php echo json_encode($today_speech_list);?>;
-var today_news_list = <?php echo json_encode($today_news_list);?>;
-var meeting_agenda_list = <?php echo json_encode($meeting_agenda_list);?>;
-
-var word_obj = <?php echo json_encode($word_obj);?>;
-var quote_obj = <?php echo json_encode($quote_obj);?>;
-*/
 
 if(IS_EXTERNAL_SHARE === false) {
 
@@ -452,14 +407,11 @@ if(meeting_action_list_std == null) {
 }
 
 
-console.log("HERE / _action ::: ",_action);
-
 var meeting_action_list = undefined;
 if(meeting_action_list_std != undefined) {
 	meeting_action_list = _action.get_action_obj(meeting_action_list_std);
 }
 
-console.log("HERE / meeting_action_list ::: ",meeting_action_list);
 
 
 
@@ -476,6 +428,94 @@ console.log("HERE / meeting_action_list ::: ",meeting_action_list);
 
 
 
+
+
+// wonder.jung
+// MOBILE TABLE
+if(_v.is_valid_array(mobile_table_std_arr)) {
+
+	console.log("HERE / mobile_table_std_arr ::: ",mobile_table_std_arr);
+
+	for(var idx=0; idx < mobile_table_std_arr.length; idx++) {
+
+		var mobile_table_std = mobile_table_std_arr[idx];
+		var mobile_table_obj = _action.get_action_obj(mobile_table_std);
+		var child_column_action_list = mobile_table_obj.get_children();
+
+		// COLUMN LIST
+		for(var column_idx=0; column_idx < child_column_action_list.length; column_idx++) {
+
+			var child_column_action_obj = child_column_action_list[column_idx];
+			if(child_column_action_obj.has_no_children()) {
+				continue;
+			}
+
+			var child_field_action_list = child_column_action_obj.get_children();
+			// console.log("child_field_action_std_list ::: ",child_field_action_std_list);
+			// FIELD LIST
+			for(var field_idx=0; field_idx < child_field_action_list.length; field_idx++) {
+
+				var child_field_action_obj = child_field_action_list[field_idx];
+
+				if( child_field_action_obj.is_relation_pair_text() ) {
+
+					// 테이블 객체를 전달합니다.
+					var parent_table = child_field_action_obj.get_parent().get_parent();
+					_m_list.add_table_pair(
+						// append_target_jq
+						table_jq
+						// action_table_obj
+						, parent_table
+						// , callback
+						, function(data) {
+
+							console.log("HERE / data ::: ",data);
+
+						}
+						// , callback_scope
+						, this
+					);
+
+					// 인덱스의 마지막으로 이동
+					column_idx = child_column_action_list.length;
+					break;
+
+				} else if( child_field_action_obj.is_relation_chain_title()) {
+
+					// 스피치 테이블을 표시.
+
+					// 테이블 객체를 전달합니다.
+					var parent_table = child_field_action_obj.get_parent().get_parent();
+					console.log("parent_table ::: ",parent_table);
+
+					_m_list.add_table_chain(
+						// append_target_jq
+						table_jq
+						// action_table_obj
+						, parent_table
+						// , callback
+						, function(data) {
+
+							console.log("HERE / data ::: ",data);
+
+						}
+						// , callback_scope
+						, this
+					);
+
+					// 인덱스의 마지막으로 이동
+					column_idx = child_column_action_list.length;
+					break;
+
+				}
+
+			} // field for end
+		} // column for end
+
+		// break;
+	} // table for end
+
+}
 
 
 

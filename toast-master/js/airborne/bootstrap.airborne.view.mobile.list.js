@@ -1106,6 +1106,68 @@ airborne.bootstrap.view.mobile.list = {
 
 		return accessor_obj;
 	}
+	// @ desc : 테이블 열 간의 서로 위치를 바꾸는 버튼입니다.
+	,add_table_row_switch:function(append_target_jq, callback, callback_scope, data){
+
+		if(append_target_jq == null){
+			console.log("!Error! / add_table_row_switch / append_target_jq == null");
+			return;
+		}
+		if(callback == null){
+			console.log("!Error! / add_table_row_switch / callback == null");
+			return;
+		}
+		if(callback_scope == null){
+			console.log("!Error! / add_table_row_switch / callback_scope == null");
+			return;
+		}
+		var text_color = _color.COLOR_WHITE;
+		var bg_color = _color.COLOR_MEDIUM_GRAY;
+
+		var row_id = airborne.html.getIdRandomTail("add_table_row_switch");
+		var row_tag = "";
+		var btn_color = _color.COLOR_WHITE;
+		row_tag += ""
+		+ "<tr class=\"active\" id=\"<_v>\">".replace(/\<_v\>/gi, row_id)
+			+ "<td class=\"text-center\" style=\"color:<COLOR>;background-color:<BG_COLOR>;border-bottom:1px solid #ddd;\">"
+					.replace(/\<COLOR\>/gi, text_color)
+					.replace(/\<BG_COLOR\>/gi, bg_color)
+					// + "<span id=\"icon_switch\" class=\"glyphicon glyphicon-arrow-up\" style=\"padding-top:2px;padding-bottom:5px;padding-left:10px;padding-right:10px;color:<COLOR>;\"></span>"
+					+ "<span id=\"icon_switch\" class=\"glyphicon glyphicon-arrow-up\" style=\"color:<COLOR>;\"></span>"
+						.replace(/\<COLOR\>/gi, btn_color)
+					+ "<span id=\"icon_switch\" class=\"glyphicon glyphicon-arrow-down\" style=\"color:<COLOR>;\"></span>"
+						.replace(/\<COLOR\>/gi, btn_color)
+			+ "</td>"
+		+ "</tr>"
+		;
+
+		append_target_jq.append(row_tag);
+
+		// Set Event
+		var header_row_jq = append_target_jq.find("tr#" + row_id);
+
+		var btn_switch_jq = header_row_jq.find("button#btn_switch");
+		btn_switch_jq.click(function(){
+			callback.apply(callback_scope, [data]);
+		});
+
+		var accessor_obj = {
+			btn_switch_jq:btn_switch_jq
+			,get_btn_switch_jq:function() {
+				return this.btn_switch_jq;
+			}
+			,disable_btn_switch:function() {
+				this.btn_switch_jq.attr("disabled","disabled");
+				this.btn_switch_jq.css("opacity",".2")
+			}
+			,row_jq:header_row_jq
+			,get_row_jq:function(){
+				return this.row_jq;
+			}
+		}
+
+		return accessor_obj;
+	}	
 	/*
 		@ Public
 		@ Desc : 타이틀이 가운데 있는 열을 그립니다.
@@ -1149,6 +1211,212 @@ airborne.bootstrap.view.mobile.list = {
 
 		return header_row_jq;
 	}		
+	// @ desc : chain 타입의 테이블을 모바일 화면에 맞게 그려줍니다.
+	,add_table_chain:function(append_target_jq, action_table_obj, callback, callback_scope){
+
+		if(_action.is_not_valid_action_obj(action_table_obj)) {
+			console.log("!Error! / add_table_chain / _action.is_not_valid_action_obj(action_table_obj)");
+			return;
+		}
+
+		var cur_table_row_title_field_arr = mobile_table_obj.get_table_row_field_arr(0);
+
+		var cur_table_row_cnt = mobile_table_obj.get_table_row_cnt();
+
+		console.log("cur_table_row_cnt ::: ",cur_table_row_cnt);
+
+		// TABLE TITLE
+		this.add_table_row_title_left_addable(
+			// title
+			action_table_obj.get_action_name()
+			// append_target_jq
+			, append_target_jq
+			// callback
+			, callback
+			// callback_scope
+			, callback_scope
+		);
+
+		for(var row_idx = 1; row_idx < cur_table_row_cnt; row_idx++) {
+
+			var next_table_row_text_field_arr = mobile_table_obj.get_table_row_field_arr(row_idx);
+
+			for(var column_idx=0; column_idx < next_table_row_text_field_arr.length; column_idx++) {
+
+				var action_item_field_title = cur_table_row_title_field_arr[column_idx];
+				var title_action_name = action_item_field_title.get_action_name();
+
+				var action_item_field_text = next_table_row_text_field_arr[column_idx];
+				var text_action_hash_key = action_item_field_text.get_action_hash_key();
+				var text_action_name = action_item_field_text.get_action_name();
+
+				if(action_item_field_text.is_select_box_group()) {
+
+					var table_row_controller = 
+					this.addTableRowTitleNBadge(
+						// title
+						title_action_name
+						// title_on_badge
+						, text_action_name
+						// append_target_jq
+						, append_target_jq
+						// delegate_obj_click_row
+						, _obj.getDelegate(callback, callback_scope)
+						// delegate_data
+						, _param
+						.get(_param.ACTION_HASH_KEY_TABLE, action_table_obj.get_action_hash_key())
+						.get(_param.ACTION_HASH_KEY_FIELD, action_item_field_text.get_action_hash_key())
+					);					
+
+				} else if(action_item_field_text.is_item_title_only_addable()) {
+					
+					this.addTableRowTextInputInline(
+						// title
+						title_action_name
+						// append_target_jq
+						, append_target_jq
+						// place holder
+						, "Empty"
+						// value
+						, text_action_name
+						// delegate_on_blur
+						, _obj.getDelegate(callback, callback_scope)
+						// param_obj
+						, _param
+						.get(_param.ACTION_HASH_KEY_TABLE, action_table_obj.get_action_hash_key())
+						.get(_param.ACTION_HASH_KEY_FIELD, action_item_field_text.get_action_hash_key())
+					);
+
+				} // end if
+			} // end for
+
+			if(row_idx < (cur_table_row_cnt - 1)) {
+
+				// 열과 열 사이에 switch btn을 배치합니다.
+				// table chain은 row의 순서를 변경할 수 있습니다.
+				var accessor_speech_order = 
+				this.add_table_row_switch(
+					// append_target_jq
+					append_target_jq
+					// delegate_obj_click_btn_up
+					, _obj.getDelegate(callback, callback_scope)
+					// delegate_obj_click_btn_down
+					, _obj.getDelegate(callback, callback_scope)
+					// delegate_data
+					, _param
+					.get(_param.ACTION_HASH_KEY_TABLE, action_table_obj.get_action_hash_key())
+					.get(_param.ACTION_TABLE_ROW_IDX, row_idx)
+				);				
+
+			} // end if
+
+		}
+
+	}
+	// @ desc : pair 타입의 테이블을 모바일 화면에 맞게 그려줍니다.
+	,add_table_pair:function(append_target_jq, action_table_obj, callback, callback_scope){
+
+		if(_action.is_not_valid_action_obj(action_table_obj)) {
+			console.log("!Error! / add_table_pair / _action.is_not_valid_action_obj(action_table_obj)");
+			return;
+		}
+
+		// TABLE TITLE
+		this.addTableRowTitleLeft(
+			// title
+			action_table_obj.get_action_name()
+			// append_target_jq
+			, append_target_jq
+			// delegate_obj_click_row
+			, _obj.getDelegate(callback, callback_scope)
+		);
+
+		// COLUMN LIST
+		var child_column_action_list = mobile_table_obj.get_children();
+		for(var column_idx=0; column_idx < child_column_action_list.length; column_idx++) {
+
+			var child_column_action_obj = child_column_action_list[column_idx];
+			if(child_column_action_obj.has_no_children()) {
+				continue;
+			}
+			var child_field_action_list = child_column_action_obj.get_children();
+
+			// FIELD LIST
+			for(var field_idx=0; field_idx < child_field_action_list.length; field_idx++) {
+				var child_field_action_obj = child_field_action_list[field_idx];
+
+				if(child_field_action_obj.is_not_relation_pair_title()) {
+					continue;
+				}
+
+				var cur_table_row_sibling_arr = child_field_action_obj.get_table_row_sibling_arr();
+				if(cur_table_row_sibling_arr.length <= (column_idx+1)) {
+					continue;
+				}
+
+				var title_action_hash_key = child_field_action_obj.get_action_hash_key();
+				var title_action_name = child_field_action_obj.get_action_name();
+
+				var child_field_action_obj_right = cur_table_row_sibling_arr[column_idx+1];
+				var text_action_hash_key = child_field_action_obj_right.get_action_hash_key();
+				var text_action_name = child_field_action_obj_right.get_action_name();
+				
+				if(child_field_action_obj_right.is_select_box_group()) {
+
+					var table_row_controller = 
+					this.addTableRowTitleNBadge(
+						// title
+						title_action_name
+						// title_on_badge
+						, text_action_name
+						// append_target_jq
+						, append_target_jq
+						// delegate_obj_click_row
+						, _obj.getDelegate(function(delegate_data){
+
+							if(callback != null && callback_scope != null) {
+								callback.apply(callback_scope, [delegate_data]);
+							}
+
+						}, this)
+						// delegate_data
+						, _param
+						.get(_param.ACTION_HASH_KEY_TITLE, title_action_hash_key)
+						.get(_param.ACTION_HASH_KEY_TEXT, text_action_hash_key)
+						.get(_param.ACTION_NAME_TITLE, title_action_name)
+						.get(_param.ACTION_NAME_TEXT, text_action_name)
+					);
+					
+				} else {
+
+					console.log("child_field_action_obj_right ::: ",child_field_action_obj_right);
+
+					this.addTableRowTextInputInline(
+						// title
+						title_action_name
+						// append_target_jq
+						, append_target_jq
+						// place holder
+						, "Empty"
+						// value
+						, text_action_name
+						// delegate_on_blur
+						, _obj.getDelegate(callback, callback_scope)
+						// param_obj
+						, _param
+						.get(_param.ACTION_HASH_KEY_TITLE, title_action_hash_key)
+						.get(_param.ACTION_HASH_KEY_TEXT, text_action_hash_key)
+						.get(_param.ACTION_NAME_TITLE, title_action_name)
+						.get(_param.ACTION_NAME_TEXT, text_action_name)
+					);					
+
+				}
+
+			} // end field for
+
+		} // end column for
+
+	}
 	/*
 		@ Public
 		@ Desc : 왼쪽에 타이틀, 오른쪽에 뱃지가 있는 테이블 열을 그립니다.
@@ -2081,6 +2349,50 @@ airborne.bootstrap.view.mobile.list = {
 
 		return header_row_jq;
 	}
+	,add_table_row_title_left_addable:function(title, append_target_jq, callback, callback_scope){
+
+		if(_v.isNotValidStr(title)){
+			console.log("!Error! / add_table_row_title_left_addable / _v.isNotValidStr(title)");
+			return;
+		}
+		if(append_target_jq == null){
+			console.log("!Error! / add_table_row_title_left_addable / append_target_jq == null");
+			return;
+		}
+		if(callback == null){
+			console.log("!Error! / add_table_row_title_left_addable / callback == null");
+			return;
+		}
+		if(callback_scope == null){
+			console.log("!Error! / add_table_row_title_left_addable / callback_scope == null");
+			return;
+		}
+
+		var row_id = airborne.html.getIdRandomTail("add_table_row_title_left_addable" + title);
+		var row_tag = "";
+		row_tag += ""
+		+ "<tr id=\"<_v>\" style=\"color:rgb(51, 51, 51);background-color:rgba(0, 0, 0, 0);\">".replace(/\<_v\>/gi, row_id)
+			+ "<td class=\"text-left\">"
+				+ "<h5>"
+					+ "<span><strong><_v></strong></span>".replace(/\<_v\>/gi, title)
+					+ "<span id=\"icon\" class=\"glyphicon glyphicon-plus\" style=\"float:right;margin-right:10px;\"></span>"
+				+ "</h5>"
+			+ "</td>"
+		+ "</tr>"
+		;
+
+		append_target_jq.append(row_tag);
+
+		// Set Event
+		var header_row_jq = append_target_jq.find("tr#" + row_id);
+
+		var delegate_obj = _obj.getDelegate(callback, callback_scope);
+
+		// 제목 열이 클릭 되었을 때, 배경 색깔 바뀌는 등의 이벤트를 제어합니다.
+		this.setTableRowEvent(header_row_jq, delegate_obj);
+
+		return header_row_jq;
+	}	
 	/*
 		@ Public
 		@ Desc : 입력창이 있는 열을 그립니다. 타이틀과 입력창 2줄이 만들어집니다.
@@ -2367,7 +2679,6 @@ airborne.bootstrap.view.mobile.list = {
 
 					var accessor = add_row_event(last_row_jq, param_obj, delegate_on_event, accessor_parent);
 					
-					// wonder.jung
 					param_obj[_param.EVENT_PARAM_EVENT_TYPE] = _param.EVENT_INSERT;
 					param_obj[_param.EVENT_PARAM_TARGET_JQ] = last_row_jq;
 					param_obj.accessor = accessor;
@@ -3316,14 +3627,10 @@ airborne.bootstrap.view.mobile.list = {
 			, store_scroll_top_return:function() {
 				// 작업 완료 이후에 돌아갈 스크롤 값을 저장합니다.
 				this.scroll_top_return = $("body").scrollTop();
-
-				// wonder.jung
 				console.log("store_scroll_top_return / this.scroll_top_return :::: ",this.scroll_top_return);
 			}
 
 		};
-
-		// wonder.jung
 
 		var delegate_obj = 
 		_obj.getDelegate(function(delegate_data){
@@ -3544,7 +3851,6 @@ airborne.bootstrap.view.mobile.list = {
 				// 작업 완료 이후에 돌아갈 스크롤 값을 저장합니다.
 				this.scroll_top_return = $("body").scrollTop();
 
-				// wonder.jung
 				console.log("store_scroll_top_return / this.scroll_top_return :::: ",this.scroll_top_return);
 			}
 

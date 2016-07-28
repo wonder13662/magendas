@@ -4465,7 +4465,7 @@ class ActionTemplate{
 
 
 	// ActionTemplate::get_TOASTMASTER_OFFICERS();
-	public static function get_TOASTMASTER_OFFICERS() {
+	public static function get_TOASTMASTER_OFFICERS($officer_list=null) {
 
 		$params = new ToastmasterParamManager();
 
@@ -4652,7 +4652,7 @@ class ActionTemplate{
 
 
 
-
+		$officer_idx = 0;
 
 		// 1-1-2. Column List - Right Role Name List
 		$table_club_officer_column_list = 
@@ -4665,10 +4665,20 @@ class ActionTemplate{
 		$table_club_officer->add_child($table_club_officer_column_list);
 
 		// 1-1-2-1. Column List Field - President
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4677,17 +4687,27 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_PRESIDENT;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 
 
 		// 1-1-2-2. Column List Field - Immediate Past President
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4697,17 +4717,27 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_IMMEDIATE_PAST_PRESIDENT;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
 
 
 		// 1-1-2-3. Column List Field - VPE
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4717,7 +4747,7 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPE;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4725,10 +4755,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-4. Column List Field - VPE Deputy
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}			
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}		
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4738,7 +4778,7 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPE_DEPUTY;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4746,10 +4786,21 @@ class ActionTemplate{
 
 
 		// 1-1-2-5. Column List Field - VPM
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}		
+
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4759,7 +4810,7 @@ class ActionTemplate{
 
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPM;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4767,10 +4818,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-6. Column List Field - VPM Deputy
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}		
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4780,7 +4841,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPM_DEPUTY;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4788,10 +4849,21 @@ class ActionTemplate{
 
 
 		// 1-1-2-7. Column List Field - VPPR
+		// 1-1-2-6. Column List Field - VPM Deputy
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}		
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4801,7 +4873,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPPR;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4809,10 +4881,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-8. Column List Field - VPPR Deputy
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}			
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4822,7 +4904,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_VPPR_DEPUTY;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4830,10 +4912,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-9. Column List Field - Secretary
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}			
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4843,7 +4935,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SECRETARY;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4851,10 +4943,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-10. Column List Field - Treasurer
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}
 		$table_club_officer_column_list_field =  
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4864,7 +4966,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_TREASURER;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4873,10 +4975,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-11. Column List Field - SAA
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}		
 		$table_club_officer_column_list_field = 
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4886,7 +4998,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SAA;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);
@@ -4896,10 +5008,20 @@ class ActionTemplate{
 
 
 		// 1-1-2-12. Column List Field - SAA Deputy
+		if(!is_null($officer_list) && (11 < count($officer_list))) {
+			$officer = $officer_list[$officer_idx++];	
+			if(empty($officer->__member_name)){
+				$officer->__member_name = "NOT ASSIGNED";	
+			}
+		} else {
+			$officer = new stdClass();
+			$officer->__member_name = "NOT ASSIGNED";
+			$officer->__member_hash_key = "";
+		}			
 		$table_club_officer_column_list_field = 
 		new ActionItem(
 			// $action_name="New Item"
-			"NOT ASSIGNED"
+			$officer->__member_name
 			// $action_item_type=1
 			, ActionItem::$SELECT_BOX_PERSON_NAME
 		);
@@ -4909,7 +5031,7 @@ class ActionTemplate{
 		
 		$context->{$params->ACTION_DB_UPDATE_MSG} = $params->IS_UPDATE_OFFICER_ROLE;
 		$context->{$params->OFFICER_ID} = $params->OFFICER_ID_SAA_DEPUTY;
-		$context->{$params->MEMBER_HASH_KEY} = "";
+		$context->{$params->MEMBER_HASH_KEY} = $officer->__member_hash_key;
 		$table_club_officer_column_list_field->set_context(json_encode($context));
 
 		$table_club_officer_column_list->add_child($table_club_officer_column_list_field);

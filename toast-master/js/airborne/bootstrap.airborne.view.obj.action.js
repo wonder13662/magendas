@@ -115,7 +115,74 @@ airborne.bootstrap.obj.__action = {
 
 		return false;
 
+	}
+	,is_relation_pair_title:function(relation_type) {
+		if(this.is_not_valid_relation_type(relation_type)) {
+			return false;
+		}
+
+		if(relation_type === this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE) {
+			return true;
+		}
+		return false;
+	}
+	,is_relation_pair_text:function(relation_type) {
+		if(this.is_not_valid_relation_type(relation_type)) {
+			return false;
+		}
+
+		if(relation_type === this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT) {
+			return true;
+		}
+		return false;	
+	}
+	,is_relation_chain_title:function(relation_type) {
+		if(this.is_not_valid_relation_type(relation_type)) {
+			return false;
+		}
+
+		if(relation_type === this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE) {
+			return true;
+		}
+		return false;		
+	}
+	,is_relation_chain_text:function(relation_type) {
+		if(this.is_not_valid_relation_type(relation_type)) {
+			return false;
+		}
+
+		if(relation_type === this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT) {
+			return true;
+		}
+		return false;		
 	}	
+	,ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TITLE:"PAIR_TITLE"
+	,ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TEXT:"PAIR_TEXT"
+	,ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TITLE:"CHAIN_TITLE"
+	,ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TEXT:"CHAIN_TEXT"
+	,get_relation_type_name:function(relation_type) {
+
+		if(	this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TITLE === relation_type ) {
+
+			return this.ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TITLE;
+
+		} else if( this.ACTION_TABLE_ITEM_RELATION_TYPE_PAIR_TEXT === relation_type ) {
+
+			return this.ACTION_TABLE_ITEM_RELATION_TYPE_NAME_PAIR_TEXT;
+
+		} else if( this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TITLE === relation_type ) {
+
+			return this.ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TITLE;
+
+		} else if( this.ACTION_TABLE_ITEM_RELATION_TYPE_CHAIN_TEXT === relation_type ) {
+
+			return this.ACTION_TABLE_ITEM_RELATION_TYPE_NAME_CHAIN_TEXT;
+
+		}
+
+		return "";
+	}	
+
 
 	,ACTION_COLLECTION_TYPE_LIST:1
 	,ACTION_COLLECTION_TYPE_TABLE:2
@@ -311,6 +378,8 @@ airborne.bootstrap.obj.__action = {
 			,action_item_type_name:null
 			,action_hash_key:null
 			,action_order:null
+			,action_relation_type:null // wonder.jung
+			,action_relation_type_name:null // wonder.jung			
 			,action_is_shy:null
 			,coordinate:null
 			,action_hierarchy_search_map:null
@@ -507,6 +576,13 @@ airborne.bootstrap.obj.__action = {
 				this.set_action_hash_key(action_data_obj.action_hash_key);
 				this.set_action_order(action_data_obj.action_order);
 				this.set_action_is_shy(action_data_obj.action_is_shy);
+
+				if(_v.is_valid_str(action_data_obj.relation_type_name)) {
+					this.set_action_relation_type_name(action_data_obj.relation_type_name);	
+				}
+				if(_action.is_valid_relation_type(action_data_obj.relation_type)) {
+					this.set_action_relation_type(action_data_obj.relation_type);	
+				}
 
 				if(action_data_obj.context != undefined) {
 					this.set_action_context(action_data_obj.context);
@@ -1227,6 +1303,22 @@ airborne.bootstrap.obj.__action = {
 				var table_action_obj = this.get_parent().get_parent();
 				return table_action_obj.get_table_row_field_arr(this.get_idx());
 			}
+			,get_table_row_cnt:function() {
+
+				if(this.is_not_table()) {
+					console.log("!Error! / get_table_row_cnt / this.is_not_table()");
+					return;
+				}
+
+				var first_table_column_list_obj = this.get_first_child();
+				if(_action.is_not_valid_action_obj(first_table_column_list_obj)) {
+					console.log("!Error! / get_table_row_cnt / _action.is_not_valid_action_obj(first_table_column_list_obj)");
+					return;
+				}
+
+				return first_table_column_list_obj.get_children_cnt();
+
+			}
 			// @ Public
 			// @ Scope 	: Action Table Obj
 			// @ Desc 	: 테이블 형태로 사용할 경우, 테이블의 필드 객체들을 row 기준으로 필드 배열을 돌려줍니다.
@@ -1241,17 +1333,11 @@ airborne.bootstrap.obj.__action = {
 					return;
 				}
 
-				var first_table_column_list_obj = this.get_first_child();
-				if(_action.is_not_valid_action_obj(first_table_column_list_obj)) {
-					console.log("!Error! / get_table_row_field_arr / _action.is_not_valid_action_obj(first_table_column_list_obj)");
-					return;
-				}
-
-				var cur_table_column_field_children_cnt = first_table_column_list_obj.get_children_cnt();
-				if(cur_table_column_field_children_cnt <= selected_idx) {
+				var table_row_cnt = this.get_table_row_cnt();
+				if(table_row_cnt <= selected_idx) {
 					console.log("this ::: ",this);
-					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / selected_idx :: ",selected_idx);
-					console.log("!Error! / get_table_row_field_arr / cur_table_column_field_children_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
+					console.log("!Error! / get_table_row_field_arr / table_row_cnt <= selected_idx / selected_idx :: ",selected_idx);
+					console.log("!Error! / get_table_row_field_arr / table_row_cnt <= selected_idx / cur_children_cnt :: ",cur_children_cnt);
 					return;
 				}
 
@@ -1659,6 +1745,51 @@ airborne.bootstrap.obj.__action = {
 			,get_action_order:function() {
 				return this.action_order;
 			}
+			,set_action_relation_type_name:function(action_relation_type_name) {
+				if(_v.is_not_valid_str(action_relation_type_name)) {
+					return;
+				}
+				this.action_relation_type_name = action_relation_type_name;
+			}
+			,get_action_relation_type_name:function() {
+				return this.action_relation_type_name;
+			}
+			,set_action_relation_type:function(action_relation_type) {
+				if(_action.is_not_valid_relation_type(action_relation_type)) {
+					return;
+				}
+				this.action_relation_type = action_relation_type;
+			}
+			,get_action_relation_type:function() {
+				return this.action_relation_type;
+			}
+			,is_not_relation_pair_title:function() {
+				return !this.is_relation_pair_title();
+			}
+			,is_relation_pair_title:function() {
+				if(this.action_relation_type == null) {
+					return false;
+				}
+				return (_action.is_relation_pair_title(this.action_relation_type))?true:false;
+			}
+			,is_relation_pair_text:function() {
+				if(this.action_relation_type == null) {
+					return false;
+				}
+				return (_action.is_relation_pair_text(this.action_relation_type))?true:false;
+			}
+			,is_relation_chain_title:function() {
+				if(this.action_relation_type == null) {
+					return false;
+				}
+				return (_action.is_relation_chain_title(this.action_relation_type))?true:false;
+			}
+			,is_relation_chain_text:function() {
+				if(this.action_relation_type == null) {
+					return false;
+				}
+				return (_action.is_relation_chain_text(this.action_relation_type))?true:false;
+			}			
 			,set_action_is_shy:function(action_is_shy) {
 				this.action_is_shy = action_is_shy;
 			}
@@ -2019,6 +2150,9 @@ airborne.bootstrap.obj.__action = {
 			,is_item_select_box_person_name:function() {
 				var action_item_type = this.get_action_item_type();
 				return (_action.ACTION_ITEM_TYPE_SELECT_BOX_PERSON_NAME === action_item_type)?true:false;
+			}
+			,is_select_box_group:function() {
+				return !this.is_not_select_box_group()
 			}
 			,is_not_select_box_group:function() {
 				var is_not_select_box_group = 
