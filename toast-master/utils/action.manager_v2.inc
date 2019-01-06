@@ -945,7 +945,7 @@ class ActionObject implements Action{
 
 	}
 
-	public function set_context($context) {
+	public function set_context($context=null) {
 		$this->context = $context;
 	}
 	public function get_context() {
@@ -2475,7 +2475,7 @@ class ActionItemTitleNTimeHHMM extends ActionItem{
 	}
 
 	// @ Override
-	public function set_context($context) {
+	public function set_context($context=null) {
 
 		if(is_null($context) || empty($context)) {
 			return;
