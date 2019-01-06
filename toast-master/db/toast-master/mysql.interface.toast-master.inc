@@ -8960,7 +8960,7 @@ class MYSQLInterface{
 			}
 			if(empty($__news_content)) {
 				echo "!Error! / " . __FUNCTION__ . " / empty(\$__news_content)<br/>";
-				break;
+				return;
 			}
 
 			// UPDATE
