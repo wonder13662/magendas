@@ -1,5 +1,5 @@
 <?php
-
+// http://localhost/magendas/toast-master/db/mysql_db_test.php
 $con=mysqli_connect("127.0.0.1","magendas","RubyAndWonder!1","magendas");
 
 // Check connection
